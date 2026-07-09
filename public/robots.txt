@@ -1,0 +1,30 @@
+# Mate y Eventos — robots.txt
+# Permitimos explícitamente a los buscadores y asistentes de IA
+# para que puedan indexar y citar el sitio.
+
+User-agent: *
+Allow: /
+
+# Crawlers de IA (búsqueda y citación)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://mateyeventos.com/sitemap.xml
