@@ -49,17 +49,66 @@ async function fetchFeed(url) {
   }
 }
 
-// Devuelve los episodios. Recorre las playlists en orden de prioridad
-// (Temporada 2, luego Temporada 1) y usa la primera que responda. Si
-// ninguna responde, cae al feed del canal para no quedar sin episodios.
+// Trae los items de una playlist con la API oficial de YouTube (confiable).
+async function fetchPlaylistViaApi(playlistId, key) {
+  try {
+    const url =
+      `https://www.googleapis.com/youtube/v3/playlistItems` +
+      `?part=snippet,contentDetails&maxResults=50&playlistId=${playlistId}&key=${key}`;
+    const res = await fetch(url, { next: { revalidate: 3600 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const items = data.items || [];
+    return items
+      .map((it) => {
+        const id =
+          it.contentDetails?.videoId || it.snippet?.resourceId?.videoId;
+        return {
+          id,
+          title: it.snippet?.title || "Episodio",
+          published:
+            it.contentDetails?.videoPublishedAt ||
+            it.snippet?.publishedAt ||
+            "",
+          description: it.snippet?.description || "",
+          thumb: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+          url: `https://www.youtube.com/watch?v=${id}`,
+        };
+      })
+      .filter(
+        (e) =>
+          e.id &&
+          e.title !== "Deleted video" &&
+          e.title !== "Private video"
+      )
+      .sort((a, b) => new Date(b.published) - new Date(a.published));
+  } catch {
+    return [];
+  }
+}
+
+// Devuelve los episodios, en orden de confiabilidad:
+//  1) API oficial de YouTube (si hay YOUTUBE_API_KEY) — Temporada 2, luego 1.
+//  2) Feed RSS de las playlists (puede venir vacío desde datacenters).
+//  3) Feed del canal completo (para no quedar nunca sin episodios).
 export async function getEpisodes() {
   const ids = LINKS.youtubePlaylistIds || [];
+  const key = process.env.YOUTUBE_API_KEY;
+
+  if (key) {
+    for (const pid of ids) {
+      const eps = await fetchPlaylistViaApi(pid, key);
+      if (eps.length > 0) return eps;
+    }
+  }
+
   for (const pid of ids) {
     const eps = await fetchFeed(
       `https://www.youtube.com/feeds/videos.xml?playlist_id=${pid}`
     );
     if (eps.length > 0) return eps;
   }
+
   return fetchFeed(LINKS.ytFeed);
 }
 

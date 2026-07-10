@@ -53,17 +53,18 @@ export default function Prensa() {
             </article>
 
             <article className="press-card reveal" style={{ transitionDelay: ".08s" }}>
-              <h3>Pack de logos</h3>
+              <h3>Galería de fotos</h3>
               <p>
-                ¿Solo necesitás el logo? Isotipo en PNG (fondo transparente),
-                versión cuadrada, banner y la guía de colores. En un ZIP.
+                Fotos autorizadas para prensa: conductores, sesiones y detrás de
+                escena, en alta resolución para publicaciones.
               </p>
               <a
                 className="btn btn--ghost"
-                href="/prensa/mate-y-eventos-brand-pack.zip"
-                download
+                href={LINKS.pressPhotos}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Descargar logos (.zip)
+                Abrir galería de fotos
               </a>
             </article>
           </div>

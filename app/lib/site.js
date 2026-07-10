@@ -38,6 +38,8 @@ export const LINKS = {
   ],
   pressDrive:
     "https://drive.google.com/drive/folders/1tMclvGZe9qtGz9xjnWGcNbHfZAmQFiia?usp=sharing",
+  pressPhotos:
+    "https://drive.google.com/drive/folders/1N80cWb66co3PDHsFQCoxW1oKV_A1AlJ3?usp=sharing",
 };
 
 // Navegación principal.
