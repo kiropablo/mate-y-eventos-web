@@ -115,10 +115,9 @@ export default function Sobre() {
 
           <div className="hosts">
             <article className="reveal">
-              {/* Cuando tengas la foto: reemplazar este div por
-                  <div className="host__photo"><img src="/pablo.jpg" alt="Pablo Quiroga" /></div> */}
-              <div className="host__photo is-empty">
-                <span>Foto próximamente</span>
+              <div className="host__photo">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/pablo.jpg" alt="Pablo Quiroga" />
               </div>
               <h3 className="host__name">Pablo Quiroga</h3>
               <div className="host__role">Co-conductor · Visión editorial</div>
@@ -135,8 +134,9 @@ export default function Sobre() {
             </article>
 
             <article className="reveal" style={{ transitionDelay: ".1s" }}>
-              <div className="host__photo is-empty">
-                <span>Foto próximamente</span>
+              <div className="host__photo">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/alexis.jpg" alt="Alexis Vidal" />
               </div>
               <h3 className="host__name">Alexis Vidal</h3>
               <div className="host__role">Co-conductor · Producción</div>
