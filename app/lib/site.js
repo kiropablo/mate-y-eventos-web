@@ -30,9 +30,12 @@ export const LINKS = {
   youtubeChannelId: "UCNvnqboj3KOXtjEwjOuH4cw",
   ytFeed:
     "https://www.youtube.com/feeds/videos.xml?channel_id=UCNvnqboj3KOXtjEwjOuH4cw",
-  // Si se completa con el ID de la playlist "podcast", la web muestra
-  // SOLO esos videos (sin shorts).
-  youtubePlaylistId: "PL1OwlqOnmols_5yelkJeZOyvGA33fB787",
+  // Orden de prioridad: muestra la 1ra playlist que responda.
+  // Temporada 2 primero; si no, Temporada 1; si no, el canal (fallback).
+  youtubePlaylistIds: [
+    "PL1OwlqOnmols_5yelkJeZOyvGA33fB787", // Temporada 2 (prioridad)
+    "PL1OwlqOnmoluVg-uiZcydhmojYqvPcmtc", // Temporada 1 (fallback)
+  ],
   pressDrive:
     "https://drive.google.com/drive/folders/1tMclvGZe9qtGz9xjnWGcNbHfZAmQFiia?usp=sharing",
 };

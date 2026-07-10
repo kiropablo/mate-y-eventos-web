@@ -1,16 +1,11 @@
 import { XMLParser } from "fast-xml-parser";
 import { LINKS } from "./site";
 
-// Lee el feed del canal de YouTube y devuelve los episodios.
-// Se cachea con revalidación (ver `revalidate` en la página), así se
-// actualiza solo sin necesidad de reconstruir el sitio.
-export async function getEpisodes() {
+// Lee y parsea un feed Atom de YouTube (canal o playlist).
+async function fetchFeed(url) {
   try {
-    const feedUrl = LINKS.youtubePlaylistId
-      ? `https://www.youtube.com/feeds/videos.xml?playlist_id=${LINKS.youtubePlaylistId}`
-      : LINKS.ytFeed;
-    const res = await fetch(feedUrl, {
-      next: { revalidate: 3600 }, // re-lee el feed cada 1 hora
+    const res = await fetch(url, {
+      next: { revalidate: 3600 },
       headers: { "User-Agent": "MateYEventos/1.0 (+https://mateyeventos.com)" },
     });
     if (!res.ok) return [];
@@ -52,6 +47,20 @@ export async function getEpisodes() {
   } catch {
     return [];
   }
+}
+
+// Devuelve los episodios. Recorre las playlists en orden de prioridad
+// (Temporada 2, luego Temporada 1) y usa la primera que responda. Si
+// ninguna responde, cae al feed del canal para no quedar sin episodios.
+export async function getEpisodes() {
+  const ids = LINKS.youtubePlaylistIds || [];
+  for (const pid of ids) {
+    const eps = await fetchFeed(
+      `https://www.youtube.com/feeds/videos.xml?playlist_id=${pid}`
+    );
+    if (eps.length > 0) return eps;
+  }
+  return fetchFeed(LINKS.ytFeed);
 }
 
 // Busca un episodio puntual por su ID de video.
