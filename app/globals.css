@@ -1055,6 +1055,49 @@ footer.site {
   font-size: 0.96rem;
   margin-bottom: 16px;
 }
+.transcript {
+  border-top: 1px solid var(--line-2);
+  padding-top: 22px;
+}
+.transcript__toggle {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  user-select: none;
+}
+.transcript__toggle::-webkit-details-marker {
+  display: none;
+}
+.transcript__label {
+  font-family: var(--font-ui);
+  font-size: 0.86rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  transition: color 1s ease;
+}
+.transcript__hint {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.transcript__toggle::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(45deg);
+  transition: transform 0.25s ease;
+}
+.transcript[open] .transcript__toggle::after {
+  transform: rotate(-135deg);
+}
 .ep-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

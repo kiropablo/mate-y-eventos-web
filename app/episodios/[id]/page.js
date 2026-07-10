@@ -147,16 +147,20 @@ export default async function Episodio({ params }) {
           ) : null}
 
           {transcript ? (
-            <div style={{ marginTop: "48px", maxWidth: "760px" }}>
-              <div className="eyebrow" style={{ marginBottom: "14px" }}>
-                Transcripción
-              </div>
-              <div className="ep-transcript">
+            <details
+              className="transcript"
+              style={{ marginTop: "48px", maxWidth: "760px" }}
+            >
+              <summary className="transcript__toggle">
+                <span className="transcript__label">Transcripción</span>
+                <span className="transcript__hint">Ver texto completo</span>
+              </summary>
+              <div className="ep-transcript" style={{ marginTop: "20px" }}>
                 {transcript.split(/\n\s*\n/).map((para, i) => (
                   <p key={i}>{para}</p>
                 ))}
               </div>
-            </div>
+            </details>
           ) : null}
         </div>
       </section>
