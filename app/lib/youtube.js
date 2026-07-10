@@ -26,27 +26,29 @@ export async function getEpisodes() {
     if (!entries) return [];
     if (!Array.isArray(entries)) entries = [entries];
 
-    return entries.map((e) => {
-      const id = e["yt:videoId"];
-      const group = e["media:group"] || {};
-      const description =
-        typeof group["media:description"] === "string"
-          ? group["media:description"]
-          : "";
-      const title =
-        (typeof group["media:title"] === "string" && group["media:title"]) ||
-        (typeof e.title === "string" && e.title) ||
-        "Episodio";
-      return {
-        id,
-        title,
-        published: e.published || "",
-        description,
-        // hqdefault siempre existe; el recorte 16:9 lo hace el CSS (object-fit)
-        thumb: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-        url: `https://www.youtube.com/watch?v=${id}`,
-      };
-    });
+    return entries
+      .map((e) => {
+        const id = e["yt:videoId"];
+        const group = e["media:group"] || {};
+        const description =
+          typeof group["media:description"] === "string"
+            ? group["media:description"]
+            : "";
+        const title =
+          (typeof group["media:title"] === "string" && group["media:title"]) ||
+          (typeof e.title === "string" && e.title) ||
+          "Episodio";
+        return {
+          id,
+          title,
+          published: e.published || "",
+          description,
+          thumb: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+          url: `https://www.youtube.com/watch?v=${id}`,
+        };
+      })
+      .filter((e) => e.id)
+      .sort((a, b) => new Date(b.published) - new Date(a.published));
   } catch {
     return [];
   }

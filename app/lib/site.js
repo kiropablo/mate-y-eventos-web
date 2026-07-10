@@ -31,8 +31,10 @@ export const LINKS = {
   ytFeed:
     "https://www.youtube.com/feeds/videos.xml?channel_id=UCNvnqboj3KOXtjEwjOuH4cw",
   // Si se completa con el ID de la playlist "podcast", la web muestra
-  // SOLO esos videos (sin shorts). Se completa cuando tengamos el ID.
-  youtubePlaylistId: "",
+  // SOLO esos videos (sin shorts).
+  youtubePlaylistId: "PL1OwlqOnmols_5yelkJeZOyvGA33fB787",
+  pressDrive:
+    "https://drive.google.com/drive/folders/1tMclvGZe9qtGz9xjnWGcNbHfZAmQFiia?usp=sharing",
 };
 
 // Navegación principal.

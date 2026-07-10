@@ -1,11 +1,11 @@
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
-import { SITE } from "../lib/site";
+import { SITE, LINKS } from "../lib/site";
 
 export const metadata = {
   title: "Prensa",
   description:
-    "Kit de prensa de Mate y Eventos: logos, colores, media kit y contacto para medios y marcas.",
+    "Kit de prensa de Mate y Eventos: logos, media kit, fotos y contacto para medios y marcas.",
 };
 
 export default function Prensa() {
@@ -25,7 +25,7 @@ export default function Prensa() {
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             Todo lo que necesitás para escribir sobre Mate y Eventos o sumarnos a
-            una nota: logos, identidad y contacto directo.
+            una nota: logos, media kit, fotos y contacto directo.
           </p>
         </div>
       </section>
@@ -36,37 +36,35 @@ export default function Prensa() {
             <span className="n">01</span>Descargas
           </div>
           <div className="press-grid" style={{ marginTop: "30px" }}>
-            <article className="press-card reveal">
-              <h3>Pack de marca</h3>
+            <article className="press-card press-card--main reveal">
+              <h3>Material de prensa completo</h3>
               <p>
-                Isotipo en PNG (fondo transparente), versión cuadrada, banner y
-                la guía de colores y tipografías. Todo en un ZIP.
+                Media kit, logos, fotos en alta y todo el material de marca en
+                una sola carpeta. Descargá lo que necesites.
               </p>
               <a
                 className="btn"
-                href="/prensa/mate-y-eventos-brand-pack.zip"
-                download
+                href={LINKS.pressDrive}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Descargar pack (.zip)
+                Abrir carpeta de prensa
               </a>
             </article>
 
             <article className="press-card reveal" style={{ transitionDelay: ".08s" }}>
-              <h3>Media kit</h3>
+              <h3>Pack de logos</h3>
               <p>
-                Presentación completa del proyecto, audiencia y métricas, pensada
-                para marcas y medios.
+                ¿Solo necesitás el logo? Isotipo en PNG (fondo transparente),
+                versión cuadrada, banner y la guía de colores. En un ZIP.
               </p>
-              <span className="press-soon">Próximamente</span>
-            </article>
-
-            <article className="press-card reveal" style={{ transitionDelay: ".16s" }}>
-              <h3>Fotos</h3>
-              <p>
-                Fotos de los conductores y del detrás de escena, en alta
-                resolución para publicaciones.
-              </p>
-              <span className="press-soon">Próximamente</span>
+              <a
+                className="btn btn--ghost"
+                href="/prensa/mate-y-eventos-brand-pack.zip"
+                download
+              >
+                Descargar logos (.zip)
+              </a>
             </article>
           </div>
         </div>
