@@ -15,6 +15,7 @@ Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 
 - [Sobre el podcast](https://mateyeventos.com/sobre): qué es el proyecto y quiénes lo hacen.
 - [Para marcas](https://mateyeventos.com/sponsors): oportunidades de sponsoreo y audiencia.
 - [Newsletter](https://mateyeventos.com/newsletter): el mail semanal de la comunidad.
+- [Prensa](https://mateyeventos.com/prensa): kit de prensa, logos, fotos y material para medios.
 - [Contacto](https://mateyeventos.com/contacto): sponsoreo, invitados y colaboraciones.
 
 ## Creadores

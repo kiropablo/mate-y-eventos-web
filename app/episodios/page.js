@@ -7,6 +7,7 @@ import { getEpisodes, formatDate } from "../lib/youtube";
 import { LINKS } from "../lib/site";
 
 export const metadata = {
+  alternates: { canonical: "/episodios" },
   title: "Episodios",
   description:
     "Todos los episodios de Mate y Eventos, el podcast de la industria de eventos en Latinoamérica. Nuevo capítulo cada miércoles.",
@@ -128,7 +129,11 @@ export default async function Episodios() {
                         aria-label={ep.title}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={ep.thumb} alt="" loading="lazy" />
+                        <img
+                          src={ep.thumb}
+                          alt={`Miniatura del episodio: ${ep.title}`}
+                          loading="lazy"
+                        />
                         <span className="ep-play" aria-hidden="true">
                           <svg viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />

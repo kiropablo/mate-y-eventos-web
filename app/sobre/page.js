@@ -3,6 +3,7 @@ import Footer from "../components/Footer";
 import { SITE } from "../lib/site";
 
 export const metadata = {
+  alternates: { canonical: "/sobre" },
   title: "Sobre el podcast",
   description:
     "Qué es Mate y Eventos, su propósito y las personas detrás: Pablo Quiroga y Alexis Vidal, un medio audiovisual de la industria de eventos en LATAM.",

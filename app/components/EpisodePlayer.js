@@ -25,9 +25,9 @@ export default function EpisodePlayer({ id, title, thumb }) {
       onClick={() => setPlay(true)}
       aria-label={`Reproducir: ${title}`}
     >
-      {/* miniatura de YouTube; usamos <img> plano para no configurar dominios remotos */}
+      {/* miniatura de YouTube con alt descriptivo (SEO + accesibilidad) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={thumb} alt="" loading="lazy" />
+      <img src={thumb} alt={`Miniatura del episodio: ${title}`} loading="lazy" />
       <span className="ep-play" aria-hidden="true">
         <svg viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z" />

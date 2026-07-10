@@ -3,6 +3,7 @@ import Footer from "../components/Footer";
 import { SITE } from "../lib/site";
 
 export const metadata = {
+  alternates: { canonical: "/sponsors" },
   title: "Para marcas",
   description:
     "Sumá tu marca a Mate y Eventos y llegá a una audiencia específica de profesionales, productoras y agencias de la industria de eventos en LATAM.",

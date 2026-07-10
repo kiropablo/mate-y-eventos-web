@@ -3,6 +3,7 @@ import Footer from "../components/Footer";
 import { SITE, LINKS } from "../lib/site";
 
 export const metadata = {
+  alternates: { canonical: "/contacto" },
   title: "Contacto",
   description:
     "Contactá a Mate y Eventos: propuestas de sponsoreo para marcas, o ideas para ser invitado y colaboraciones.",

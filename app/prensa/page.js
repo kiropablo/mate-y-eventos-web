@@ -3,6 +3,7 @@ import Footer from "../components/Footer";
 import { SITE, LINKS } from "../lib/site";
 
 export const metadata = {
+  alternates: { canonical: "/prensa" },
   title: "Prensa",
   description:
     "Kit de prensa de Mate y Eventos: logos, media kit, fotos y contacto para medios y marcas.",

@@ -4,6 +4,7 @@ import NewsletterForm from "../components/NewsletterForm";
 import { LINKS } from "../lib/site";
 
 export const metadata = {
+  alternates: { canonical: "/newsletter" },
   title: "Newsletter",
   description:
     "El newsletter de Mate y Eventos: ideas, aprendizajes y detrás de escena de la industria de eventos en LATAM, directo a tu mail.",

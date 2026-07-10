@@ -42,7 +42,6 @@ export const metadata = {
     "Mate y Eventos",
   ],
   authors: SITE.autores.map((name) => ({ name })),
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "es_AR",
