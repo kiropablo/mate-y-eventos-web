@@ -1,8 +1,14 @@
 import Link from "next/link";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
+import { getEpisodes } from "./lib/youtube";
 
-export default function Home() {
+export const revalidate = 3600;
+
+export default async function Home() {
+  const episodes = await getEpisodes();
+  const latestHref =
+    episodes.length > 0 ? `/episodios/${episodes[0].id}` : "/episodios";
   return (
     <>
       {/* ---------- HERO ---------- */}
@@ -25,16 +31,16 @@ export default function Home() {
               El backstage de la industria, en voz alta. Nuevo episodio cada
               miércoles.
             </div>
-            <Link href="/episodios" className="hplay" aria-label="Ver episodio">
+            <Link href={latestHref} className="hplay" aria-label="Mirá el último episodio">
               <span className="hplay__disc" aria-hidden="true">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </span>
               <span className="hplay__label">
-                Ver
+                Mirá el
                 <br />
-                episodio
+                último episodio
               </span>
             </Link>
           </div>

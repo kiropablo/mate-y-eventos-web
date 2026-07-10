@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { NAV } from "../lib/site";
 
 export default function SiteNav() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <nav className="nav" aria-label="Principal">
@@ -25,16 +27,29 @@ export default function SiteNav() {
       </Link>
 
       <div className={open ? "menu menu--open" : "menu"}>
-        {NAV.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={item.label === "Para marcas" ? "is-cta" : undefined}
-            onClick={() => setOpen(false)}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {NAV.map((item) => {
+          const active =
+            item.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(item.href);
+          const cls = [
+            item.label === "Para marcas" ? "is-cta" : "",
+            active ? "is-active" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cls || undefined}
+              aria-current={active ? "page" : undefined}
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </div>
 
       <button

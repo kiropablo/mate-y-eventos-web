@@ -58,7 +58,7 @@ export default function Contacto() {
                 para colaborar? Nos encanta conocer gente del rubro.
               </p>
               <a
-                className="btn btn--ghost"
+                className="btn btn--azul"
                 style={{ marginTop: "18px" }}
                 href={`mailto:${SITE.email}?subject=Invitado%20/%20Colaboración%20-%20Mate%20y%20Eventos`}
               >

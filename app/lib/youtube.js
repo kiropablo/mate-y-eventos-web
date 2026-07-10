@@ -6,7 +6,10 @@ import { LINKS } from "./site";
 // actualiza solo sin necesidad de reconstruir el sitio.
 export async function getEpisodes() {
   try {
-    const res = await fetch(LINKS.ytFeed, {
+    const feedUrl = LINKS.youtubePlaylistId
+      ? `https://www.youtube.com/feeds/videos.xml?playlist_id=${LINKS.youtubePlaylistId}`
+      : LINKS.ytFeed;
+    const res = await fetch(feedUrl, {
       next: { revalidate: 3600 }, // re-lee el feed cada 1 hora
       headers: { "User-Agent": "MateYEventos/1.0 (+https://mateyeventos.com)" },
     });
@@ -47,6 +50,12 @@ export async function getEpisodes() {
   } catch {
     return [];
   }
+}
+
+// Busca un episodio puntual por su ID de video.
+export async function getEpisodeById(id) {
+  const episodes = await getEpisodes();
+  return episodes.find((e) => e.id === id) || null;
 }
 
 // Fecha legible en español (ej. "12 mar 2025").

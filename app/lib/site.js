@@ -30,14 +30,18 @@ export const LINKS = {
   youtubeChannelId: "UCNvnqboj3KOXtjEwjOuH4cw",
   ytFeed:
     "https://www.youtube.com/feeds/videos.xml?channel_id=UCNvnqboj3KOXtjEwjOuH4cw",
+  // Si se completa con el ID de la playlist "podcast", la web muestra
+  // SOLO esos videos (sin shorts). Se completa cuando tengamos el ID.
+  youtubePlaylistId: "",
 };
 
 // Navegación principal.
 export const NAV = [
   { href: "/episodios", label: "Episodios" },
-  { href: "/sobre", label: "Sobre" },
+  { href: "/sobre", label: "Sobre MyE" },
   { href: "/newsletter", label: "Newsletter" },
   { href: "/sponsors", label: "Para marcas" },
+  { href: "/prensa", label: "Prensa" },
   { href: "/contacto", label: "Contacto" },
 ];
 

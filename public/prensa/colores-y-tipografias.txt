@@ -1,0 +1,14 @@
+MATE Y EVENTOS — Marca
+
+Colores
+- Magenta: #EA478A
+- Celeste / Azul: #93D5F7
+- Negro (tinta): #010004
+- Blanco: #F5F5F5
+
+Tipografías
+- Títulos: Rajdhani
+- Interfaz / etiquetas: Space Grotesk
+- Cuerpo: Inter
+
+Contacto: mateyeventos@gmail.com

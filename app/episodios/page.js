@@ -1,6 +1,8 @@
+import Link from "next/link";
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import EpisodePlayer from "../components/EpisodePlayer";
+import SpotifyButton from "../components/SpotifyButton";
 import { getEpisodes, formatDate } from "../lib/youtube";
 import { LINKS } from "../lib/site";
 
@@ -10,7 +12,6 @@ export const metadata = {
     "Todos los episodios de Mate y Eventos, el podcast de la industria de eventos en Latinoamérica. Nuevo capítulo cada miércoles.",
 };
 
-// Re-lee el feed cada hora: los episodios nuevos aparecen solos.
 export const revalidate = 3600;
 
 export default async function Episodios() {
@@ -35,20 +36,13 @@ export default async function Episodios() {
             Conversaciones ágiles sobre producción, estrategia, tecnología y el
             lado humano de la industria de eventos.
           </p>
-          <a
-            className="btn btn--ghost reveal"
-            style={{ marginTop: "24px", transitionDelay: ".18s" }}
-            href={LINKS.spotify}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Escuchar en Spotify
-          </a>
+          <div className="reveal" style={{ transitionDelay: ".18s", marginTop: "24px" }}>
+            <SpotifyButton href={LINKS.spotify} />
+          </div>
         </div>
       </section>
 
       {episodes.length === 0 ? (
-        // Estado seguro si el feed no responde
         <section className="section-p" data-accent="blue">
           <div className="wrap">
             <div className="hold reveal">
@@ -69,22 +63,18 @@ export default async function Episodios() {
                 >
                   YouTube
                 </a>
-                <a
-                  className="btn btn--ghost"
-                  href={LINKS.spotify}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Spotify
-                </a>
+                <SpotifyButton href={LINKS.spotify} />
               </div>
             </div>
           </div>
         </section>
       ) : (
         <>
-          {/* Episodio destacado (el más reciente) */}
-          <section className="section-p" data-accent="blue" style={{ paddingBottom: "clamp(50px,9vh,90px)" }}>
+          <section
+            className="section-p"
+            data-accent="blue"
+            style={{ paddingBottom: "clamp(50px,9vh,90px)" }}
+          >
             <div className="wrap">
               <div className="eyebrow reveal">
                 <span className="n">01</span>Último episodio
@@ -97,28 +87,34 @@ export default async function Episodios() {
                 />
                 <div className="ep-featured__info">
                   <div className="ep-date">{formatDate(featured.published)}</div>
-                  <h2 className="ep-featured__title">{featured.title}</h2>
+                  <Link href={`/episodios/${featured.id}`}>
+                    <h2 className="ep-featured__title">{featured.title}</h2>
+                  </Link>
                   {featured.description ? (
                     <p className="ep-desc ep-desc--long">
                       {featured.description}
                     </p>
                   ) : null}
-                  <a
-                    className="btn btn--ghost"
-                    href={LINKS.spotify}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Escuchar en Spotify
-                  </a>
+                  <div className="ep-actions">
+                    <Link
+                      href={`/episodios/${featured.id}`}
+                      className="btn btn--ghost"
+                    >
+                      Ver episodio
+                    </Link>
+                    <SpotifyButton href={LINKS.spotify} />
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Resto de episodios */}
           {rest.length > 0 && (
-            <section className="section-p" data-accent="blue" style={{ paddingTop: 0 }}>
+            <section
+              className="section-p"
+              data-accent="blue"
+              style={{ paddingTop: 0 }}
+            >
               <div className="wrap">
                 <div className="eyebrow reveal">
                   <span className="n">02</span>Anteriores
@@ -126,14 +122,24 @@ export default async function Episodios() {
                 <div className="ep-grid" style={{ marginTop: "34px" }}>
                   {rest.map((ep) => (
                     <article className="ep-card reveal" key={ep.id}>
-                      <EpisodePlayer
-                        id={ep.id}
-                        title={ep.title}
-                        thumb={ep.thumb}
-                      />
+                      <Link
+                        href={`/episodios/${ep.id}`}
+                        className="ep-media ep-facade"
+                        aria-label={ep.title}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={ep.thumb} alt="" loading="lazy" />
+                        <span className="ep-play" aria-hidden="true">
+                          <svg viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      </Link>
                       <div className="ep-card__info">
                         <div className="ep-date">{formatDate(ep.published)}</div>
-                        <h3 className="ep-card__title">{ep.title}</h3>
+                        <Link href={`/episodios/${ep.id}`}>
+                          <h3 className="ep-card__title">{ep.title}</h3>
+                        </Link>
                       </div>
                     </article>
                   ))}
