@@ -9,7 +9,9 @@ export const SITE = {
     "El podcast que aporta valor a todos aquellos que amamos el mundo de los eventos, siempre con un mate de por medio.",
   descripcion:
     "Mate y Eventos es un medio audiovisual argentino especializado en la industria de eventos de Latinoamérica. Cada semana, conversaciones sobre producción, estrategia, tendencias, tecnología y el lado humano de la industria.",
-  url: "https://mateyeventos.com",
+  descripcionSeo:
+    "Podcast argentino sobre la industria de eventos en LATAM. Producción, estrategia, tecnología y el lado humano del rubro. Nuevo episodio cada miércoles.",
+  url: "https://www.mateyeventos.com",
   datosUrl: "https://datos.mateyeventos.com",
   email: "mateyeventos@gmail.com",
   autores: ["Pablo Quiroga", "Alexis Vidal"],
