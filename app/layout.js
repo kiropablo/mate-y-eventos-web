@@ -28,10 +28,10 @@ const rajdhani = Rajdhani({
 export const metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — ${SITE.tagline}`,
+    default: "Mate y Eventos — Podcast de la industria de eventos",
     template: `%s · ${SITE.name}`,
   },
-  description: SITE.descripcion,
+  description: SITE.descripcionSeo,
   keywords: [
     "eventos",
     "podcast de eventos",
@@ -43,12 +43,12 @@ export const metadata = {
   ],
   authors: SITE.autores.map((name) => ({ name })),
   openGraph: {
-    type: "website",
+    type: "Mate y Eventos — Podcast de la industria de eventos",
     locale: "es_AR",
     url: SITE.url,
     siteName: SITE.name,
     title: `${SITE.name} — ${SITE.tagline}`,
-    description: SITE.descripcion,
+    description: SITE.descripcionSeo,
     images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
   },
   twitter: {
