@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["stands", "ferias y expos", "generación de leads", "marketing experiencial", "producción de eventos"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Un stand con mostrador y folletos no es un error de presupuesto. Es un error de diagnóstico: alguien decidió estar presente en una feria sin responder antes la pregunta que ordena todo lo demás. ¿Para qué está ese stand? Sin esa respuesta, cualquier inversión en escenografía, pantallas o personal termina siendo decoración cara sin retorno.
 
 ## El objetivo se define antes de pensar en la escenografía
