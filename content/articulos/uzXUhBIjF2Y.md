@@ -9,8 +9,10 @@ eje: "Técnico & Producción"
 etiquetas: ["djs", "eventos sociales", "entretenimiento", "liderazgo de equipos", "producción de fiestas"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Cuando se piensa en un DJ, la imagen suele quedarse en la consola: alguien que elige canciones y las encadena. Tommy Muñoz, con más de tres décadas arriba de una cabina, plantea algo distinto: el DJ interpreta. Lee lo que pasa en la pista, ajusta en tiempo real y toma decisiones que tienen más que ver con la psicología de un grupo que con el gusto musical de una persona. Esa distinción, que en la conversación aparece casi como un juego de verdadero o falso, es en realidad un cambio de marco conceptual sobre qué es la música en vivo dentro de un evento.
 
 ## La pista no miente: el feedback en tiempo real como oficio central
