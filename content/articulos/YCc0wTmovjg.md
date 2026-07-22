@@ -9,7 +9,7 @@ eje: "Estrategia & Negocio"
 etiquetas: ["gestión de empresas", "alquiler de mobiliario", "marca", "crecimiento", "emprendimiento"]
 lectura: 6
 generado: "2026-07-22"
-publicado: true
+publicado: false
 revisado: "2026-07-22"
 ---
 
