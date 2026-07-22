@@ -3,7 +3,9 @@ name: Transcripciones
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 6 * * 1"
+    # Todos los días a las 12:00 UTC (9 de la mañana en Argentina).
+    # Así un episodio del miércoles tiene su transcripción el jueves.
+    - cron: "0 12 * * *"
 
 jobs:
   transcripts:
@@ -12,6 +14,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -27,7 +31,18 @@ jobs:
           git add content/transcripts
           if git diff --staged --quiet; then
             echo "Sin transcripciones nuevas."
-          else
-            git commit -m "Actualizar transcripciones (automático)"
-            git push
+            exit 0
           fi
+          git commit -m "Actualizar transcripciones (automático)"
+          # Mismo cuidado que en la Action de artículos: si el repo cambió
+          # mientras corría, traemos lo nuevo antes de subir.
+          for intento in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "Guardado en el intento $intento."
+              exit 0
+            fi
+            echo "El repo cambió mientras tanto. Reintento $intento..."
+            sleep 8
+          done
+          echo "No se pudo guardar después de 3 intentos."
+          exit 1
