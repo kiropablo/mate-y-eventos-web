@@ -5,6 +5,10 @@
 User-agent: *
 Allow: /
 
+# Panel interno: no se indexa nunca.
+Disallow: /admin
+Disallow: /api/
+
 # Crawlers de IA (búsqueda y citación)
 User-agent: GPTBot
 Allow: /
