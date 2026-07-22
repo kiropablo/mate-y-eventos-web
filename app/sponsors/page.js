@@ -1,12 +1,31 @@
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
-import { SITE } from "../lib/site";
+import { SITE, STATS } from "../lib/site";
+
+const DESCRIPCION =
+  "Sumá tu marca a Mate y Eventos y llegá a una audiencia específica de profesionales, productoras y agencias de la industria de eventos en LATAM.";
+
+const OG_TITLE = "Llegá a los que deciden en eventos · Mate y Eventos";
 
 export const metadata = {
   alternates: { canonical: "/sponsors" },
   title: "Para marcas",
-  description:
-    "Sumá tu marca a Mate y Eventos y llegá a una audiencia específica de profesionales, productoras y agencias de la industria de eventos en LATAM.",
+  description: DESCRIPCION,
+  openGraph: {
+    type: "website",
+    locale: "es_AR",
+    url: "/sponsors",
+    siteName: SITE.name,
+    title: OG_TITLE,
+    description: DESCRIPCION,
+    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: OG_TITLE,
+    description: DESCRIPCION,
+    images: ["/og-default.jpg"],
+  },
 };
 
 const AUDIENCIA = [
@@ -76,14 +95,18 @@ export default function Sponsors() {
           <div className="grid">
             <div className="stat reveal">
               <div className="n">
-                <span className="cnt" data-to="32513">0</span>
+                <span className="cnt" data-to={STATS.vistasYouTube}>
+                  {STATS.vistasYouTube.toLocaleString("es-AR")}
+                </span>
               </div>
               <div className="l">Vistas en YouTube</div>
               <div className="rule" />
             </div>
             <div className="stat reveal" style={{ transitionDelay: ".1s" }}>
               <div className="n">
-                +<span className="cnt" data-to="5">0</span>
+                +<span className="cnt" data-to={STATS.crecimientoMensual}>
+                  {STATS.crecimientoMensual}
+                </span>
                 <span className="suf">%</span>
               </div>
               <div className="l">Crecimiento mensual</div>
@@ -91,7 +114,9 @@ export default function Sponsors() {
             </div>
             <div className="stat reveal" style={{ transitionDelay: ".2s" }}>
               <div className="n">
-                <span className="cnt" data-to="17">0</span>
+                <span className="cnt" data-to={STATS.paises}>
+                  {STATS.paises}
+                </span>
               </div>
               <div className="l">Países en la audiencia</div>
               <div className="rule" />
