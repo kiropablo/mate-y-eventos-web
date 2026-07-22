@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["productor de eventos", "producción de eventos", "gestión de proveedores", "presupuesto de eventos", "planificación de eventos"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Cuando una empresa organiza sus propios eventos y ya tiene el contacto de todos los proveedores, suele pensar que no necesita sumar un productor. Tiene el catering, tiene el audiovisual, tiene el lugar. ¿Para qué pagar por alguien que coordine algo que, en teoría, ya está resuelto? La respuesta está en todo lo que no se ve: el trabajo que ocurre semanas antes de que el evento empiece y que determina si ese día todo funciona o todo se cae.
 
 ## Cinco roles que se parecen pero no son el mismo trabajo
