@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["teatro ciego", "experiencias sensoriales", "inclusión", "producción de eventos", "diseño de experiencias"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Cuando Facundo Borgarín dice que el Teatro Ciego "no es teatro para ciegos ni de ciegos", está corrigiendo un malentendido que sirve para pensar cualquier evento inclusivo. La discapacidad no es el eje del proyecto: es una consecuencia de un diseño artístico que decidió apagar la luz. Esa distinción cambia por completo cómo se aborda el trabajo, y tiene aplicación directa para quienes producen eventos corporativos, ferias o lanzamientos.
 
 ## La inclusión es una consecuencia, no el objetivo del diseño
