@@ -9,8 +9,10 @@ eje: "Tendencias & Tecnología"
 etiquetas: ["inteligencia artificial", "eventos sociales", "marca personal", "dj", "experiencias en vivo"]
 lectura: 4
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Tommy Muñoz lleva 32 años poniendo música en fiestas de 15, casamientos y ahora en fiestas masivas para público adulto. Cuando le preguntan si la inteligencia artificial va a cambiar los eventos, su respuesta no es técnica: es sensorial. Y ahí aparece una distinción que vale la pena desarmar, porque no aplica solo a los DJs sino a cualquiera que produzca experiencias en vivo.
 
 ## La IA puede armar el playlist, no puede leer la pista
