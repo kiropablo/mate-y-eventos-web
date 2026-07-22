@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["liderazgo", "gestión de clientes", "producción de eventos", "trabajo en equipo", "toma de decisiones"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que circula entre productores con años de trayectoria, casi como contraseña: el evento manda. No aparece en los cursos formales ni te la explica ningún manual de gestión, pero ordena cada decisión que se toma antes, durante y después de una producción. Entenderla a fondo cambia la forma de discutir una idea, de tratar a un cliente y de convivir con los egos que aparecen en cualquier equipo de trabajo.
 
 ## El evento manda: un criterio, no una consigna motivacional
