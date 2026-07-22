@@ -2,6 +2,7 @@ import Link from "next/link";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
 import { getEpisodes } from "./lib/youtube";
+import { STATS } from "./lib/site";
 
 export const revalidate = 3600;
 
@@ -143,14 +144,18 @@ export default async function Home() {
           <div className="grid">
             <div className="stat reveal" style={{ transitionDelay: ".1s" }}>
               <div className="n">
-                <span className="cnt" data-to="32513">0</span>
+                <span className="cnt" data-to={STATS.vistasYouTube}>
+                  {STATS.vistasYouTube.toLocaleString("es-AR")}
+                </span>
               </div>
               <div className="l">Vistas en YouTube</div>
               <div className="rule" />
             </div>
             <div className="stat reveal" style={{ transitionDelay: ".2s" }}>
               <div className="n">
-                +<span className="cnt" data-to="5">0</span>
+                +<span className="cnt" data-to={STATS.crecimientoMensual}>
+                  {STATS.crecimientoMensual}
+                </span>
                 <span className="suf">%</span>
               </div>
               <div className="l">Crecimiento mensual</div>
@@ -158,7 +163,9 @@ export default async function Home() {
             </div>
             <div className="stat reveal" style={{ transitionDelay: ".3s" }}>
               <div className="n">
-                <span className="cnt" data-to="17">0</span>
+                <span className="cnt" data-to={STATS.paises}>
+                  {STATS.paises}
+                </span>
               </div>
               <div className="l">Países en la audiencia</div>
               <div className="rule" />
