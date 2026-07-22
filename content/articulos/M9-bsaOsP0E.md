@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["micronichos", "delegación", "redes sociales", "presupuestos", "ambientación"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que suena casi temeraria si no se entiende el contexto: Cielo Carazatorre vendió su cabina despejada —hoy un rental de 250 kilos que se convirtió en el corazón de su negocio— antes de haberla fabricado. No tenía la estructura, no sabía todavía cómo iba a resolver el mecanismo de apertura, pero tenía un render, un costo calculado y un cliente que confió. Ese episodio, contado casi al pasar en la charla, es en realidad un caso de estudio sobre cómo se valida un micronicho antes de quemar capital en él.
 
 ## Validar antes de producir es la diferencia entre negocio y hobby caro
