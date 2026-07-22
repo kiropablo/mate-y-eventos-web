@@ -9,8 +9,10 @@ eje: "Técnico & Producción"
 etiquetas: ["diseño sensorial", "teatro ciego", "experiencias inmersivas", "producción de eventos", "storytelling"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Casi todo el diseño de eventos parte de una premisa que rara vez se cuestiona: la vista manda. Pantallas, iluminación, escenografía. Facundo Bogarín y Sofía Martín, de Teatro Ciego, trabajan al revés: eliminan ese sentido por completo y construyen la experiencia sobre lo que queda. La conversación con ellos deja algo más útil que una anécdota curiosa: un método para pensar el resto de los sentidos con la misma rigurosidad con la que se piensa la imagen.
 
 ## Cuando falta la vista, el oído no mejora: se reorganiza
