@@ -3,6 +3,10 @@
 // Lee   : content/transcripts/{videoId}.txt
 // Escribe: content/articulos/{videoId}.md   (como BORRADOR, publicado: false)
 //
+// Cada artículo incluye un bloque de PREGUNTAS FRECUENTES pensado para AI SEO:
+// preguntas reales de la industria, con respuestas que se entienden solas.
+// El script lee las preguntas ya usadas en artículos anteriores para no repetirlas.
+//
 // Usa:
 //   - Claude API (ANTHROPIC_API_KEY) para escribir el artículo
 //   - YouTube Data API (YOUTUBE_API_KEY) para saber el título de cada episodio
@@ -42,7 +46,7 @@ const INSTRUCCIONES = `Sos el editor de contenidos de Mate y Eventos, un medio a
 especializado en la industria de eventos de Latinoamérica, conducido por Pablo Quiroga y Alexis Vidal.
 
 Tu tarea: a partir de la transcripción de un episodio del podcast, escribir un ARTÍCULO DE ANÁLISIS
-para el sitio web.
+para el sitio web, más un bloque de preguntas frecuentes.
 
 REGLA MÁS IMPORTANTE: el artículo NO es un resumen del episodio.
 Es una pieza que AMPLÍA. Toma los 3 o 4 conceptos más fuertes de la conversación y los desarrolla
@@ -65,8 +69,8 @@ HONESTIDAD (crítico)
 - Si la transcripción es pobre o el audio quedó mal transcripto, escribí igual pero más corto,
   y no rellenes con invenciones.
 
-ESTRUCTURA
-- Extensión objetivo: entre 1100 y 1300 palabras en el cuerpo.
+ESTRUCTURA DEL CUERPO
+- Extensión objetivo: entre 1100 y 1300 palabras.
 - 3 o 4 secciones con subtítulo (##). Los subtítulos son afirmaciones concretas, no etiquetas
   genéricas: "El presupuesto se define antes del concepto, no después" y no "Presupuesto".
 - Párrafos cortos (2 a 4 oraciones).
@@ -86,21 +90,44 @@ ESTRUCTURA
 - No pongas un título H1 en el cuerpo (el título va aparte).
 - No uses negritas decorativas cada dos líneas. Como mucho, tres usos de negrita en todo el texto.
 
+PREGUNTAS FRECUENTES (muy importante: esto se usa para que los buscadores y los asistentes de IA
+citen a Mate y Eventos como fuente)
+- Escribí entre 5 y 7 preguntas con su respuesta.
+- Las preguntas son las que una persona real escribiría en Google o le preguntaría a un asistente
+  de IA. Naturales y completas, ejemplos del tipo:
+  "¿Cómo conseguir trabajo en la industria de eventos sin experiencia previa?",
+  "¿Cuánto tiempo antes hay que empezar a producir un evento corporativo?",
+  "¿Qué diferencia hay entre un productor y un coordinador de eventos?".
+- Mezclá dos tipos: preguntas amplias de la industria que este episodio permite responder con
+  autoridad, y preguntas más específicas que se desprenden del tema del artículo.
+- CADA RESPUESTA SE TIENE QUE ENTENDER SOLA, sin haber leído el artículo. Nada de
+  "como vimos antes" ni "en este episodio". Primera oración: la respuesta directa y concreta.
+  Después, el matiz o el ejemplo.
+- Largo de cada respuesta: entre 50 y 90 palabras.
+- No repitas preguntas que ya estén en la lista de PREGUNTAS YA USADAS que te paso, ni versiones
+  apenas reformuladas de esas. Si el tema se superpone, buscá un ángulo distinto.
+
 EJES TEMÁTICOS (elegí el que mejor encaje, uno solo, texto exacto):
 "Humano" · "Estrategia & Negocio" · "Técnico & Producción" · "Tendencias & Tecnología"
 
-FORMATO DE SALIDA
-Respondé ÚNICAMENTE con un objeto JSON válido, sin texto antes ni después, sin bloques de código.
-El objeto tiene exactamente estas claves:
+FORMATO DE SALIDA (respetalo exactamente, sin agregar nada antes ni después,
+sin bloques de código, sin comentarios)
 
-{
-  "titulo": "Título del artículo, 45 a 70 caracteres, concreto y con gancho. NO repite el título del episodio.",
-  "bajada": "Una o dos oraciones que resumen la promesa del artículo, 140 a 220 caracteres.",
-  "metaDescripcion": "Descripción para Google, 140 a 158 caracteres, con la palabra clave principal.",
-  "eje": "uno de los cuatro ejes",
-  "etiquetas": ["3 a 5 etiquetas cortas en minúscula, ej: producción, presupuesto, proveedores"],
-  "cuerpo": "El artículo completo en Markdown, con los ## y el bloque :::checklist"
-}`;
+TITULO: título del artículo, 45 a 70 caracteres, concreto y con gancho, que NO repita el título del episodio
+BAJADA: una o dos oraciones con la promesa del artículo, 140 a 220 caracteres
+META: descripción para Google, 140 a 158 caracteres, con la palabra clave principal
+EJE: uno de los cuatro ejes
+ETIQUETAS: tres a cinco etiquetas cortas en minúscula separadas por comas
+
+---CUERPO---
+(el artículo completo en Markdown, con los ## y el bloque :::checklist)
+
+---PREGUNTAS---
+P: ¿primera pregunta?
+R: primera respuesta
+
+P: ¿segunda pregunta?
+R: segunda respuesta`;
 
 // --------------------------------------------------------------------------
 // Utilidades
@@ -113,6 +140,20 @@ function yaml(texto) {
     .replace(/"/g, '\\"')
     .replace(/\s*\n\s*/g, " ")
     .trim();
+}
+
+// Junta todas las preguntas ya usadas en artículos anteriores,
+// para pedirle a la IA que no las repita.
+function preguntasYaUsadas() {
+  const lista = [];
+  for (const archivo of fs.readdirSync(DIR_ARTICULOS)) {
+    if (!archivo.endsWith(".md")) continue;
+    const texto = fs.readFileSync(path.join(DIR_ARTICULOS, archivo), "utf8");
+    for (const linea of texto.split("\n")) {
+      if (linea.startsWith("### ")) lista.push(linea.slice(4).trim());
+    }
+  }
+  return lista;
 }
 
 // Trae los títulos de los videos desde la API de YouTube (de a 50).
@@ -144,8 +185,15 @@ async function titulosDeVideos(ids) {
 }
 
 // Llama a la API de Claude y devuelve el texto de la respuesta.
-async function pedirArticulo(tituloEpisodio, transcripcion) {
+async function pedirArticulo(tituloEpisodio, transcripcion, usadas) {
+  const bloqueUsadas = usadas.length
+    ? `PREGUNTAS YA USADAS EN OTROS ARTÍCULOS (no las repitas):\n` +
+      usadas.map((p) => `- ${p}`).join("\n") +
+      `\n\n`
+    : "";
+
   const entrada =
+    bloqueUsadas +
     `TÍTULO DEL EPISODIO: ${tituloEpisodio || "(sin título)"}\n\n` +
     `TRANSCRIPCIÓN DEL EPISODIO:\n${transcripcion}`;
 
@@ -158,7 +206,7 @@ async function pedirArticulo(tituloEpisodio, transcripcion) {
     },
     body: JSON.stringify({
       model: MODELO,
-      max_tokens: 4000,
+      max_tokens: 8000,
       system: INSTRUCCIONES,
       messages: [{ role: "user", content: entrada }],
     }),
@@ -170,6 +218,11 @@ async function pedirArticulo(tituloEpisodio, transcripcion) {
   }
 
   const data = await res.json();
+
+  if (data.stop_reason === "max_tokens") {
+    throw new Error("la respuesta quedó cortada (subir max_tokens)");
+  }
+
   const texto = (data.content || [])
     .filter((b) => b.type === "text")
     .map((b) => b.text)
@@ -180,21 +233,54 @@ async function pedirArticulo(tituloEpisodio, transcripcion) {
   return texto;
 }
 
-// Convierte la respuesta en objeto, tolerando que venga con ```json alrededor.
-function parsearJSON(texto) {
-  let limpio = texto.trim();
-  if (limpio.startsWith("```")) {
-    limpio = limpio.replace(/^```(json)?/i, "").replace(/```$/, "").trim();
+// Separa la respuesta en sus tres partes: cabecera, cuerpo y preguntas.
+function parsearRespuesta(texto) {
+  const [cabeceraYresto, ...restoCuerpo] = texto.split("---CUERPO---");
+  if (!restoCuerpo.length) throw new Error("no vino el separador ---CUERPO---");
+
+  const [cuerpoCrudo, ...restoPreg] = restoCuerpo.join("---CUERPO---").split(
+    "---PREGUNTAS---"
+  );
+  if (!restoPreg.length) throw new Error("no vino el separador ---PREGUNTAS---");
+
+  const campo = (nombre) => {
+    const m = cabeceraYresto.match(new RegExp(`^${nombre}:\\s*(.+)$`, "im"));
+    return m ? m[1].trim() : "";
+  };
+
+  // Preguntas: pares "P: ..." / "R: ..."
+  const preguntas = [];
+  let actual = null;
+  for (const linea of restoPreg.join("\n").split("\n")) {
+    const p = linea.match(/^\s*P:\s*(.+)$/i);
+    const r = linea.match(/^\s*R:\s*(.+)$/i);
+    if (p) {
+      if (actual && actual.pregunta && actual.respuesta) preguntas.push(actual);
+      actual = { pregunta: p[1].trim(), respuesta: "" };
+    } else if (r && actual) {
+      actual.respuesta = r[1].trim();
+    } else if (actual && actual.respuesta && linea.trim()) {
+      actual.respuesta += " " + linea.trim();
+    }
   }
-  const desde = limpio.indexOf("{");
-  const hasta = limpio.lastIndexOf("}");
-  if (desde === -1 || hasta === -1) throw new Error("no vino un JSON");
-  return JSON.parse(limpio.slice(desde, hasta + 1));
+  if (actual && actual.pregunta && actual.respuesta) preguntas.push(actual);
+
+  return {
+    titulo: campo("TITULO"),
+    bajada: campo("BAJADA"),
+    metaDescripcion: campo("META"),
+    eje: campo("EJE"),
+    etiquetas: campo("ETIQUETAS")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean),
+    cuerpo: cuerpoCrudo.trim(),
+    preguntas,
+  };
 }
 
 // Arma el archivo .md final con su frontmatter.
 function armarMarkdown(art, id, meta) {
-  const etiquetas = Array.isArray(art.etiquetas) ? art.etiquetas : [];
   const palabras = String(art.cuerpo || "").split(/\s+/).filter(Boolean).length;
   const lectura = Math.max(3, Math.round(palabras / 200));
 
@@ -207,7 +293,7 @@ function armarMarkdown(art, id, meta) {
     `episodioTitulo: "${yaml(meta.titulo || "")}"`,
     `fecha: "${meta.fecha || new Date().toISOString().slice(0, 10)}"`,
     `eje: "${yaml(art.eje)}"`,
-    `etiquetas: [${etiquetas.map((t) => `"${yaml(t)}"`).join(", ")}]`,
+    `etiquetas: [${art.etiquetas.map((t) => `"${yaml(t)}"`).join(", ")}]`,
     `lectura: ${lectura}`,
     `generado: "${new Date().toISOString().slice(0, 10)}"`,
     "publicado: false",
@@ -215,7 +301,14 @@ function armarMarkdown(art, id, meta) {
     "",
   ].join("\n");
 
-  return frontmatter + String(art.cuerpo || "").trim() + "\n";
+  const faq = art.preguntas.length
+    ? "\n\n## Preguntas frecuentes\n\n" +
+      art.preguntas
+        .map((q) => `### ${q.pregunta}\n\n${q.respuesta}`)
+        .join("\n\n")
+    : "";
+
+  return frontmatter + art.cuerpo.trim() + faq + "\n";
 }
 
 // --------------------------------------------------------------------------
@@ -250,6 +343,8 @@ if (tanda.length < pendientes.length) {
 }
 
 const metadatos = await titulosDeVideos(tanda);
+const usadas = preguntasYaUsadas();
+console.log(`Preguntas ya usadas en artículos anteriores: ${usadas.length}`);
 
 let hechos = 0,
   fallados = 0;
@@ -266,8 +361,8 @@ for (const id of tanda) {
       continue;
     }
 
-    const respuesta = await pedirArticulo(meta.titulo, transcripcion);
-    const art = parsearJSON(respuesta);
+    const respuesta = await pedirArticulo(meta.titulo, transcripcion, usadas);
+    const art = parsearRespuesta(respuesta);
 
     if (!art.titulo || !art.cuerpo) throw new Error("faltan título o cuerpo");
 
@@ -276,8 +371,13 @@ for (const id of tanda) {
       armarMarkdown(art, id, meta),
       "utf8"
     );
+
+    // Las preguntas de este artículo pasan a la lista de usadas,
+    // así los siguientes de la misma corrida tampoco las repiten.
+    art.preguntas.forEach((q) => usadas.push(q.pregunta));
+
     hechos++;
-    console.log(`  ✓ ${id} — ${art.titulo}`);
+    console.log(`  ✓ ${id} — ${art.titulo} (${art.preguntas.length} preguntas)`);
   } catch (e) {
     fallados++;
     console.log(`  ✗ ${id} (${e.message})`);
