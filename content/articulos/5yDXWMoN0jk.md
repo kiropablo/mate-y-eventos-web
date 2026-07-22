@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["producción de eventos", "argentina", "inflación", "presupuesto", "proveedores"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Producir eventos en un país con inflación de dos dígitos mensuales obliga a repensar herramientas que en otros mercados son casi automáticas. El presupuesto, el contrato, la relación con proveedores: nada de eso funciona igual cuando la variable económica cambia todas las semanas. Lo que en la charla queda como una serie de consejos sueltos, acá lo ordenamos en una lógica de trabajo.
 
 ## El margen no es un colchón, es una variable de costeo
