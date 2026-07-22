@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["gestión de empresas", "alquiler de mobiliario", "marca", "crecimiento", "emprendimiento"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que circula en la industria de eventos y que casi nadie se anima a aplicar del todo: la empresa tiene que ser más grande que la persona que la fundó. Daniel Godino, cofundador de Godino Sciencie, la lleva al extremo. Con más de 30 años en el rubro y un volumen que ronda los 800 a 1000 eventos por año, construyó un negocio que —según cuenta— podría funcionar sin él. Esa decisión, más filosófica que operativa, explica buena parte de por qué su marca sigue de pie después de crisis, pandemia y devaluaciones.
 
 ## La empresa tiene que sobrevivir a su fundador, no depender de él
