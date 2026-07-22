@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["presupuestos", "pricing", "negociación", "ventas", "freelance"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay un momento incómodo que se repite en toda la industria de eventos: alguien manda un presupuesto y, en el mismo mensaje, ya está pidiendo disculpas. "Si necesitás que lo ajuste, avisame." Esa frase, tan habitual, es el síntoma de un problema anterior: no se pensó el presupuesto desde adentro del servicio, sino desde el miedo a perder el cliente. Y ese miedo, tarde o temprano, se nota.
 
 El punto de partida no debería ser "¿cuánto cobra el mercado por esto?". Esa pregunta viene después. Lo que hay que resolver primero es mucho más simple y mucho más ignorado: ¿de qué está hecho realmente lo que estoy ofreciendo?
