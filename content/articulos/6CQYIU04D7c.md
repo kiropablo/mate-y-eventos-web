@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["ventas", "presentación de proyectos", "elevator pitch", "clientes", "negociación"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Una presentación bien armada no convence porque el render sea espectacular. Convence porque, antes de llegar a esa instancia, alguien hizo un trabajo de diagnóstico que el cliente ni siquiera nota que hizo posible la reunión. Ese trabajo previo es el que separa a una agencia que "tira ideas" de una que resuelve un problema puntual, y es también el punto donde más se falla cuando la ansiedad por mostrar algo lindo le gana a la necesidad de entender qué se está pidiendo en realidad.
 
 ## El diagnóstico no es un trámite: es la mitad de la venta
