@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["catering", "gastronomía", "degustación", "errores profesionales", "tendencias gastronómicas"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que circula en el catering de eventos y que funciona como brújula cuando las opciones se multiplican: el evento manda. No es una consigna motivacional, es un criterio de decisión concreto que resuelve algo que parece simple y no lo es: qué servir cuando en la misma mesa hay una abuela de 90 años, un primo de 20 y un cliente que pidió "algo sofisticado". Vale la pena desarmar esa lógica, porque explica más sobre el negocio del catering que cualquier lista de menús.
 
 ## El error de promediar mal, no de equivocarse
