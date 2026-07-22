@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["staff de eventos", "promotoras", "gestión de equipos", "ferias y exposiciones", "producción de eventos"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que se repite en las reuniones de presupuesto de cualquier empresa que organiza su primer stand o su primera exposición: "esto lo podemos hacer con gente nuestra". Recursos humanos tiene gente disponible, alguien de marketing se ofrece, un pasante puede parar en la puerta. Suena razonable y, sobre todo, suena más barato. El problema es que confunde dos cosas que no tienen nada que ver: tener personas y tener un equipo preparado para una tarea específica.
 
 Verónica Pérez Guidek, que dirige una agencia de promotores y promotoras, plantea este error como el más caro de toda la producción de eventos, más caro incluso que fallar con la escenografía o el cartel. Porque la persona que recibe al público en la puerta de un stand o de un congreso es, literalmente, la primera cara que ve un cliente. Y esa cara no se improvisa.
