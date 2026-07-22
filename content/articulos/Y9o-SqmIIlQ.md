@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["diseño de eventos", "briefing", "metodología", "proceso creativo", "producción de eventos"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay un momento en la producción de eventos que casi nunca se factura, no aparece en ningún presupuesto y sin embargo define todo lo que viene después: el momento en que alguien, con un papel o una pantalla en blanco, decide cómo se va a ver algo que todavía no existe. Ese momento tiene nombre, tiene método y, sobre todo, tiene una lógica que conviene entender antes de escribir la primera línea de un presupuesto.
 
 ## El boceto a mano sigue resolviendo lo que ninguna maqueta digital resuelve
