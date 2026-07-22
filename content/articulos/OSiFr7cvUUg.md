@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["eventos infantiles", "escalabilidad", "cultura organizacional", "branding", "gestión de equipos"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay un momento en la vida de casi cualquier empresa de eventos donde la demanda supera la capacidad real de respuesta. No es un problema de facturación, es un problema de estructura. Anto Vicari, fundadora de Wen I Wish, lo vivió en carne propia cuando terminó la pandemia y el rubro de eventos infantiles, que venía golpeado, explotó de repente con una demanda que nadie había dimensionado.
 
 ## Crecer rápido y escalar bien no son la misma cosa
