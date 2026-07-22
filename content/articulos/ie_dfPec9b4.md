@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["influencers", "marketing de eventos", "presupuesto", "contratación de proveedores", "medición de resultados"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Todos conocemos la escena: un influencer con muchísimos seguidores llega al evento, se saca cinco fotos, sube tres historias y se va. Al otro día las historias tienen buenas vistas, pero la fila de entrada fue la misma de siempre y los leads que se generaron en el stand tampoco cambiaron. La pregunta que queda flotando es simple: ¿para qué se pagó?
 
 La respuesta casi nunca está en el influencer en sí, sino en cómo se lo eligió y para qué se lo contrató. Un influencer es una herramienta, no un talismán. Y como toda herramienta, sirve si se usa para el trabajo correcto y se mide si funcionó.
