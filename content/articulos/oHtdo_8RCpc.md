@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["eventos infantiles", "experiencia de marca", "diseño de experiencias", "gestión emocional", "entretenimiento"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una idea instalada en la industria que dice que el público infantil es el más fácil de conformar: poca cosa, un animador con onda y algunas golosinas alcanzan. Anto Vicari, al frente de Wena Wish, plantea exactamente lo contrario. Para ella, el chico es el público más exigente que existe, porque no tiene filtros sociales para disimular que algo no funciona. Un adulto aplaude por compromiso. Un niño se aburre, se distrae o directamente lo dice en voz alta.
 
 Esa asimetría cambia por completo cómo hay que pensar el diseño de una experiencia infantil, y es el punto de partida para entender los conceptos que realmente importan detrás de un evento para chicos.
