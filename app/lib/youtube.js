@@ -87,8 +87,26 @@ async function fetchPlaylistViaApi(playlistId, key) {
   }
 }
 
-// Devuelve los episodios, en orden de confiabilidad:
-//  1) API oficial de YouTube (si hay YOUTUBE_API_KEY) — Temporada 2, luego 1.
+// Junta varias listas de episodios en una sola: saca los repetidos
+// (un video puede estar en más de una playlist) y ordena del más nuevo
+// al más viejo.
+function unirEpisodios(listas) {
+  const vistos = new Set();
+  const todos = [];
+  listas.forEach((lista) => {
+    (lista || []).forEach((e) => {
+      if (e && e.id && !vistos.has(e.id)) {
+        vistos.add(e.id);
+        todos.push(e);
+      }
+    });
+  });
+  return todos.sort((a, b) => new Date(b.published) - new Date(a.published));
+}
+
+// Devuelve TODOS los episodios (Temporada 2 + Temporada 1), en orden de
+// confiabilidad de la fuente:
+//  1) API oficial de YouTube (si hay YOUTUBE_API_KEY).
 //  2) Feed RSS de las playlists (puede venir vacío desde datacenters).
 //  3) Feed del canal completo (para no quedar nunca sin episodios).
 export async function getEpisodes() {
@@ -96,18 +114,24 @@ export async function getEpisodes() {
   const key = process.env.YOUTUBE_API_KEY;
 
   if (key) {
+    const porApi = [];
     for (const pid of ids) {
-      const eps = await fetchPlaylistViaApi(pid, key);
-      if (eps.length > 0) return eps;
+      porApi.push(await fetchPlaylistViaApi(pid, key));
     }
-  }
-
-  for (const pid of ids) {
-    const eps = await fetchFeed(
-      `https://www.youtube.com/feeds/videos.xml?playlist_id=${pid}`
-    );
+    const eps = unirEpisodios(porApi);
     if (eps.length > 0) return eps;
   }
+
+  const porRss = [];
+  for (const pid of ids) {
+    porRss.push(
+      await fetchFeed(
+        `https://www.youtube.com/feeds/videos.xml?playlist_id=${pid}`
+      )
+    );
+  }
+  const eps = unirEpisodios(porRss);
+  if (eps.length > 0) return eps;
 
   return fetchFeed(LINKS.ytFeed);
 }
