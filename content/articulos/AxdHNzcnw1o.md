@@ -9,8 +9,10 @@ eje: "Técnico & Producción"
 etiquetas: ["minuto cero", "coordinación técnica", "producción de eventos", "liderazgo en eventos", "backstage"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una idea instalada en la industria de que el minuto cero es simplemente cuando arranca el evento: se abren las puertas, entra el primer invitado, suena la música. Es una simplificación cómoda pero incompleta. El minuto cero es, en realidad, un sistema de tres capas —operativa, escénica y anímica— que se construye en los minutos previos y que determina si todo lo que viene después fluye o se traba. Entenderlo como sistema, y no como instante, cambia por completo la forma de prepararlo.
 
 ## El minuto cero no siempre coincide con el inicio del evento
