@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["b2b y b2c", "presupuestos", "retargeting", "prospección de clientes", "fidelización"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que circula en la charla con Cielo, fundadora de Cielo Ambientaciones, que merece más desarrollo del que tuvo en el momento: "recién sos cliente cuando me volviste a llamar". No es una definición romántica de la fidelidad. Es una decisión de negocio que ordena todo lo demás: a quién se le cobra qué, cómo se responde un mensaje y por qué vale la pena perder plata en un servicio de 500 mil pesos si eso construye algo más grande.
 
 ## Hablarle a un colega no es lo mismo que hablarle a un consumidor final
