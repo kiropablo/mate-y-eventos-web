@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,3 +52,10 @@ jobs:
           done
           echo "No se pudo guardar después de 3 intentos."
           exit 1
+      - name: Avisar que hay borradores nuevos
+        # Si el aviso falla, la Action no se cae: los artículos ya están guardados.
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PANEL_URL: "https://www.mateyeventos.com/admin"
+        run: node scripts/avisar-borradores.mjs
