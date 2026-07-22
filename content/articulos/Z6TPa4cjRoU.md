@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["proveedores", "gestión de eventos", "producción", "relaciones comerciales", "criterio profesional"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Elegir un proveedor mal no se nota en el presupuesto. Se nota el día del evento, cuando algo falla y no hay margen para resolverlo. La mayoría de los errores de contratación no vienen de un mal precio ni de equipamiento viejo: vienen de no haber sabido leer, a tiempo, las señales que el proveedor ya estaba mostrando desde el primer mensaje.
 
 ## El proveedor no ejecuta una tarea, sostiene un resultado
