@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["coordinación de eventos", "liderazgo", "producción de eventos", "gestión de equipos", "comunicación operativa"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Cuando un evento crece, deja de ser manejable por una sola cabeza. Alguien tiene que hacerse cargo de acreditación, otro de alimentos y bebidas, otro del escenario, otro de seguridad. Ahí aparece la figura del coordinador de área: la persona que gobierna un pedazo del evento con autonomía real, no con una lista de instrucciones para seguir al pie de la letra.
 
 El problema es que muchas producciones confunden delegar con soltar. Ponen a alguien en un puesto, le dan una instrucción genérica del tipo "quedate acá y cualquier cosa avisame", y esperan que funcione como líder. Eso no es coordinación, es vigilancia. Vale la pena desarmar esa confusión porque de ahí se desprende casi todo lo demás: el nivel de autonomía que le das a un coordinador determina cuánto vas a tener que estar encima de esa área durante el evento.
