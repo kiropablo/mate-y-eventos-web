@@ -27,7 +27,7 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           # Cuántos artículos escribe por corrida.
           # Arranca en 3 para probar el estilo. Cuando te guste, poné 40.
-          MAX_ARTICULOS: "3"
+          MAX_ARTICULOS: "40"
         run: node scripts/generar-articulos.mjs
       - name: Guardar cambios
         run: |
