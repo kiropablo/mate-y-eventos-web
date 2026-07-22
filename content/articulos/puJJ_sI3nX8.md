@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["presupuesto de eventos", "kpis", "roi", "marketing de eventos", "gestión estratégica"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Cuando a alguien le preguntan "¿cuánto vendimos con este evento?" y no tiene respuesta, el problema casi nunca es el evento en sí. Es que nadie definió, antes de organizarlo, qué tenía que demostrar. Esa diferencia —entre hacer un evento y saber para qué se hace— es la que separa a las empresas que ven a los eventos como un costo fijo que hay que recortar, de las que los tratan como un canal de negocio más, con su propio presupuesto de inversión y su propio retorno esperado.
 
 ## Un gasto es lo que no se puede explicar, no lo que cuesta caro
