@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["gestión de crisis", "liderazgo", "imprevistos", "producción en vivo", "manejo de equipos"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay un momento en todo evento en vivo donde el control deja de ser total. Podés haber relevado el lugar, ensayado el discurso, probado el micrófono tres veces: igual existe una ventana donde algo se escapa de tus manos. La diferencia entre un evento que se recupera y uno que se hunde no está en evitar ese momento, porque es inevitable, sino en qué hace el equipo en los segundos siguientes.
 
 ## La ley de Murphy no es una frase hecha, es un protocolo de trabajo
