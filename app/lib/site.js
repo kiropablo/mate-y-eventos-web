@@ -47,6 +47,7 @@ export const LINKS = {
 // Navegación principal.
 export const NAV = [
   { href: "/episodios", label: "Episodios" },
+  { href: "/articulos", label: "Artículos" },
   { href: "/sobre", label: "Sobre MyE" },
   { href: "/newsletter", label: "Newsletter" },
   { href: "/sponsors", label: "Para marcas" },
