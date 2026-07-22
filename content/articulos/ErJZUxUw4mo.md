@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["brief", "clientes", "producción de eventos", "estrategia comercial", "negociación"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Un brief llega con fecha, ubicación, cantidad de invitados y una lista de requerimientos. Parece completo. Y sin embargo, la mayoría de las veces, lo que realmente define si un evento va a funcionar no está escrito en ningún lado. Está en lo que el cliente no supo —o no pudo— poner en palabras.
 
 Esa brecha entre el documento y la necesidad real es el problema central de cualquier proceso de venta en la industria de eventos. No se resuelve con más plantillas ni con briefs más largos. Se resuelve con un método de lectura que vaya más allá del papel.
