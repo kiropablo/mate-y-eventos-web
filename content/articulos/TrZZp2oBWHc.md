@@ -9,8 +9,10 @@ eje: "Tendencias & Tecnología"
 etiquetas: ["tecnología en eventos", "inteligencia artificial", "diseño 3D", "gestión de proyectos", "innovación"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una escena que se repite en agencias de todos los tamaños: alguien manda un presupuesto por Excel, el cliente lo abre en otra versión de Office, una fórmula se rompe, y nadie sabe si esa es la última versión del archivo o la anterior. No es un problema menor ni anecdótico. Es la base de por qué la industria de eventos necesita repensar cómo gestiona la información, no solo qué tecnología de punta usa en el escenario.
 
 ## El problema no es la herramienta vieja, es la información que no fluye
