@@ -9,8 +9,10 @@ eje: "Técnico & Producción"
 etiquetas: ["planificación de eventos", "cronograma", "producción técnica", "gestión de equipos", "brief"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una manera rápida de entender qué hace bien un productor de eventos: mirar, uno por uno, los momentos en los que un evento suele romperse. No son errores exóticos ni casos límite. Son decisiones chicas, tomadas con apuro o con exceso de confianza, que se acumulan hasta que algo cede en vivo, delante de todos.
 
 Pablo y Alexis lo plantearon como un juego irónico: armar un manual de cómo arruinar un evento. Pero atrás de esa broma hay un patrón real, repetido en distintos formatos, tamaños y presupuestos. Vale la pena desarmarlo en serio.
