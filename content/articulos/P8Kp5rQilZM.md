@@ -9,8 +9,10 @@ eje: "Tendencias & Tecnología"
 etiquetas: ["tendencias 2025", "experiencias multisensoriales", "streaming", "apps companion", "sostenibilidad"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Durante años, un evento corporativo se medía por la calidad de la información que transmitía: un gerente hablando, un capacitador exponiendo, una sala escuchando. Ese modelo cambió de raíz. Hoy el criterio de éxito no es solo qué se dijo arriba del escenario, sino qué vivió cada persona desde que estacionó el auto hasta que se fue. Ese desplazamiento —de la información a la experiencia— es el hilo que atraviesa casi todas las tendencias que se discuten para 2025, y vale la pena desarmarlo en detalle.
 
 ## La experiencia se construye con los cinco sentidos, no solo con la vista
