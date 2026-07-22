@@ -81,3 +81,10 @@ export const EJES = [
       "Hacia dónde va la industria: innovación, IA aplicada, formatos híbridos y experiencias inmersivas con criterio.",
   },
 ];
+// Métricas de alcance (home y /sponsors).
+// Actualizar a mano hasta automatizar desde Windsor.
+export const STATS = {
+  vistasYouTube: 32513,
+  crecimientoMensual: 5,
+  paises: 17,
+};
