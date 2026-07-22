@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["liderazgo", "equipos de trabajo", "gestión de proveedores", "producción de eventos", "trabajo bajo presión"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Un evento junta en el mismo día a un arquitecto, un carpintero, un técnico de video, un músico, un fletero y un creativo. Todos hablan castellano, pero ninguno piensa igual. El arquitecto necesita medidas y planos. El carpintero necesita algo concreto y resoluble. El creativo necesita entender la esencia de lo que se quiere transmitir. Pedirle a cada uno lo mismo, de la misma forma, es la manera más rápida de generar fricción sin que nadie tenga la culpa.
 
 Esa idea, que en la conversación entre Pablo Quiroga y Alexis Vidal aparece casi de pasada, merece pararse a pensarla como marco: liderar un equipo mixto de eventos no es dar una orden y repetirla. Es traducir la misma necesidad a distintos lenguajes técnicos y culturales, tantas veces como perfiles distintos haya en la operación.
