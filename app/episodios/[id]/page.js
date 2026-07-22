@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import SpotifyButton from "../../components/SpotifyButton";
 import { getEpisodes, getEpisodeById, formatDate } from "../../lib/youtube";
 import { getTranscript } from "../../lib/transcripts";
+import { getArticulo } from "../../lib/articulos";
 import { SITE, LINKS } from "../../lib/site";
 
 export const revalidate = 3600;
@@ -56,6 +57,7 @@ export default async function Episodio({ params }) {
     .trim();
   const se = seasonEpisode(ep.title);
   const transcript = getTranscript(ep.id);
+  const articulo = getArticulo(ep.id);
 
   const videoObject = {
     "@context": "https://schema.org",
@@ -144,6 +146,21 @@ export default async function Episodio({ params }) {
                 {ep.description}
               </div>
             </div>
+          ) : null}
+
+          {articulo ? (
+            <Link
+              href={`/articulos/${articulo.id}`}
+              className="ep-articulo"
+              style={{ marginTop: "40px", maxWidth: "760px" }}
+            >
+              <div className="eyebrow">Para leer</div>
+              <h2 className="ep-articulo__titulo">{articulo.titulo}</h2>
+              <p className="ep-articulo__bajada">{articulo.bajada}</p>
+              <span className="ep-articulo__link">
+                Leer el artículo · {articulo.lectura} min
+              </span>
+            </Link>
           ) : null}
 
           {transcript ? (
