@@ -1,7 +1,7 @@
 name: Articulos
 
 on:
-  # Botón "Run workflow" para correrlo a mano (así hacemos los 34 de una).
+  # Botón "Run workflow" para correrlo a mano.
   workflow_dispatch:
   # Se dispara solo cuando termina de correr la Action de Transcripciones.
   workflow_run:
@@ -26,7 +26,6 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           # Cuántos artículos escribe por corrida.
-          # Arranca en 3 para probar el estilo. Cuando te guste, poné 40.
           MAX_ARTICULOS: "40"
         run: node scripts/generar-articulos.mjs
       - name: Guardar cambios
@@ -36,7 +35,19 @@ jobs:
           git add content/articulos
           if git diff --staged --quiet; then
             echo "Sin artículos nuevos."
-          else
-            git commit -m "Nuevos artículos (borradores)"
-            git push
+            exit 0
           fi
+          git commit -m "Nuevos artículos (borradores)"
+          # Mientras esto corría, alguien pudo haber subido algo al repo.
+          # Traemos lo nuevo, acomodamos nuestro commit encima y recién
+          # ahí subimos. Hasta 3 intentos.
+          for intento in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "Guardado en el intento $intento."
+              exit 0
+            fi
+            echo "El repo cambió mientras tanto. Reintento $intento..."
+            sleep 8
+          done
+          echo "No se pudo guardar después de 3 intentos."
+          exit 1
