@@ -9,7 +9,7 @@ eje: "Humano"
 etiquetas: ["inserción laboral", "industria de eventos", "freelance", "actitud", "primer empleo"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
 ---
 Cuando alguien golpea la puerta de la industria de eventos sin experiencia, lo primero que evalúa quien contrata no es el título ni el software que maneja. Es algo mucho más difícil de fingir: si esa persona resuelve o espera que le resuelvan. Esa distinción, que en el episodio se nombra simplemente como "actitud", merece un poco más de marco porque no es una virtud abstracta sino una competencia observable y entrenable.
 
