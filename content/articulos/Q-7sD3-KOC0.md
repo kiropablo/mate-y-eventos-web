@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["catering", "gastronomía de eventos", "gestión de equipos", "capacidad operativa", "calidad de servicio"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que atraviesa toda la conversación con Nico Conjián, fundador de La Estaca: "lo que le prometimos tiene que estar". Suena a eslogan, pero detrás hay una lógica de negocio bastante más concreta que vale la pena desarmar, porque explica por qué el catering funciona distinto al resto de los servicios de un evento.
 
 ## La comida es el único ítem que un evento no puede permitirse fallar
