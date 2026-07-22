@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["liderazgo", "trabajo en equipo", "clientes", "valores", "industria de eventos"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay una frase que atraviesa toda la conversación con Pamela Sánchez y que vale la pena desarmar: "la que se sienta frente al cliente soy yo". No es una declaración de ego ni de jerarquía. Es, en rigor, una definición de liderazgo que se aparta bastante de cómo suele entenderse en la industria de eventos, donde a veces se confunde liderar con coordinar tareas o repartir instrucciones.
 
 ## El liderazgo no es estar arriba, es hacerse cargo frente al cliente
