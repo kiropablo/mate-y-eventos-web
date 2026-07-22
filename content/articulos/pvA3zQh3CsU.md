@@ -9,8 +9,10 @@ eje: "Técnico & Producción"
 etiquetas: ["rider técnico", "producción de eventos", "sonido en vivo", "festivales", "contrarider"]
 lectura: 5
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Un rider técnico parece un jeroglífico la primera vez que alguien lo abre: planos, listas de micrófonos, siglas de consolas, requerimientos de colgado. Pero detrás de ese aparente chino básico hay una lógica muy simple. Es el documento que garantiza que un show se vea y suene igual en Salta que en Ushuaia, aunque cambien el venue, el equipo técnico local y hasta el clima. No lo escribe una sola persona ni se arma en una tarde: lo construyen el ingeniero de sonido, el diseñador de luces, el operador de video y el tour manager, cada uno aportando el estándar que el artista necesita para sostener su show en cualquier plaza.
 
 Entender un rider no es un tema exclusivo de técnicos. Cualquiera que organice, contrate o produzca un evento con artistas en vivo va a tener que leerlo, interpretarlo y, muchas veces, discutirlo. Y ahí es donde aparecen las decisiones que realmente importan.
