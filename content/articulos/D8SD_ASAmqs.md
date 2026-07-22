@@ -9,8 +9,10 @@ eje: "Técnico & Producción"
 etiquetas: ["conducción de eventos", "locución", "producción", "presupuesto", "escenario"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Hay un momento, en casi todos los eventos, en el que nadie mira al locutor pero todo depende de él. El público está distraído, un orador se demora, el clima de la sala se enfría o se calienta sin aviso. Ahí, en ese segundo en que nadie lo nota, se juega buena parte del éxito de la producción. Verónica Pérez Guidek lo explica desde adentro: la conducción no es un accesorio del evento, es una de las variables que lo ordena.
 
 ## El locutor no es un rol único, son tres roles distintos según el escenario
