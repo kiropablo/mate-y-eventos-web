@@ -1,0 +1,42 @@
+name: Articulos
+
+on:
+  # Botón "Run workflow" para correrlo a mano (así hacemos los 34 de una).
+  workflow_dispatch:
+  # Se dispara solo cuando termina de correr la Action de Transcripciones.
+  workflow_run:
+    workflows: ["Transcripciones"]
+    types:
+      - completed
+
+jobs:
+  articulos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Escribir artículos nuevos
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          # Cuántos artículos escribe por corrida.
+          # Arranca en 3 para probar el estilo. Cuando te guste, poné 40.
+          MAX_ARTICULOS: "3"
+        run: node scripts/generar-articulos.mjs
+      - name: Guardar cambios
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add content/articulos
+          if git diff --staged --quiet; then
+            echo "Sin artículos nuevos."
+          else
+            git commit -m "Nuevos artículos (borradores)"
+            git push
+          fi
