@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["sostenibilidad", "huella de carbono", "festivales", "green washing", "gestión de eventos"]
 lectura: 6
 generado: "2026-07-22"
-publicado: false
+publicado: true
+revisado: "2026-07-22"
 ---
+
 Cuando se habla de sostenibilidad en eventos, la primera reacción suele ser defensiva: "eso es más caro" o "no tenemos presupuesto para eso". Ariela Giacco, especialista en sostenibilidad de eventos, plantea algo distinto: el problema no es el dinero, es la falta de foco. Y esa distinción cambia por completo cómo debería abordarse el tema en cualquier productora.
 
 ## Elegir una sola batalla es mejor que prometer todo
