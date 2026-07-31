@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["percusión", "experiencias en vivo", "diseño de eventos", "energía colectiva", "entretenimiento"]
 lectura: 5
 generado: "2026-07-31"
-publicado: false
+publicado: true
+revisado: "2026-07-31"
 ---
+
 Hay una escena que Luciano Larocca cuenta de pasada y que merece más atención de la que tuvo en la charla: Carlos Santana, en un camarín de Dubai, escuchando a La Bomba de Tiempo desde un parlante Bluetooth y diciéndoles que lo suyo no es hacer música para músicos, sino acercar la percusión a la vida de la gente. Esa frase funciona como marco para pensar algo que cualquier productor de eventos debería incorporar: la percusión no es un adorno sonoro, es una herramienta de activación corporal que tiene reglas propias, límites propios y una forma específica de integrarse a la narrativa de un evento.
 
 ## El bombo en negras es el corazón, y por eso la gente se mueve sin que nadie se lo pida
