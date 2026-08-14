@@ -141,6 +141,10 @@ ${yaEstan.join("\n") || "(la base está vacía)"}
 
 REGLAS INNEGOCIABLES
 - Nunca inventes datos. Si no encontrás un dato, dejá el campo vacío.
+- HOY ES ${hoy}. Las fechas que cargues tienen que ser futuras. Si el evento es
+  periódico y la única edición que encontrás ya se hizo, esa fecha NO va en
+  fechaInicio: va en "edicionesAnteriores", y el evento queda con las fechas
+  vacías y estadoFechas "Por anunciar". Buscá siempre la próxima edición.
 - Las fechas jamás se estiman a ojo. Si la organización todavía no las anunció,
   poné estadoFechas "Por anunciar" y dejá las fechas vacías. Si hay una fecha
   tentativa publicada por la organización, usala con estadoFechas "Estimadas".
@@ -238,14 +242,15 @@ async function verificar(registros) {
   // fecha firme, y después los que tienen la verificación más vieja.
   const candidatos = registros
     .filter((r) => r.fields["Estado"] === "Aprobado")
-    .filter((r) => {
-      const fin = r.fields["Fecha fin"] || r.fields["Fecha inicio"];
-      return !fin || fin >= hoy; // los que ya pasaron no se tocan
-    })
+    .filter((r) => !esUnicaVez(r) || !quedoEnElPasado(r))
     .sort((a, b) => {
-      const sinFecha = (r) =>
-        r.fields["Estado de fechas"] !== "Confirmadas" ? 0 : 1;
-      if (sinFecha(a) !== sinFecha(b)) return sinFecha(a) - sinFecha(b);
+      // Primero los que quedaron con una fecha vieja: son los que se ven mal.
+      const prioridad = (r) => {
+        if (quedoEnElPasado(r)) return 0;
+        if (r.fields["Estado de fechas"] !== "Confirmadas") return 1;
+        return 2;
+      };
+      if (prioridad(a) !== prioridad(b)) return prioridad(a) - prioridad(b);
       return (a.fields["Última verificación"] || "").localeCompare(
         b.fields["Última verificación"] || ""
       );
@@ -268,6 +273,75 @@ async function verificar(registros) {
 }
 
 async function verificarUno(r) {
+  if (quedoEnElPasado(r)) return reciclarEdicion(r);
+  return verificarVigente(r);
+}
+
+// Un evento periódico cuya edición ya se hizo no puede quedar en la agenda con
+// la fecha vieja: la fecha pasa a "Ediciones anteriores" y se busca la próxima.
+async function reciclarEdicion(r) {
+  const f = r.fields;
+  const rango = `${f["Fecha inicio"] || ""}${f["Fecha fin"] ? ` al ${f["Fecha fin"]}` : ""}`;
+
+  const prompt = `Este evento de la agenda de Mate y Eventos figura con fechas que
+YA PASARON. Hoy es ${hoy}.
+
+FICHA
+Nombre: ${f["Nombre"]}
+Organiza: ${f["Organizador"] || "—"}
+Edición que ya se hizo: ${rango}
+Frecuencia: ${f["Edición/Frecuencia"] || "—"}
+Lugar: ${[f["Venue"], f["Ciudad"], f["Provincia/Región"], f["País"]].filter(Boolean).join(", ")}
+Web: ${f["Web oficial"] || "—"}
+
+Buscá en la web si la organización ya anunció la PRÓXIMA edición: fechas, sede,
+apertura de inscripción o de venta de stands. Buscá también, si la hay,
+información sobre cómo resultó la edición que pasó (convocatoria, expositores,
+novedades) que le sirva a un profesional de eventos.
+
+REGLAS
+- Nunca inventes. Si la próxima edición todavía no se anunció, decilo.
+- Una fecha solo vale si la publica la organización o una fuente oficial.
+- No des por hecho que se repite el mismo mes del año pasado.
+
+Devolvé JSON sin texto alrededor y sin backticks:
+{"hayProxima": true|false,
+ "fechaInicio":"YYYY-MM-DD o vacío",
+ "fechaFin":"YYYY-MM-DD o vacío",
+ "estadoFechas":"Confirmadas | Estimadas | vacío",
+ "resumen":"dos o tres oraciones sobre lo que encontraste",
+ "comoResulto":"una o dos oraciones sobre la edición que pasó, o vacío",
+ "fuente":"url"}`;
+
+  const d = await preguntarleAClaude(prompt, 3000);
+  const campos = { "Última verificación": hoy, Revisar: true };
+
+  // La edición que pasó se guarda como historia, si no estaba ya anotada.
+  const historia = f["Ediciones anteriores"] || "";
+  const linea = [rango, f["Ciudad"], d.comoResulto].filter(Boolean).join(" · ");
+  if (rango && !historia.includes(f["Fecha inicio"])) {
+    campos["Ediciones anteriores"] = historia ? `${historia}\n${linea}` : linea;
+  }
+
+  if (d.hayProxima && esFecha(d.fechaInicio) && d.fechaInicio > hoy) {
+    campos["Fecha inicio"] = d.fechaInicio;
+    campos["Fecha fin"] = esFecha(d.fechaFin) ? d.fechaFin : null;
+    campos["Estado de fechas"] = d.estadoFechas === "Confirmadas" ? "Confirmadas" : "Estimadas";
+    campos["Hallazgos IA"] = `[${hoy}] Próxima edición: ${d.fechaInicio}. ${d.resumen || ""}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
+    console.log(`  ${f["Nombre"]}: próxima edición → ${d.fechaInicio}`);
+  } else {
+    // Sin anuncio: se limpian las fechas para que no siga figurando como pasado.
+    campos["Fecha inicio"] = null;
+    campos["Fecha fin"] = null;
+    campos["Estado de fechas"] = "Por anunciar";
+    campos["Hallazgos IA"] = `[${hoy}] La edición ${rango} ya se hizo y todavía no anunciaron la próxima. Queda a la espera.${d.resumen ? `\n${d.resumen}` : ""}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
+    console.log(`  ${f["Nombre"]}: edición pasada archivada, sin próxima fecha`);
+  }
+
+  await escribir("PATCH", [{ id: r.id, fields: campos }]);
+}
+
+async function verificarVigente(r) {
   const f = r.fields;
   const prompt = `Verificá contra las fuentes oficiales si cambió algo de este evento
 de la agenda de Mate y Eventos. Buscá en la web el sitio oficial y las
@@ -423,6 +497,18 @@ function normalizar(nombre) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]/g, "");
+}
+
+// ¿Tiene cargada una fecha que ya pasó?
+function quedoEnElPasado(r) {
+  const fin = r.fields["Fecha fin"] || r.fields["Fecha inicio"];
+  return Boolean(fin) && fin < hoy;
+}
+
+// Los eventos de una sola vez no se reciclan: son historia y punto.
+function esUnicaVez(r) {
+  const f = String(r.fields["Edición/Frecuencia"] || "").toLowerCase();
+  return f.includes("única") || f.includes("unica") || f.includes("único") || f.includes("unico");
 }
 
 function esFecha(v) {
