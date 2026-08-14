@@ -14,6 +14,7 @@ on:
           - completo
           - descubrir
           - verificar
+          - limpiar
       tema:
         description: "Opcional: buscar solo un tema puntual"
         required: false
@@ -26,6 +27,13 @@ on:
     # Todos los días a las 11:00 UTC (8 de la mañana en Argentina),
     # una hora antes que las transcripciones para no pisarse.
     - cron: "0 11 * * *"
+
+# Si ya hay una corrida en curso, la nueva espera en vez de arrancar en
+# paralelo. Dos barridos simultáneos leen la base antes de que el otro
+# escriba, y terminan cargando el mismo evento dos veces.
+concurrency:
+  group: agenda
+  cancel-in-progress: false
 
 jobs:
   agenda:
