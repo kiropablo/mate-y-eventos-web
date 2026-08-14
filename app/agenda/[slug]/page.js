@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
@@ -29,6 +30,23 @@ export async function generateMetadata({ params }) {
       ev.descCorta ||
       `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos, en la agenda de ${SITE.name}.`,
     alternates: { canonical: `/agenda/${ev.slug}` },
+    openGraph: {
+      type: "article",
+      title: `${ev.nombre} — ${formatRango(ev)}`,
+      description:
+        ev.descCorta ||
+        `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos.`,
+      url: `${SITE.url}/agenda/${ev.slug}`,
+      siteName: SITE.name,
+      locale: "es_AR",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${ev.nombre} — ${formatRango(ev)}`,
+      description:
+        ev.descCorta ||
+        `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas e información oficial.`,
+    },
   };
 }
 
@@ -90,10 +108,13 @@ export default async function Evento({ params }) {
             {ev.tipo ? ` / ${ev.tipo}` : ""}
           </div>
           {ev.imagen ? (
-            <img
-              className="ev-logo reveal"
+            <Image
+              className="ev-logo"
               src={ev.imagen}
               alt={`Logo de ${ev.nombre}`}
+              width={480}
+              height={200}
+              priority
             />
           ) : null}
           <h1>{ev.nombre}</h1>
@@ -178,6 +199,12 @@ export default async function Evento({ params }) {
                   rel="noopener noreferrer"
                 >
                   Sitio oficial
+                </a>
+              )}
+
+              {ev.fechaInicio && !pasado && (
+                <a className="btn btn--ghost" href={`/api/agenda/${ev.slug}/ics`}>
+                  + Agregar a mi calendario
                 </a>
               )}
 

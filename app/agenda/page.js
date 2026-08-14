@@ -9,6 +9,21 @@ export const metadata = {
   title: "Agenda de eventos",
   description:
     "Agenda de la industria: congresos, expos, festivales, recitales y grandes eventos de Argentina y Latinoamérica, con fechas, contactos y referencias de ediciones anteriores.",
+  openGraph: {
+    type: "website",
+    title: "Agenda de eventos de la industria · Mate y Eventos",
+    description:
+      "Congresos, expos, festivales y grandes producciones de Argentina y la región: fechas, contactos y referencias, en un solo lugar.",
+    url: `${SITE.url}/agenda`,
+    siteName: SITE.name,
+    locale: "es_AR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Agenda de eventos de la industria · Mate y Eventos",
+    description:
+      "Congresos, expos, festivales y grandes producciones de Argentina y la región, con fechas y contactos.",
+  },
 };
 
 export const revalidate = 3600;

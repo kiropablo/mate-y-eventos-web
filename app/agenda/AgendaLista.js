@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { TIPO_COLOR, MESES_LARGO } from "../lib/agenda";
 
@@ -17,6 +17,37 @@ export default function AgendaLista({ proximos, pasados }) {
   const [provincia, setProvincia] = useState("");
   const [fecha, setFecha] = useState(""); // filtro por día puntual (desde el calendario)
   const [verPasados, setVerPasados] = useState(false);
+  const [hidratado, setHidratado] = useState(false);
+
+  // Al entrar, recuperamos los filtros de la URL. Así el botón "atrás"
+  // del navegador devuelve la agenda como estaba y se puede compartir
+  // un link ya filtrado.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("vista") === "calendario") setVista("calendario");
+    if (q.get("tipo")) setTipo(q.get("tipo"));
+    if (q.get("pais")) setPais(q.get("pais"));
+    if (q.get("provincia")) setProvincia(q.get("provincia"));
+    if (/^\d{4}-\d{2}-\d{2}$/.test(q.get("fecha") || "")) setFecha(q.get("fecha"));
+    setHidratado(true);
+  }, []);
+
+  // Y cada cambio queda escrito en la URL, sin recargar la página.
+  useEffect(() => {
+    if (!hidratado) return;
+    const q = new URLSearchParams();
+    if (vista === "calendario") q.set("vista", "calendario");
+    if (tipo) q.set("tipo", tipo);
+    if (pais) q.set("pais", pais);
+    if (provincia) q.set("provincia", provincia);
+    if (fecha) q.set("fecha", fecha);
+    const s = q.toString();
+    window.history.replaceState(
+      null,
+      "",
+      s ? `${window.location.pathname}?${s}` : window.location.pathname
+    );
+  }, [hidratado, vista, tipo, pais, provincia, fecha]);
 
   const todos = useMemo(() => [...proximos, ...pasados], [proximos, pasados]);
   const tipos = useMemo(() => unicos(todos.map((e) => e.tipo)), [todos]);
@@ -46,6 +77,27 @@ export default function AgendaLista({ proximos, pasados }) {
 
   const proximosVisibles = proximos.filter(pasaFiltros);
   const pasadosVisibles = pasados.filter(pasaFiltros);
+
+  // Los que puede dibujar el calendario (necesitan fecha), ya filtrados.
+  const eventosCalendario = todos.filter(
+    (e) =>
+      e.fechaInicio &&
+      (!tipo || e.tipo === tipo) &&
+      (!pais || e.pais === pais) &&
+      (!provincia || e.provincia === provincia)
+  );
+
+  // El calendario abre en el primer mes que tenga algo para mostrar,
+  // no en el mes actual (que puede estar vacío).
+  const mesInicial = useMemo(() => {
+    if (fecha) return fecha.slice(0, 7);
+    const futuros = eventosCalendario
+      .map((e) => (e.fechaFin || e.fechaInicio) >= hoyISO ? e.fechaInicio : null)
+      .filter(Boolean)
+      .sort();
+    const ref = futuros[0] || hoyISO;
+    return ref < hoyISO ? hoyISO.slice(0, 7) : ref.slice(0, 7);
+  }, [eventosCalendario, fecha]);
 
   // El "ver más…" del calendario: pasa a la lista filtrada por ese día.
   const irADia = (dia) => {
@@ -141,13 +193,8 @@ export default function AgendaLista({ proximos, pasados }) {
 
       {vista === "calendario" ? (
         <Calendario
-          eventos={todos.filter(
-            (e) =>
-              e.fechaInicio &&
-              (!tipo || e.tipo === tipo) &&
-              (!pais || e.pais === pais) &&
-              (!provincia || e.provincia === provincia)
-          )}
+          eventos={eventosCalendario}
+          mesInicial={mesInicial}
           onDia={irADia}
         />
       ) : (
@@ -254,9 +301,9 @@ function ListaCompacta({ eventos, pasado = false }) {
 
 const MAX_DOTS = 4;
 
-function Calendario({ eventos, onDia }) {
-  const [anio, setAnio] = useState(HOY.getFullYear());
-  const [mes, setMes] = useState(HOY.getMonth() + 1); // 1-12
+function Calendario({ eventos, mesInicial, onDia }) {
+  const [anio, setAnio] = useState(() => Number(mesInicial.slice(0, 4)));
+  const [mes, setMes] = useState(() => Number(mesInicial.slice(5, 7))); // 1-12
 
   const mover = (paso) => {
     let m = mes + paso;
@@ -408,14 +455,20 @@ function tituloMes(claveYYYYMM) {
   return `${MESES_LARGO[m - 1]} ${a}`;
 }
 
-// "12" o "12–14" para la columna de fecha de la lista.
+// "12", "12–14" o "29 abr–11 may" para la columna de fecha de la lista.
 function diaCorto(ev) {
   const di = Number(ev.fechaInicio.slice(8, 10));
   if (!ev.fechaFin || ev.fechaFin === ev.fechaInicio) return String(di);
   const df = Number(ev.fechaFin.slice(8, 10));
   if (ev.fechaFin.slice(0, 7) === ev.fechaInicio.slice(0, 7))
     return `${di}–${df}`;
-  return `${di}→`;
+  return `${di} ${mesCorto(ev.fechaInicio)}–${df} ${mesCorto(ev.fechaFin)}`;
+}
+
+function mesCorto(fechaISO) {
+  return MESES_LARGO[Number(fechaISO.slice(5, 7)) - 1]
+    .slice(0, 3)
+    .toLowerCase();
 }
 
 function fechaLinda(diaISO) {

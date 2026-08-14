@@ -2044,11 +2044,14 @@ footer.site {
 .ag-fila__fecha {
   font-family: var(--f-disp);
   font-size: 17px;
+  line-height: 1.15;
   color: var(--acc, var(--accent));
-  min-width: 52px;
+  width: 66px;
   text-align: center;
   flex: none;
 }
+/* Rangos que cruzan de mes ("29 abr–11 may") entran en dos renglones */
+.ag-fila__fecha:not(:empty) { font-size: clamp(12px, 2.6vw, 17px); }
 .ag-fila__cuerpo { min-width: 0; flex: 1; display: grid; gap: 2px; }
 .ag-fila__nombre {
   color: var(--hueso);
