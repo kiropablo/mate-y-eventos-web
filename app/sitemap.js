@@ -12,6 +12,7 @@ export default async function sitemap() {
     "/episodios",
     "/articulos",
     "/agenda",
+    "/agenda/sugerir",
     "/sobre",
     "/sponsors",
     "/newsletter",

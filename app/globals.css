@@ -1989,3 +1989,193 @@ footer.site {
 .ev-fuentes ul {
   margin-top: 14px;
 }
+
+/* ==================== AGENDA v2: vistas, calendario, sugerir ==================== */
+
+.ag-barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.ag-vistas { display: flex; gap: 8px; }
+.ag-acciones { display: flex; gap: 10px; align-items: center; }
+.btn--chico { padding: 10px 18px; font-size: 13px; }
+.chip--limpiar { border-color: rgba(234, 71, 138, 0.5); color: var(--magenta); }
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 7px;
+  flex: none;
+  vertical-align: middle;
+}
+
+/* --- Lista compacta --- */
+.ag-meses { display: grid; gap: 34px; }
+.ag-mes {
+  font-family: var(--f-disp);
+  font-size: clamp(20px, 3vw, 26px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hueso);
+  margin-bottom: 12px;
+}
+.ag-tabla {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ag-fila {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.2s, border-color 0.2s;
+}
+.ag-fila:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--acc, var(--accent));
+}
+.ag-fila--pasado { opacity: 0.55; }
+.ag-fila__fecha {
+  font-family: var(--f-disp);
+  font-size: 17px;
+  color: var(--acc, var(--accent));
+  min-width: 52px;
+  text-align: center;
+  flex: none;
+}
+.ag-fila__cuerpo { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.ag-fila__nombre {
+  color: var(--hueso);
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ag-fila__meta {
+  color: var(--gris);
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ag-fila__flecha { color: var(--gris); flex: none; }
+.ag-fila:hover .ag-fila__flecha { color: var(--acc, var(--accent)); }
+
+/* --- Calendario --- */
+.cal { max-width: 860px; }
+.cal-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+.cal-grid--dias { margin-bottom: 5px; }
+.cal-dia-nombre {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gris);
+  padding: 4px 0;
+}
+.cal-celda {
+  position: relative;
+  min-height: 68px;
+  padding: 7px 4px 4px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: var(--gris);
+  font: inherit;
+  cursor: default;
+}
+.cal-celda--vacia { background: none; border-color: transparent; }
+.cal-celda--eventos { cursor: pointer; }
+.cal-celda--eventos:hover {
+  border-color: var(--acc, var(--accent));
+  background: rgba(255, 255, 255, 0.05);
+}
+.cal-celda--hoy { border-color: var(--acc, var(--accent)); }
+.cal-celda--hoy .cal-num { color: var(--acc, var(--accent)); font-weight: 700; }
+.cal-num { font-size: 13px; }
+.cal-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  max-width: 44px;
+}
+.cal-dots .dot { margin-right: 0; width: 7px; height: 7px; }
+.cal-mas {
+  font-size: 10px;
+  color: var(--acc, var(--accent));
+  white-space: nowrap;
+}
+.cal-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 16px;
+  font-size: 12.5px;
+  color: var(--gris);
+}
+
+/* --- Formulario sugerir --- */
+.sug-form { max-width: 760px; }
+.sug-form .ev-h2 { margin-top: 26px; }
+.sug-form .ev-h2:first-child { margin-top: 0; }
+.sug-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+.sug-campo { display: grid; gap: 6px; }
+.sug-campo > span { font-size: 13px; color: var(--gris); }
+.sug-campo--full { grid-column: 1 / -1; }
+.sug-campo .input, .sug-campo .ag-select { width: 100%; }
+.sug-area { resize: vertical; min-height: 96px; }
+.sug-tel {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.sug-form .field-row { margin-top: 26px; max-width: none; }
+
+/* --- Logo en ficha de evento --- */
+.ev-logo {
+  display: block;
+  max-height: 92px;
+  max-width: 240px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 8px;
+}
+
+@media (max-width: 680px) {
+  .sug-grid { grid-template-columns: 1fr; }
+  .cal-celda { min-height: 56px; }
+  .cal-mas { font-size: 9px; }
+  .ag-barra { justify-content: center; }
+}

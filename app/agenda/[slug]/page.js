@@ -89,6 +89,13 @@ export default async function Evento({ params }) {
             <Link href="/agenda">Agenda</Link>
             {ev.tipo ? ` / ${ev.tipo}` : ""}
           </div>
+          {ev.imagen ? (
+            <img
+              className="ev-logo reveal"
+              src={ev.imagen}
+              alt={`Logo de ${ev.nombre}`}
+            />
+          ) : null}
           <h1>{ev.nombre}</h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             <strong>{formatRango(ev)}</strong>

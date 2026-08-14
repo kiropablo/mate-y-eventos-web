@@ -64,8 +64,8 @@ export default async function Agenda() {
             <div className="hold reveal">
               <span className="tag">Muy pronto</span>
               <p>
-                Estamos cargando los primeros eventos de la agenda. Mientras
-                tanto, podés escuchar los episodios o leer los artículos.
+                Estamos cargando los primeros eventos de la agenda. ¿Conocés
+                uno que tenga que estar? Sugerilo y lo sumamos.
               </p>
             </div>
           ) : (
@@ -82,7 +82,7 @@ export default async function Agenda() {
   );
 }
 
-// Solo mandamos al cliente los datos que la lista necesita.
+// Solo mandamos al cliente los datos que la lista y el calendario necesitan.
 function resumen(ev) {
   return {
     slug: ev.slug,
@@ -90,6 +90,8 @@ function resumen(ev) {
     tipo: ev.tipo,
     destacado: ev.destacado,
     fechas: formatRango(ev),
+    fechaInicio: ev.fechaInicio,
+    fechaFin: ev.fechaFin,
     estadoFechas: ev.estadoFechas,
     pais: ev.pais,
     provincia: ev.provincia,

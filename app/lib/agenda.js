@@ -11,6 +11,24 @@
 const BASE_ID = process.env.AIRTABLE_AGENDA_BASE || "app6q7METE3ofZz1S";
 const TABLE_ID = process.env.AIRTABLE_AGENDA_TABLE || "tblaLHf2VSyyyeN2s";
 
+// Color de cada tipo de evento (dots del calendario y la lista).
+export const TIPO_COLOR = {
+  "Congreso/Conferencia": "#5aa0ff",
+  "Expo/Feria": "#93d5f7",
+  Festival: "#b78cff",
+  "Recital masivo": "#ea478a",
+  Corporativo: "#9aa3b2",
+  "Capacitación": "#7fe0a7",
+  "Deportivo masivo": "#ffb35a",
+  "Premios y galas": "#ffd75e",
+  "Público/Festivo": "#5ad8c9",
+};
+
+export const MESES_LARGO = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
 const MESES = [
   "ene", "feb", "mar", "abr", "may", "jun",
   "jul", "ago", "sep", "oct", "nov", "dic",
