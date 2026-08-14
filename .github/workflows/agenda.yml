@@ -1,0 +1,60 @@
+name: Agenda
+
+on:
+  # Lo dispara el botón de la consola (/admin) y también se puede
+  # correr a mano desde esta pestaña.
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "completo = busca en todos los rubros y repasa lo cargado"
+        required: false
+        default: completo
+        type: choice
+        options:
+          - completo
+          - descubrir
+          - verificar
+      tema:
+        description: "Opcional: buscar solo un tema puntual"
+        required: false
+        default: ""
+      cantidad:
+        description: "Máximo de eventos por rubro"
+        required: false
+        default: "10"
+  schedule:
+    # Todos los días a las 11:00 UTC (8 de la mañana en Argentina),
+    # una hora antes que las transcripciones para no pisarse.
+    - cron: "0 11 * * *"
+
+jobs:
+  agenda:
+    runs-on: ubuntu-latest
+    # El barrido completo recorre diez rubros: le damos aire.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Actualizar la agenda
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Sin inputs (o sea, en el cron diario) hace el mantenimiento:
+          # repasa lo cargado y suma un rubro nuevo, rotando.
+          MODO: ${{ inputs.modo || 'diario' }}
+          TEMA: ${{ inputs.tema }}
+          MAX_EVENTOS: ${{ inputs.cantidad || '10' }}
+        run: node scripts/agenda-ia.mjs
+      - name: Refrescar la web
+        env:
+          REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
+        run: |
+          if [ -n "$REVALIDATE_TOKEN" ]; then
+            curl -s "https://www.mateyeventos.com/api/agenda/revalidar?token=$REVALIDATE_TOKEN" || true
+          else
+            echo "Sin REVALIDATE_TOKEN: la web se actualiza sola dentro de una hora."
+          fi

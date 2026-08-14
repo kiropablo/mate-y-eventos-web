@@ -36,6 +36,11 @@ const CSS = `
 .adm-msg--ok{color:#93d5f7}
 .adm-msg--mal{color:#ea478a}
 .adm-vacio{background:#141418;border:1px solid rgba(245,245,245,.08);border-radius:14px;padding:30px;font-family:var(--font-body);color:rgba(245,245,245,.55);line-height:1.6}
+.adm-bloque{background:#141418;border:1px solid rgba(245,245,245,.08);border-radius:14px;padding:24px 22px;margin-bottom:30px}
+.adm-bloque h2{font-family:var(--font-display);font-weight:700;font-size:1.15rem;margin-bottom:6px}
+.adm-bloque p{font-family:var(--font-body);font-size:.9rem;line-height:1.55;color:rgba(245,245,245,.55)}
+.adm-bloque .adm-acciones{margin-top:18px}
+.adm-btn--agenda{background:#93d5f7;color:#0c0c0f}
 `;
 
 export default function PanelAdmin({ articulos }) {
@@ -44,6 +49,8 @@ export default function PanelAdmin({ articulos }) {
   const [campos, setCampos] = useState({ titulo: "", bajada: "", cuerpo: "" });
   const [guardando, setGuardando] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [agenda, setAgenda] = useState(null);
+  const [agendaOcupada, setAgendaOcupada] = useState("");
 
   const borradores = lista.filter((a) => !a.publicado).length;
 
@@ -101,6 +108,35 @@ export default function PanelAdmin({ articulos }) {
     setGuardando(false);
   }
 
+  // Los dos botones de la agenda. "refrescar" trae lo de Airtable al
+  // instante; "buscar" dispara la Action que rastrea internet.
+  async function accionAgenda(accion) {
+    if (accion === "buscar") {
+      const seguro = window.confirm(
+        "Va a buscar eventos nuevos en los diez rubros y repasar los que ya están cargados. Tarda entre 10 y 30 minutos y todo entra a Airtable como Borrador IA. ¿Arranco?"
+      );
+      if (!seguro) return;
+    }
+    setAgendaOcupada(accion);
+    setAgenda(null);
+    try {
+      const res = await fetch("/api/admin/agenda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accion }),
+      });
+      const data = await res.json();
+      setAgenda(
+        data.ok
+          ? { ok: true, texto: data.mensaje }
+          : { ok: false, texto: data.error || "No se pudo." }
+      );
+    } catch {
+      setAgenda({ ok: false, texto: "No se pudo conectar." });
+    }
+    setAgendaOcupada("");
+  }
+
   async function salir() {
     await fetch("/api/admin/login", { method: "DELETE" });
     window.location.reload();
@@ -120,6 +156,41 @@ export default function PanelAdmin({ articulos }) {
       <div className="adm-resumen">
         {lista.length} artículos · {borradores} sin revisar
       </div>
+
+      <section className="adm-bloque">
+        <h2>Agenda de eventos</h2>
+        <p>
+          La web se actualiza sola cada hora y todos los días a la mañana
+          busca novedades. Estos botones son para no esperar.
+        </p>
+        <div className="adm-acciones">
+          <button
+            type="button"
+            className="adm-btn adm-btn--agenda"
+            disabled={agendaOcupada !== ""}
+            onClick={() => accionAgenda("refrescar")}
+          >
+            {agendaOcupada === "refrescar"
+              ? "Actualizando…"
+              : "Actualizar desde Airtable"}
+          </button>
+          <button
+            type="button"
+            className="adm-btn adm-btn--sec"
+            disabled={agendaOcupada !== ""}
+            onClick={() => accionAgenda("buscar")}
+          >
+            {agendaOcupada === "buscar"
+              ? "Lanzando…"
+              : "Buscar novedades en internet"}
+          </button>
+          {agenda ? (
+            <span className={agenda.ok ? "adm-msg adm-msg--ok" : "adm-msg adm-msg--mal"}>
+              {agenda.texto}
+            </span>
+          ) : null}
+        </div>
+      </section>
 
       {lista.length === 0 ? (
         <div className="adm-vacio">
