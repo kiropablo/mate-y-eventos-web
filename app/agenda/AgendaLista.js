@@ -153,7 +153,7 @@ export default function AgendaLista({ proximos, pasados }) {
       ) : (
         <>
           {proximosVisibles.length === 0 ? (
-            <div className="hold reveal" style={{ marginTop: "8px" }}>
+            <div className="hold" style={{ marginTop: "8px" }}>
               <span className="tag">Sin resultados</span>
               <p>
                 No hay próximos eventos con esos filtros.
@@ -295,7 +295,7 @@ function Calendario({ eventos, onDia }) {
   const tiposDelMes = unicos([...porDia.values()].flat().map((e) => e.tipo));
 
   return (
-    <div className="cal reveal">
+    <div className="cal">
       <div className="cal-cab">
         <button
           className="chip"

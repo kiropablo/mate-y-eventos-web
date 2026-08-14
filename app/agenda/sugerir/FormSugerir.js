@@ -61,7 +61,7 @@ export default function FormSugerir() {
 
   if (estado === "ok") {
     return (
-      <div className="hold reveal">
+      <div className="hold">
         <span className="tag">¡Gracias!</span>
         <p>
           Recibimos tu sugerencia. El equipo editorial la revisa y, si encaja
