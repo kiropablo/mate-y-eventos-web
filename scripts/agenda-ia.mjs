@@ -53,6 +53,68 @@ const TIPOS = [
   "Público/Festivo",
 ];
 
+// El campo Provincia/Región es texto libre, así que sin control la IA
+// escribe cosas como "Jujuy / Mendoza" o "Variable (últimas ediciones en…)"
+// y el filtro de la web se llena de opciones basura. Acá lo encauzamos.
+const PROVINCIAS = [
+  "Ciudad de Buenos Aires", "Buenos Aires", "Catamarca", "Chaco", "Chubut",
+  "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa",
+  "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta",
+  "San Juan", "San Luis", "Santa Cruz", "Santa Fe",
+  "Santiago del Estero", "Tierra del Fuego", "Tucumán",
+];
+
+const ITINERANTE = "Itinerante";
+
+// Devuelve una provincia limpia, "Itinerante", o "" si no se puede saber.
+function normalizarProvincia(texto, ciudad, pais) {
+  const crudo = String(texto || "").trim();
+  if (!crudo) return "";
+
+  const plano = sinAcentos(crudo);
+
+  // Sedes que cambian de edición en edición.
+  if (/variable|itinerant|rotativ|varias sedes|distintas sedes|cambia/i.test(plano)) {
+    return ITINERANTE;
+  }
+
+  // Fuera de Argentina no aplicamos la lista de provincias: alcanza con
+  // recortar la aclaración, si la hubiera.
+  if (pais && sinAcentos(pais).toLowerCase() !== "argentina") {
+    return crudo.split(/[(,]/)[0].trim();
+  }
+
+  // Coincidencia exacta con el nombre canónico.
+  const exacta = PROVINCIAS.find((p) => sinAcentos(p) === plano);
+  if (exacta) return exacta;
+
+  // Alias frecuentes de la Ciudad de Buenos Aires.
+  if (/^(caba|capital federal|ciudad autonoma de buenos aires|buenos aires city)$/i.test(plano)) {
+    return "Ciudad de Buenos Aires";
+  }
+
+  // Nombra varias ("Jujuy / Mendoza"): si la ciudad desempata, gana la ciudad.
+  const mencionadas = PROVINCIAS.filter((p) =>
+    new RegExp(`\\b${sinAcentos(p)}\\b`, "i").test(plano)
+  );
+  if (mencionadas.length > 1) {
+    const porCiudad = mencionadas.find((p) =>
+      sinAcentos(String(ciudad || "")).includes(sinAcentos(p))
+    );
+    return porCiudad || ITINERANTE;
+  }
+  if (mencionadas.length === 1) return mencionadas[0];
+
+  return "";
+}
+
+function sinAcentos(t) {
+  return String(t)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 const INTERESES = [
   "Oportunidad comercial",
   "Capacitación / Networking",
@@ -75,6 +137,12 @@ async function main() {
   const registros = await traerTodos();
   console.log(`Agenda: ${registros.length} registros en la base.`);
 
+  if (MODO === "limpiar") {
+    await archivarDuplicados(registros);
+    await limpiarProvincias(registros);
+    return;
+  }
+
   if (MODO === "completo") {
     // El botón de la consola: barre todos los rubros y después repasa
     // lo que ya está cargado.
@@ -90,6 +158,83 @@ async function main() {
   } else {
     await verificar(registros);
   }
+}
+
+// Dos corridas simultáneas pueden haber cargado el mismo evento dos veces.
+// No borramos nada: al repetido se lo pasa a "Archivado", que no se publica,
+// y queda anotado por si hubiera que recuperarlo.
+async function archivarDuplicados(registros) {
+  const porNombre = new Map();
+  for (const r of registros) {
+    if (r.fields["Estado"] === "Archivado") continue;
+    const clave = normalizar(r.fields["Nombre"]);
+    if (!clave) continue;
+    if (!porNombre.has(clave)) porNombre.set(clave, []);
+    porNombre.get(clave).push(r);
+  }
+
+  const aArchivar = [];
+  for (const [, grupo] of porNombre) {
+    if (grupo.length < 2) continue;
+    // Se queda el registro más completo; si empatan, el más viejo.
+    grupo.sort((a, b) => {
+      const peso = (r) => Object.keys(r.fields).length;
+      if (peso(a) !== peso(b)) return peso(b) - peso(a);
+      return String(a.createdTime).localeCompare(String(b.createdTime));
+    });
+    const [gana, ...repetidos] = grupo;
+    console.log(`  "${gana.fields["Nombre"]}": ${repetidos.length} repetido(s)`);
+    for (const r of repetidos) {
+      aArchivar.push({
+        id: r.id,
+        fields: {
+          Estado: "Archivado",
+          "Notas internas": `Duplicado de ${gana.id}, archivado automáticamente el ${hoy}.`,
+        },
+      });
+    }
+  }
+
+  if (aArchivar.length === 0) {
+    console.log("No hay duplicados.");
+    return;
+  }
+  for (let i = 0; i < aArchivar.length; i += 10) {
+    await escribir("PATCH", aArchivar.slice(i, i + 10));
+  }
+  console.log(`Archivados ${aArchivar.length} duplicados.\n`);
+}
+
+// Pasada de trapo sobre lo ya cargado: deja el campo Provincia/Región
+// con nombres limpios para que el filtro de la web sirva. No usa IA.
+async function limpiarProvincias(registros) {
+  const arreglos = [];
+
+  for (const r of registros) {
+    const actual = r.fields["Provincia/Región"];
+    if (!actual) continue;
+    const limpia = normalizarProvincia(actual, r.fields["Ciudad"], r.fields["País"]);
+    if (limpia === actual) continue;
+
+    const campos = { "Provincia/Región": limpia || null };
+    const notas = r.fields["Notas internas"] || "";
+    if (!notas.includes(actual)) {
+      campos["Notas internas"] = notas
+        ? `${notas}\nProvincia original: ${actual}`
+        : `Provincia original: ${actual}`;
+    }
+    arreglos.push({ id: r.id, fields: campos });
+    console.log(`  ${r.fields["Nombre"]}: "${actual}" → "${limpia || "(vacío)"}"`);
+  }
+
+  if (arreglos.length === 0) {
+    console.log("Las provincias ya estaban limpias.");
+    return;
+  }
+  for (let i = 0; i < arreglos.length; i += 10) {
+    await escribir("PATCH", arreglos.slice(i, i + 10));
+  }
+  console.log(`\nCorregidos ${arreglos.length} registros.`);
 }
 
 // Un rubro distinto cada día, en ciclo.
@@ -162,7 +307,7 @@ Devolvé hasta ${MAX} eventos en JSON, sin texto alrededor y sin backticks:
   "organizador":"", "edicion":"Anual/Bienal/Única/etc",
   "fechaInicio":"YYYY-MM-DD o vacío", "fechaFin":"YYYY-MM-DD o vacío",
   "estadoFechas":"Confirmadas | Estimadas | Por anunciar",
-  "pais":"", "provincia":"", "ciudad":"", "venue":"",
+  "pais":"", "provincia":"solo el nombre de la provincia o region, sin aclaraciones ni barras; si la sede cambia cada edicion escribi Itinerante", "ciudad":"", "venue":"",
   "descCorta":"una o dos oraciones", "descLarga":"2 a 4 párrafos",
   "web":"", "contactos":"", "redes":"una red por línea, formato: Instagram https://...",
   "edicionesAnteriores":"una por línea, con datos concretos si los hay",
@@ -222,7 +367,13 @@ function aCampos(e) {
     f["Estado de fechas"] = "Por anunciar";
   }
   if (e.pais) f["País"] = e.pais;
-  if (e.provincia) f["Provincia/Región"] = e.provincia;
+  const prov = normalizarProvincia(e.provincia, e.ciudad, e.pais);
+  if (prov) f["Provincia/Región"] = prov;
+  // Si el dato original decía algo más (sedes rotativas, aclaraciones), no se
+  // pierde: queda anotado adentro.
+  if (e.provincia && prov !== e.provincia) {
+    f["Notas internas"] = `Provincia según la fuente: ${e.provincia}`;
+  }
   if (e.ciudad) f["Ciudad"] = e.ciudad;
   if (e.venue) f["Venue"] = e.venue;
   if (e.descCorta) f["Descripción corta"] = e.descCorta;

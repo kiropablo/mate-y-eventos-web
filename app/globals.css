@@ -2015,6 +2015,15 @@ footer.site {
   vertical-align: middle;
 }
 
+.ag-cuenta {
+  font-family: var(--f-ui, inherit);
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gris);
+  margin: 4px 0 20px;
+}
+
 /* --- Lista compacta --- */
 .ag-meses { display: grid; gap: 34px; }
 .ag-mes {

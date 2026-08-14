@@ -69,10 +69,15 @@ export default function AgendaLista({ proximos, pasados }) {
     setFecha("");
   };
 
+  // Comparación tolerante: un espacio de más en Airtable no tiene por qué
+  // romper un filtro.
+  const igual = (a, b) =>
+    String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+
   const pasaFiltros = (e) =>
-    (!tipo || e.tipo === tipo) &&
-    (!pais || e.pais === pais) &&
-    (!provincia || e.provincia === provincia) &&
+    (!tipo || igual(e.tipo, tipo)) &&
+    (!pais || igual(e.pais, pais)) &&
+    (!provincia || igual(e.provincia, provincia)) &&
     (!fecha || enDia(e, fecha));
 
   const proximosVisibles = proximos.filter(pasaFiltros);
@@ -82,9 +87,9 @@ export default function AgendaLista({ proximos, pasados }) {
   const eventosCalendario = todos.filter(
     (e) =>
       e.fechaInicio &&
-      (!tipo || e.tipo === tipo) &&
-      (!pais || e.pais === pais) &&
-      (!provincia || e.provincia === provincia)
+      (!tipo || igual(e.tipo, tipo)) &&
+      (!pais || igual(e.pais, pais)) &&
+      (!provincia || igual(e.provincia, provincia))
   );
 
   // El calendario abre en el primer mes que tenga algo para mostrar,
@@ -191,6 +196,13 @@ export default function AgendaLista({ proximos, pasados }) {
         </div>
       </div>
 
+      <p className="ag-cuenta">
+        {proximosVisibles.length === 0
+          ? "Ningún evento con estos filtros"
+          : `${proximosVisibles.length} ${proximosVisibles.length === 1 ? "evento" : "eventos"}`}
+        {hayFiltros ? " · filtrado" : ""}
+      </p>
+
       {vista === "calendario" ? (
         <Calendario
           eventos={eventosCalendario}
@@ -245,7 +257,12 @@ function ListaCompacta({ eventos, pasado = false }) {
       if (!map.has(clave)) map.set(clave, []);
       map.get(clave).push(e);
     }
-    return [...map.entries()];
+    // Meses en orden, y los que no tienen fecha siempre al final.
+    return [...map.entries()].sort(([a], [b]) => {
+      if (a === "por-anunciar") return 1;
+      if (b === "por-anunciar") return -1;
+      return a.localeCompare(b);
+    });
   }, [eventos]);
 
   return (
