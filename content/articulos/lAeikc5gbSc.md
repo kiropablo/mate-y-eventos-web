@@ -9,8 +9,10 @@ eje: "Estrategia & Negocio"
 etiquetas: ["gestión de artistas", "comisiones", "liderazgo", "improvisación", "marca"]
 lectura: 6
 generado: "2026-08-13"
-publicado: false
+publicado: true
+revisado: "2026-08-14"
 ---
+
 Luciano Larocca cuenta una escena que debería incomodar a cualquiera que venda o contrate artistas para eventos: descubrió, por casualidad, que un tercero ofrecía a la Bomba de Tiempo en su propia página web, cobraba un precio y, si el cliente decía que no, le vendía otro producto. Nadie de la Bomba sabía que eso pasaba. La anécdota no es un chisme del rubro musical: es un caso de estudio sobre qué pasa cuando una marca es más fuerte que la estructura comercial que la rodea, y sobre cómo se resuelve eso desde adentro.
 
 ## Una marca fuerte atrae intermediarios que no siempre suman valor
