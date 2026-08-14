@@ -1,6 +1,7 @@
 import { SITE } from "./lib/site";
 import { getEpisodes } from "./lib/youtube";
 import { getArticulos } from "./lib/articulos";
+import { getEventos } from "./lib/agenda";
 
 export const revalidate = 3600;
 
@@ -10,6 +11,7 @@ export default async function sitemap() {
     "",
     "/episodios",
     "/articulos",
+    "/agenda",
     "/sobre",
     "/sponsors",
     "/newsletter",
@@ -20,7 +22,9 @@ export default async function sitemap() {
     url: `${SITE.url}${path}`,
     lastModified: now,
     changeFrequency:
-      path === "/episodios" || path === "/articulos" ? "weekly" : "monthly",
+      path === "/episodios" || path === "/articulos" || path === "/agenda"
+        ? "weekly"
+        : "monthly",
     priority: path === "" ? 1 : path === "/sponsors" ? 0.9 : 0.7,
   }));
 
@@ -51,5 +55,18 @@ export default async function sitemap() {
     arts = [];
   }
 
-  return [...base, ...eps, ...arts];
+  let evs = [];
+  try {
+    const eventos = await getEventos();
+    evs = eventos.map((e) => ({
+      url: `${SITE.url}/agenda/${e.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
+  } catch {
+    evs = [];
+  }
+
+  return [...base, ...eps, ...arts, ...evs];
 }
