@@ -17,6 +17,7 @@ export default function AgendaLista({ proximos, pasados }) {
   const [provincia, setProvincia] = useState("");
   const [fecha, setFecha] = useState(""); // filtro por día puntual (desde el calendario)
   const [verPasados, setVerPasados] = useState(false);
+  const [busca, setBusca] = useState("");
   const [hidratado, setHidratado] = useState(false);
 
   // Al entrar, recuperamos los filtros de la URL. Así el botón "atrás"
@@ -60,9 +61,10 @@ export default function AgendaLista({ proximos, pasados }) {
     [todos, pais]
   );
 
-  const hayFiltros = tipo || pais || provincia || fecha;
+  const hayFiltros = tipo || pais || provincia || fecha || busca;
 
   const borrarFiltros = () => {
+    setBusca("");
     setTipo("");
     setPais("");
     setProvincia("");
@@ -74,7 +76,18 @@ export default function AgendaLista({ proximos, pasados }) {
   const igual = (a, b) =>
     String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 
+  // Busca por nombre, ciudad, provincia y organizador, sin acentos ni mayúsculas.
+  const termino = pelado(busca);
+  const coincide = (e) =>
+    !termino ||
+    pelado(
+      [e.nombre, e.ciudad, e.provincia, e.pais, e.tipo, e.descCorta]
+        .filter(Boolean)
+        .join(" ")
+    ).includes(termino);
+
   const pasaFiltros = (e) =>
+    coincide(e) &&
     (!tipo || igual(e.tipo, tipo)) &&
     (!pais || igual(e.pais, pais)) &&
     (!provincia || igual(e.provincia, provincia)) &&
@@ -82,6 +95,9 @@ export default function AgendaLista({ proximos, pasados }) {
 
   const proximosVisibles = proximos.filter(pasaFiltros);
   const pasadosVisibles = pasados.filter(pasaFiltros);
+
+  // Hasta seis destacados vigentes, respetando los filtros puestos.
+  const destacados = proximosVisibles.filter((e) => e.destacado).slice(0, 6);
 
   // Los que puede dibujar el calendario (necesitan fecha), ya filtrados.
   const eventosCalendario = todos.filter(
@@ -146,6 +162,16 @@ export default function AgendaLista({ proximos, pasados }) {
 
       {/* Filtros compartidos */}
       <div className="ag-filtros reveal">
+        <div className="ag-buscador">
+          <input
+            className="input ag-buscar"
+            type="search"
+            value={busca}
+            placeholder="Buscar por nombre, ciudad o provincia…"
+            aria-label="Buscar eventos"
+            onChange={(e) => setBusca(e.target.value)}
+          />
+        </div>
         <div className="ag-chips" role="group" aria-label="Filtrar por tipo">
           {tipos.map((t) => (
             <button
@@ -195,6 +221,30 @@ export default function AgendaLista({ proximos, pasados }) {
           ) : null}
         </div>
       </div>
+
+      {destacados.length > 0 && vista === "lista" ? (
+        <section className="ag-dest">
+          <h2 className="ag-dest__tit">★ Destacados</h2>
+          <div className="ag-dest__tira">
+            {destacados.map((ev) => (
+              <Link key={ev.slug} href={`/agenda/${ev.slug}`} className="ag-dest__card">
+                {ev.imagen ? (
+                  <img src={ev.imagen} alt="" className="ag-dest__logo" loading="lazy" />
+                ) : (
+                  <span className="ag-dest__logo ag-dest__logo--vacio" aria-hidden>
+                    <span className="dot" style={{ background: color(ev.tipo) }} />
+                  </span>
+                )}
+                <span className="ag-dest__nombre">{ev.nombre}</span>
+                <span className="ag-dest__meta">{ev.fechas}</span>
+                <span className="ag-dest__meta">
+                  {[ev.ciudad || ev.provincia, ev.pais].filter(Boolean).join(", ")}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <p className="ag-cuenta">
         {proximosVisibles.length === 0
@@ -465,6 +515,15 @@ function Calendario({ eventos, mesInicial, onDia }) {
 
 function color(tipo) {
   return TIPO_COLOR[tipo] || "#9aa3b2";
+}
+
+// Minúsculas y sin acentos, para que "cordoba" encuentre "Córdoba".
+function pelado(t) {
+  return String(t || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 }
 
 function unicos(lista) {

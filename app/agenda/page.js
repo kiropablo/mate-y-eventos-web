@@ -112,5 +112,6 @@ function resumen(ev) {
     provincia: ev.provincia,
     ciudad: ev.ciudad,
     descCorta: ev.descCorta,
+    imagen: ev.imagen || null,
   };
 }

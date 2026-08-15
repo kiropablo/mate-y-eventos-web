@@ -34,7 +34,8 @@ const RUBROS = [
   "ferias comerciales grandes de otros rubros en Argentina que mueven producción de eventos: agro, industria, salud, construcción, automotor, gastronomía, hotelería, inmobiliario y energía",
   "festivales de música y recitales masivos en Argentina, incluidos los festivales de música electrónica y los festivales de verano",
   "fiestas nacionales, provinciales y municipales grandes de Argentina, y celebraciones populares con producción técnica relevante",
-  "eventos deportivos masivos en Argentina: maratones, automovilismo, torneos internacionales y competencias con montaje y producción",
+  "eventos deportivos masivos en Argentina: maratones, torneos internacionales y competencias con montaje y producción",
+  "fechas puntuales del calendario de automovilismo argentino (Turismo Carretera, TC2000, Top Race, Súper TC2000): cada carrera con su autódromo, su ciudad y su fin de semana, NUNCA la temporada completa. Cargá una ficha por fecha, con nombre del estilo \"Turismo Carretera — Autódromo de Rafaela\"",
   "premios, galas y ceremonias de entrega de la industria en Argentina: publicidad, marketing, música, gastronomía, arquitectura y eventos",
   "convenciones pop, comic cons, gaming, anime, tatuajes, moda y ferias de nicho con gran montaje en Argentina",
   "eventos del rubro eventos en países limítrofes y de Latinoamérica relevantes para un profesional argentino: Uruguay, Chile, Brasil, Paraguay, México y Colombia",
@@ -107,6 +108,16 @@ function normalizarProvincia(texto, ciudad, pais) {
   return "";
 }
 
+// La búsqueda web de Claude devuelve el texto con marcas de citación
+// (<cite index="2-4">…</cite>). Si no se sacan, terminan publicadas.
+function sinCitas(texto) {
+  if (typeof texto !== "string") return texto;
+  return texto
+    .replace(/<\/?cite[^>]*>/gi, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
 function sinAcentos(t) {
   return String(t)
     .normalize("NFD")
@@ -138,6 +149,7 @@ async function main() {
 
   if (MODO === "limpiar") {
     await archivarDuplicados(registros);
+    await limpiarTextos(registros);
     await limpiarProvincias(registros);
     return;
   }
@@ -157,6 +169,38 @@ async function main() {
   } else {
     await verificar(registros);
   }
+}
+
+// Saca las marcas de citación que quedaron guardadas en fichas ya publicadas.
+async function limpiarTextos(registros) {
+  const CAMPOS = [
+    "Descripción corta", "Descripción larga", "Ediciones anteriores",
+    "Contactos", "Redes", "Fuentes", "Organizador", "Venue",
+    "Edición/Frecuencia", "Hallazgos IA", "Notas internas",
+  ];
+
+  const arreglos = [];
+  for (const r of registros) {
+    const campos = {};
+    for (const c of CAMPOS) {
+      const v = r.fields[c];
+      if (typeof v !== "string" || !/<\/?cite/i.test(v)) continue;
+      campos[c] = sinCitas(v);
+    }
+    if (Object.keys(campos).length) {
+      arreglos.push({ id: r.id, fields: campos });
+      console.log(`  ${r.fields["Nombre"]}: ${Object.keys(campos).join(", ")}`);
+    }
+  }
+
+  if (arreglos.length === 0) {
+    console.log("No hay marcas de citación para sacar.");
+    return;
+  }
+  for (let i = 0; i < arreglos.length; i += 10) {
+    await escribir("PATCH", arreglos.slice(i, i + 10));
+  }
+  console.log(`Textos limpiados en ${arreglos.length} fichas.\n`);
 }
 
 // Dos corridas simultáneas pueden haber cargado el mismo evento dos veces.
@@ -352,6 +396,10 @@ Devolvé hasta ${MAX} eventos en JSON, sin texto alrededor y sin backticks:
 }
 
 function aCampos(e) {
+  // Todo lo que venga de la IA pasa por el filtro antes de guardarse.
+  for (const k of Object.keys(e)) {
+    if (typeof e[k] === "string") e[k] = sinCitas(e[k]);
+  }
   const f = {
     Nombre: e.nombre,
     Slug: slug(e.nombre),
@@ -391,7 +439,7 @@ function aCampos(e) {
   if (e.contactos) f["Contactos"] = e.contactos;
   if (e.redes) f["Redes"] = e.redes;
   if (e.edicionesAnteriores) f["Ediciones anteriores"] = e.edicionesAnteriores;
-  if (e.fuentes?.length) f["Fuentes"] = e.fuentes.join("\n");
+  if (e.fuentes?.length) f["Fuentes"] = e.fuentes.map(sinCitas).join("\n");
   return f;
 }
 
@@ -478,7 +526,7 @@ Devolvé JSON sin texto alrededor y sin backticks:
 
   // La edición que pasó se guarda como historia, si no estaba ya anotada.
   const historia = f["Ediciones anteriores"] || "";
-  const linea = [rango, f["Ciudad"], d.comoResulto].filter(Boolean).join(" · ");
+  const linea = [rango, f["Ciudad"], sinCitas(d.comoResulto)].filter(Boolean).join(" · ");
   if (rango && !historia.includes(f["Fecha inicio"])) {
     campos["Ediciones anteriores"] = historia ? `${historia}\n${linea}` : linea;
   }
@@ -487,7 +535,7 @@ Devolvé JSON sin texto alrededor y sin backticks:
     campos["Fecha inicio"] = d.fechaInicio;
     campos["Fecha fin"] = esFecha(d.fechaFin) ? d.fechaFin : null;
     campos["Estado de fechas"] = d.estadoFechas === "Confirmadas" ? "Confirmadas" : "Estimadas";
-    campos["Hallazgos IA"] = `[${hoy}] Próxima edición: ${d.fechaInicio}. ${d.resumen || ""}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
+    campos["Hallazgos IA"] = `[${hoy}] Próxima edición: ${d.fechaInicio}. ${sinCitas(d.resumen || "")}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
     console.log(`  ${f["Nombre"]}: próxima edición → ${d.fechaInicio}`);
   } else {
     // Sin anuncio: se limpian las fechas para que no siga figurando como pasado.
@@ -537,7 +585,7 @@ Devolvé JSON sin texto alrededor y sin backticks:
   const campos = { "Última verificación": hoy };
 
   if (d.cambio && d.resumen) {
-    campos["Hallazgos IA"] = `[${hoy}] ${d.resumen}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
+    campos["Hallazgos IA"] = `[${hoy}] ${sinCitas(d.resumen)}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
     campos["Revisar"] = true;
 
     // Completar fechas solo cuando antes NO estaban firmes. Si ya figuraban
