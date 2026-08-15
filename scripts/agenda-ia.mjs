@@ -34,7 +34,6 @@ const RUBROS = [
   "ferias comerciales grandes de otros rubros en Argentina que mueven producción de eventos: agro, industria, salud, construcción, automotor, gastronomía, hotelería, inmobiliario y energía",
   "festivales de música y recitales masivos en Argentina, incluidos los festivales de música electrónica y los festivales de verano",
   "fiestas nacionales, provinciales y municipales grandes de Argentina, y celebraciones populares con producción técnica relevante",
-  "capacitaciones, cursos, diplomaturas y certificaciones para profesionales de eventos, producción, técnica y wedding planning en Argentina",
   "eventos deportivos masivos en Argentina: maratones, automovilismo, torneos internacionales y competencias con montaje y producción",
   "premios, galas y ceremonias de entrega de la industria en Argentina: publicidad, marketing, música, gastronomía, arquitectura y eventos",
   "convenciones pop, comic cons, gaming, anime, tatuajes, moda y ferias de nicho con gran montaje en Argentina",
@@ -278,6 +277,16 @@ creativos, planners, proveedores, marcas).
 QUÉ NO ENTRA
 Eventos culturales chicos o de baja trascendencia, religiosos, político-partidarios,
 y activaciones privadas de marca.
+
+Tampoco entran, aunque parezcan del rubro:
+- Cursos, cursadas, carreras, diplomaturas, licenciaturas y certificaciones.
+  Una formación que dura meses no es un evento de agenda. Sí entra un congreso
+  o una jornada de capacitación con fecha propia y sede, de uno o dos días.
+- Temporadas y campeonatos completos ("Turismo Carretera temporada 2026",
+  "Campeonato Provincial de Rally"). Un calendario deportivo entero no es un
+  evento: si lo cargás, tiene que ser una fecha puntual, con su sede y su día
+  ("TC en Rafaela, 12 de octubre").
+- Ciclos permanentes de webinars o jornadas sin fecha única.
 
 ${foco}
 

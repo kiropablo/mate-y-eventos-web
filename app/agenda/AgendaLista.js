@@ -253,14 +253,27 @@ function ListaCompacta({ eventos, pasado = false }) {
   const grupos = useMemo(() => {
     const map = new Map();
     for (const e of eventos) {
-      const clave = e.fechaInicio ? e.fechaInicio.slice(0, 7) : "por-anunciar";
+      let clave;
+      if (!e.fechaInicio) {
+        clave = "por-anunciar";
+      } else if (
+        e.fechaInicio < hoyISO &&
+        (e.fechaFin || e.fechaInicio) >= hoyISO
+      ) {
+        // Temporadas, campeonatos y cursos largos: empezaron hace meses pero
+        // todavía están pasando. No van bajo el mes en que arrancaron.
+        clave = "en-curso";
+      } else {
+        clave = e.fechaInicio.slice(0, 7);
+      }
       if (!map.has(clave)) map.set(clave, []);
       map.get(clave).push(e);
     }
-    // Meses en orden, y los que no tienen fecha siempre al final.
+    // Lo que está pasando ahora arriba, después los meses en orden, y los
+    // que todavía no tienen fecha al final.
+    const orden = (k) => (k === "en-curso" ? 0 : k === "por-anunciar" ? 2 : 1);
     return [...map.entries()].sort(([a], [b]) => {
-      if (a === "por-anunciar") return 1;
-      if (b === "por-anunciar") return -1;
+      if (orden(a) !== orden(b)) return orden(a) - orden(b);
       return a.localeCompare(b);
     });
   }, [eventos]);
@@ -270,9 +283,11 @@ function ListaCompacta({ eventos, pasado = false }) {
       {grupos.map(([clave, lista]) => (
         <section key={clave}>
           <h2 className="ag-mes">
-            {clave === "por-anunciar"
-              ? "Fechas por anunciar"
-              : tituloMes(clave)}
+            {clave === "en-curso"
+              ? "Sucediendo ahora"
+              : clave === "por-anunciar"
+                ? "Fechas por anunciar"
+                : tituloMes(clave)}
           </h2>
           <div className="ag-tabla">
             {lista.map((ev) => (
