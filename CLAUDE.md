@@ -26,7 +26,7 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
 - `site.js` — config central: `SITE` (nombre, tagline, frase institucional, url, email), `LINKS` (redes, IDs de playlists de YouTube, Drives de prensa), `NAV` (menú), `EJES` (4 ejes temáticos), `STATS` (métricas curadas **a mano**).
 - `youtube.js` — trae episodios con la YouTube Data API. **Junta las dos playlists** (Temporada 2 + Temporada 1) con `unirEpisodios()`, saca repetidos y ordena por fecha. Fallback: RSS de playlists → feed del canal.
 - `transcripts.js` — lee `content/transcripts/{videoId}.txt`.
-- `articulos.js` — lee `content/articulos/{videoId}.md`. Por defecto **solo los publicados**. Separa cabecera, cuerpo y preguntas frecuentes.
+- `articulos.js` — lee `content/articulos/{direccion-del-articulo}.md`. Por defecto **solo los publicados**. Separa cabecera, cuerpo y preguntas frecuentes. El archivo se llama por su tema (esa es la URL); lo que lo ata a su episodio es el campo `episodio` de la cabecera, no el nombre.
 - `articulos-admin.js` — igual pero trae **también los borradores**, para el panel interno.
 - `admin.js` — seguridad del panel: cookie con huella SHA-256 de `ADMIN_PASSWORD`.
 
@@ -51,7 +51,7 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
 4. `scripts/avisar-borradores.mjs` abre un **issue en GitHub** asignado a mí → me llega por mail con el link al panel.
 5. Entro a `/admin`, reviso, corrijo y publico. Eso escribe en GitHub y redeploya.
 
-**Formato de cada artículo** (`content/articulos/{videoId}.md`): cabecera entre `---` con `titulo`, `bajada`, `metaDescripcion`, `episodio`, `episodioTitulo`, `fecha`, `eje`, `etiquetas`, `lectura`, `generado`, `publicado`. Después el cuerpo en Markdown con `##` para subtítulos, un bloque `:::checklist ... :::` (recuadro destacado) y al final `## Preguntas frecuentes` con cada pregunta en `###`.
+**Formato de cada artículo** (`content/articulos/{direccion-del-articulo}.md`): cabecera entre `---` con `titulo`, `bajada`, `metaDescripcion`, `episodio`, `episodioTitulo`, `fecha`, `eje`, `etiquetas`, `slugsAnteriores`, `lectura`, `generado`, `publicado`. Después el cuerpo en Markdown con `##` para subtítulos, un bloque `:::checklist ... :::` (recuadro destacado) y al final `## Preguntas frecuentes` con cada pregunta en `###`.
 
 **Criterio editorial** (está todo escrito en castellano en la constante `INSTRUCCIONES` dentro de `generar-articulos.mjs` — si hay que cambiar el estilo, se cambia ahí y en ningún otro lado):
 - Los artículos **no son resúmenes**: amplían el episodio. ~1200 palabras.
@@ -97,6 +97,7 @@ Variables en Vercel: `WINDSOR_API_KEY`, `SPOTIFY_CSV_URL`, `PAUTA_DESDE` (fecha 
 2. **Mientras una GitHub Action está corriendo, no tocar el repo** (el push falla por conflicto).
 3. Los números que se ven en la web (`STATS` en `site.js`) están **escritos a mano**, no vienen de ningún lado automático.
 4. La web y el panel son proyectos separados: un cambio en uno no afecta al otro.
+5. **Un artículo no se renombra a mano.** Su nombre de archivo es su URL. Si hay que cambiarla, hay que sumar la dirección vieja a `slugsAnteriores` en la cabecera: de ahí salen solas las redirecciones (`app/lib/redirecciones.js` → `next.config.js`). Renombrar sin eso deja la URL vieja en la nada.
 
 ---
 

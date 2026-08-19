@@ -64,11 +64,21 @@ function parsear(crudo, id) {
     titulo: datos.titulo || "",
     bajada: datos.bajada || "",
     metaDescripcion: datos.metaDescripcion || datos.bajada || "",
-    episodio: datos.episodio || id,
+    // La clave de unión con el episodio de YouTube. Sin respaldo a propósito:
+    // cuando el archivo se llamaba igual que el video, poner el nombre del
+    // archivo acá no molestaba. Ahora que el archivo se llama por su tema,
+    // ese respaldo armaría links a /episodios/{slug} que dan 404 sin avisar.
+    episodio: datos.episodio || "",
     episodioTitulo: datos.episodioTitulo || "",
     fecha: datos.fecha || "",
     eje: datos.eje || "",
     etiquetas: Array.isArray(datos.etiquetas) ? datos.etiquetas : [],
+    // Las direcciones que este artículo tuvo antes. Se usan para redirigir a
+    // quien llegue por la vieja: un link compartido o un resultado de Google
+    // que todavía no se actualizó.
+    slugsAnteriores: Array.isArray(datos.slugsAnteriores)
+      ? datos.slugsAnteriores.filter((s) => typeof s === "string" && s.trim())
+      : [],
     lectura: datos.lectura || 6,
     publicado: datos.publicado === true,
     cuerpo: texto,
@@ -113,6 +123,19 @@ export function getArticulo(id, { incluirBorradores = false } = {}) {
   } catch {
     return null;
   }
+}
+
+// El artículo de un episodio, buscado por su videoId.
+//
+// Antes esto era getArticulo(videoId) y funcionaba de casualidad, porque el
+// archivo se llamaba igual que el video. Ahora el archivo se llama por su
+// tema, así que hay que buscar por el campo "episodio".
+export function getArticuloDeEpisodio(videoId, { incluirBorradores = false } = {}) {
+  if (!videoId) return null;
+  return (
+    getArticulos({ incluirBorradores }).find((a) => a.episodio === videoId) ||
+    null
+  );
 }
 
 // Los artículos que mejor acompañan a este. Prioriza los que comparten

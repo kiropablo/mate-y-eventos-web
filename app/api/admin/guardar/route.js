@@ -83,7 +83,9 @@ export async function POST(request) {
   }
 
   const id = String(datos?.id || "");
-  if (!/^[A-Za-z0-9_-]{5,40}$/.test(id)) {
+  // Hasta 80: un slug descriptivo ("como-elegir-proveedores-para-un-evento")
+  // no entra en los 40 que alcanzaban para un código de YouTube.
+  if (!/^[A-Za-z0-9_-]{2,80}$/.test(id)) {
     return Response.json({ ok: false, error: "Artículo inválido." }, { status: 400 });
   }
   if (!String(datos?.titulo || "").trim() || !String(datos?.cuerpo || "").trim()) {

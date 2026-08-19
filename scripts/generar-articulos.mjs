@@ -1,7 +1,8 @@
 // Genera un artículo de análisis por cada episodio, a partir de su transcripción.
 //
 // Lee   : content/transcripts/{videoId}.txt
-// Escribe: content/articulos/{videoId}.md   (como BORRADOR, publicado: false)
+// Escribe: content/articulos/{direccion-del-articulo}.md  (BORRADOR, publicado: false)
+//          El campo "episodio" de adentro es el que lo ata a su videoId.
 //
 // Cada artículo incluye un bloque de PREGUNTAS FRECUENTES pensado para AI SEO:
 // preguntas reales de la industria, con respuestas que se entienden solas.
@@ -114,6 +115,7 @@ FORMATO DE SALIDA (respetalo exactamente, sin agregar nada antes ni después,
 sin bloques de código, sin comentarios)
 
 TITULO: título del artículo, 45 a 70 caracteres, concreto y con gancho, que NO repita el título del episodio
+DIRECCION: la dirección web del artículo, en minúsculas y con guiones. De 3 a 7 palabras, sin artículos ni preposiciones sueltas. Tiene que decir de qué trata el artículo tal como alguien lo buscaría en Google. Ejemplos buenos: "cuanto-cobrar-por-organizar-un-evento", "rider-tecnico-que-es", "gestion-de-crisis-en-eventos". Ejemplos malos: "articulo-del-episodio-12", "reflexiones-sobre-la-industria", "t02e11"
 BAJADA: una o dos oraciones con la promesa del artículo, 140 a 220 caracteres
 META: descripción para Google, 140 a 158 caracteres, con la palabra clave principal
 EJE: uno de los cuatro ejes
@@ -267,6 +269,7 @@ function parsearRespuesta(texto) {
 
   return {
     titulo: campo("TITULO"),
+    direccion: campo("DIRECCION"),
     bajada: campo("BAJADA"),
     metaDescripcion: campo("META"),
     eje: campo("EJE"),
@@ -311,6 +314,67 @@ function armarMarkdown(art, id, meta) {
   return frontmatter + art.cuerpo.trim() + faq + "\n";
 }
 
+// Los videoId que ya tienen un artículo escrito, borradores incluidos.
+function episodiosConArticulo() {
+  const salida = new Set();
+  let archivos = [];
+  try {
+    archivos = fs.readdirSync(DIR_ARTICULOS).filter((f) => f.endsWith(".md"));
+  } catch {
+    return salida;
+  }
+  for (const archivo of archivos) {
+    try {
+      const crudo = fs.readFileSync(path.join(DIR_ARTICULOS, archivo), "utf8");
+      const m = crudo.match(/^episodio:[^\S\r\n]*(.+)$/m);
+      const ep = m ? m[1].trim().replace(/^"|"$/g, "") : "";
+      if (ep) salida.add(ep);
+    } catch {
+      // Un archivo ilegible no puede hacer que se reescriba todo.
+    }
+  }
+  return salida;
+}
+
+// La dirección del artículo: minúsculas, sin acentos, con guiones.
+const LARGO_MAXIMO = 70;
+
+function aSlug(texto) {
+  const limpio = String(texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (limpio.length <= LARGO_MAXIMO) return limpio;
+
+  // Hay que recortar. Se corta en el último guion entero para no dejar una
+  // palabra partida al medio en la dirección.
+  const cortado = limpio.slice(0, LARGO_MAXIMO + 1);
+  const ultimo = cortado.lastIndexOf("-");
+  return (ultimo > 0 ? cortado.slice(0, ultimo) : cortado.slice(0, LARGO_MAXIMO))
+    .replace(/^-+|-+$/g, "");
+}
+
+// Una dirección que no choque con ninguna que ya exista.
+//
+// Dos artículos con el mismo nombre de archivo serían uno solo: el segundo
+// pisaría al primero sin decir nada.
+function direccionLibre(propuesta, respaldo) {
+  let base = aSlug(propuesta);
+  // Muy corta no describe nada: mejor caer al título.
+  if (base.split("-").filter(Boolean).length < 2) base = aSlug(respaldo);
+  if (!base) base = "articulo";
+
+  let slug = base;
+  let n = 2;
+  while (fs.existsSync(path.join(DIR_ARTICULOS, `${slug}.md`))) {
+    slug = `${base}-${n++}`;
+  }
+  return slug;
+}
+
 // --------------------------------------------------------------------------
 // Programa principal
 // --------------------------------------------------------------------------
@@ -320,9 +384,30 @@ const transcripciones = fs
   .filter((f) => f.endsWith(".txt") && f !== "README.txt")
   .map((f) => f.replace(/\.txt$/, ""));
 
-const pendientes = transcripciones.filter(
-  (id) => !fs.existsSync(path.join(DIR_ARTICULOS, `${id}.md`))
-);
+// Qué episodios YA tienen artículo. Se pregunta por el campo "episodio" de
+// cada archivo, no por su nombre.
+//
+// Antes esto era existsSync(`${videoId}.md`) y alcanzaba, porque el archivo se
+// llamaba igual que el video. Desde que los artículos se llaman por su tema,
+// esa pregunta no encuentra nada: el script creería que faltan los cuarenta y
+// los escribiría de nuevo, pagando la API y duplicando todo el archivo.
+const yaEscritos = episodiosConArticulo();
+
+// Seguro: si hay artículos en la carpeta pero ninguno declara su episodio,
+// algo se rompió leyendo las cabeceras. Seguir sería escribir los cuarenta
+// de nuevo, pagando la API y duplicando el archivo entero. Mejor cortar.
+const cuantosArchivos = fs
+  .readdirSync(DIR_ARTICULOS)
+  .filter((f) => f.endsWith(".md")).length;
+if (cuantosArchivos > 0 && yaEscritos.size === 0) {
+  console.error(
+    `Hay ${cuantosArchivos} artículos pero ninguno tiene el campo "episodio". ` +
+      `No se escribe nada: revisá las cabeceras antes de volver a correr esto.`
+  );
+  process.exit(1);
+}
+
+const pendientes = transcripciones.filter((id) => !yaEscritos.has(id));
 
 console.log(
   `Transcripciones: ${transcripciones.length} · ya tienen artículo: ` +
@@ -366,8 +451,10 @@ for (const id of tanda) {
 
     if (!art.titulo || !art.cuerpo) throw new Error("faltan título o cuerpo");
 
+    const slug = direccionLibre(art.direccion, art.titulo);
+
     fs.writeFileSync(
-      path.join(DIR_ARTICULOS, `${id}.md`),
+      path.join(DIR_ARTICULOS, `${slug}.md`),
       armarMarkdown(art, id, meta),
       "utf8"
     );
@@ -378,6 +465,7 @@ for (const id of tanda) {
 
     hechos++;
     console.log(`  ✓ ${id} — ${art.titulo} (${art.preguntas.length} preguntas)`);
+    console.log(`      /articulos/${slug}`);
   } catch (e) {
     fallados++;
     console.log(`  ✗ ${id} (${e.message})`);

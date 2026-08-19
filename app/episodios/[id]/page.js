@@ -14,7 +14,7 @@ import {
   getSecciones,
   armarTranscripcion,
 } from "../../lib/transcripts";
-import { getArticulo } from "../../lib/articulos";
+import { getArticuloDeEpisodio } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
 import { SITE, LINKS } from "../../lib/site";
 
@@ -83,7 +83,7 @@ export default async function Episodio({ params }) {
   const transcript = getTranscript(ep.id);
   const bloques = armarTranscripcion(transcript, getSecciones(ep.id));
   const terminos = terminosDelEpisodio(ep.id);
-  const articulo = getArticulo(ep.id);
+  const articulo = getArticuloDeEpisodio(ep.id);
 
   const videoObject = {
     "@context": "https://schema.org",
