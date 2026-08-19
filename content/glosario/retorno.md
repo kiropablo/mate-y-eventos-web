@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 El retorno es clave para cualquier artista en vivo, y en el caso del freestyle se vuelve todavía más crítico porque el rapero necesita escuchar la base o pista instrumental con precisión para poder rimar sobre el ritmo. Si el retorno falla o suena mal, el artista pierde la referencia sonora y tiene que improvisar guiándose por señales mínimas, como un simple "tic" de fondo que marca el compás.
 
 En el episodio se cuenta cómo en eventos más under o con producciones más precarias, el sonido de retorno puede ser tan malo que apenas se escucha algo, y el artista tiene que arreglárselas igual con lo poco que tiene. También se menciona que el exceso de luces y foco en el escenario puede generar que el artista no vea ni escuche bien lo que pasa en la platea, quedando "cegado" y dependiendo pura y exclusivamente de lo que le llega por el retorno para saber si la actuación está funcionando.
