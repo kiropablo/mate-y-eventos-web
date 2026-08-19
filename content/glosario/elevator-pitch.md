@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 En el episodio se lo describe como una herramienta clave para vender una idea a un cliente que tiene "muy poco tiempo" y que puede llegar a tomar una decisión en apenas 2 o 3 minutos de reunión. La lógica es simple: todo el trabajo de fondo (diseño, presupuesto, render, concepto) tiene que poder resumirse y defenderse en una exposición corta, visual y ensayada.
 
 Para que funcione, se recomienda llevar la presentación resuelta al detalle antes de entrar a la reunión: render preparado, paleta de colores definida, y en algunos casos hasta muestras físicas (como llevar sillones reales a una reunión para que el cliente los pruebe). También se insiste en ensayarlo previamente con el equipo, porque improvisar frente a quien decide genera nerviosismo y resta confianza.
