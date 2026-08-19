@@ -121,11 +121,22 @@ function lineas(crudo) {
 // Lo usa el feed de calendario: publicar una lista incompleta ahí no es
 // "mostrar menos", es hacer que los calendarios de los suscriptos BORREN
 // los eventos que faltan.
-export async function getEventos({ estricto = false } = {}) {
+export async function getEventos(opciones) {
+  const { eventos } = await getEventosConEstado(opciones);
+  return eventos;
+}
+
+// Igual que getEventos, pero además dice si la lectura salió entera.
+//
+// Hace falta para no mentir: el hub muestra "actualizada al {fecha}", y si
+// Airtable cortó a mitad del paginado esa leyenda estaría afirmando frescura
+// sobre una lista incompleta. Con "completa" en false, la página muestra los
+// eventos que pudo traer pero se guarda el sello.
+export async function getEventosConEstado({ estricto = false } = {}) {
   const key = process.env.AIRTABLE_API_KEY;
   if (!key) {
     if (estricto) throw new Error("Agenda: falta AIRTABLE_API_KEY");
-    return [];
+    return { eventos: [], completa: false };
   }
 
   const eventos = [];
@@ -151,7 +162,7 @@ export async function getEventos({ estricto = false } = {}) {
       if (!res.ok) {
         if (estricto)
           throw new Error(`Agenda: Airtable respondió ${res.status}`);
-        return eventos;
+        return { eventos: ordenados(eventos), completa: false };
       }
 
       const data = await res.json();
@@ -163,20 +174,26 @@ export async function getEventos({ estricto = false } = {}) {
     } while (offset);
   } catch (error) {
     if (estricto) throw error;
-    return eventos;
+    return { eventos: ordenados(eventos), completa: false };
   }
 
-  // Orden: primero los que tienen fecha (más cercana arriba),
-  // después los "por anunciar".
-  eventos.sort((a, b) => {
+  return { eventos: ordenados(eventos), completa: true };
+}
+
+// Orden: primero los que tienen fecha (más cercana arriba), después los
+// "por anunciar".
+//
+// Se ordena también cuando la lectura salió corta. Antes las salidas
+// degradadas devolvían la lista en el orden crudo de Airtable —que es por
+// código de registro— y el hub mostraba el 28 de septiembre arriba del 3.
+function ordenados(eventos) {
+  return [...eventos].sort((a, b) => {
     if (a.fechaInicio && b.fechaInicio)
       return a.fechaInicio < b.fechaInicio ? -1 : 1;
     if (a.fechaInicio) return -1;
     if (b.fechaInicio) return 1;
     return a.nombre.localeCompare(b.nombre);
   });
-
-  return eventos;
 }
 
 export async function getEvento(slug) {
@@ -309,4 +326,103 @@ export function partirLinea(linea) {
     };
   }
   return { etiqueta: "", texto: linea.trim(), url };
+}
+
+// ---------------------------------------------------------------------------
+// Títulos de las fichas de evento
+// ---------------------------------------------------------------------------
+
+// El año de la edición sale de la fecha de inicio, no del nombre.
+export function anioDeEvento(ev) {
+  return ev && ev.fechaInicio ? ev.fechaInicio.slice(0, 4) : "";
+}
+
+// El nombre del evento con el año de SU edición.
+//
+// En Airtable muchos nombres vienen con el año pegado, y el robot que corre
+// las fechas de un año al siguiente no toca el nombre. Así, un evento anual
+// queda con el nombre en 2025 y la fecha ya en 2026: si solo preguntáramos
+// "¿el nombre ya dice 2026?", el título saldría "Expo Auto Chino 2025 2026".
+//
+// Se saca el año viejo antes de pegar el nuevo, pero solo si está cerca del
+// de la edición. Un año lejano casi siempre es parte del nombre y no una
+// edición: "Rock 2000" no es la edición del año 2000, es como se llama.
+const DISTANCIA_MAXIMA = 3;
+// Los separadores que suelen acompañar a un año dentro de un nombre.
+const SEPARADORES = "-–—·|,:;/";
+// Marca interna para saber dónde estaba el año mientras se limpia alrededor.
+const HUECO = "\u0000";
+
+export function nombreConAnio(ev) {
+  const nombre = String((ev && ev.nombre) || "").trim();
+  const anio = anioDeEvento(ev);
+  if (!nombre || !anio) return nombre;
+
+  // Si el nombre YA trae el año de esta edición, no se toca nada. Muchos lo
+  // tienen en el medio y ahí está bien: "Copa Davis 2026 – Playoffs Grupo
+  // Mundial I" no mejora en nada si lo mandamos al final.
+  if (new RegExp(`\\b${anio}\\b`).test(nombre)) return nombre;
+
+  const limpio = nombre
+    // Se marca el año viejo en vez de borrarlo, para poder limpiar después lo
+    // que quedó a su alrededor sabiendo dónde estaba.
+    .replace(/\b(19|20)\d{2}\b/g, (encontrado) =>
+      Math.abs(Number(encontrado) - Number(anio)) <= DISTANCIA_MAXIMA
+        ? HUECO
+        : encontrado
+    )
+    // Si el año venía precedido de un separador, ese separador se va con él:
+    // en "Expo — 2025 — Rosario" el primer guion solo estaba ahí para colgar
+    // el año, y sin esto quedaría "Expo — — Rosario". El de atrás NO se toca,
+    // porque ese sí separa lo que quedó: en "Expo 2025, Rosario" la coma
+    // sigue haciendo falta.
+    .replace(new RegExp(`\\s*[${SEPARADORES}]\\s*${HUECO}`, "g"), " ")
+    .replace(new RegExp(HUECO, "g"), " ")
+    // Un paréntesis que se quedó sin contenido: "Congreso (2025)".
+    .replace(/\(\s*\)|\[\s*\]/g, " ")
+    // Y el espacio que queda colgando delante de un signo.
+    .replace(/\s+([,:;.!?)\]])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .replace(new RegExp(`^[\\s${SEPARADORES}]+|[\\s${SEPARADORES}]+$`, "g"), "")
+    .trim();
+
+  // Si al sacar los años no quedó nada, el nombre era el año y con eso alcanza.
+  return limpio ? `${limpio} ${anio}` : anio;
+}
+
+// El título de la ficha, recortado para que entre en el resultado de Google.
+//
+// El patrón completo es "{Evento} {año} — fechas, sede y contactos", pero con
+// la marca que agrega el layout muchos nombres se van a 90 caracteres y
+// Google corta cerca de 60: el usuario termina sin ver ni el año ni la marca.
+// Así que se va soltando cola hasta que entre, y el nombre con el año —que es
+// lo que la gente escribe cuando busca— nunca se toca.
+//
+// Devuelve un texto (y el layout le agrega " · Mate y Eventos") o, cuando ni
+// el nombre solo entra con la marca, un { absolute } para que no se la agregue.
+const MARCA = " · Mate y Eventos";
+const LARGO_IDEAL = 60;
+const COLAS = [
+  " — fechas, sede y contactos",
+  " — fechas y sede",
+  " — fechas",
+  "",
+];
+
+export function tituloDeEvento(ev) {
+  const base = nombreConAnio(ev);
+
+  // Primero se intenta con la marca, que es como sale el resto del sitio.
+  for (const cola of COLAS) {
+    if ((base + cola + MARCA).length <= LARGO_IDEAL) return base + cola;
+  }
+
+  // Si el nombre es tan largo que ni pelado entra con la marca, se suelta la
+  // marca y se usa ese lugar para la cola más larga que entre.
+  for (const cola of COLAS) {
+    if ((base + cola).length <= LARGO_IDEAL) return { absolute: base + cola };
+  }
+
+  // Un nombre larguísimo va solo: recortarlo sería cortar el propio evento.
+  return { absolute: base };
 }

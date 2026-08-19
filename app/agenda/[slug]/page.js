@@ -11,6 +11,8 @@ import {
   youtubeId,
   partirLinea,
   MESES_LARGO,
+  nombreConAnio,
+  tituloDeEvento,
 } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
 
@@ -27,21 +29,22 @@ export async function generateMetadata({ params }) {
   const lugar = [ev.ciudad, ev.pais].filter(Boolean).join(", ");
   // El año va en el título: "Expo Auto Chino 2026 — fechas…". Es lo que la
   // gente escribe cuando busca, y distingue una edición de la siguiente.
-  const anio = ev.fechaInicio ? ev.fechaInicio.slice(0, 4) : "";
-  const conAnio = anio && !ev.nombre.includes(anio) ? `${ev.nombre} ${anio}` : ev.nombre;
+  // El armado está en lib/agenda porque también lo usan el OG y el Twitter:
+  // si no, la ficha se comparte sin decir de qué edición es.
+  const conAnio = nombreConAnio(ev);
 
   return {
-    title: `${conAnio} — fechas, sede y contactos`,
+    title: tituloDeEvento(ev),
     description:
       ev.descCorta ||
-      `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos, en la agenda de ${SITE.name}.`,
+      `${conAnio}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos, en la agenda de ${SITE.name}.`,
     alternates: { canonical: `/agenda/${ev.slug}` },
     openGraph: {
       type: "article",
-      title: `${ev.nombre} — ${formatRango(ev)}`,
+      title: `${conAnio} — ${formatRango(ev)}`,
       description:
         ev.descCorta ||
-        `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos.`,
+        `${conAnio}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos.`,
       url: `${SITE.url}/agenda/${ev.slug}`,
       siteName: SITE.name,
       locale: "es_AR",
@@ -52,10 +55,10 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${ev.nombre} — ${formatRango(ev)}`,
+      title: `${conAnio} — ${formatRango(ev)}`,
       description:
         ev.descCorta ||
-        `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas e información oficial.`,
+        `${conAnio}${lugar ? `, ${lugar}` : ""}. Fechas e información oficial.`,
       images: ["/og-default.jpg"],
     },
   };

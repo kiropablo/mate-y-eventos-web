@@ -43,7 +43,7 @@ export default function Articulos() {
             <span className="n">—</span>Artículos
           </div>
           <h1>
-            Artículos sobre producción
+            Artículos sobre producción{" "}
             <br />
             y negocio de eventos
           </h1>

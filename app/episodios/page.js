@@ -39,7 +39,7 @@ export default async function Episodios() {
             <span className="n">—</span>Episodios
           </div>
           <h1>
-            Episodios del podcast de
+            Episodios del podcast de{" "}
             <br />
             la industria de eventos
           </h1>
@@ -114,6 +114,17 @@ export default async function Episodios() {
                     >
                       Ver episodio
                     </Link>
+                    {conArticulo.has(featured.id) ? (
+                      <Link
+                        href={`/articulos/${conArticulo.get(featured.id).id}`}
+                        className="btn btn--ghost"
+                        aria-label={`Leer el artículo: ${
+                          conArticulo.get(featured.id).titulo
+                        }`}
+                      >
+                        Leer el artículo
+                      </Link>
+                    ) : null}
                     <SpotifyButton href={LINKS.spotify} />
                   </div>
                 </div>
@@ -166,9 +177,13 @@ export default async function Episodios() {
                         {conArticulo.has(ep.id) ? (
                           <Link
                             className="ep-card__art"
-                            href={`/articulos/${ep.id}`}
+                            href={`/articulos/${conArticulo.get(ep.id).id}`}
+                            aria-label={`Leer el artículo: ${
+                              conArticulo.get(ep.id).titulo
+                            }`}
                           >
-                            Leer el artículo →
+                            Leer el artículo{" "}
+                            <span aria-hidden="true">→</span>
                           </Link>
                         ) : null}
                       </div>

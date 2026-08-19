@@ -3,7 +3,7 @@ import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import AgendaLista from "./AgendaLista";
 import {
-  getEventos,
+  getEventosConEstado,
   yaPaso,
   formatRango,
   hoyISO,
@@ -40,7 +40,7 @@ export const metadata = {
 export const revalidate = 3600;
 
 export default async function Agenda() {
-  const eventos = await getEventos();
+  const { eventos, completa } = await getEventosConEstado();
 
   const proximos = eventos.filter((e) => !yaPaso(e));
   const pasados = eventos.filter((e) => yaPaso(e)).reverse();
@@ -86,7 +86,7 @@ export default async function Agenda() {
             <span className="n">—</span>Agenda
           </div>
           <h1>
-            Agenda de eventos de
+            Agenda de eventos de{" "}
             <br />
             Argentina y Latinoamérica
           </h1>
@@ -154,11 +154,23 @@ export default async function Agenda() {
                 </section>
               )}
 
-              <p className="ag-frescura reveal">
-                {eventos.length} eventos · actualizada al{" "}
-                <time dateTime={hoy}>{fechaLarga(hoy)}</time>. La agenda se
-                revisa todos los días de forma automática.
-              </p>
+              {/* El sello de frescura solo sale si la lectura de la agenda
+                  salió entera. Si Airtable cortó a mitad de camino, la lista
+                  es más corta que la real: decir "actualizada al {hoy}"
+                  encima de una lista incompleta sería afirmar frescura sobre
+                  algo que se rompió, y eso queda cacheado una hora. */}
+              {completa ? (
+                <p className="ag-frescura reveal">
+                  {eventos.length} eventos · actualizada al{" "}
+                  <time dateTime={hoy}>{fechaLarga(hoy)}</time>. La agenda se
+                  revisa todos los días de forma automática.
+                </p>
+              ) : (
+                <p className="ag-frescura reveal">
+                  Estamos teniendo un problema para traer la agenda completa:
+                  puede que falten eventos. Volvé a probar en un rato.
+                </p>
+              )}
             </>
           )}
         </div>
