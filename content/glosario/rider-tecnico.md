@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 El rider funciona como un manual de instrucciones que complementa el contrato del artista. No lo escribe una sola persona: detrás hay un equipo entero (ingeniero de sonido, diseñador de luces, tour manager, stage manager) que documenta el estándar de calidad con el que quiere que se replique el show en cada lugar donde toque, sea gira o evento puntual.
 
 Se puede analizar desde dos lugares: como quien lo recibe y tiene que cumplirlo (la producción local, la agencia que contrata al artista), o como quien lo redacta y exige su cumplimiento (el propio artista o su management). Cuando hay varios artistas compartiendo escenario —como en un festival— los riders se cotejan entre sí para definir tiempos de armado, desarmado y transición.
