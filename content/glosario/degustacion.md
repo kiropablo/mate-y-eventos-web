@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 La degustación es mucho más que una prueba de sabor: es el momento donde el cliente conoce al equipo de catering, ve el lugar donde va a trabajar el proveedor y empieza a relajarse respecto a esa parte del evento. Según se cuenta en el episodio, es ahí donde el cliente "se relaja" y empieza a proyectar cómo va a ser la fiesta, incluso surgen ideas para otros momentos del evento (como qué va a decir tal persona en su discurso) mientras se prueba la comida.
 
 Desde el lado del proveedor gastronómico, la degustación también funciona como una negociación entre lo que "es mejor para nosotros" y lo que "es mejor para el evento". Es habitual que en esa instancia el cliente pida sacar algún bocado que no elegiría por su cuenta, y el desafío del proveedor es defender esos platos cuando sabe, por experiencia, que van a funcionar bien con la mayoría de los invitados reales el día del evento.
