@@ -8,8 +8,12 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 Muchas veces se lo imagina como el "che, pibe" al que se le pide de todo, pero en realidad es un rol que requiere cierto conocimiento y, sobre todo, mucha actitud. El asistente de producción tiene que anticiparse a lo que el productor puede necesitar en cada momento: traer documentación, estar atento a detalles que se escapan del control general del evento, y resolver situaciones imprevistas antes de que escalen (un arreglo floral roto, una copa caída, un retraso).
 
 Es una de las puertas de entrada más comunes para quien recién se está insertando en la industria, porque permite estar "en el detrás de escena" y aprender de cerca cómo funciona la producción de un evento completo, aunque el rol en sí parezca menor o de bajo perfil.
+
+Al asistente se le puede encargar temporalmente la dirección una área del evento, ya que es un rol que muchas veces se usa para preparar a futuros productores.
