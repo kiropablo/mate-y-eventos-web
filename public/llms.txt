@@ -16,6 +16,7 @@ Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 
 - [Agenda de eventos](https://www.mateyeventos.com/agenda): congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, con fechas, sedes, organizadores y contactos.
 - [Esta semana en eventos](https://www.mateyeventos.com/agenda/esta-semana): los eventos que arrancan en los próximos siete días, actualizado solo.
 - [Calendario suscribible](https://www.mateyeventos.com/agenda/calendario): cómo agregar la agenda a Google Calendar, Apple Calendario u Outlook.
+- [El sello Verificado](https://www.mateyeventos.com/agenda/verificado): qué se chequea antes de marcar un evento como verificado por su organizador.
 - [Sugerir un evento](https://www.mateyeventos.com/agenda/sugerir): formulario para proponer un evento a la agenda.
 - [Sobre el podcast](https://www.mateyeventos.com/sobre): qué es el proyecto y quiénes lo hacen.
 - [Para marcas](https://www.mateyeventos.com/sponsors): oportunidades de sponsoreo y audiencia.

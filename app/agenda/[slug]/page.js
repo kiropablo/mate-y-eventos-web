@@ -10,6 +10,7 @@ import {
   yaPaso,
   youtubeId,
   partirLinea,
+  MESES_LARGO,
 } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
 
@@ -89,6 +90,22 @@ export default async function Evento({ params }) {
     url: `${SITE.url}/agenda/${ev.slug}`,
   };
 
+  // Cuando el organizador confirmó los datos, lo declaramos también para los
+  // buscadores y los asistentes de IA: lastReviewed es la propiedad estándar
+  // para "esta página fue revisada para verificar que dice la verdad".
+  const jsonLdPagina = ev.verificado
+    ? {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": `${SITE.url}/agenda/${ev.slug}#pagina`,
+        url: `${SITE.url}/agenda/${ev.slug}`,
+        name: ev.nombre,
+        ...(ev.fechaVerificacion ? { lastReviewed: ev.fechaVerificacion } : {}),
+        reviewedBy: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#organization` },
+      }
+    : null;
+
   const videos = ev.edicionesAnteriores
     .map((l) => ({ linea: l, yt: youtubeId(l) }))
     .filter((x) => x.yt);
@@ -100,6 +117,12 @@ export default async function Evento({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {jsonLdPagina && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdPagina) }}
+        />
+      )}
 
       <div className="wrap">
         <SiteNav />
@@ -123,6 +146,19 @@ export default async function Evento({ params }) {
             />
           ) : null}
           <h1>{ev.nombre}</h1>
+          {ev.verificado && (
+            <Link className="sello reveal" href="/agenda/verificado">
+              <span className="sello__tilde" aria-hidden>
+                ✓
+              </span>
+              <span>
+                Datos verificados por el organizador
+                {ev.fechaVerificacion
+                  ? ` · ${mesYAnio(ev.fechaVerificacion)}`
+                  : ""}
+              </span>
+            </Link>
+          )}
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             <strong>{formatRango(ev)}</strong>
             {ev.estadoFechas !== "Confirmadas" ? " (a confirmar)" : ""}
@@ -298,6 +334,12 @@ function Linea({ linea }) {
       )}
     </li>
   );
+}
+
+// "agosto de 2026" — el día no aporta nada en un sello de verificación.
+function mesYAnio(fechaISO) {
+  const [a, m] = String(fechaISO).slice(0, 10).split("-").map(Number);
+  return `${MESES_LARGO[m - 1].toLowerCase()} de ${a}`;
 }
 
 function acortar(url) {

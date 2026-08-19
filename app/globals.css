@@ -2245,6 +2245,97 @@ footer.site {
   .ag-barra { justify-content: center; }
 }
 
+/* --- Sello "Verificado" --- */
+.sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 6px 0 4px;
+  padding: 7px 15px 7px 9px;
+  border: 1px solid rgba(90, 160, 255, 0.42);
+  border-radius: 999px;
+  background: rgba(90, 160, 255, 0.09);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--blanco);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.sello:hover { border-color: var(--accent); background: rgba(90, 160, 255, 0.16); }
+.sello--estatico { cursor: default; }
+.sello__tilde {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--tinta);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+/* El tilde chiquito de la lista: se tiene que notar sin gritar. */
+.sello-mini {
+  margin-left: 7px;
+  color: var(--accent);
+  font-size: 0.78em;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+.sello-muestra { margin-bottom: 40px; }
+.sello-previa {
+  display: flex;
+  justify-content: center;
+  padding: 26px;
+  border-radius: 12px;
+  border: 1px dashed var(--line-2);
+  margin-top: 10px;
+}
+.sello-previa--oscuro { background: #0b0b11; }
+.sello-previa--claro { background: #f4f4f7; }
+.sello-codigo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 10px;
+  background: var(--tinta);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 16px;
+}
+.sello-codigo pre {
+  flex: 1 1 300px;
+  overflow-x: auto;
+  margin: 0;
+}
+.sello-codigo code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.76rem;
+  line-height: 1.65;
+  color: var(--celeste);
+  white-space: pre;
+}
+.ver-lista { display: grid; gap: 16px; }
+.ver-item {
+  border-left: 2px solid rgba(90, 160, 255, 0.35);
+  padding-left: 16px;
+}
+.ver-item dt {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.ver-item dd {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
 /* --- Acceso rápido a "esta semana", arriba de la agenda --- */
 .ag-semana {
   display: flex;

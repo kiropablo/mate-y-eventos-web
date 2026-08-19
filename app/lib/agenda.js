@@ -61,6 +61,11 @@ function mapear(record) {
     tipo: f["Tipo"] || "",
     interes: f["Interés MyE"] || [],
     destacado: Boolean(f["Destacado"]),
+    // El sello solo se enciende con la casilla que marca Pablo a mano después
+    // de hablar con el organizador. Ojo: NO usar "Última verificación", que
+    // la escribe el robot en cada pasada y la tienen todos los eventos.
+    verificado: Boolean(f["Verificado por el organizador"]),
+    fechaVerificacion: f["Fecha de verificación"] || null,
     imagen,
     organizador: (f["Organizador"] || "").trim(),
     edicion: (f["Edición/Frecuencia"] || "").trim(),

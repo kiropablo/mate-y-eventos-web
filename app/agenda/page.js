@@ -137,6 +137,7 @@ function resumen(ev) {
     nombre: ev.nombre,
     tipo: ev.tipo,
     destacado: ev.destacado,
+    verificado: ev.verificado,
     fechas: formatRango(ev),
     fechaInicio: ev.fechaInicio,
     fechaFin: ev.fechaFin,

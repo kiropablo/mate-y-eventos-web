@@ -437,6 +437,14 @@ function ListaCompacta({ eventos, pasado = false }) {
                       <span className="ev-star">★ </span>
                     ) : null}
                     {ev.nombre}
+                    {ev.verificado ? (
+                      <span
+                        className="sello-mini"
+                        title="Datos verificados por el organizador"
+                      >
+                        ✓
+                      </span>
+                    ) : null}
                   </span>
                   <span className="ag-fila__meta">
                     {[ev.ciudad || ev.provincia, ev.pais]
