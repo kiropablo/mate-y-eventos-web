@@ -1,5 +1,5 @@
 ---
-titulo: "Gasto o inversión: la pregunta que define tu evento"
+titulo: "ROI de eventos corporativos: ¿gasto o inversión?"
 bajada: "Un evento sin objetivo claro ni métricas siempre termina siendo un gasto. Te mostramos cómo pensarlo como canal de negocio y defenderlo frente a cualquier CFO."
 metaDescripcion: "Descubrí cómo convertir un evento en inversión con KPIs claros y un reporte post evento que lo justifique."
 episodio: "puJJ_sI3nX8"

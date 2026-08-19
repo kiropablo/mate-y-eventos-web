@@ -1,5 +1,5 @@
 ---
-titulo: "Proveedores de eventos: las señales que anticipan un problema"
+titulo: "Cómo elegir proveedores para un evento: las señales que anticipan un problema"
 bajada: "Un buen proveedor se detecta antes de firmar el contrato, no durante el evento. Claves para leer el criterio, la comunicación y el profesionalismo desde el primer contacto."
 metaDescripcion: "Cómo detectar un proveedor de eventos profesional antes de contratarlo: señales, errores y criterios clave."
 episodio: "Z6TPa4cjRoU"

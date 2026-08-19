@@ -1,5 +1,5 @@
 ---
-titulo: "Cuando todo se rompe en vivo: gestionar la crisis en un evento"
+titulo: "Gestión de crisis en eventos: cuando todo se rompe en vivo"
 bajada: "Sudestadas, micrófonos que fallan y clientes que cambian todo a último momento. Cómo se sostiene un evento cuando la presión hace que hasta los profesionales se equivoquen."
 metaDescripcion: "Gestión de crisis en eventos: cómo actuar cuando algo falla en vivo y la presión supera al equipo."
 episodio: "grd437fZP2c"

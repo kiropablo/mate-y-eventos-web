@@ -1,5 +1,5 @@
 ---
-titulo: "El staff no es un gasto, es la primera impresión de la marca"
+titulo: "Staff para eventos: la primera impresión de la marca"
 bajada: "Por qué delegar la atención al público en personal no capacitado es el error más caro que puede cometer una empresa en un evento, y cómo se arma un equipo que realmente funcione."
 metaDescripcion: "Cómo armar un equipo de staff para eventos que represente bien a la marca y evite errores caros"
 episodio: "Qxf21vLVCgk"

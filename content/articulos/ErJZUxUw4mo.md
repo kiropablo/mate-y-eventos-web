@@ -1,5 +1,5 @@
 ---
-titulo: "Lo que el brief no dice: cómo leer el pedido real de un cliente"
+titulo: "Brief de un evento: cómo leer el pedido real del cliente"
 bajada: "Un brief bien escrito puede seguir ocultando lo esencial. Cómo distinguir entre lo que el cliente pide, lo que quiere y lo que en el fondo anhela."
 metaDescripcion: "Qué es un brief de eventos, cómo interpretarlo y por qué el pedido escrito casi nunca cuenta toda la historia real."
 episodio: "ErJZUxUw4mo"

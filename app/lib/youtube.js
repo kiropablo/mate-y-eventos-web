@@ -156,6 +156,44 @@ export function formatDate(iso) {
   }
 }
 
+// Las estadísticas públicas del canal, en vivo.
+//
+// Las vistas totales las publica la propia API de YouTube, así que no hace
+// falta ningún servicio pago para tenerlas al día: el número de la home y de
+// /sponsors deja de ser una foto vieja.
+//
+// Si no hay clave o la API falla, devuelve null y quien llama usa el número
+// cargado a mano. Nunca rompe la página por una métrica.
+export async function getEstadisticasCanal() {
+  const key = process.env.YOUTUBE_API_KEY;
+  if (!key) return null;
+
+  try {
+    const url =
+      `https://www.googleapis.com/youtube/v3/channels` +
+      `?part=statistics&id=${LINKS.youtubeChannelId}&key=${key}`;
+    // Seis horas: el número se mueve despacio y no vale gastar cuota.
+    const res = await fetch(url, { next: { revalidate: 21600 } });
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const st = data?.items?.[0]?.statistics;
+    if (!st) return null;
+
+    const vistas = Number(st.viewCount);
+    if (!Number.isFinite(vistas) || vistas <= 0) return null;
+
+    return {
+      vistas,
+      videos: Number(st.videoCount) || null,
+      // El canal puede tener los suscriptores ocultos: en ese caso no viene.
+      suscriptores: st.hiddenSubscriberCount ? null : Number(st.subscriberCount) || null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // Parte el título de YouTube en sus tres pedazos.
 //
 // Los títulos vienen como "T02E23 | Tema del episodio | Invitado" o, en la

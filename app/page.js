@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
-import { getEpisodes } from "./lib/youtube";
+import { getEpisodes, getEstadisticasCanal } from "./lib/youtube";
 import { getArticulos, formatFecha } from "./lib/articulos";
 import {
   getEventos,
@@ -20,6 +20,10 @@ export const metadata = {
 
 export default async function Home() {
   const episodes = await getEpisodes();
+  // Vistas en vivo desde YouTube; si la API no contesta, el número
+  // cargado a mano.
+  const canal = await getEstadisticasCanal();
+  const vistas = canal?.vistas ?? STATS.vistasYouTube;
 
   // Lo que se viene y lo último escrito, para que la home mande tráfico a las
   // dos secciones que hoy no linkea desde ningún lado.
@@ -250,8 +254,8 @@ export default async function Home() {
           <div className="grid">
             <div className="stat reveal" style={{ transitionDelay: ".1s" }}>
               <div className="n">
-                <span className="cnt" data-to={STATS.vistasYouTube}>
-                  {STATS.vistasYouTube.toLocaleString("es-AR")}
+                <span className="cnt" data-to={vistas}>
+                  {vistas.toLocaleString("es-AR")}
                 </span>
               </div>
               <div className="l">Vistas en YouTube</div>

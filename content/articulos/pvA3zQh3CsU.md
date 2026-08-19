@@ -1,5 +1,5 @@
 ---
-titulo: "El rider técnico: el contrato invisible detrás de cada show"
+titulo: "Rider técnico: qué es y cómo se negocia el contrato invisible del show"
 bajada: "Detrás de cada escenario hay un documento que decide luces, sonido y hasta el agua del camarín. Así se lee, se negocia y se cumple un rider técnico."
 metaDescripcion: "Qué es un rider técnico, cómo se negocia con el contra-rider y por qué define la calidad de un show en vivo."
 episodio: "pvA3zQh3CsU"

@@ -21,7 +21,15 @@ export async function generateMetadata({ params }) {
   const art = getArticulo(params.id);
   if (!art) return { title: "Artículo" };
   return {
-    title: art.titulo,
+    // Misma escalera que en los episodios: si el título ya ocupa lo que
+    // Google muestra, sumarle la marca solo consigue que el corte se lleve el
+    // final del título en vez de la marca.
+    title: {
+      absolute:
+        `${art.titulo} · ${SITE.name}`.length <= 70
+          ? `${art.titulo} · ${SITE.name}`
+          : art.titulo,
+    },
     description: art.metaDescripcion,
     alternates: { canonical: `/articulos/${art.id}` },
     keywords: art.etiquetas,

@@ -2300,6 +2300,22 @@ footer.site {
   color: var(--faint);
 }
 
+/* --- Formato comercial todavía sin precio --- */
+.card__pronto {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: middle;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--celeste);
+  border: 1px solid rgba(147, 213, 247, 0.4);
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+
 /* --- Invitado en la card del episodio --- */
 .ep-card__inv {
   font-size: 0.76rem;

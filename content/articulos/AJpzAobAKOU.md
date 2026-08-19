@@ -1,5 +1,5 @@
 ---
-titulo: "Presupuestar sin miedo: el método que evita regalar tu trabajo"
+titulo: "Cuánto cobrar por organizar un evento: presupuestar sin miedo"
 bajada: "Antes de pensar en cuánto cobrar, hay que inventariar todo lo invisible que sostiene un servicio. Una guía para armar presupuestos con criterio y defenderlos sin culpa."
 metaDescripcion: "Cómo armar un presupuesto de eventos con criterio: método, valor y cómo responder cuando el cliente dice que es caro."
 episodio: "AJpzAobAKOU"

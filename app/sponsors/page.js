@@ -1,6 +1,7 @@
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { SITE, STATS } from "../lib/site";
+import { getEstadisticasCanal } from "../lib/youtube";
 
 const DESCRIPCION =
   "Sumá tu marca a Mate y Eventos y llegá a una audiencia específica de profesionales, productoras y agencias de la industria de eventos en LATAM.";
@@ -44,9 +45,33 @@ const FORMATOS = [
   ["Contenido co-creado", "Clips y piezas pensadas junto a tu equipo."],
   ["Presencia en redes", "Amplificación en Instagram, TikTok y LinkedIn."],
   ["Newsletter", "Un espacio en el mail semanal de la comunidad."],
+  // El séptimo formato queda maquetado y marcado como "muy pronto": el copy
+  // y el precio los define Pablo. Aparece igual para que la agenda —que es
+  // el activo con más tráfico propio— figure en la vidriera comercial.
+  [
+    "Destacado en Agenda",
+    "Tu evento arriba de todo en la agenda de la industria, con ficha propia.",
+    true,
+  ],
 ];
 
-export default function Sponsors() {
+// "22 de julio de 2026"
+function fechaCorta(iso) {
+  const [a, m, d] = String(iso).split("-").map(Number);
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(a, m - 1, d)));
+}
+
+export default async function Sponsors() {
+  // Vistas en vivo desde YouTube; si la API no contesta, el número
+  // cargado a mano.
+  const canal = await getEstadisticasCanal();
+  const vistas = canal?.vistas ?? STATS.vistasYouTube;
+
   return (
     <>
       <div className="wrap">
@@ -95,8 +120,8 @@ export default function Sponsors() {
           <div className="grid">
             <div className="stat reveal">
               <div className="n">
-                <span className="cnt" data-to={STATS.vistasYouTube}>
-                  {STATS.vistasYouTube.toLocaleString("es-AR")}
+                <span className="cnt" data-to={vistas}>
+                  {vistas.toLocaleString("es-AR")}
                 </span>
               </div>
               <div className="l">Vistas en YouTube</div>
@@ -124,7 +149,11 @@ export default function Sponsors() {
           </div>
 
           <div className="hold reveal" style={{ marginTop: "48px" }}>
-            <span className="tag">Datos reales · actualizados</span>
+            <span className="tag">
+              {canal
+                ? `Vistas en vivo desde YouTube · resto al ${fechaCorta(STATS.actualizado)}`
+                : `Datos al ${fechaCorta(STATS.actualizado)}`}
+            </span>
             <p>
               Métricas reales de nuestras plataformas (Instagram, YouTube y
               TikTok). El detalle en vivo, con la evolución día a día,
@@ -175,13 +204,16 @@ export default function Sponsors() {
             Formatos de sponsoreo.
           </h2>
           <div className="grid">
-            {FORMATOS.map(([t, d], i) => (
+            {FORMATOS.map(([t, d, pronto], i) => (
               <article
                 className="card reveal"
                 key={t}
                 style={{ transitionDelay: `${(i % 3) * 0.1}s` }}
               >
-                <h3 style={{ fontSize: "1.25rem" }}>{t}</h3>
+                <h3 style={{ fontSize: "1.25rem" }}>
+                  {t}
+                  {pronto ? <span className="card__pronto">Muy pronto</span> : null}
+                </h3>
                 <p>{d}</p>
               </article>
             ))}

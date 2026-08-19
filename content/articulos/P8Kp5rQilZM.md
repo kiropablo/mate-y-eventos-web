@@ -1,5 +1,5 @@
 ---
-titulo: "Experiencias multisensoriales: la tendencia que manda en 2025"
+titulo: "Tendencias en eventos: experiencias multisensoriales y qué viene"
 bajada: "Pantallas, streaming, apps y sostenibilidad medible: así se está rediseñando la experiencia del asistente en los eventos que vienen."
 metaDescripcion: "Tendencias 2025 en eventos: experiencias multisensoriales, streaming, apps companion y sostenibilidad medible."
 episodio: "P8Kp5rQilZM"

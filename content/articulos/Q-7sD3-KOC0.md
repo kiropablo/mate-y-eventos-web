@@ -1,5 +1,5 @@
 ---
-titulo: "Catering de eventos: por qué la comida nunca puede fallar"
+titulo: "Catering para eventos: por qué la comida nunca puede fallar"
 bajada: "La Estaca construyó una empresa de catering sobre una idea simple: la comida es el único servicio de un evento que el público no perdona si falla. Así se gestiona esa presión."
 metaDescripcion: "Catering de eventos: por qué la comida es el servicio que define la percepción de un evento y cómo se gestiona esa presión."
 episodio: "Q-7sD3-KOC0"
