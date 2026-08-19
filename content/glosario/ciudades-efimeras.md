@@ -8,8 +8,10 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 La comparación surge para dimensionar el impacto ambiental de los eventos: un pueblo de 10.000 habitantes en Argentina puede tener menos gente que un festival de 50.000 personas, pero ese festival concentra todo ese impacto en apenas un fin de semana, como un "torbellino".
 
 La idea que se desprende es que a los productores les sirve pensar el evento como si estuvieran fundando y desmontando una ciudad: hay que planificar cómo llega la gente, cómo se comporta en el espacio, qué necesita (tachos de basura, señalización de puntos ecológicos en altura, zonas de descanso) y, sobre todo, en qué estado queda el lugar una vez que la "ciudad" se disuelve.
