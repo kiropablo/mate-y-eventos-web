@@ -6,6 +6,7 @@ import SpotifyButton from "../../components/SpotifyButton";
 import { getEpisodes, getEpisodeById, formatDate } from "../../lib/youtube";
 import { getTranscript } from "../../lib/transcripts";
 import { getArticulo } from "../../lib/articulos";
+import { terminosDelEpisodio } from "../../lib/glosario";
 import { SITE, LINKS } from "../../lib/site";
 
 export const revalidate = 3600;
@@ -57,6 +58,7 @@ export default async function Episodio({ params }) {
     .trim();
   const se = seasonEpisode(ep.title);
   const transcript = getTranscript(ep.id);
+  const terminos = terminosDelEpisodio(ep.id);
   const articulo = getArticulo(ep.id);
 
   const videoObject = {
@@ -161,6 +163,23 @@ export default async function Episodio({ params }) {
                 Leer el artículo · {articulo.lectura} min
               </span>
             </Link>
+          ) : null}
+
+          {terminos.length > 0 ? (
+            <div className="ep-glosario">
+              <h2 className="ev-h2">Palabras que salen en este episodio</h2>
+              <div className="ep-glosario__tira">
+                {terminos.map((t) => (
+                  <Link
+                    className="chip"
+                    href={`/glosario/${t.slug}`}
+                    key={t.slug}
+                  >
+                    {t.termino}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ) : null}
 
           {transcript ? (

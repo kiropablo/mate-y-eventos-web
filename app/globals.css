@@ -2245,6 +2245,64 @@ footer.site {
   .ag-barra { justify-content: center; }
 }
 
+/* --- Glosario --- */
+.glo-grupo { margin-bottom: 34px; }
+.glo-letra {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--accent);
+  border-bottom: 1px solid var(--line-2);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+.glo-lista { display: grid; gap: 2px; }
+.glo-item {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: 18px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+.glo-item:hover { background: rgba(90, 160, 255, 0.07); }
+.glo-item__termino {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 1rem;
+}
+.glo-item:hover .glo-item__termino { color: var(--accent); }
+.glo-item__def {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.glo-alias {
+  font-size: 0.82rem;
+  color: var(--faint);
+  margin: 4px 0 2px;
+}
+.glo-episodio {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.glo-minuto { color: var(--celeste); font-size: 0.84rem; }
+.ep-glosario { margin-top: 48px; max-width: 760px; }
+.ep-glosario__tira {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+@media (max-width: 620px) {
+  .glo-item { grid-template-columns: 1fr; gap: 4px; }
+}
+
 /* --- Los imperdibles del mes --- */
 .imp-lista {
   display: grid;

@@ -2,6 +2,7 @@ import { SITE } from "./lib/site";
 import { getEpisodes } from "./lib/youtube";
 import { getArticulos } from "./lib/articulos";
 import { getEventos, edicionesImperdibles } from "./lib/agenda";
+import { getTerminos } from "./lib/glosario";
 
 export const revalidate = 3600;
 
@@ -17,6 +18,7 @@ export default async function sitemap() {
     "/agenda/verificado",
     "/agenda/sugerir",
     "/imperdibles",
+    "/glosario",
     "/sobre",
     "/sponsors",
     "/newsletter",
@@ -91,5 +93,18 @@ export default async function sitemap() {
     imps = [];
   }
 
-  return [...base, ...eps, ...arts, ...evs, ...imps];
+  // Una URL por término del glosario.
+  let glo = [];
+  try {
+    glo = getTerminos().map((t) => ({
+      url: `${SITE.url}/glosario/${t.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }));
+  } catch {
+    glo = [];
+  }
+
+  return [...base, ...eps, ...arts, ...evs, ...imps, ...glo];
 }
