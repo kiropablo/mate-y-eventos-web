@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 El ecomanager se integra como un activo más dentro de la estructura de producción, trabajando codo a codo con el director técnico, el responsable de electricidad, de barras y de agua. Su función no es entorpecer la tarea del equipo preguntando todo el tiempo, sino salir a buscar los datos por su cuenta: cuánto consume tal generador, cómo se organizan los traslados, qué proveedores están involucrados.
 
 Un ejemplo concreto que se menciona es el trabajo sobre las trazas de los artistas: si hay varios hospedados en el mismo hotel con horarios distintos, el ecomanager analiza si se pueden coordinar para hacer un solo viaje en vez de varios, reduciendo así traslados y costos al mismo tiempo. Es decir, el rol no solo apunta a lo ambiental, sino que termina detectando fugas de costos que el resto de la producción no ve.
