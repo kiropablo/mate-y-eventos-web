@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 El momento wow no es casualidad ni improvisación: según se plantea en el episodio, es algo que se piensa y se coreografía como si fuera un "microevento dentro del evento". Tres factores clave lo definen: el timing (en qué momento del evento sucede y por qué), el factor sorpresa (mostrar algo cuando nadie lo espera) y una narrativa o storytelling que le dé sentido, con una previa que genera expectativa antes de que el momento explote.
 
 Se usan varios ejemplos para ilustrarlo: el lanzamiento del iPhone X, la revelación de un actor en un panel de Comic-Con, el juego con la audiencia de Jacob Collier haciendo de "instrumentos humanos", o los shows de Michael Jackson controlando silencios de varios minutos antes de moverse. En todos los casos hay un patrón: expectativa, sorpresa y una historia que lo sostiene.
