@@ -25,8 +25,13 @@ export async function generateMetadata({ params }) {
   const ev = await getEvento(params.slug);
   if (!ev) return { title: "Evento" };
   const lugar = [ev.ciudad, ev.pais].filter(Boolean).join(", ");
+  // El año va en el título: "Expo Auto Chino 2026 — fechas…". Es lo que la
+  // gente escribe cuando busca, y distingue una edición de la siguiente.
+  const anio = ev.fechaInicio ? ev.fechaInicio.slice(0, 4) : "";
+  const conAnio = anio && !ev.nombre.includes(anio) ? `${ev.nombre} ${anio}` : ev.nombre;
+
   return {
-    title: `${ev.nombre} — fechas, contactos y referencias`,
+    title: `${conAnio} — fechas, sede y contactos`,
     description:
       ev.descCorta ||
       `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos, en la agenda de ${SITE.name}.`,
@@ -65,30 +70,54 @@ export default async function Evento({ params }) {
     .join(" · ");
   const pasado = yaPaso(ev);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: ev.nombre,
-    ...(ev.fechaInicio ? { startDate: ev.fechaInicio } : {}),
-    ...(ev.fechaFin ? { endDate: ev.fechaFin } : {}),
-    ...(ev.descCorta ? { description: ev.descCorta } : {}),
-    ...(ev.web ? { sameAs: ev.web } : {}),
-    ...(ev.organizador
-      ? { organizer: { "@type": "Organization", name: ev.organizador } }
-      : {}),
-    ...(ev.ciudad || ev.pais
-      ? {
-          location: {
-            "@type": "Place",
-            name: ev.venue || ev.ciudad || ev.pais,
-            address: [ev.ciudad, ev.provincia, ev.pais]
-              .filter(Boolean)
-              .join(", "),
-          },
-        }
-      : {}),
-    url: `${SITE.url}/agenda/${ev.slug}`,
-  };
+  // Schema Event. Solo se emite si el evento tiene fecha de inicio: sin
+  // startDate, Google descarta la ficha entera y además estaríamos diciendo
+  // que hay un evento cuando todavía no hay nada confirmado.
+  const jsonLd = ev.fechaInicio
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: ev.nombre,
+        startDate: ev.fechaInicio,
+        ...(ev.fechaFin ? { endDate: ev.fechaFin } : {}),
+        // Las fechas estimadas o sin anunciar no se declaran como programadas.
+        eventStatus:
+          ev.estadoFechas === "Confirmadas"
+            ? "https://schema.org/EventScheduled"
+            : "https://schema.org/EventPostponed",
+        eventAttendanceMode:
+          "https://schema.org/OfflineEventAttendanceMode",
+        ...(ev.descCorta ? { description: ev.descCorta } : {}),
+        ...(ev.imagen ? { image: [ev.imagen] } : {}),
+        ...(ev.web ? { sameAs: ev.web } : {}),
+        ...(ev.organizador
+          ? {
+              organizer: {
+                "@type": "Organization",
+                name: ev.organizador,
+                ...(ev.web ? { url: ev.web } : {}),
+              },
+            }
+          : {}),
+        ...(ev.venue || ev.ciudad || ev.provincia || ev.pais
+          ? {
+              location: {
+                "@type": "Place",
+                name: ev.venue || ev.ciudad || ev.pais,
+                address: {
+                  "@type": "PostalAddress",
+                  ...(ev.venue ? { streetAddress: ev.venue } : {}),
+                  ...(ev.ciudad ? { addressLocality: ev.ciudad } : {}),
+                  ...(ev.provincia ? { addressRegion: ev.provincia } : {}),
+                  ...(paisISO(ev.pais) ? { addressCountry: paisISO(ev.pais) } : {}),
+                },
+              },
+            }
+          : {}),
+        url: `${SITE.url}/agenda/${ev.slug}`,
+        isPartOf: { "@id": `${SITE.url}/#organization` },
+      }
+    : null;
 
   // Cuando el organizador confirmó los datos, lo declaramos también para los
   // buscadores y los asistentes de IA: lastReviewed es la propiedad estándar
@@ -113,10 +142,12 @@ export default async function Evento({ params }) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       {jsonLdPagina && (
         <script
           type="application/ld+json"
@@ -340,6 +371,34 @@ function Linea({ linea }) {
 function mesYAnio(fechaISO) {
   const [a, m] = String(fechaISO).slice(0, 10).split("-").map(Number);
   return `${MESES_LARGO[m - 1].toLowerCase()} de ${a}`;
+}
+
+// Google prefiere el código ISO de dos letras en addressCountry. Solo los
+// países que efectivamente aparecen en la agenda; el resto se omite antes que
+// inventar un código equivocado.
+const PAISES_ISO = {
+  Argentina: "AR",
+  Brasil: "BR",
+  Chile: "CL",
+  Uruguay: "UY",
+  Paraguay: "PY",
+  Bolivia: "BO",
+  Perú: "PE",
+  Colombia: "CO",
+  México: "MX",
+  Panamá: "PA",
+  "El Salvador": "SV",
+  "Estados Unidos": "US",
+  España: "ES",
+  Francia: "FR",
+  Italia: "IT",
+  Alemania: "DE",
+  Jamaica: "JM",
+  "Emiratos Árabes Unidos": "AE",
+};
+
+function paisISO(nombre) {
+  return PAISES_ISO[String(nombre || "").trim()] || null;
 }
 
 function acortar(url) {

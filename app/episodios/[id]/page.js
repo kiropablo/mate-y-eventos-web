@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import SpotifyButton from "../../components/SpotifyButton";
-import { getEpisodes, getEpisodeById, formatDate } from "../../lib/youtube";
+import {
+  getEpisodes,
+  getEpisodeById,
+  formatDate,
+  partirTitulo,
+} from "../../lib/youtube";
 import { getTranscript } from "../../lib/transcripts";
 import { getArticulo } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
@@ -21,9 +26,7 @@ function metaDescription(text) {
 // Detecta "T02E21" → { season: 2, episode: 21 } para el schema.
 function seasonEpisode(title) {
   const m = (title || "").match(/T\s*(\d+)\s*E\s*(\d+)/i);
-  return m
-    ? { season: parseInt(m[1], 10), episode: parseInt(m[2], 10) }
-    : null;
+  return m ? { season: parseInt(m[1], 10), episode: parseInt(m[2], 10) } : null;
 }
 
 // Pre-genera las páginas de los episodios actuales del feed.
@@ -35,14 +38,29 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const ep = await getEpisodeById(params.id);
   if (!ep) return { title: "Episodio" };
-  const desc = metaDescription(ep.description || SITE.descripcion);
+  const { codigo, tema, invitado } = partirTitulo(ep.title);
+  // El tema va primero: el código de episodio adelante se comía los primeros
+  // caracteres del título, que es lo poco que muestra Google. El invitado
+  // pasa a la descripción, donde suma sin ocupar el lugar de la búsqueda.
+  const desc = metaDescription(
+    (invitado ? `Con ${invitado}. ` : "") +
+      (ep.description || SITE.descripcion),
+  );
+  // Escalera de títulos, de más completo a más corto. Google muestra unos 65
+  // caracteres: si el tema ya se los come, sumarle la marca solo consigue que
+  // el corte se lleve el final del tema en vez de la marca.
+  const conCodigo = `${tema} · ${SITE.name}${codigo ? ` ${codigo}` : ""}`;
+  const conMarca = `${tema} · ${SITE.name}`;
+  const titulo =
+    conCodigo.length <= 65 ? conCodigo : conMarca.length <= 65 ? conMarca : tema;
+
   return {
-    title: ep.title,
+    title: { absolute: titulo },
     description: desc,
     alternates: { canonical: `/episodios/${ep.id}` },
     openGraph: {
       type: "video.other",
-      title: ep.title,
+      title: titulo,
       description: desc,
       images: [{ url: ep.thumb }],
     },
@@ -57,6 +75,7 @@ export default async function Episodio({ params }) {
     .replace(/\s+/g, " ")
     .trim();
   const se = seasonEpisode(ep.title);
+  const partes = partirTitulo(ep.title);
   const transcript = getTranscript(ep.id);
   const terminos = terminosDelEpisodio(ep.id);
   const articulo = getArticulo(ep.id);
@@ -111,7 +130,11 @@ export default async function Episodio({ params }) {
         <SiteNav />
       </div>
 
-      <section className="page-top" data-accent="blue" style={{ paddingBottom: 0 }}>
+      <section
+        className="page-top"
+        data-accent="blue"
+        style={{ paddingBottom: 0 }}
+      >
         <div className="wrap">
           <Link href="/episodios" className="ep-back">
             ← Todos los episodios
@@ -119,11 +142,21 @@ export default async function Episodio({ params }) {
           <div className="ep-date" style={{ marginTop: "18px" }}>
             {formatDate(ep.published)}
           </div>
-          <h1 style={{ marginTop: "10px" }}>{ep.title}</h1>
+          <h1 style={{ marginTop: "10px" }}>{partes.tema}</h1>
+          {partes.invitado ? (
+            <p className="lead reveal" style={{ marginTop: "14px" }}>
+              Con {partes.invitado}
+              {partes.codigo ? ` · ${partes.codigo}` : ""}
+            </p>
+          ) : null}
         </div>
       </section>
 
-      <section className="section-p" data-accent="blue" style={{ paddingTop: "36px" }}>
+      <section
+        className="section-p"
+        data-accent="blue"
+        style={{ paddingTop: "36px" }}
+      >
         <div className="wrap">
           <div className="ep-media" style={{ maxWidth: "900px" }}>
             <iframe

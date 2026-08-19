@@ -115,6 +115,29 @@ export function getArticulo(id, { incluirBorradores = false } = {}) {
   }
 }
 
+// Los artículos que mejor acompañan a este. Prioriza los que comparten
+// etiquetas, después los del mismo eje, y completa con los más nuevos: así
+// siempre devuelve algo, aunque el artículo esté suelto de tema.
+export function relacionados(art, cuantos = 3) {
+  const otros = getArticulos().filter((a) => a.id !== art.id);
+  const etiquetas = new Set((art.etiquetas || []).map((t) => t.toLowerCase()));
+
+  const puntaje = (a) => {
+    const compartidas = (a.etiquetas || []).filter((t) =>
+      etiquetas.has(String(t).toLowerCase())
+    ).length;
+    return compartidas * 10 + (a.eje && a.eje === art.eje ? 3 : 0);
+  };
+
+  return otros
+    .map((a) => ({ a, p: puntaje(a) }))
+    .sort((x, y) =>
+      y.p !== x.p ? y.p - x.p : String(y.a.fecha).localeCompare(String(x.a.fecha))
+    )
+    .slice(0, cuantos)
+    .map((x) => x.a);
+}
+
 // Fecha "2026-07-22" → "22 de julio de 2026"
 export function formatFecha(iso) {
   if (!iso) return "";

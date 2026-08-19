@@ -43,11 +43,14 @@ export default function Articulos() {
             <span className="n">—</span>Artículos
           </div>
           <h1>
-            Lo que el episodio<br />deja para leer.
+            Artículos sobre producción
+            <br />
+            y negocio de eventos
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
-            Cada conversación del podcast se convierte en un análisis que la
-            ordena, la amplía y la deja lista para aplicar.
+            <strong>Lo que el episodio deja para leer.</strong> Cada
+            conversación del podcast se convierte en un análisis que la ordena,
+            la amplía y la deja lista para aplicar.
           </p>
         </div>
       </section>

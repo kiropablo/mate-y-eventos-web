@@ -2,6 +2,14 @@ import Link from "next/link";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
 import { getEpisodes } from "./lib/youtube";
+import { getArticulos, formatFecha } from "./lib/articulos";
+import {
+  getEventos,
+  formatRango,
+  hoyISO,
+  enCurso,
+  yaPaso,
+} from "./lib/agenda";
 import { STATS } from "./lib/site";
 
 export const revalidate = 3600;
@@ -12,6 +20,17 @@ export const metadata = {
 
 export default async function Home() {
   const episodes = await getEpisodes();
+
+  // Lo que se viene y lo último escrito, para que la home mande tráfico a las
+  // dos secciones que hoy no linkea desde ningún lado.
+  const hoy = hoyISO();
+  const eventos = await getEventos();
+  const proximos = eventos
+    .filter((e) => e.fechaInicio && !yaPaso(e))
+    .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio))
+    .slice(0, 4);
+  const ultimosArticulos = getArticulos().slice(0, 3);
+
   const latestHref =
     episodes.length > 0 ? `/episodios/${episodes[0].id}` : "/episodios";
 
@@ -133,6 +152,93 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+
+      {/* ---------- PRÓXIMOS EVENTOS ---------- */}
+      {proximos.length > 0 && (
+        <section className="section-p" data-accent="blue">
+          <div className="wrap">
+            <div className="eyebrow reveal">
+              <span className="n">—</span>Próximos eventos
+            </div>
+            <h2 className="clip" style={{ margin: "14px 0 26px" }}>
+              Lo que se viene.
+            </h2>
+            <div className="ag-tabla">
+              {proximos.map((ev) => (
+                <Link
+                  href={`/agenda/${ev.slug}`}
+                  key={ev.slug}
+                  className="ag-fila"
+                >
+                  <span className="ag-fila__fecha">
+                    {Number(ev.fechaInicio.slice(8, 10))}
+                  </span>
+                  <span className="ag-fila__cuerpo">
+                    <span className="ag-fila__nombre">
+                      {enCurso(ev, hoy) ? (
+                        <span className="ev-star">● </span>
+                      ) : null}
+                      {ev.nombre}
+                    </span>
+                    <span className="ag-fila__meta">
+                      {formatRango(ev)}
+                      {[ev.ciudad || ev.provincia, ev.pais]
+                        .filter(Boolean)
+                        .join(", ")
+                        ? ` · ${[ev.ciudad || ev.provincia, ev.pais].filter(Boolean).join(", ")}`
+                        : ""}
+                    </span>
+                  </span>
+                  <span className="ag-fila__flecha" aria-hidden>
+                    →
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div style={{ marginTop: "26px" }}>
+              <Link className="btn" href="/agenda">
+                Ver la agenda completa
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ---------- ÚLTIMOS ARTÍCULOS ---------- */}
+      {ultimosArticulos.length > 0 && (
+        <section className="section-p" data-accent="magenta">
+          <div className="wrap">
+            <div className="eyebrow reveal">
+              <span className="n">—</span>Últimos artículos
+            </div>
+            <h2 className="clip" style={{ margin: "14px 0 26px" }}>
+              Para leer.
+            </h2>
+            <div className="home-arts">
+              {ultimosArticulos.map((art, i) => (
+                <Link
+                  className="home-art reveal"
+                  href={`/articulos/${art.id}`}
+                  key={art.id}
+                  style={{ transitionDelay: `${i * 0.06}s` }}
+                >
+                  <span className="home-art__eje">{art.eje}</span>
+                  <h3 className="home-art__tit">{art.titulo}</h3>
+                  <p className="home-art__baj">{art.bajada}</p>
+                  <span className="home-art__pie">
+                    {formatFecha(art.fecha)} · {art.lectura} min
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div style={{ marginTop: "26px" }}>
+              <Link className="btn" href="/articulos">
+                Ver todos los artículos
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ---------- MÉTRICAS ---------- */}
       <section className="nums" data-accent="magenta">

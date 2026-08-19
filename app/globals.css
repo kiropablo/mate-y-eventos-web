@@ -2245,6 +2245,89 @@ footer.site {
   .ag-barra { justify-content: center; }
 }
 
+/* --- "También te puede servir", al pie del artículo --- */
+.rel {
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line-2);
+}
+.rel .ag-mes { margin-bottom: 18px; }
+
+/* --- Últimos artículos, en la home --- */
+.home-arts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.home-art {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.home-art:hover {
+  border-color: rgba(234, 71, 138, 0.4);
+  transform: translateY(-2px);
+}
+.home-art__eje {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--magenta);
+}
+.home-art__tit {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1.15rem;
+  line-height: 1.12;
+}
+.home-art__baj {
+  flex: 1 1 auto;
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+.home-art__pie {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+}
+
+/* --- Invitado en la card del episodio --- */
+.ep-card__inv {
+  font-size: 0.76rem;
+  color: var(--faint);
+  margin-top: 5px;
+}
+
+/* --- Link al artículo desde la card del episodio --- */
+.ep-card__art {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--celeste);
+}
+.ep-card__art:hover { color: var(--blanco); }
+
+/* --- Cuándo se actualizó la agenda --- */
+.ag-frescura {
+  margin-top: 34px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+
 /* --- Glosario --- */
 .glo-grupo { margin-bottom: 34px; }
 .glo-letra {

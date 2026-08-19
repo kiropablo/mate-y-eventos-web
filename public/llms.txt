@@ -33,6 +33,13 @@ Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 
   https://www.mateyeventos.com/api/agenda/ics?pais=Argentina&provincia=Córdoba
 - Panel público de métricas del proyecto: https://datos.mateyeventos.com
 
+## Destacados
+Las piezas por las que empezar si querés entender de qué se trata el proyecto.
+- [Cuánto cobrar por organizar un evento](https://www.mateyeventos.com/articulos/AJpzAobAKOU): cómo se arma un presupuesto en la industria de eventos y por qué cobrar barato sale caro.
+- [El rider técnico](https://www.mateyeventos.com/articulos/pvA3zQh3CsU): qué es, qué incluye y cómo se negocia el contrato invisible de un show.
+- [Cómo elegir proveedores para un evento](https://www.mateyeventos.com/articulos/Z6TPa4cjRoU): las señales que anticipan un problema antes de firmar.
+- [Agenda de eventos](https://www.mateyeventos.com/agenda): el calendario de la industria en Argentina y Latinoamérica, actualizado todos los días.
+
 ## Creadores
 - Pablo Quiroga — productor y comunicador; visión editorial y estratégica.
 - Alexis Vidal — productor y creativo; experiencia práctica y operación.

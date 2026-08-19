@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import ArticuloCuerpo from "../../components/ArticuloCuerpo";
-import { getArticulo, getArticulos, formatFecha } from "../../lib/articulos";
+import {
+  getArticulo,
+  getArticulos,
+  formatFecha,
+  relacionados,
+} from "../../lib/articulos";
 import { SITE } from "../../lib/site";
 
 export const revalidate = 3600;
@@ -32,6 +37,8 @@ export async function generateMetadata({ params }) {
 export default function Articulo({ params }) {
   const art = getArticulo(params.id);
   if (!art) notFound();
+
+  const otros = relacionados(art, 3);
 
   const url = `${SITE.url}/articulos/${art.id}`;
 
@@ -145,6 +152,28 @@ export default function Articulo({ params }) {
             </div>
           </div>
         </div>
+
+        {otros.length > 0 && (
+          <div className="wrap">
+            <section className="rel reveal">
+              <h2 className="ag-mes">También te puede servir</h2>
+              <div className="home-arts">
+                {otros.map((a) => (
+                  <Link
+                    className="home-art"
+                    href={`/articulos/${a.id}`}
+                    key={a.id}
+                  >
+                    <span className="home-art__eje">{a.eje}</span>
+                    <h3 className="home-art__tit">{a.titulo}</h3>
+                    <p className="home-art__baj">{a.bajada}</p>
+                    <span className="home-art__pie">{a.lectura} min</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
       </section>
 
       <Footer />

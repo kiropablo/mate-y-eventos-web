@@ -155,3 +155,28 @@ export function formatDate(iso) {
     return "";
   }
 }
+
+// Parte el título de YouTube en sus tres pedazos.
+//
+// Los títulos vienen como "T02E23 | Tema del episodio | Invitado" o, en la
+// primera temporada, "T01E13 - Tema del episodio". El código adelante sirve
+// para ordenar en YouTube, pero en la web se come los primeros caracteres del
+// title —que es lo que Google muestra— y empuja el tema fuera de la vista.
+//
+//   "T02E23 | Cómo se crea música en tiempo real | Luciano Larocca"
+//   → { codigo: "T02E23", tema: "Cómo se crea música…", invitado: "Luciano Larocca" }
+export function partirTitulo(titulo) {
+  const limpio = String(titulo || "").trim();
+  const m = limpio.match(/^\s*(T\s*\d+\s*E\s*\d+)\s*[|\-–—:]?\s*/i);
+
+  const codigo = m ? m[1].replace(/\s+/g, "").toUpperCase() : "";
+  const resto = m ? limpio.slice(m[0].length) : limpio;
+
+  // El invitado va después de la última barra. Solo se separa si la barra
+  // existe: hay episodios sin invitado y el tema puede tener guiones.
+  const partes = resto.split("|").map((p) => p.trim()).filter(Boolean);
+  const tema = partes[0] || limpio;
+  const invitado = partes.length > 1 ? partes.slice(1).join(" · ") : "";
+
+  return { codigo, tema, invitado };
+}

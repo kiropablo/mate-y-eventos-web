@@ -3,7 +3,8 @@ import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import EpisodePlayer from "../components/EpisodePlayer";
 import SpotifyButton from "../components/SpotifyButton";
-import { getEpisodes, formatDate } from "../lib/youtube";
+import { getEpisodes, formatDate, partirTitulo } from "../lib/youtube";
+import { getArticulos } from "../lib/articulos";
 import { LINKS } from "../lib/site";
 
 export const metadata = {
@@ -19,6 +20,13 @@ export default async function Episodios() {
   const episodes = await getEpisodes();
   const [featured, ...rest] = episodes;
 
+  // Qué episodios tienen artículo publicado, para ofrecer el link desde la
+  // card. Es el cruce que hace que el visitante que llegó por el video
+  // descubra que además hay algo escrito.
+  const conArticulo = new Map(
+    getArticulos().map((a) => [a.episodio, a])
+  );
+
   return (
     <>
       <div className="wrap">
@@ -31,11 +39,14 @@ export default async function Episodios() {
             <span className="n">—</span>Episodios
           </div>
           <h1>
-            Nuevo capítulo<br />cada miércoles.
+            Episodios del podcast de
+            <br />
+            la industria de eventos
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
-            Conversaciones ágiles sobre producción, estrategia, tecnología y el
-            lado humano de la industria de eventos.
+            <strong>Nuevo capítulo cada miércoles.</strong> Conversaciones
+            ágiles sobre producción, estrategia, tecnología y el lado humano de
+            la industria de eventos.
           </p>
           <div className="reveal" style={{ transitionDelay: ".18s", marginTop: "24px" }}>
             <SpotifyButton href={LINKS.spotify} />
@@ -143,8 +154,23 @@ export default async function Episodios() {
                       <div className="ep-card__info">
                         <div className="ep-date">{formatDate(ep.published)}</div>
                         <Link href={`/episodios/${ep.id}`}>
-                          <h3 className="ep-card__title">{ep.title}</h3>
+                          <h3 className="ep-card__title">
+                            {partirTitulo(ep.title).tema}
+                          </h3>
                         </Link>
+                        {partirTitulo(ep.title).invitado ? (
+                          <div className="ep-card__inv">
+                            Con {partirTitulo(ep.title).invitado}
+                          </div>
+                        ) : null}
+                        {conArticulo.has(ep.id) ? (
+                          <Link
+                            className="ep-card__art"
+                            href={`/articulos/${ep.id}`}
+                          >
+                            Leer el artículo →
+                          </Link>
+                        ) : null}
                       </div>
                     </article>
                   ))}

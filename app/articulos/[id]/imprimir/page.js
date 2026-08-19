@@ -14,6 +14,10 @@ export async function generateMetadata({ params }) {
     title: `${art.titulo} — versión imprimible`,
     // Esta versión no se indexa: la que rankea es la página normal.
     robots: { index: false, follow: false },
+    // La hoja de impresión es una copia del artículo para guardar en PDF.
+    // El noindex es a propósito, y la canónica deja explícito cuál es la
+    // versión buena: así Google no tiene que adivinar.
+    alternates: { canonical: `/articulos/${art.id}` },
   };
 }
 

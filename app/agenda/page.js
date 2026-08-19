@@ -80,14 +80,14 @@ export default async function Agenda() {
             <span className="n">—</span>Agenda
           </div>
           <h1>
-            Los eventos donde
+            Agenda de eventos de
             <br />
-            hay que estar.
+            Argentina y Latinoamérica
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
-            Congresos, expos, festivales y grandes producciones de Argentina y
-            la región: fechas, contactos y referencias de ediciones anteriores,
-            en un solo lugar.
+            <strong>Los eventos donde hay que estar.</strong> Congresos, expos,
+            festivales y grandes producciones: fechas, contactos y referencias
+            de ediciones anteriores, en un solo lugar.
           </p>
         </div>
       </section>
@@ -120,6 +120,11 @@ export default async function Agenda() {
                 proximos={proximos.map(resumen)}
                 pasados={pasados.map(resumen)}
               />
+              <p className="ag-frescura reveal">
+                {eventos.length} eventos · actualizada al{" "}
+                <time dateTime={hoy}>{fechaLarga(hoy)}</time>. La agenda se
+                revisa todos los días de forma automática.
+              </p>
             </>
           )}
         </div>
@@ -128,6 +133,17 @@ export default async function Agenda() {
       <Footer />
     </>
   );
+}
+
+// "19 de agosto de 2026"
+function fechaLarga(iso) {
+  const [a, m, d] = String(iso).split("-").map(Number);
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(a, m - 1, d)));
 }
 
 // Solo mandamos al cliente los datos que la lista y el calendario necesitan.
