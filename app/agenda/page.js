@@ -17,12 +17,14 @@ export const metadata = {
     url: `${SITE.url}/agenda`,
     siteName: SITE.name,
     locale: "es_AR",
+    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Agenda de eventos de la industria · Mate y Eventos",
     description:
       "Congresos, expos, festivales y grandes producciones de Argentina y la región, con fechas y contactos.",
+    images: ["/og-default.jpg"],
   },
 };
 

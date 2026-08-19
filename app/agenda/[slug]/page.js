@@ -39,6 +39,10 @@ export async function generateMetadata({ params }) {
       url: `${SITE.url}/agenda/${ev.slug}`,
       siteName: SITE.name,
       locale: "es_AR",
+      // Portada de marca, no el logo del evento: los links de las imágenes
+      // de Airtable vencen a las pocas horas y quedarían rotos justo cuando
+      // alguien comparte la ficha.
+      images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
@@ -46,6 +50,7 @@ export async function generateMetadata({ params }) {
       description:
         ev.descCorta ||
         `${ev.nombre}${lugar ? `, ${lugar}` : ""}. Fechas e información oficial.`,
+      images: ["/og-default.jpg"],
     },
   };
 }

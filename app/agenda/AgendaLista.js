@@ -154,6 +154,12 @@ export default function AgendaLista({ proximos, pasados }) {
               ✕ Borrar filtros
             </button>
           ) : null}
+          <Link
+            className="btn btn--ghost btn--chico"
+            href="/agenda/calendario"
+          >
+            Suscribirme al calendario
+          </Link>
           <Link className="btn btn--chico" href="/agenda/sugerir">
             + Sugerir evento
           </Link>

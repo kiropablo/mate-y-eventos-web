@@ -2001,7 +2001,7 @@ footer.site {
   margin-bottom: 18px;
 }
 .ag-vistas { display: flex; gap: 8px; }
-.ag-acciones { display: flex; gap: 10px; align-items: center; }
+.ag-acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .btn--chico { padding: 10px 18px; font-size: 13px; }
 .chip--limpiar { border-color: rgba(234, 71, 138, 0.5); color: var(--magenta); }
 
@@ -2243,4 +2243,93 @@ footer.site {
   .cal-celda { min-height: 56px; }
   .cal-mas { font-size: 9px; }
   .ag-barra { justify-content: center; }
+}
+
+/* --- Suscripción al calendario (/agenda/calendario) --- */
+.sus-caja {
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 18px;
+  padding: 30px 30px 34px;
+  margin-bottom: 22px;
+}
+.sus-ayuda {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  max-width: 62ch;
+}
+.sus-cuenta {
+  margin-top: 22px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--celeste);
+  font-size: 1.05rem;
+}
+.sus-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+.sus-url {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  background: var(--tinta);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.sus-url code {
+  flex: 1 1 260px;
+  font-size: 0.82rem;
+  color: var(--celeste);
+  word-break: break-all;
+  line-height: 1.5;
+}
+.sus-pasos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 34px;
+}
+.sus-paso {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 24px;
+}
+.sus-paso h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+.sus-paso p {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.sus-nota {
+  margin-top: 26px;
+  font-family: var(--font-body);
+  color: var(--faint);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  max-width: 70ch;
+}
+
+@media (max-width: 860px) {
+  .sus-pasos { grid-template-columns: 1fr; }
+  .sus-caja { padding: 24px 20px 28px; }
 }

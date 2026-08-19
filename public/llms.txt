@@ -2,7 +2,7 @@
 
 > Medio audiovisual argentino especializado en la industria de eventos de Latinoamérica. Podcast semanal creado y conducido por Pablo Quiroga y Alexis Vidal, con conversaciones sobre producción, estrategia, tendencias, tecnología y el lado humano del rubro.
 
-Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 20 minutos), disponible en YouTube, Spotify y Apple Podcasts. El proyecto busca convertirse en el medio de referencia de la industria de eventos en LATAM y construir una comunidad de profesionales del sector.
+Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 20 minutos), disponible en YouTube, Spotify y Apple Podcasts. Además mantiene la agenda de eventos de la industria más completa de Argentina y la región, y publica artículos propios que amplían cada episodio. El proyecto busca convertirse en el medio de referencia de la industria de eventos en LATAM y construir una comunidad de profesionales del sector.
 
 ## Temas principales
 - Humano: liderazgo, equipos, presión y decisiones en la producción de eventos.
@@ -11,12 +11,23 @@ Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 
 - Tendencias y tecnología: innovación, IA aplicada y formatos híbridos.
 
 ## Páginas
-- [Episodios](https://mateyeventos.com/episodios): todos los capítulos del podcast.
-- [Sobre el podcast](https://mateyeventos.com/sobre): qué es el proyecto y quiénes lo hacen.
-- [Para marcas](https://mateyeventos.com/sponsors): oportunidades de sponsoreo y audiencia.
-- [Newsletter](https://mateyeventos.com/newsletter): el mail semanal de la comunidad.
-- [Prensa](https://mateyeventos.com/prensa): kit de prensa, logos, fotos y material para medios.
-- [Contacto](https://mateyeventos.com/contacto): sponsoreo, invitados y colaboraciones.
+- [Episodios](https://www.mateyeventos.com/episodios): todos los capítulos del podcast, con video y transcripción completa.
+- [Artículos](https://www.mateyeventos.com/articulos): artículos propios que amplían cada episodio, con preguntas frecuentes.
+- [Agenda de eventos](https://www.mateyeventos.com/agenda): congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, con fechas, sedes, organizadores y contactos.
+- [Calendario suscribible](https://www.mateyeventos.com/agenda/calendario): cómo agregar la agenda a Google Calendar, Apple Calendario u Outlook.
+- [Sugerir un evento](https://www.mateyeventos.com/agenda/sugerir): formulario para proponer un evento a la agenda.
+- [Sobre el podcast](https://www.mateyeventos.com/sobre): qué es el proyecto y quiénes lo hacen.
+- [Para marcas](https://www.mateyeventos.com/sponsors): oportunidades de sponsoreo y audiencia.
+- [Newsletter](https://www.mateyeventos.com/newsletter): el mail semanal de la comunidad.
+- [Prensa](https://www.mateyeventos.com/prensa): kit de prensa, logos, fotos y material para medios.
+- [Contacto](https://www.mateyeventos.com/contacto): sponsoreo, invitados y colaboraciones.
+
+## Datos abiertos
+- Calendario de la agenda en formato iCalendar: https://www.mateyeventos.com/api/agenda/ics
+  Incluye todos los eventos vigentes con fecha confirmada o estimada. Acepta los
+  filtros opcionales `tipo`, `pais` y `provincia`; por ejemplo
+  https://www.mateyeventos.com/api/agenda/ics?pais=Argentina&provincia=Córdoba
+- Panel público de métricas del proyecto: https://datos.mateyeventos.com
 
 ## Creadores
 - Pablo Quiroga — productor y comunicador; visión editorial y estratégica.

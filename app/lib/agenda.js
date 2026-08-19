@@ -91,9 +91,20 @@ function lineas(crudo) {
 }
 
 // Trae todos los eventos aprobados, paginando si hace falta.
-export async function getEventos() {
+//
+// Por defecto degrada: si Airtable no contesta devuelve lo que haya (o nada)
+// y las páginas muestran su estado vacío en vez de romperse.
+//
+// Con { estricto: true } avisa el error en vez de devolver una lista corta.
+// Lo usa el feed de calendario: publicar una lista incompleta ahí no es
+// "mostrar menos", es hacer que los calendarios de los suscriptos BORREN
+// los eventos que faltan.
+export async function getEventos({ estricto = false } = {}) {
   const key = process.env.AIRTABLE_API_KEY;
-  if (!key) return [];
+  if (!key) {
+    if (estricto) throw new Error("Agenda: falta AIRTABLE_API_KEY");
+    return [];
+  }
 
   const eventos = [];
   let offset = "";
@@ -113,7 +124,11 @@ export async function getEventos() {
           next: { revalidate: 3600 },
         }
       );
-      if (!res.ok) return eventos;
+      if (!res.ok) {
+        if (estricto)
+          throw new Error(`Agenda: Airtable respondió ${res.status}`);
+        return eventos;
+      }
 
       const data = await res.json();
       (data.records || []).forEach((r) => {
@@ -122,7 +137,8 @@ export async function getEventos() {
       });
       offset = data.offset || "";
     } while (offset);
-  } catch {
+  } catch (error) {
+    if (estricto) throw error;
     return eventos;
   }
 

@@ -1,34 +1,36 @@
 # Mate y Eventos — robots.txt
 # Permitimos explícitamente a los buscadores y asistentes de IA
 # para que puedan indexar y citar el sitio.
+#
+# Ojo al tocar esto: cada robot obedece UN solo bloque, el que lo nombra.
+# Por eso los crawlers de IA van todos juntos en el segundo bloque, con las
+# mismas reglas repetidas. Si a uno se le hace un bloque propio con solo
+# "Allow: /", ese robot deja de respetar los bloqueos de abajo.
 
 User-agent: *
 Allow: /
 
 # Panel interno: no se indexa nunca.
 Disallow: /admin
+
+# Los calendarios .ics de la agenda son públicos a propósito: Google no se
+# suscribe a una URL bloqueada acá. La regla más específica gana, y además
+# va primero por los lectores viejos que toman la primera que coincide.
+Allow: /api/agenda/
 Disallow: /api/
 
-# Crawlers de IA (búsqueda y citación)
+# Crawlers de IA (búsqueda y citación).
+# Mismas reglas que arriba: bienvenidos al contenido, afuera del panel.
 User-agent: GPTBot
-Allow: /
-
 User-agent: ChatGPT-User
-Allow: /
-
 User-agent: OAI-SearchBot
-Allow: /
-
 User-agent: ClaudeBot
-Allow: /
-
 User-agent: anthropic-ai
-Allow: /
-
 User-agent: PerplexityBot
-Allow: /
-
 User-agent: Google-Extended
 Allow: /
+Disallow: /admin
+Allow: /api/agenda/
+Disallow: /api/
 
-Sitemap: https://mateyeventos.com/sitemap.xml
+Sitemap: https://www.mateyeventos.com/sitemap.xml
