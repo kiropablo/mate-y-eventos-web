@@ -8,8 +8,10 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 En el episodio, Verónica Pérez Guidek desarma el mito de que el rol de promotor o promotora se reduce a tener buena presencia. Según cuenta, el trabajo real pasa por saber comunicar el producto, generar empatía con el público y sostener una performance profesional durante toda la jornada del evento.
 
 Cuenta el caso de una expo de productos para bebés donde el cliente pedía un perfil de mujer "tipo bailarina", pero ella detectó que ese perfil no iba a generar cercanía con el público real (mamás embarazadas o con bebés recién nacidos, inseguras con su cuerpo). Cambiar el staff para que empatizara con esa audiencia hizo que el stand funcionara mejor, más allá de lo estético.
