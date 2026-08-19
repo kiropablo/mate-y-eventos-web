@@ -185,6 +185,9 @@ export default function AgendaLista({ proximos, pasados }) {
               ✕ Borrar filtros
             </button>
           ) : null}
+          <Link className="btn btn--ghost btn--chico" href="/imperdibles">
+            ★ Los imperdibles
+          </Link>
           <Link
             className="btn btn--ghost btn--chico"
             href="/agenda/calendario"

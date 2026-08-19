@@ -66,6 +66,11 @@ function mapear(record) {
     // la escribe el robot en cada pasada y la tienen todos los eventos.
     verificado: Boolean(f["Verificado por el organizador"]),
     fechaVerificacion: f["Fecha de verificación"] || null,
+    // Los 5 imperdibles del mes. El mes vive en el evento (y no en una lista
+    // aparte) para que el archivo de ediciones se arme solo: un evento
+    // elegido en septiembre se queda con "2026-09" para siempre.
+    imperdibleMes: mesValido(f["Imperdible del mes"]),
+    porQueImperdible: (f["Por qué es imperdible"] || "").trim(),
     imagen,
     organizador: (f["Organizador"] || "").trim(),
     edicion: (f["Edición/Frecuencia"] || "").trim(),
@@ -84,6 +89,18 @@ function mapear(record) {
     edicionesAnteriores: lineas(f["Ediciones anteriores"]),
     fuentes: lineas(f["Fuentes"]),
   };
+}
+
+// Acepta "2026-09" y también "2026-09-15" o "2026-9", que es lo que sale si
+// alguien lo escribe apurado. Cualquier otra cosa se ignora en silencio: un
+// mes mal escrito no tiene que hacer aparecer una edición fantasma.
+function mesValido(crudo) {
+  const t = String(crudo || "").trim();
+  const m = t.match(/^(\d{4})-(\d{1,2})/);
+  if (!m) return null;
+  const mes = Number(m[2]);
+  if (mes < 1 || mes > 12) return null;
+  return `${m[1]}-${String(mes).padStart(2, "0")}`;
 }
 
 // Divide un campo de texto largo en líneas limpias.
@@ -222,6 +239,31 @@ export function yaPaso(ev) {
   const fin = ev.fechaFin || ev.fechaInicio;
   if (!fin) return false;
   return fin < hoyISO();
+}
+
+// Las ediciones de "Los 5 imperdibles" que existen, de la más nueva a la más
+// vieja. Cada una es un mes con al menos un evento elegido.
+export function edicionesImperdibles(eventos) {
+  const meses = new Map();
+  for (const e of eventos) {
+    if (!e.imperdibleMes) continue;
+    if (!meses.has(e.imperdibleMes)) meses.set(e.imperdibleMes, []);
+    meses.get(e.imperdibleMes).push(e);
+  }
+  return [...meses.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([mes, lista]) => ({
+      mes,
+      eventos: lista.sort((a, b) =>
+        (a.fechaInicio || "9").localeCompare(b.fechaInicio || "9")
+      ),
+    }));
+}
+
+// "septiembre de 2026" a partir de "2026-09".
+export function mesLargo(mes) {
+  const [a, m] = String(mes).split("-").map(Number);
+  return `${MESES_LARGO[m - 1].toLowerCase()} de ${a}`;
 }
 
 // Ya arrancó y todavía no terminó.

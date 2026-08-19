@@ -2245,6 +2245,72 @@ footer.site {
   .ag-barra { justify-content: center; }
 }
 
+/* --- Los imperdibles del mes --- */
+.imp-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+.imp-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.imp-card:hover {
+  border-color: rgba(234, 71, 138, 0.4);
+  transform: translateY(-2px);
+}
+.imp-card__cab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.imp-card__tipo {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--faint);
+}
+.imp-card__nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-size: 1.3rem;
+  line-height: 1.08;
+}
+.imp-card__nombre a:hover { color: var(--magenta); }
+.imp-card__cuando {
+  font-size: 0.8rem;
+  color: var(--celeste);
+  line-height: 1.5;
+}
+.imp-card__porque {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.92rem;
+  line-height: 1.68;
+  flex: 1 1 auto;
+}
+.imp-card__link {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--magenta);
+  margin-top: 4px;
+}
+.imp-card__link:hover { color: var(--blanco); }
+.imp-archivo { display: flex; flex-wrap: wrap; gap: 9px; }
+
+@media (max-width: 560px) {
+  .imp-card { padding: 20px; }
+}
+
 /* --- Sello "Verificado" --- */
 .sello {
   display: inline-flex;

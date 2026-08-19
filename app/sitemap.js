@@ -1,7 +1,7 @@
 import { SITE } from "./lib/site";
 import { getEpisodes } from "./lib/youtube";
 import { getArticulos } from "./lib/articulos";
-import { getEventos } from "./lib/agenda";
+import { getEventos, edicionesImperdibles } from "./lib/agenda";
 
 export const revalidate = 3600;
 
@@ -16,6 +16,7 @@ export default async function sitemap() {
     "/agenda/calendario",
     "/agenda/verificado",
     "/agenda/sugerir",
+    "/imperdibles",
     "/sobre",
     "/sponsors",
     "/newsletter",
@@ -75,5 +76,20 @@ export default async function sitemap() {
     evs = [];
   }
 
-  return [...base, ...eps, ...arts, ...evs];
+  // Una URL por edición mensual de los imperdibles. Se arman solas: cada mes
+  // que tenga eventos elegidos pasa a ser una página con su propia dirección.
+  let imps = [];
+  try {
+    const eventos = await getEventos();
+    imps = edicionesImperdibles(eventos).map((e) => ({
+      url: `${SITE.url}/imperdibles/${e.mes}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+  } catch {
+    imps = [];
+  }
+
+  return [...base, ...eps, ...arts, ...evs, ...imps];
 }
