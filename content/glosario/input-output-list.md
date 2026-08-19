@@ -8,6 +8,9 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 Forma parte del apartado de sonido dentro del rider y es la referencia que usa la producción local para asegurarse de que los micrófonos pedidos (o sus reemplazos aprobados) estén contemplados en el armado, evitando errores de conexión o de asignación de canales el día del show.
+En la misma planilla pueden figurar si los microfonos necesitan de un pie alto, bajo, o si la linea lleva caja directa. Si se trata de un monitor de piso o un IEM.
