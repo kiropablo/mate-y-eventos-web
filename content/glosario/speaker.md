@@ -8,8 +8,10 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 En la jerga de producción de eventos, "speaker" es la forma habitual de nombrar a quien va a exponer, más allá de que hable en español. El término se usa constantemente para diferenciar a esta persona del locutor o conductor, que es quien lo presenta y acompaña desde el escenario.
 
 En el episodio se cuenta que muchos speakers, aunque sean eminencias en su tema, se ponen muy nerviosos al subir a hablar frente a público, y ahí es donde el locutor cumple un rol de contención: los tranquiliza, les recuerda que cuenten su tema "como si se lo contaran a un amigo" y usa el humor para destrabar la tensión previa a salir a escena.
