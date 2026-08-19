@@ -30,15 +30,22 @@ jobs:
           MAX_ARTICULOS: "40"
         run: node scripts/generar-articulos.mjs
       - name: Guardar cambios
+        id: guardar
+        # Corre aunque el paso anterior se haya caído: si el script murió
+        # a mitad de camino, los artículos que alcanzó a escribir se guardan igual
+        # en vez de irse con el runner.
+        if: always()
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add content/articulos
           if git diff --staged --quiet; then
+            echo "hubo=no" >> "$GITHUB_OUTPUT"
             echo "Sin artículos nuevos."
             exit 0
           fi
           git commit -m "Nuevos artículos (borradores)"
+          echo "hubo=si" >> "$GITHUB_OUTPUT"
           # Mientras esto corría, alguien pudo haber subido algo al repo.
           # Traemos lo nuevo, acomodamos nuestro commit encima y recién
           # ahí subimos. Hasta 3 intentos.
@@ -53,9 +60,14 @@ jobs:
           echo "No se pudo guardar después de 3 intentos."
           exit 1
       - name: Avisar que hay borradores nuevos
+        # Solo si esta Action commiteó algo. Si no, el aviso leería el último
+        # commit del repo —que puede ser de la Action de Glosario— y mandaría
+        # un issue repetido con cosas que ya se avisaron.
+        if: steps.guardar.outcome == 'success' && steps.guardar.outputs.hubo == 'si'
         # Si el aviso falla, la Action no se cae: los artículos ya están guardados.
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PANEL_URL: "https://www.mateyeventos.com/admin"
+          SOLO: articulos
         run: node scripts/avisar-borradores.mjs

@@ -41,10 +41,27 @@ const CSS = `
 .adm-bloque p{font-family:var(--font-body);font-size:.9rem;line-height:1.55;color:rgba(245,245,245,.55)}
 .adm-bloque .adm-acciones{margin-top:18px}
 .adm-btn--agenda{background:#93d5f7;color:#0c0c0f}
+.adm-tabs{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap}
+.adm-tab{background:none;border:1px solid rgba(245,245,245,.14);color:rgba(245,245,245,.55);border-radius:999px;padding:9px 20px;font-family:var(--font-ui);font-size:.84rem;cursor:pointer}
+.adm-tab[data-on="si"]{border-color:#5aa0ff;color:#f5f5f5}
+.adm-tab span{color:rgba(245,245,245,.34);margin-left:7px}
+.adm-chip--falta{color:#ffb35a;border:1px solid rgba(255,179,90,.45)}
+.adm-aviso{background:rgba(255,179,90,.08);border:1px solid rgba(255,179,90,.3);border-radius:10px;padding:12px 15px;font-family:var(--font-body);font-size:.86rem;line-height:1.55;color:rgba(245,245,245,.75);margin-bottom:18px}
 `;
 
-export default function PanelAdmin({ articulos }) {
+export default function PanelAdmin({ articulos, glosario }) {
+  const [seccion, setSeccion] = useState("articulos");
   const [lista, setLista] = useState(articulos);
+  const [glo, setGlo] = useState(glosario || []);
+  const [abiertoGlo, setAbiertoGlo] = useState(null);
+  const [camposGlo, setCamposGlo] = useState({
+    termino: "",
+    definicionCorta: "",
+    minuto: "",
+    cuerpo: "",
+  });
+  const [guardandoGlo, setGuardandoGlo] = useState(false);
+  const [msgGlo, setMsgGlo] = useState(null);
   const [abierto, setAbierto] = useState(null);
   const [campos, setCampos] = useState({ titulo: "", bajada: "", cuerpo: "" });
   const [guardando, setGuardando] = useState(false);
@@ -53,6 +70,68 @@ export default function PanelAdmin({ articulos }) {
   const [agendaOcupada, setAgendaOcupada] = useState("");
 
   const borradores = lista.filter((a) => !a.publicado).length;
+  const borradoresGlo = glo.filter((t) => !t.publicado).length;
+
+  function abrirTermino(t) {
+    setAbiertoGlo(t.id);
+    setCamposGlo({
+      termino: t.termino,
+      definicionCorta: t.definicionCorta,
+      minuto: t.minuto || "",
+      cuerpo: t.cuerpo,
+    });
+    setMsgGlo(null);
+  }
+
+  async function guardarTermino(t, publicar) {
+    setGuardandoGlo(true);
+    setMsgGlo(null);
+    try {
+      const res = await fetch("/api/admin/glosario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: t.id,
+          termino: camposGlo.termino,
+          definicionCorta: camposGlo.definicionCorta,
+          minuto: camposGlo.minuto,
+          cuerpo: camposGlo.cuerpo,
+          publicado: publicar,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        setGlo((prev) =>
+          prev.map((x) =>
+            x.id === t.id
+              ? {
+                  ...x,
+                  termino: camposGlo.termino,
+                  definicionCorta: camposGlo.definicionCorta,
+                  minuto: camposGlo.minuto,
+                  cuerpo: camposGlo.cuerpo,
+                  publicado: publicar,
+                }
+              : x
+          )
+        );
+        setMsgGlo({
+          tipo: "ok",
+          texto: data.sinCambios
+            ? "No había nada para cambiar."
+            : publicar
+              ? "Publicado. En un minuto está online."
+              : "Guardado como borrador.",
+        });
+      } else {
+        setMsgGlo({ tipo: "mal", texto: data.error || "No se pudo guardar." });
+      }
+    } catch {
+      setMsgGlo({ tipo: "mal", texto: "No se pudo conectar." });
+    }
+    setGuardandoGlo(false);
+  }
 
   function abrir(art) {
     setAbierto(art.id);
@@ -147,14 +226,35 @@ export default function PanelAdmin({ articulos }) {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="adm-top">
-        <h1>Artículos</h1>
+        <h1>{seccion === "articulos" ? "Artículos" : "Glosario"}</h1>
         <button className="adm-salir" type="button" onClick={salir}>
           Cerrar sesión
         </button>
       </div>
 
       <div className="adm-resumen">
-        {lista.length} artículos · {borradores} sin revisar
+        {seccion === "articulos"
+          ? `${lista.length} artículos · ${borradores} sin revisar`
+          : `${glo.length} términos · ${borradoresGlo} sin revisar`}
+      </div>
+
+      <div className="adm-tabs">
+        <button
+          type="button"
+          className="adm-tab"
+          data-on={seccion === "articulos" ? "si" : "no"}
+          onClick={() => setSeccion("articulos")}
+        >
+          Artículos{borradores ? <span>{borradores} sin revisar</span> : null}
+        </button>
+        <button
+          type="button"
+          className="adm-tab"
+          data-on={seccion === "glosario" ? "si" : "no"}
+          onClick={() => setSeccion("glosario")}
+        >
+          Glosario{borradoresGlo ? <span>{borradoresGlo} sin revisar</span> : null}
+        </button>
       </div>
 
       <section className="adm-bloque">
@@ -192,12 +292,12 @@ export default function PanelAdmin({ articulos }) {
         </div>
       </section>
 
-      {lista.length === 0 ? (
+      {seccion === "articulos" && lista.length === 0 ? (
         <div className="adm-vacio">
           Todavía no hay artículos. Corré la Action de Artículos en GitHub y
           volvé a entrar acá.
         </div>
-      ) : (
+      ) : seccion === "articulos" ? (
         <div className="adm-lista">
           {lista.map((art) => {
             const estaAbierto = abierto === art.id;
@@ -307,6 +407,161 @@ export default function PanelAdmin({ articulos }) {
                           }
                         >
                           {msg.texto}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+      ) : glo.length === 0 ? (
+        <div className="adm-vacio">
+          Todavía no hay términos. Corré la Action de Glosario en GitHub y
+          volvé a entrar acá.
+        </div>
+      ) : (
+        <div className="adm-lista">
+          {glo.map((t) => {
+            const estaAbierto = abiertoGlo === t.id;
+            return (
+              <article
+                className="adm-item"
+                data-abierto={estaAbierto ? "si" : "no"}
+                key={t.id}
+                onClick={() => {
+                  if (!estaAbierto) abrirTermino(t);
+                }}
+              >
+                <div className="adm-item__top">
+                  <span
+                    className={
+                      t.publicado
+                        ? "adm-chip adm-chip--publicado"
+                        : "adm-chip adm-chip--borrador"
+                    }
+                  >
+                    {t.publicado ? "Publicado" : "Borrador"}
+                  </span>
+                  {t.eje ? (
+                    <span className="adm-chip adm-chip--eje">{t.eje}</span>
+                  ) : null}
+                  {!t.listoParaPublicar ? (
+                    <span className="adm-chip adm-chip--falta">
+                      Sin episodio
+                    </span>
+                  ) : null}
+                </div>
+
+                <h2>{estaAbierto ? camposGlo.termino : t.termino}</h2>
+                {!estaAbierto ? <p>{t.definicionCorta}</p> : null}
+                <div className="adm-ep">
+                  episodio: {t.episodioTitulo || t.episodio || "—"}
+                </div>
+
+                {estaAbierto ? (
+                  <div className="adm-editor">
+                    {!t.listoParaPublicar ? (
+                      <div className="adm-aviso">
+                        Este término no tiene episodio cargado. Podés guardarlo
+                        como borrador, pero para publicarlo hay que completar el
+                        campo <code>episodio</code> en el archivo: sin eso, la
+                        web no lo muestra igual.
+                      </div>
+                    ) : null}
+
+                    <div className="adm-campo">
+                      <label>Término</label>
+                      <input
+                        value={camposGlo.termino}
+                        onChange={(e) =>
+                          setCamposGlo({ ...camposGlo, termino: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div className="adm-campo">
+                      <label>Definición corta</label>
+                      <textarea
+                        value={camposGlo.definicionCorta}
+                        onChange={(e) =>
+                          setCamposGlo({
+                            ...camposGlo,
+                            definicionCorta: e.target.value,
+                          })
+                        }
+                      />
+                      <div className="adm-ayuda">
+                        Una o dos oraciones. Es lo que se ve en el listado, lo
+                        que se comparte y lo que lee un asistente de IA: tiene
+                        que entenderse sola, sin el resto de la página.
+                      </div>
+                    </div>
+
+                    <div className="adm-campo">
+                      <label>Minuto del episodio (opcional)</label>
+                      <input
+                        value={camposGlo.minuto}
+                        placeholder="12:40"
+                        onChange={(e) =>
+                          setCamposGlo({ ...camposGlo, minuto: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div className="adm-campo">
+                      <label>Explicación</label>
+                      <textarea
+                        className="grande"
+                        value={camposGlo.cuerpo}
+                        onChange={(e) =>
+                          setCamposGlo({ ...camposGlo, cuerpo: e.target.value })
+                        }
+                      />
+                      <div className="adm-ayuda">
+                        Escribí normal. Las líneas que empiezan con ## son los
+                        subtítulos. Si borrás esos signos, se pierde el formato.
+                      </div>
+                    </div>
+
+                    <div className="adm-acciones">
+                      <button
+                        className="adm-btn adm-btn--pub"
+                        type="button"
+                        disabled={guardandoGlo || !t.listoParaPublicar}
+                        onClick={() => guardarTermino(t, true)}
+                      >
+                        {guardandoGlo ? "Guardando…" : "Publicar"}
+                      </button>
+                      <button
+                        className="adm-btn adm-btn--sec"
+                        type="button"
+                        disabled={guardandoGlo}
+                        onClick={() => guardarTermino(t, false)}
+                      >
+                        {t.publicado ? "Despublicar" : "Guardar borrador"}
+                      </button>
+                      <button
+                        className="adm-btn adm-btn--sec"
+                        type="button"
+                        disabled={guardandoGlo}
+                        onClick={() => {
+                          setAbiertoGlo(null);
+                          setMsgGlo(null);
+                        }}
+                      >
+                        Cerrar
+                      </button>
+                      {msgGlo ? (
+                        <span
+                          className={
+                            msgGlo.tipo === "ok"
+                              ? "adm-msg adm-msg--ok"
+                              : "adm-msg adm-msg--mal"
+                          }
+                        >
+                          {msgGlo.texto}
                         </span>
                       ) : null}
                     </div>

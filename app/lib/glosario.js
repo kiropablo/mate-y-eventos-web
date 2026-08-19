@@ -12,6 +12,15 @@ import path from "path";
 
 const DIR = path.join(process.cwd(), "content", "glosario");
 
+// Deshace el escapado que hace el generador al escribir el archivo.
+// El orden importa: primero las comillas, después las barras.
+function desescapar(t) {
+  return String(t)
+    .replace(/^"|"$/g, "")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, "\\");
+}
+
 function valorCabecera(crudo) {
   const t = crudo.trim();
   if (t === "true") return true;
@@ -21,10 +30,10 @@ function valorCabecera(crudo) {
       .replace(/^\[/, "")
       .replace(/\]$/, "")
       .split(",")
-      .map((s) => s.trim().replace(/^"|"$/g, ""))
+      .map((s) => desescapar(s.trim()))
       .filter(Boolean);
   }
-  return t.replace(/^"|"$/g, "").replace(/\\"/g, '"');
+  return desescapar(t);
 }
 
 function parsear(crudo, slug) {
@@ -61,7 +70,11 @@ function parsear(crudo, slug) {
 export function getTerminos({ incluirBorradores = false } = {}) {
   let archivos = [];
   try {
-    archivos = fs.readdirSync(DIR).filter((f) => f.endsWith(".md"));
+    archivos = fs
+      .readdirSync(DIR)
+      // Los que empiezan con "_" son notas internas (la plantilla), no
+      // términos: no salen ni en la web ni en el panel.
+      .filter((f) => f.endsWith(".md") && !f.startsWith("_"));
   } catch {
     // Todavía no existe la carpeta: el glosario está vacío, no roto.
     return [];

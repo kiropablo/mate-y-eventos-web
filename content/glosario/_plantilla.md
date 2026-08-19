@@ -1,7 +1,7 @@
 ---
-termino: "Rider"
-alias: ["rider técnico", "technical rider"]
-definicionCorta: "El documento donde el artista detalla qué necesita para poder tocar: sonido, luces, backline, camarines y hasta la comida."
+termino: "Ejemplo de plantilla"
+alias: []
+definicionCorta: "Este archivo no es un término: es el molde con la explicación de cada campo. No se publica."
 episodio: "0VMLRXE3cbU"
 episodioTitulo: "T01E13 - Cómo insertarse en la Industria de los Eventos"
 minuto: "12:40"
@@ -9,14 +9,15 @@ eje: "Técnico & Producción"
 relacionados: []
 publicado: false
 ---
-Esto es una plantilla, no un término publicado. Está en `publicado: false`,
+Esto es la plantilla, no un término publicado. Se llama "Ejemplo de plantilla" y no "Rider" a propósito: si usara el nombre de un término real, el generador automático lo tomaría por ya escrito y nunca lo generaría. Está en `publicado: false`,
 así que no aparece en la web: sirve para ver cómo se escribe cada archivo.
 
 ## Cómo funciona este archivo
 
 Un archivo `.md` por término, en `content/glosario/`. El nombre del archivo
 es la dirección: `rider.md` queda en `/glosario/rider`. Va en minúsculas y
-sin acentos ni espacios.
+sin acentos ni espacios. Los que empiezan con `_`, como este, no se publican
+ni aparecen en el panel: son notas internas.
 
 En la cabecera de arriba:
 

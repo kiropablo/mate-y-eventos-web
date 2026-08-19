@@ -1,0 +1,92 @@
+name: Glosario
+
+on:
+  # Botón "Run workflow" para correrlo a mano. Con "episodios: 100" hace la
+  # carga inicial de todo el archivo de una sola vez.
+  workflow_dispatch:
+    inputs:
+      episodios:
+        description: "Cuántos episodios revisar (100 = todos los pendientes)"
+        required: false
+        default: "5"
+      terminos:
+        description: "Máximo de términos por episodio"
+        required: false
+        default: "4"
+  # Se dispara solo cuando termina la Action de Artículos, que a su vez se
+  # dispara cuando terminan las Transcripciones. La cadena queda:
+  # Transcripciones → Artículos → Glosario.
+  workflow_run:
+    workflows: ["Articulos"]
+    types:
+      - completed
+
+# Dos corridas en paralelo escribirían términos repetidos: la segunda lee la
+# carpeta antes de que la primera guarde.
+concurrency:
+  group: glosario
+  cancel-in-progress: false
+
+jobs:
+  glosario:
+    runs-on: ubuntu-latest
+    # La carga inicial revisa 40 episodios: le damos aire.
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Sacar términos nuevos
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          MAX_EPISODIOS: ${{ inputs.episodios || '5' }}
+          MAX_TERMINOS: ${{ inputs.terminos || '4' }}
+        run: node scripts/generar-glosario.mjs
+      - name: Guardar cambios
+        id: guardar
+        # Corre aunque el paso anterior se haya caído: si el script murió
+        # a mitad de camino, los términos que alcanzó a escribir se guardan igual
+        # en vez de irse con el runner.
+        if: always()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add content/glosario
+          if git diff --staged --quiet; then
+            echo "hubo=no" >> "$GITHUB_OUTPUT"
+            echo "Sin términos nuevos."
+            exit 0
+          fi
+          git commit -m "Nuevos términos del glosario (borradores)"
+          echo "hubo=si" >> "$GITHUB_OUTPUT"
+          # Mismo cuidado que en las otras Actions: si el repo cambió mientras
+          # corría, traemos lo nuevo antes de subir. Hasta 3 intentos.
+          for intento in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "Guardado en el intento $intento."
+              exit 0
+            fi
+            echo "El repo cambió mientras tanto. Reintento $intento..."
+            sleep 8
+          done
+          echo "No se pudo guardar después de 3 intentos."
+          exit 1
+      - name: Avisar que hay términos nuevos
+        # Solo si esta Action commiteó algo. Si no, el aviso leería el último
+        # commit del repo —que puede ser de otra Action— y mandaría un issue
+        # repetido con cosas que ya se avisaron.
+        if: steps.guardar.outcome == 'success' && steps.guardar.outputs.hubo == 'si'
+        # Si el aviso falla, la Action no se cae: los términos ya están guardados.
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PANEL_URL: "https://www.mateyeventos.com/admin"
+          SOLO: glosario
+        run: node scripts/avisar-borradores.mjs

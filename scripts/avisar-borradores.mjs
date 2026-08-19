@@ -16,6 +16,17 @@ const REPO = process.env.GITHUB_REPOSITORY || "";
 const PANEL = process.env.PANEL_URL || "https://www.mateyeventos.com/admin";
 // A quién se le asigna el issue. Por defecto, el dueño del repositorio.
 const AVISAR_A = process.env.AVISAR_A || REPO.split("/")[0] || "";
+// Qué carpeta mira. Cada Action avisa solo de lo suyo: si no, la de Glosario
+// termina abriendo un issue con los artículos que la de Artículos ya avisó
+// diez minutos antes, porque las dos leen el último commit del repo.
+//   articulos · glosario · (vacío = las dos)
+const SOLO = (process.env.SOLO || "").trim();
+
+const CARPETAS = {
+  articulos: "content/articulos/",
+  glosario: "content/glosario/",
+};
+const MIRA = SOLO && CARPETAS[SOLO] ? [CARPETAS[SOLO]] : Object.values(CARPETAS);
 
 if (!TOKEN || !REPO) {
   console.log("Sin datos de GitHub: no se manda aviso.");
@@ -30,29 +41,43 @@ try {
   })
     .split("\n")
     .map((linea) => linea.trim())
-    .filter((f) => f.startsWith("content/articulos/") && f.endsWith(".md"));
+    .filter((f) => f.endsWith(".md") && MIRA.some((c) => f.startsWith(c)));
 } catch {
   archivos = [];
 }
 
 if (archivos.length === 0) {
-  console.log("No hay artículos nuevos en el último commit: no se manda aviso.");
+  console.log("Nada nuevo en el último commit: no se manda aviso.");
   process.exit(0);
 }
 
 // Sacamos el título de cada uno y nos quedamos solo con los borradores.
 const campo = (texto, clave) => {
-  const m = texto.match(new RegExp(`^${clave}:\\s*(.+)$`, "m"));
+  const m = texto.match(new RegExp(`^${clave}:[^\\S\\r\\n]*(.+)$`, "m"));
   return m ? m[1].trim().replace(/^"|"$/g, "").replace(/\\"/g, '"') : "";
 };
 
 const borradores = [];
+const terminos = [];
 for (const ruta of archivos) {
   try {
     const texto = fs.readFileSync(ruta, "utf8");
     if (campo(texto, "publicado") !== "false") continue;
+    const id = ruta.split("/").pop().replace(/\.md$/, "");
+
+    if (ruta.startsWith("content/glosario/")) {
+      terminos.push({
+        id,
+        termino: campo(texto, "termino") || "(sin término)",
+        definicion: campo(texto, "definicionCorta"),
+        eje: campo(texto, "eje"),
+        episodio: campo(texto, "episodioTitulo"),
+      });
+      continue;
+    }
+
     borradores.push({
-      id: ruta.split("/").pop().replace(/\.md$/, ""),
+      id,
       titulo: campo(texto, "titulo") || "(sin título)",
       bajada: campo(texto, "bajada"),
       eje: campo(texto, "eje"),
@@ -64,7 +89,7 @@ for (const ruta of archivos) {
   }
 }
 
-if (borradores.length === 0) {
+if (borradores.length === 0 && terminos.length === 0) {
   console.log("No hay borradores nuevos: no se manda aviso.");
   process.exit(0);
 }
@@ -74,33 +99,62 @@ const hoy = new Intl.DateTimeFormat("es-AR", {
   month: "long",
 }).format(new Date());
 
-const titulo =
-  borradores.length === 1
-    ? `1 artículo nuevo para revisar (${hoy})`
-    : `${borradores.length} artículos nuevos para revisar (${hoy})`;
+// El título dice las dos cosas cuando vienen juntas.
+const partes = [];
+if (borradores.length)
+  partes.push(
+    `${borradores.length} ${borradores.length === 1 ? "artículo" : "artículos"}`
+  );
+if (terminos.length)
+  partes.push(
+    `${terminos.length} ${terminos.length === 1 ? "término" : "términos"}`
+  );
+
+const titulo = `${partes.join(" y ")} para revisar (${hoy})`;
 
 const cuerpo = [
-  `Se escribieron **${borradores.length}** ${
-    borradores.length === 1 ? "borrador nuevo" : "borradores nuevos"
-  }. Ninguno está online todavía.`,
+  `Hay **${partes.join("** y **")}** esperando tu revisión. Nada está online todavía.`,
   "",
   `👉 **[Abrir el panel para revisarlos](${PANEL})**`,
   "",
-  "---",
-  "",
-  ...borradores.map((b) =>
-    [
-      `### ${b.titulo}`,
-      b.bajada ? `${b.bajada}` : "",
-      "",
-      `*${b.eje || "Sin eje"} · ${b.preguntas} preguntas${
-        b.episodio ? ` · Episodio: ${b.episodio}` : ""
-      }*`,
-      "",
-      `[Ver el archivo](https://github.com/${REPO}/blob/main/content/articulos/${b.id}.md)`,
-      "",
-    ].join("\n")
-  ),
+  ...(borradores.length
+    ? [
+        "---",
+        "",
+        "## Artículos",
+        "",
+        ...borradores.map((b) =>
+          [
+            `### ${b.titulo}`,
+            b.bajada ? `${b.bajada}` : "",
+            "",
+            `*${b.eje || "Sin eje"} · ${b.preguntas} preguntas${
+              b.episodio ? ` · Episodio: ${b.episodio}` : ""
+            }*`,
+            "",
+            `[Ver el archivo](https://github.com/${REPO}/blob/main/content/articulos/${b.id}.md)`,
+            "",
+          ].join("\n")
+        ),
+      ]
+    : []),
+  ...(terminos.length
+    ? [
+        "---",
+        "",
+        "## Glosario",
+        "",
+        "| Término | Definición | Episodio |",
+        "| --- | --- | --- |",
+        ...terminos.map(
+          (t) =>
+            `| **[${t.termino}](https://github.com/${REPO}/blob/main/content/glosario/${t.id}.md)** | ${
+              (t.definicion || "—").replace(/\|/g, "\\|")
+            } | ${(t.episodio || "—").replace(/\|/g, "\\|")} |`
+        ),
+        "",
+      ]
+    : []),
   "---",
   "",
   "Cuando termines de revisarlos, cerrá este issue.",
@@ -128,4 +182,6 @@ if (!res.ok) {
 }
 
 const issue = await res.json();
-console.log(`Aviso enviado: issue #${issue.number} con ${borradores.length} borradores.`);
+console.log(
+  `Aviso enviado: issue #${issue.number} · ${borradores.length} artículos · ${terminos.length} términos.`
+);

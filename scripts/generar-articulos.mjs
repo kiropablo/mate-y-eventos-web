@@ -244,7 +244,7 @@ function parsearRespuesta(texto) {
   if (!restoPreg.length) throw new Error("no vino el separador ---PREGUNTAS---");
 
   const campo = (nombre) => {
-    const m = cabeceraYresto.match(new RegExp(`^${nombre}:\\s*(.+)$`, "im"));
+    const m = cabeceraYresto.match(new RegExp(`^${nombre}:[^\\S\\r\\n]*(.+)$`, "im"));
     return m ? m[1].trim() : "";
   };
 

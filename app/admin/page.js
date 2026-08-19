@@ -1,5 +1,6 @@
 import { haySesion } from "../lib/admin";
 import { listarParaPanel } from "../lib/articulos-admin";
+import { listarGlosarioParaPanel } from "../lib/glosario-admin";
 import LoginAdmin from "./LoginAdmin";
 import PanelAdmin from "./PanelAdmin";
 
@@ -13,5 +14,10 @@ export const metadata = {
 
 export default function Admin() {
   if (!haySesion()) return <LoginAdmin />;
-  return <PanelAdmin articulos={listarParaPanel()} />;
+  return (
+    <PanelAdmin
+      articulos={listarParaPanel()}
+      glosario={listarGlosarioParaPanel()}
+    />
+  );
 }
