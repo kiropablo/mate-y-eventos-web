@@ -8,8 +8,10 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 En el episodio se cuenta como caso concreto: en un festival, al preguntarle a la gente qué le gustaría encontrar en esa zona, surgió un pedido no contemplado (poder enjuagarse la boca o lavarse los dientes), que llevó a sumar ese servicio al refresh point.
 
 El ejemplo se usa para mostrar cómo un espacio pensado originalmente solo para el confort del asistente puede convertirse también en una herramienta de relevamiento: a cambio de un servicio (como el enjuague bucal), se puede pedir a cambio algún dato del recorrido de esa persona por el evento, información que después sirve para tomar decisiones más finas sobre la experiencia.
