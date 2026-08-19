@@ -1,0 +1,83 @@
+name: Secciones
+
+on:
+  # Botón "Run workflow" para correrlo a mano. Con "episodios: 100" segmenta
+  # todas las transcripciones que falten de una sola vez.
+  workflow_dispatch:
+    inputs:
+      episodios:
+        description: "Cuántas transcripciones segmentar (100 = todas las pendientes)"
+        required: false
+        default: "5"
+  # Última de la cadena, que queda así:
+  # Transcripciones → Artículos → Glosario → Secciones.
+  workflow_run:
+    workflows: ["Glosario"]
+    types:
+      - completed
+
+# Dos corridas en paralelo se pisarían el push.
+concurrency:
+  group: secciones
+  cancel-in-progress: false
+
+jobs:
+  secciones:
+    runs-on: ubuntu-latest
+    # La carga inicial son 41 transcripciones: le damos aire.
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Proponer subtítulos
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          MAX_EPISODIOS: ${{ inputs.episodios || '5' }}
+        run: node scripts/segmentar-transcripciones.mjs
+      - name: Guardar cambios
+        id: guardar
+        # Corre aunque el paso anterior se haya caído: lo que alcanzó a
+        # segmentar se guarda igual en vez de irse con el runner.
+        if: always()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add content/transcripts/secciones
+          if git diff --staged --quiet; then
+            echo "hubo=no" >> "$GITHUB_OUTPUT"
+            echo "Sin secciones nuevas."
+            exit 0
+          fi
+          git commit -m "Subtitulos de transcripciones"
+          echo "hubo=si" >> "$GITHUB_OUTPUT"
+          # Mismo cuidado que en las otras Actions: si el repo cambió mientras
+          # corría, traemos lo nuevo antes de subir. Hasta 3 intentos.
+          for intento in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "Guardado en el intento $intento."
+              exit 0
+            fi
+            echo "El repo cambió mientras tanto. Reintento $intento..."
+            sleep 8
+          done
+          echo "No se pudo guardar después de 3 intentos."
+          exit 1
+      - name: Avisar qué subtítulos se pusieron
+        # Solo si esta Action commiteó algo. Si no, el aviso leería el último
+        # commit del repo —que puede ser de otra Action— y mandaría un issue
+        # repetido.
+        if: steps.guardar.outcome == 'success' && steps.guardar.outputs.hubo == 'si'
+        # Si el aviso falla, la Action no se cae: las secciones ya están guardadas.
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOLO: secciones
+        run: node scripts/avisar-borradores.mjs

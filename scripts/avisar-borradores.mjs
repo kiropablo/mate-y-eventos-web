@@ -19,12 +19,13 @@ const AVISAR_A = process.env.AVISAR_A || REPO.split("/")[0] || "";
 // Qué carpeta mira. Cada Action avisa solo de lo suyo: si no, la de Glosario
 // termina abriendo un issue con los artículos que la de Artículos ya avisó
 // diez minutos antes, porque las dos leen el último commit del repo.
-//   articulos · glosario · (vacío = las dos)
+//   articulos · glosario · secciones · (vacío = todas)
 const SOLO = (process.env.SOLO || "").trim();
 
 const CARPETAS = {
   articulos: "content/articulos/",
   glosario: "content/glosario/",
+  secciones: "content/transcripts/secciones/",
 };
 const MIRA = SOLO && CARPETAS[SOLO] ? [CARPETAS[SOLO]] : Object.values(CARPETAS);
 
@@ -41,7 +42,11 @@ try {
   })
     .split("\n")
     .map((linea) => linea.trim())
-    .filter((f) => f.endsWith(".md") && MIRA.some((c) => f.startsWith(c)));
+    .filter(
+      (f) =>
+        (f.endsWith(".md") || f.endsWith(".json")) &&
+        MIRA.some((c) => f.startsWith(c))
+    );
 } catch {
   archivos = [];
 }
@@ -59,9 +64,25 @@ const campo = (texto, clave) => {
 
 const borradores = [];
 const terminos = [];
+const segmentados = [];
 for (const ruta of archivos) {
   try {
     const texto = fs.readFileSync(ruta, "utf8");
+
+    // Las secciones de las transcripciones son un caso aparte: no son
+    // borradores. Como son solo posiciones dentro del texto, no pueden
+    // cambiar una palabra de lo que se dijo, así que van derecho online.
+    // El aviso es para que los leas, no para que los aprobés.
+    if (ruta.startsWith("content/transcripts/secciones/")) {
+      const cortes = JSON.parse(texto);
+      if (!Array.isArray(cortes) || cortes.length === 0) continue;
+      segmentados.push({
+        id: ruta.split("/").pop().replace(/\.json$/, ""),
+        titulos: cortes.map((c) => c.titulo).filter(Boolean),
+      });
+      continue;
+    }
+
     if (campo(texto, "publicado") !== "false") continue;
     const id = ruta.split("/").pop().replace(/\.md$/, "");
 
@@ -89,7 +110,7 @@ for (const ruta of archivos) {
   }
 }
 
-if (borradores.length === 0 && terminos.length === 0) {
+if (borradores.length === 0 && terminos.length === 0 && segmentados.length === 0) {
   console.log("No hay borradores nuevos: no se manda aviso.");
   process.exit(0);
 }
@@ -109,14 +130,24 @@ if (terminos.length)
   partes.push(
     `${terminos.length} ${terminos.length === 1 ? "término" : "términos"}`
   );
+if (segmentados.length)
+  partes.push(
+    `${segmentados.length} ${
+      segmentados.length === 1 ? "transcripción" : "transcripciones"
+    } con subtítulos`
+  );
 
 const titulo = `${partes.join(" y ")} para revisar (${hoy})`;
 
+// El panel sirve para artículos y glosario. Las secciones no pasan por ahí.
+const hayPanel = borradores.length > 0 || terminos.length > 0;
+
 const cuerpo = [
-  `Hay **${partes.join("** y **")}** esperando tu revisión. Nada está online todavía.`,
+  hayPanel
+    ? `Hay **${partes.join("** y **")}** esperando tu revisión. Los artículos y los términos no están online todavía.`
+    : `Hay **${partes.join("** y **")}** para que les des una mirada.`,
   "",
-  `👉 **[Abrir el panel para revisarlos](${PANEL})**`,
-  "",
+  ...(hayPanel ? [`👉 **[Abrir el panel para revisarlos](${PANEL})**`, ""] : []),
   ...(borradores.length
     ? [
         "---",
@@ -155,6 +186,26 @@ const cuerpo = [
         "",
       ]
     : []),
+  ...(segmentados.length
+    ? [
+        "---",
+        "",
+        "## Subtítulos de transcripciones",
+        "",
+        "Estos **ya están online**. No hace falta que los apruebes: son solo",
+        "renglones que marcan dónde cambia el tema, no tocan una palabra de lo",
+        "que dijeron en el episodio (el script lo verifica antes de guardar).",
+        "Si alguno no te cierra, decímelo y lo cambio.",
+        "",
+        ...segmentados.map((s) =>
+          [
+            `**[${s.id}](https://www.mateyeventos.com/episodios/${s.id})**`,
+            ...s.titulos.map((t) => `- ${t}`),
+            "",
+          ].join("\n")
+        ),
+      ]
+    : []),
   "---",
   "",
   "Cuando termines de revisarlos, cerrá este issue.",
@@ -183,5 +234,6 @@ if (!res.ok) {
 
 const issue = await res.json();
 console.log(
-  `Aviso enviado: issue #${issue.number} · ${borradores.length} artículos · ${terminos.length} términos.`
+  `Aviso enviado: issue #${issue.number} · ${borradores.length} artículos · ` +
+    `${terminos.length} términos · ${segmentados.length} transcripciones.`
 );

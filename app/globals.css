@@ -2316,6 +2316,19 @@ footer.site {
   padding: 4px 9px;
 }
 
+/* --- Subtítulos dentro de la transcripción --- */
+.ep-transcript__h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 1.15rem;
+  line-height: 1.18;
+  color: var(--celeste);
+  margin: 34px 0 14px;
+}
+.ep-transcript section:first-child .ep-transcript__h2 { margin-top: 0; }
+
 /* --- Invitado en la card del episodio --- */
 .ep-card__inv {
   font-size: 0.76rem;

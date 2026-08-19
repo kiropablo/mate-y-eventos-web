@@ -9,7 +9,11 @@ import {
   formatDate,
   partirTitulo,
 } from "../../lib/youtube";
-import { getTranscript } from "../../lib/transcripts";
+import {
+  getTranscript,
+  getSecciones,
+  armarTranscripcion,
+} from "../../lib/transcripts";
 import { getArticulo } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
 import { SITE, LINKS } from "../../lib/site";
@@ -77,6 +81,7 @@ export default async function Episodio({ params }) {
   const se = seasonEpisode(ep.title);
   const partes = partirTitulo(ep.title);
   const transcript = getTranscript(ep.id);
+  const bloques = armarTranscripcion(transcript, getSecciones(ep.id));
   const terminos = terminosDelEpisodio(ep.id);
   const articulo = getArticulo(ep.id);
 
@@ -225,8 +230,15 @@ export default async function Episodio({ params }) {
                 <span className="transcript__hint">Ver texto completo</span>
               </summary>
               <div className="ep-transcript" style={{ marginTop: "20px" }}>
-                {transcript.split(/\n\s*\n/).map((para, i) => (
-                  <p key={i}>{para}</p>
+                {bloques.map((b, i) => (
+                  <section key={i}>
+                    {b.titulo ? (
+                      <h2 className="ep-transcript__h2">{b.titulo}</h2>
+                    ) : null}
+                    {b.parrafos.map((p, j) => (
+                      <p key={j}>{p}</p>
+                    ))}
+                  </section>
                 ))}
               </div>
             </details>
