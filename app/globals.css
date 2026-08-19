@@ -2245,6 +2245,73 @@ footer.site {
   .ag-barra { justify-content: center; }
 }
 
+/* --- Acceso rápido a "esta semana", arriba de la agenda --- */
+.ag-semana {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(90, 160, 255, 0.35);
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    rgba(90, 160, 255, 0.12),
+    rgba(147, 213, 247, 0.04)
+  );
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.ag-semana:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.ag-semana__tag {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  color: var(--accent);
+  border: 1px solid rgba(90, 160, 255, 0.4);
+  border-radius: 999px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+.ag-semana__txt {
+  flex: 1 1 auto;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--blanco);
+}
+.ag-semana__flecha {
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+/* En pantallas angostas el texto ocupa el renglón entero y la flecha queda
+   colgando sola abajo. La tarjeta entera es clickeable igual. */
+@media (max-width: 560px) {
+  .ag-semana { gap: 10px; }
+  .ag-semana__flecha { display: none; }
+}
+
+/* --- Esta semana (/agenda/esta-semana) --- */
+.sem-bloque { margin-bottom: 34px; }
+.sem-bloque .ag-mes { margin-bottom: 14px; }
+.sem-nota {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  max-width: 66ch;
+  margin-bottom: 16px;
+}
+.sem-cierre {
+  margin-top: 44px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+
 /* --- Filtros acumulativos: los valores elegidos, para sacarlos de a uno --- */
 .ag-elegidos {
   display: flex;

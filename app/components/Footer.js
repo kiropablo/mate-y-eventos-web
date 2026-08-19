@@ -50,6 +50,7 @@ export default function Footer() {
             </div>
             <div className="foot-col">
               <h4>Proyecto</h4>
+              <Link href="/agenda/esta-semana">Esta semana en eventos</Link>
               <Link href="/agenda/calendario">Calendario de eventos</Link>
               <Link href="/sobre">Sobre</Link>
               <Link href="/sponsors">Para marcas</Link>

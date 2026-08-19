@@ -193,12 +193,35 @@ function estaEn(valor, elegidos) {
   return elegidos.some((e) => pelado(e) === v);
 }
 
+// Hoy, en hora de Argentina, como "2026-08-19".
+//
+// Importa el detalle: los servidores de Vercel corren en UTC, así que sin
+// esto, a partir de las 21 de acá el sitio ya creería que es mañana y los
+// eventos de hoy desaparecerían de "los próximos" tres horas antes.
+export function hoyISO() {
+  return new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
+}
+
+// Suma (o resta) días a una fecha "2026-08-19".
+export function sumarDias(fechaISO, dias) {
+  const [a, m, d] = String(fechaISO).slice(0, 10).split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1, d + dias)).toISOString().slice(0, 10);
+}
+
 // ¿El evento ya pasó? (comparado contra hoy)
 export function yaPaso(ev) {
   const fin = ev.fechaFin || ev.fechaInicio;
   if (!fin) return false;
-  const hoy = new Date().toISOString().slice(0, 10);
-  return fin < hoy;
+  return fin < hoyISO();
+}
+
+// Ya arrancó y todavía no terminó.
+export function enCurso(ev, hoy = hoyISO()) {
+  if (!ev.fechaInicio) return false;
+  const fin = ev.fechaFin || ev.fechaInicio;
+  return ev.fechaInicio <= hoy && fin >= hoy;
 }
 
 // "12 al 14 de mar 2027", "5 de sep 2026" o "Fechas por anunciar".

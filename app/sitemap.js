@@ -12,6 +12,7 @@ export default async function sitemap() {
     "/episodios",
     "/articulos",
     "/agenda",
+    "/agenda/esta-semana",
     "/agenda/calendario",
     "/agenda/sugerir",
     "/sobre",
@@ -24,9 +25,12 @@ export default async function sitemap() {
     url: `${SITE.url}${path}`,
     lastModified: now,
     changeFrequency:
-      path === "/episodios" || path === "/articulos" || path === "/agenda"
-        ? "weekly"
-        : "monthly",
+      // Esta semana cambia todos los días por definición.
+      path === "/agenda/esta-semana"
+        ? "daily"
+        : path === "/episodios" || path === "/articulos" || path === "/agenda"
+          ? "weekly"
+          : "monthly",
     priority: path === "" ? 1 : path === "/sponsors" ? 0.9 : 0.7,
   }));
 

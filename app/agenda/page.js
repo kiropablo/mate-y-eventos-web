@@ -1,7 +1,15 @@
+import Link from "next/link";
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import AgendaLista from "./AgendaLista";
-import { getEventos, yaPaso, formatRango } from "../lib/agenda";
+import {
+  getEventos,
+  yaPaso,
+  formatRango,
+  hoyISO,
+  sumarDias,
+  enCurso,
+} from "../lib/agenda";
 import { SITE } from "../lib/site";
 
 export const metadata = {
@@ -35,6 +43,15 @@ export default async function Agenda() {
 
   const proximos = eventos.filter((e) => !yaPaso(e));
   const pasados = eventos.filter((e) => yaPaso(e)).reverse();
+
+  // Cuántos hay esta semana, para el acceso rápido de arriba.
+  const hoy = hoyISO();
+  const hasta = sumarDias(hoy, 6);
+  const estaSemana = eventos.filter(
+    (e) =>
+      enCurso(e, hoy) ||
+      (e.fechaInicio && e.fechaInicio >= hoy && e.fechaInicio <= hasta)
+  ).length;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -86,10 +103,24 @@ export default async function Agenda() {
               </p>
             </div>
           ) : (
-            <AgendaLista
-              proximos={proximos.map(resumen)}
-              pasados={pasados.map(resumen)}
-            />
+            <>
+              {estaSemana > 0 && (
+                <Link className="ag-semana reveal" href="/agenda/esta-semana">
+                  <span className="ag-semana__tag">Esta semana</span>
+                  <span className="ag-semana__txt">
+                    {estaSemana} {estaSemana === 1 ? "evento" : "eventos"} en
+                    los próximos siete días
+                  </span>
+                  <span className="ag-semana__flecha" aria-hidden>
+                    →
+                  </span>
+                </Link>
+              )}
+              <AgendaLista
+                proximos={proximos.map(resumen)}
+                pasados={pasados.map(resumen)}
+              />
+            </>
           )}
         </div>
       </section>
