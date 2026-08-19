@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 La ecomoneda funciona como una especie de moneda de cambio basada en reciclables o en acciones responsables: no tirar residuos en cualquier lado, contestar cómo llegó la persona al evento, entre otras. A cambio, el asistente recibe acceso a "zonas de refresh" con agua, wifi o sombra, o incluso descuentos posteriores por mail.
 
 Lo interesante del mecanismo es que le permite al organizador conseguir datos que de otra forma serían difíciles de relevar en medio de una multitud, presentándolos como un beneficio para el asistente y no como una carga o un "costo moral" que le arruine la experiencia de diversión.
