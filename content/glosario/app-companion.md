@@ -8,8 +8,10 @@ minuto: ""
 eje: "Tendencias & Tecnología"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 La App Companion es una de las tendencias que más creció en eventos corporativos y expos. El asistente se la baja antes del evento y ahí va recibiendo información (dónde estacionar, agenda, notificaciones), puede avisar si va acompañado, escanear un QR al entrar para acreditarse y hasta hacerle preguntas a un disertante antes o durante su charla para que las levante y responda en vivo.
 
 Lo interesante es que el beneficio es bidireccional: al invitado le da una experiencia más rica e interactiva (networking, saber qué gente conocida está cerca, en qué puesto trabaja), y al organizador le da datos muy valiosos después del evento —qué espacio tuvo más convocatoria, cuánto tiempo se quedó la gente en cada lugar, qué contenido generó más interés— información clave para planificar la próxima edición.
