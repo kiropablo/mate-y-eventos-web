@@ -7,7 +7,7 @@ episodioTitulo: "T02E24 | Improvisar sin perder el control | Luciano Larocca (la
 fecha: "2026-08-12"
 eje: "Estrategia & Negocio"
 etiquetas: ["gestión de artistas", "comisiones", "liderazgo", "improvisación", "marca"]
-slugsAnteriores: ["lAeikc5gbSc"]
+slugsAnteriores: ["lAeikc5gbSc", "cuando-decir-que-no-a-un-cliente"]
 lectura: 6
 generado: "2026-08-13"
 publicado: true

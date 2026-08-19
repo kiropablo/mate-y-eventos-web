@@ -205,16 +205,30 @@ export async function getEstadisticasCanal() {
 //   → { codigo: "T02E23", tema: "Cómo se crea música…", invitado: "Luciano Larocca" }
 export function partirTitulo(titulo) {
   const limpio = String(titulo || "").trim();
-  const m = limpio.match(/^\s*(T\s*\d+\s*E\s*\d+)\s*[|\-–—:]?\s*/i);
+  // El código viene escrito de varias formas según la temporada: T02E24,
+  // T01-E14, T01 E14. Si no se contemplan todas, la que quede afuera se
+  // publica con el código adentro del title.
+  const m = limpio.match(/^\s*(T\s*\d+\s*[-–—.]?\s*E\s*\d+)\s*[|\-–—:]?\s*/i);
 
-  const codigo = m ? m[1].replace(/\s+/g, "").toUpperCase() : "";
+  const codigo = m ? m[1].replace(/[^A-Za-z0-9]/g, "").toUpperCase() : "";
   const resto = m ? limpio.slice(m[0].length) : limpio;
 
   // El invitado va después de la última barra. Solo se separa si la barra
   // existe: hay episodios sin invitado y el tema puede tener guiones.
   const partes = resto.split("|").map((p) => p.trim()).filter(Boolean);
-  const tema = partes[0] || limpio;
-  const invitado = partes.length > 1 ? partes.slice(1).join(" · ") : "";
+  let tema = partes[0] || limpio;
+  let invitado = partes.length > 1 ? partes.slice(1).join(" · ") : "";
+
+  // La temporada 1 no usa barra: cierra con "- Con Fulano". Se corta ahí y
+  // solo ahí, porque esos títulos tienen guiones que no separan invitado
+  // ("T01E10 - Edición Especial - De la cocina a los eventos").
+  if (!invitado) {
+    const cierre = tema.match(/\s[-–—]\s*[Cc]on\s+(\S.*)$/);
+    if (cierre) {
+      invitado = cierre[1].trim();
+      tema = tema.slice(0, cierre.index).trim();
+    }
+  }
 
   return { codigo, tema, invitado };
 }

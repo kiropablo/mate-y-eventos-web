@@ -31,6 +31,7 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const YT_KEY = process.env.YOUTUBE_API_KEY || "";
 const MODELO = process.env.MODELO_IA || "claude-sonnet-5";
 const MAX_POR_CORRIDA = Number(process.env.MAX_EPISODIOS || 5);
+const MAX_TOKENS = Number(process.env.MAX_TOKENS || 4000);
 
 const INSTRUCCIONES = `Sos el editor de contenidos de Mate y Eventos, un medio audiovisual argentino
 especializado en la industria de eventos de Latinoamérica.
@@ -112,7 +113,10 @@ async function pedirSecciones(titulo, transcripcion) {
     },
     body: JSON.stringify({
       model: MODELO,
-      max_tokens: 1500,
+      // Con 1500 se cortaban 17 de 36 episodios sin devolver una línea. Es
+      // barato dar aire: la respuesta útil son 6 renglones, así que lo que
+      // sobra no se gasta.
+      max_tokens: MAX_TOKENS,
       system: INSTRUCCIONES,
       messages: [{ role: "user", content: entrada }],
     }),
@@ -130,8 +134,31 @@ async function pedirSecciones(titulo, transcripcion) {
     .join("")
     .trim();
 
-  if (!texto) throw new Error("respuesta vacía");
+  if (!texto) {
+    // Antes esto decía solo "respuesta vacía" y no alcanzaba para saber por
+    // qué: si se quedó sin tokens, si devolvió otro tipo de bloque o si
+    // contestó nada. Ahora el log dice qué pasó.
+    const tipos = (data.content || []).map((b) => b.type).join(", ") || "ninguno";
+    throw new Error(
+      `respuesta sin texto (motivo: ${data.stop_reason || "?"} · ` +
+        `bloques: ${tipos} · tokens de salida: ${data.usage?.output_tokens ?? "?"})`
+    );
+  }
   return texto;
+}
+
+// Pide las secciones y, si la primera vuelve sin texto, lo intenta una vez
+// más. Una respuesta vacía suele ser pasajera y el reintento sale más barato
+// que dejar el episodio afuera hasta la corrida siguiente.
+async function pedirSeccionesConReintento(titulo, transcripcion) {
+  try {
+    return await pedirSecciones(titulo, transcripcion);
+  } catch (e) {
+    if (!/respuesta sin texto/.test(e.message)) throw e;
+    console.log(`      (reintento: ${e.message})`);
+    await new Promise((r) => setTimeout(r, 3000));
+    return pedirSecciones(titulo, transcripcion);
+  }
 }
 
 // Convierte la respuesta en cortes con su posición real dentro del texto.
@@ -251,7 +278,7 @@ async function main() {
         continue;
       }
 
-      const respuesta = await pedirSecciones(titulos[id], transcripcion);
+      const respuesta = await pedirSeccionesConReintento(titulos[id], transcripcion);
       const cortes = ubicarCortes(respuesta, transcripcion);
 
       if (cortes.length < 2) {
