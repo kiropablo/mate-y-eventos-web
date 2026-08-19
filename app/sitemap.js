@@ -3,6 +3,7 @@ import { getEpisodes } from "./lib/youtube";
 import { getArticulos } from "./lib/articulos";
 import { getEventos, edicionesImperdibles } from "./lib/agenda";
 import { getTerminos } from "./lib/glosario";
+import { todosLosCortes } from "./agenda/cortes";
 
 export const revalidate = 3600;
 
@@ -106,5 +107,22 @@ export default async function sitemap() {
     glo = [];
   }
 
-  return [...base, ...eps, ...arts, ...evs, ...imps, ...glo];
+  // Las landings de la agenda: una URL por país, tipo, provincia y mes.
+  // Se arman solas con los datos, así que el sitemap las sigue sin que nadie
+  // tenga que acordarse de agregarlas.
+  let cortes = [];
+  try {
+    const eventos = await getEventos();
+    cortes = todosLosCortes(eventos).map((c) => ({
+      url: `${SITE.url}${c.url}`,
+      lastModified: now,
+      // Los cortes por mes envejecen; los de país y tipo no.
+      changeFrequency: c.tipo === "mes" ? "daily" : "weekly",
+      priority: 0.7,
+    }));
+  } catch {
+    cortes = [];
+  }
+
+  return [...base, ...eps, ...arts, ...evs, ...imps, ...glo, ...cortes];
 }

@@ -2334,6 +2334,23 @@ footer.site {
 }
 .ep-card__art:hover { color: var(--blanco); }
 
+/* --- Explorá la agenda: los cortes con página propia --- */
+.ag-cortes {
+  margin-top: 44px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line-2);
+}
+.ag-cortes__grupo { margin-bottom: 22px; }
+.ag-cortes__tit {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--faint);
+  margin-bottom: 10px;
+}
+.ag-cortes__n { color: var(--faint); font-size: 0.9em; }
+
 /* --- Cuándo se actualizó la agenda --- */
 .ag-frescura {
   margin-top: 34px;

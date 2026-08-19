@@ -11,6 +11,7 @@ import {
   enCurso,
 } from "../lib/agenda";
 import { SITE } from "../lib/site";
+import { todosLosCortes, textosDe } from "./cortes";
 
 export const metadata = {
   alternates: { canonical: "/agenda" },
@@ -52,6 +53,11 @@ export default async function Agenda() {
       enCurso(e, hoy) ||
       (e.fechaInicio && e.fechaInicio >= hoy && e.fechaInicio <= hasta)
   ).length;
+
+  // Los cortes con página propia, para que se puedan encontrar desde acá y
+  // no solo por buscador.
+  const cortes = todosLosCortes(eventos);
+  const porTipo = (t) => cortes.filter((c) => c.tipo === t);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -120,6 +126,34 @@ export default async function Agenda() {
                 proximos={proximos.map(resumen)}
                 pasados={pasados.map(resumen)}
               />
+              {cortes.length > 0 && (
+                <section className="ag-cortes reveal">
+                  <h2 className="ag-mes">Explorá la agenda</h2>
+                  {[
+                    ["Por país", porTipo("pais")],
+                    ["Por tipo de evento", porTipo("tipo")],
+                    ["Por provincia", porTipo("provincia")],
+                    ["Por mes", porTipo("mes")],
+                  ].map(([titulo, lista]) =>
+                    lista.length > 0 ? (
+                      <div className="ag-cortes__grupo" key={titulo}>
+                        <h3 className="ag-cortes__tit">{titulo}</h3>
+                        <div className="imp-archivo">
+                          {lista.map((c) => (
+                            <Link className="chip" href={c.url} key={c.url}>
+                              {textosDe(c).etiqueta}{" "}
+                              <span className="ag-cortes__n">
+                                {c.eventos.length}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null
+                  )}
+                </section>
+              )}
+
               <p className="ag-frescura reveal">
                 {eventos.length} eventos · actualizada al{" "}
                 <time dateTime={hoy}>{fechaLarga(hoy)}</time>. La agenda se
