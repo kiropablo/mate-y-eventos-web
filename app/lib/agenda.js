@@ -121,7 +121,9 @@ export async function getEventos({ estricto = false } = {}) {
         `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}?${params}`,
         {
           headers: { Authorization: `Bearer ${key}` },
-          next: { revalidate: 3600 },
+          // La etiqueta permite refrescar de un saque todo lo que lee la
+          // agenda —páginas, fichas y los .ics— desde /api/agenda/revalidar.
+          next: { revalidate: 3600, tags: ["agenda"] },
         }
       );
       if (!res.ok) {
