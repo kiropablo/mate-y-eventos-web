@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 El minuto cero no es solo "cuando entra el primer invitado", sino el momento que marca la energía con la que va a correr todo el evento de ahí en adelante. Si el equipo llega alineado a ese instante, todo fluye; si no, se nota al toque.
 
 En el episodio lo dividen en tres frentes que hay que tener resueltos antes de que llegue ese minuto: lo operativo (que todas las áreas técnicas y artísticas estén realmente listas), el refuerzo de la escena (repasar en detalle qué va a pasar en los próximos minutos con todo el equipo) y lo anímico (que los líderes transmitan calma, porque el nerviosismo se contagia).
