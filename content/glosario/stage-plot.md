@@ -8,6 +8,8 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 Es una de las piezas centrales del rider: indica dónde va la batería, el bajo, la guitarra, los cantantes, y sirve como referencia obligada para quienes arman después el escenario, ya que de esa disposición dependen los cableados, la ubicación de micrófonos y monitores. En iluminación existe un equivalente similar, con la disposición de estructuras y puntos de colgado de cada artefacto.
