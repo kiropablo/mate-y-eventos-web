@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 En el episodio se lo menciona como uno de esos ítems que en la lógica de "cómo arruinar un evento" se suele obviar: si el lugar tiene energía de la red, muchos deciden no contratarlo. El problema es que la energía de red puede cortarse en cualquier momento, y si eso pasa a mitad de un show (justo cuando está tocando la banda principal, como se ironiza en la charla), el evento se cae en vivo y en directo frente a todos los invitados.
 
 Por eso, en una producción profesional el grupo electrógeno no se piensa como un gasto extra sino como parte del plan de contingencia: es la garantía de que, pase lo que pase con el suministro eléctrico del lugar, el sonido, la iluminación y las pantallas van a seguir funcionando.
