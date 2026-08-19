@@ -91,7 +91,17 @@ export default async function Evento({ params }) {
         eventAttendanceMode:
           "https://schema.org/OfflineEventAttendanceMode",
         ...(ev.descCorta ? { description: ev.descCorta } : {}),
-        ...(ev.imagen ? { image: [ev.imagen] } : {}),
+        // Sin imagen, a propósito y por ahora.
+        //
+        // Acá iba ev.imagen, que es el link directo al adjunto de Airtable, y
+        // ese link vence: lleva la hora de vencimiento adentro de la propia
+        // URL. Google la leía viva si pasaba dentro de la ventana y muerta si
+        // pasaba después, y una imagen muerta en el schema es peor que
+        // ninguna. El mismo criterio ya estaba escrito unas líneas más abajo
+        // para la portada de redes; faltaba aplicarlo acá.
+        //
+        // Vuelve cuando exista la portada generada por evento, servida desde
+        // nuestro dominio y sin vencimiento.
         ...(ev.web ? { sameAs: ev.web } : {}),
         ...(ev.organizador
           ? {

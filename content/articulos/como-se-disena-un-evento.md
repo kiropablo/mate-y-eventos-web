@@ -1,13 +1,13 @@
 ---
 titulo: "Por qué separar el \"qué\" del \"cómo\" salva un evento"
 bajada: "Antes de cotizar proveedores o armar planos técnicos, hay una etapa invisible que decide si un evento va a ser memorable o simplemente correcto."
-metaDescripcion: "Metodología de diseño de eventos: cómo pasar de la idea al boceto y del boceto al montaje sin perder impacto."
+metaDescripcion: "Cómo se diseña un evento: el método para pasar de la idea al boceto y del boceto al montaje sin que el presupuesto recorte la idea."
 episodio: "Y9o-SqmIIlQ"
 episodioTitulo: "T01E05  - Del papel al montaje  cómo transformar una idea en experiencia"
 fecha: "2025-10-01"
 eje: "Estrategia & Negocio"
 etiquetas: ["diseño de eventos", "briefing", "metodología", "proceso creativo", "producción de eventos"]
-slugsAnteriores: ["Y9o-SqmIIlQ"]
+slugsAnteriores: ["Y9o-SqmIIlQ", "separar-el-que-del-como"]
 lectura: 5
 generado: "2026-07-22"
 publicado: true

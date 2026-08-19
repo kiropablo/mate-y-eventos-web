@@ -1,13 +1,13 @@
 ---
 titulo: "El evento manda: la regla que resuelve toda discusión creativa"
 bajada: "Cuatro ideas que rara vez se explican en un curso de eventos: por qué el evento decide, cuándo el cliente se equivoca y cómo convivir con egos y errores sin que arruinen el resultado."
-metaDescripcion: "Descubrí por qué \"el evento manda\" es la clave para tomar decisiones en la producción de eventos."
+metaDescripcion: "Cómo resolver discusiones creativas en la producción de un evento: por qué \"el evento manda\" es el criterio que ordena cualquier decisión."
 episodio: "uJZ8OfGWa4I"
 episodioTitulo: "T01E12 - Los secretos de producción que nadie enseña (Pero todos deberían saber)"
 fecha: "2025-11-19"
 eje: "Humano"
 etiquetas: ["liderazgo", "gestión de clientes", "producción de eventos", "trabajo en equipo", "toma de decisiones"]
-slugsAnteriores: ["uJZ8OfGWa4I"]
+slugsAnteriores: ["uJZ8OfGWa4I", "la-regla-que-ordena-las-discusiones-creativas"]
 lectura: 5
 generado: "2026-07-22"
 publicado: true
