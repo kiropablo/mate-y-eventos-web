@@ -2245,6 +2245,17 @@ footer.site {
   .ag-barra { justify-content: center; }
 }
 
+/* --- Filtros acumulativos: los valores elegidos, para sacarlos de a uno --- */
+.ag-elegidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ag-elegidos .chip {
+  font-size: 12px;
+}
+
 /* --- Suscripción al calendario (/agenda/calendario) --- */
 .sus-caja {
   background: var(--panel);

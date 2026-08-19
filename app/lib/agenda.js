@@ -160,6 +160,39 @@ export async function getEvento(slug) {
   return eventos.find((e) => e.slug === slug) || null;
 }
 
+// Compara sin distinguir mayúsculas, acentos ni espacios de más. Un
+// "Cordoba " cargado a las apuradas en Airtable tiene que seguir entrando
+// en el filtro de "Córdoba".
+export function pelado(t) {
+  return String(t || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+// ¿El evento pasa los filtros elegidos?
+//
+// Cada filtro es una lista. Vacía quiere decir "todos". Dentro de un mismo
+// filtro los valores SUMAN (Córdoba o Santa Fe); entre filtros distintos se
+// CRUZAN (Córdoba o Santa Fe, y además solo festivales).
+//
+// Vive acá porque la usan tres lugares que tienen que dar siempre el mismo
+// resultado: la lista, el calendario y el feed .ics.
+export function pasaFiltros(ev, { tipos, paises, provincias } = {}) {
+  return (
+    estaEn(ev.tipo, tipos) &&
+    estaEn(ev.pais, paises) &&
+    estaEn(ev.provincia, provincias)
+  );
+}
+
+function estaEn(valor, elegidos) {
+  if (!elegidos || elegidos.length === 0) return true;
+  const v = pelado(valor);
+  return elegidos.some((e) => pelado(e) === v);
+}
+
 // ¿El evento ya pasó? (comparado contra hoy)
 export function yaPaso(ev) {
   const fin = ev.fechaFin || ev.fechaInicio;

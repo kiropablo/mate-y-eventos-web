@@ -125,7 +125,7 @@ export default async function Evento({ params }) {
           <h1>{ev.nombre}</h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             <strong>{formatRango(ev)}</strong>
-            {ev.estadoFechas === "Estimadas" ? " (a confirmar)" : ""}
+            {ev.estadoFechas !== "Confirmadas" ? " (a confirmar)" : ""}
             {pasado ? " — edición pasada" : ""}
             {lugar ? (
               <>

@@ -1,4 +1,4 @@
-import { getEventos, yaPaso } from "../../../lib/agenda";
+import { getEventos, yaPaso, pasaFiltros } from "../../../lib/agenda";
 import { armarCalendario } from "../../../lib/ics";
 import { SITE } from "../../../lib/site";
 
@@ -7,15 +7,16 @@ import { SITE } from "../../../lib/site";
 // este no se descarga, se suscribe.
 //
 // Filtros opcionales por querystring: ?tipo=  ?pais=  ?provincia=
-// Ejemplo: /api/agenda/ics?pais=Argentina&provincia=Córdoba
+// Se pueden repetir para sumar varios valores, igual que en /agenda:
+//   /api/agenda/ics?pais=Argentina&pais=Brasil&tipo=Festival
 
 export const revalidate = 3600;
 
 export async function GET(req) {
   const q = new URL(req.url).searchParams;
-  const tipo = (q.get("tipo") || "").trim();
-  const pais = (q.get("pais") || "").trim();
-  const provincia = (q.get("provincia") || "").trim();
+  const tipos = valores(q, "tipo");
+  const paises = valores(q, "pais");
+  const provincias = valores(q, "provincia");
 
   // Estricto a propósito. Si Airtable falla a mitad de la paginación y
   // devolviéramos la lista corta, los calendarios de los suscriptos
@@ -44,12 +45,10 @@ export async function GET(req) {
     (e) =>
       e.fechaInicio &&
       !yaPaso(e) &&
-      igual(e.tipo, tipo) &&
-      igual(e.pais, pais) &&
-      igual(e.provincia, provincia)
+      pasaFiltros(e, { tipos, paises, provincias })
   );
 
-  const filtros = [tipo, provincia, pais].filter(Boolean).join(" · ");
+  const filtros = [...tipos, ...provincias, ...paises].join(" · ");
   const nombre = filtros
     ? `Agenda Mate y Eventos — ${filtros}`
     : "Agenda Mate y Eventos";
@@ -74,17 +73,11 @@ export async function GET(req) {
   });
 }
 
-// Comparación tolerante: si no se pidió filtro pasa todo, y un espacio o un
-// acento de más en Airtable no tiene por qué romper nada.
-function igual(valor, filtro) {
-  if (!filtro) return true;
-  return pelado(valor) === pelado(filtro);
-}
-
-function pelado(t) {
-  return String(t || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
+// Todos los valores de un parámetro que puede venir repetido, ya limpios.
+// ?pais=Argentina&pais=Brasil  ->  ["Argentina", "Brasil"]
+function valores(q, nombre) {
+  return q
+    .getAll(nombre)
+    .map((v) => v.trim())
+    .filter(Boolean);
 }

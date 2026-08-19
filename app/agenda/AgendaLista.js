@@ -2,19 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { TIPO_COLOR, MESES_LARGO } from "../lib/agenda";
+import { TIPO_COLOR, MESES_LARGO, pasaFiltros, pelado } from "../lib/agenda";
 
 // Agenda con dos vistas — lista compacta y calendario — que comparten
 // los mismos filtros (tipo, país, provincia y fecha puntual).
+//
+// Los filtros son acumulativos: se pueden elegir varios tipos, varios
+// países y varias provincias a la vez. Dentro de un mismo filtro los
+// valores suman (Córdoba o Santa Fe); entre filtros se cruzan.
 
 const HOY = new Date();
 const hoyISO = iso(HOY.getFullYear(), HOY.getMonth() + 1, HOY.getDate());
 
 export default function AgendaLista({ proximos, pasados }) {
   const [vista, setVista] = useState("lista");
-  const [tipo, setTipo] = useState("");
-  const [pais, setPais] = useState("");
-  const [provincia, setProvincia] = useState("");
+  const [tipos, setTipos] = useState([]);
+  const [paises, setPaises] = useState([]);
+  const [provincias, setProvincias] = useState([]);
   const [fecha, setFecha] = useState(""); // filtro por día puntual (desde el calendario)
   const [verPasados, setVerPasados] = useState(false);
   const [busca, setBusca] = useState("");
@@ -22,13 +26,15 @@ export default function AgendaLista({ proximos, pasados }) {
 
   // Al entrar, recuperamos los filtros de la URL. Así el botón "atrás"
   // del navegador devuelve la agenda como estaba y se puede compartir
-  // un link ya filtrado.
+  // un link ya filtrado. Se repite el parámetro por cada valor elegido
+  // (?pais=Argentina&pais=Brasil), así que un link viejo con un solo
+  // valor sigue funcionando igual.
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     if (q.get("vista") === "calendario") setVista("calendario");
-    if (q.get("tipo")) setTipo(q.get("tipo"));
-    if (q.get("pais")) setPais(q.get("pais"));
-    if (q.get("provincia")) setProvincia(q.get("provincia"));
+    setTipos(q.getAll("tipo"));
+    setPaises(q.getAll("pais"));
+    setProvincias(q.getAll("provincia"));
     if (/^\d{4}-\d{2}-\d{2}$/.test(q.get("fecha") || "")) setFecha(q.get("fecha"));
     setHidratado(true);
   }, []);
@@ -38,9 +44,9 @@ export default function AgendaLista({ proximos, pasados }) {
     if (!hidratado) return;
     const q = new URLSearchParams();
     if (vista === "calendario") q.set("vista", "calendario");
-    if (tipo) q.set("tipo", tipo);
-    if (pais) q.set("pais", pais);
-    if (provincia) q.set("provincia", provincia);
+    tipos.forEach((t) => q.append("tipo", t));
+    paises.forEach((p) => q.append("pais", p));
+    provincias.forEach((p) => q.append("provincia", p));
     if (fecha) q.set("fecha", fecha);
     const s = q.toString();
     window.history.replaceState(
@@ -48,33 +54,66 @@ export default function AgendaLista({ proximos, pasados }) {
       "",
       s ? `${window.location.pathname}?${s}` : window.location.pathname
     );
-  }, [hidratado, vista, tipo, pais, provincia, fecha]);
+  }, [hidratado, vista, tipos, paises, provincias, fecha]);
 
   const todos = useMemo(() => [...proximos, ...pasados], [proximos, pasados]);
-  const tipos = useMemo(() => unicos(todos.map((e) => e.tipo)), [todos]);
-  const paises = useMemo(() => unicos(todos.map((e) => e.pais)), [todos]);
-  const provincias = useMemo(
+  const tiposDisponibles = useMemo(() => unicos(todos.map((e) => e.tipo)), [todos]);
+  const paisesDisponibles = useMemo(() => unicos(todos.map((e) => e.pais)), [todos]);
+
+  // Las provincias que se ofrecen dependen de los países elegidos.
+  const provinciasDisponibles = useMemo(
     () =>
       unicos(
-        todos.filter((e) => !pais || e.pais === pais).map((e) => e.provincia)
+        todos
+          .filter((e) => paises.length === 0 || estaEn(e.pais, paises))
+          .map((e) => e.provincia)
       ),
-    [todos, pais]
+    [todos, paises]
   );
 
-  const hayFiltros = tipo || pais || provincia || fecha || busca;
+  const hayFiltros =
+    tipos.length || paises.length || provincias.length || fecha || busca;
 
   const borrarFiltros = () => {
     setBusca("");
-    setTipo("");
-    setPais("");
-    setProvincia("");
+    setTipos([]);
+    setPaises([]);
+    setProvincias([]);
     setFecha("");
   };
 
-  // Comparación tolerante: un espacio de más en Airtable no tiene por qué
-  // romper un filtro.
-  const igual = (a, b) =>
-    String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+  // Suma o saca un valor de una lista de filtros.
+  //
+  // Siempre con la forma funcional (previa => …) y nunca leyendo la lista
+  // del render actual: si no, dos clics seguidos antes de que React vuelva
+  // a dibujar leen los dos el mismo valor viejo y uno se pierde.
+  const alternar = (poner) => (valor) => {
+    if (!valor) return;
+    poner((previa) =>
+      previa.some((v) => pelado(v) === pelado(valor))
+        ? previa.filter((v) => pelado(v) !== pelado(valor))
+        : [...previa, valor]
+    );
+  };
+
+  const alternarTipo = alternar(setTipos);
+  const alternarPais = alternar(setPaises);
+  const alternarProvincia = alternar(setProvincias);
+
+  // Si cambian los países, se caen solas las provincias que ya no
+  // corresponden. Devolvemos la misma lista cuando no hay nada que sacar,
+  // para no disparar otro render al pedo.
+  useEffect(() => {
+    if (!hidratado) return;
+    setProvincias((previas) => {
+      const validas = previas.filter((p) =>
+        provinciasDisponibles.some((d) => pelado(d) === pelado(p))
+      );
+      return validas.length === previas.length ? previas : validas;
+    });
+  }, [hidratado, provinciasDisponibles]);
+
+  const seleccion = { tipos, paises, provincias };
 
   // Busca por nombre, ciudad, provincia y organizador, sin acentos ni mayúsculas.
   const termino = pelado(busca);
@@ -86,26 +125,18 @@ export default function AgendaLista({ proximos, pasados }) {
         .join(" ")
     ).includes(termino);
 
-  const pasaFiltros = (e) =>
-    coincide(e) &&
-    (!tipo || igual(e.tipo, tipo)) &&
-    (!pais || igual(e.pais, pais)) &&
-    (!provincia || igual(e.provincia, provincia)) &&
-    (!fecha || enDia(e, fecha));
+  const visible = (e) =>
+    coincide(e) && pasaFiltros(e, seleccion) && (!fecha || enDia(e, fecha));
 
-  const proximosVisibles = proximos.filter(pasaFiltros);
-  const pasadosVisibles = pasados.filter(pasaFiltros);
+  const proximosVisibles = proximos.filter(visible);
+  const pasadosVisibles = pasados.filter(visible);
 
   // Hasta seis destacados vigentes, respetando los filtros puestos.
   const destacados = proximosVisibles.filter((e) => e.destacado).slice(0, 6);
 
   // Los que puede dibujar el calendario (necesitan fecha), ya filtrados.
   const eventosCalendario = todos.filter(
-    (e) =>
-      e.fechaInicio &&
-      (!tipo || igual(e.tipo, tipo)) &&
-      (!pais || igual(e.pais, pais)) &&
-      (!provincia || igual(e.provincia, provincia))
+    (e) => e.fechaInicio && pasaFiltros(e, seleccion)
   );
 
   // El calendario abre en el primer mes que tenga algo para mostrar,
@@ -179,46 +210,59 @@ export default function AgendaLista({ proximos, pasados }) {
           />
         </div>
         <div className="ag-chips" role="group" aria-label="Filtrar por tipo">
-          {tipos.map((t) => (
-            <button
-              key={t}
-              className={tipo === t ? "chip chip--on" : "chip"}
-              onClick={() => setTipo(tipo === t ? "" : t)}
-            >
-              <span className="dot" style={{ background: color(t) }} />
-              {t}
-            </button>
-          ))}
+          {tiposDisponibles.map((t) => {
+            const puesto = tipos.some((v) => pelado(v) === pelado(t));
+            return (
+              <button
+                key={t}
+                className={puesto ? "chip chip--on" : "chip"}
+                aria-pressed={puesto}
+                onClick={() => alternarTipo(t)}
+              >
+                <span className="dot" style={{ background: color(t) }} />
+                {t}
+              </button>
+            );
+          })}
         </div>
         <div className="ag-selects">
+          {/* Los desplegables suman: al elegir uno aparece como chip abajo
+              y sale de la lista, así se pueden ir apilando. */}
           <select
             className="ag-select"
-            value={pais}
-            aria-label="Filtrar por país"
-            onChange={(e) => {
-              setPais(e.target.value);
-              setProvincia("");
-            }}
+            value=""
+            aria-label="Agregar un país al filtro"
+            onChange={(e) => alternarPais(e.target.value)}
           >
-            <option value="">Todos los países</option>
-            {paises.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
+            <option value="">
+              {paises.length ? "Agregar otro país…" : "Todos los países"}
+            </option>
+            {paisesDisponibles
+              .filter((p) => !paises.some((v) => pelado(v) === pelado(p)))
+              .map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
           </select>
           <select
             className="ag-select"
-            value={provincia}
-            aria-label="Filtrar por provincia o región"
-            onChange={(e) => setProvincia(e.target.value)}
+            value=""
+            aria-label="Agregar una provincia o región al filtro"
+            onChange={(e) => alternarProvincia(e.target.value)}
           >
-            <option value="">Todas las provincias</option>
-            {provincias.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
+            <option value="">
+              {provincias.length
+                ? "Agregar otra provincia…"
+                : "Todas las provincias"}
+            </option>
+            {provinciasDisponibles
+              .filter((p) => !provincias.some((v) => pelado(v) === pelado(p)))
+              .map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
           </select>
           {fecha ? (
             <button className="chip chip--on" onClick={() => setFecha("")}>
@@ -226,6 +270,35 @@ export default function AgendaLista({ proximos, pasados }) {
             </button>
           ) : null}
         </div>
+
+        {paises.length > 0 || provincias.length > 0 ? (
+          <div
+            className="ag-elegidos"
+            role="group"
+            aria-label="Filtros de lugar puestos"
+          >
+            {paises.map((p) => (
+              <button
+                key={`pa-${p}`}
+                className="chip chip--on"
+                aria-label={`Quitar el país ${p}`}
+                onClick={() => alternarPais(p)}
+              >
+                {p} ✕
+              </button>
+            ))}
+            {provincias.map((p) => (
+              <button
+                key={`pr-${p}`}
+                className="chip chip--on"
+                aria-label={`Quitar la provincia ${p}`}
+                onClick={() => alternarProvincia(p)}
+              >
+                {p} ✕
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {destacados.length > 0 && vista === "lista" ? (
@@ -255,8 +328,7 @@ export default function AgendaLista({ proximos, pasados }) {
       <p className="ag-cuenta">
         {proximosVisibles.length === 0
           ? "Ningún evento con estos filtros"
-          : `${proximosVisibles.length} ${proximosVisibles.length === 1 ? "evento" : "eventos"}`}
-        {hayFiltros ? " · filtrado" : ""}
+          : `${proximosVisibles.length} ${proximosVisibles.length === 1 ? "evento" : "eventos"}${hayFiltros ? " · filtrado" : ""}`}
       </p>
 
       {vista === "calendario" ? (
@@ -370,7 +442,7 @@ function ListaCompacta({ eventos, pasado = false }) {
                     {[ev.ciudad || ev.provincia, ev.pais]
                       .filter(Boolean)
                       .join(", ")}
-                    {ev.estadoFechas === "Estimadas" ? " · a confirmar" : ""}
+                    {ev.estadoFechas !== "Confirmadas" ? " · a confirmar" : ""}
                   </span>
                 </span>
                 <span className="ag-fila__flecha" aria-hidden>
@@ -523,13 +595,12 @@ function color(tipo) {
   return TIPO_COLOR[tipo] || "#9aa3b2";
 }
 
-// Minúsculas y sin acentos, para que "cordoba" encuentre "Córdoba".
-function pelado(t) {
-  return String(t || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
+// ¿El valor está en la lista de elegidos? (sin distinguir acentos)
+// pelado() viene de lib/agenda para no tener dos criterios distintos dando
+// vueltas por el mismo problema.
+function estaEn(valor, elegidos) {
+  if (!elegidos || elegidos.length === 0) return true;
+  return elegidos.some((e) => pelado(e) === pelado(valor));
 }
 
 function unicos(lista) {
