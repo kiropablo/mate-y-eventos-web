@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-19"
 ---
+
 El brief es el punto de partida de cualquier propuesta o cotización: lo redacta el solicitante (puede ser una agencia de marketing, una empresa, un corporativo o hasta una municipalidad o gobierno) y ahí vuelca lo que necesita para su evento. Según quién lo escriba cambia mucho su forma: un brief de un organismo gubernamental suele ser muy específico y "duro", acompañado de documentos legales y detalles técnicos exactos (cantidad de pasajes, hospedaje, especificaciones de sonido). Un brief corporativo o de agencia de marketing, en cambio, tiende a ser más abierto y da lugar a interpretación.
 
 El problema recurrente que señala el episodio es que el brief detalla lo técnico (mesas, sillas, equipamiento) pero casi nunca explicita lo esencial: qué quiere lograr realmente el cliente con ese evento. Por eso en la práctica hay que interpretarlo en equipo, leerlo en voz alta, discutirlo, y muchas veces ir más allá del papel: pedirle al cliente un audio contando lo que imagina, hacer preguntas puntuales, buscar referencias visuales, todo para completar la información que el documento escrito no da.
