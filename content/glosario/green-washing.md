@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 En el episodio se marca al green washing como el principal riesgo de cualquier acción de sostenibilidad mal ejecutada: poner unos cestos de basura o vestir personal de verde no alcanza si después no hay un informe de impacto real detrás. La clave para evitarlo, según se plantea, es siempre sostener las acciones con datos concretos y con un análisis de esos datos (dónde se capturaron, en qué horario, qué representan), no solo mostrarlos como maquillaje.
 
 Se señala también que es muy difícil que una activación ambiental reciba críticas en sí misma —nadie va a decir que "salvar el mundo está mal"—, pero el peligro real está en quedar expuesto como green washing cuando la propuesta no tiene sustento real detrás.
