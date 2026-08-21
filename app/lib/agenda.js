@@ -66,6 +66,12 @@ function mapear(record) {
     // la escribe el robot en cada pasada y la tienen todos los eventos.
     verificado: Boolean(f["Verificado por el organizador"]),
     fechaVerificacion: f["Fecha de verificación"] || null,
+    // El circuito de difusión: lo que el organizador pidió corregir, y si ya
+    // lo publicamos en las redes.
+    correcciones: (f["Correcciones del organizador"] || "").trim(),
+    emailOrganizador: (f["Email del organizador"] || "").trim(),
+    difundido: Boolean(f["Difundido"]),
+    fechaDifusion: f["Fecha de difusión"] || null,
     // Los 5 imperdibles del mes. El mes vive en el evento (y no en una lista
     // aparte) para que el archivo de ediciones se arme solo: un evento
     // elegido en septiembre se queda con "2026-09" para siempre.

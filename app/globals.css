@@ -2755,3 +2755,114 @@ footer.site {
   .sus-pasos { grid-template-columns: 1fr; }
   .sus-caja { padding: 24px 20px 28px; }
 }
+
+/* --- Confirmación del organizador -------------------------------------
+   La página a la que llega desde el mail. Reusa .btn y el look de los
+   formularios de sugerir; lo propio es la ficha en revisión. */
+
+.cf-ficha {
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-left: 3px solid var(--magenta);
+  border-radius: 14px;
+  padding: 26px 28px;
+  margin: 30px 0 24px;
+}
+.cf-ficha h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin: 0 0 18px;
+}
+.cf-ficha dl { margin: 0; display: grid; gap: 12px; }
+.cf-ficha dl > div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 4px 16px;
+}
+.cf-ficha dt {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--celeste);
+  padding-top: 2px;
+}
+.cf-ficha dd { margin: 0; color: var(--blanco); }
+.cf-vermas {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--magenta);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+
+.cf-caja { display: grid; gap: 18px; margin-bottom: 30px; }
+.cf-campo { display: grid; gap: 7px; max-width: 460px; }
+.cf-campo > span {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--mute);
+}
+.cf-campo input,
+.cf-campo textarea {
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  color: var(--blanco);
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  width: 100%;
+}
+.cf-campo textarea { resize: vertical; min-height: 110px; line-height: 1.55; }
+.cf-campo input::placeholder,
+.cf-campo textarea::placeholder { color: var(--faint); }
+.cf-campo input:focus,
+.cf-campo textarea:focus { outline: none; border-color: var(--magenta); }
+
+.cf-botones { display: flex; flex-wrap: wrap; gap: 12px; }
+.cf-botones .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cf-error {
+  color: var(--magenta);
+  font-size: 0.92rem;
+  margin: 0;
+}
+.cf-yaesta {
+  color: var(--celeste);
+  font-size: 0.94rem;
+  border-left: 2px solid var(--celeste);
+  padding-left: 14px;
+  margin: 18px 0 0;
+}
+.cf-difusion {
+  color: var(--mute);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+  max-width: 62ch;
+}
+.cf-difusion strong { color: var(--blanco); }
+
+.cf-listo {
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  padding: 30px 32px;
+  margin-bottom: 30px;
+}
+.cf-listo h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  margin: 0 0 12px;
+  color: var(--celeste);
+}
+.cf-listo p { margin: 0 0 12px; }
+.cf-listo p:last-child { margin-bottom: 0; }
+.cf-nota { color: var(--mute); font-size: 0.92rem; }
+
+@media (max-width: 620px) {
+  .cf-ficha dl > div { grid-template-columns: 1fr; gap: 2px; }
+  .cf-ficha { padding: 22px 20px; }
+}

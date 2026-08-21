@@ -45,12 +45,31 @@ const CSS = `
 .adm-tab{background:none;border:1px solid rgba(245,245,245,.14);color:rgba(245,245,245,.55);border-radius:999px;padding:9px 20px;font-family:var(--font-ui);font-size:.84rem;cursor:pointer}
 .adm-tab[data-on="si"]{border-color:#5aa0ff;color:#f5f5f5}
 .adm-tab span{color:rgba(245,245,245,.34);margin-left:7px}
+.org{cursor:default}
+.org-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.org-cab h3{margin:0 0 5px;font-family:var(--font-display);font-size:1.18rem}
+.org-meta{color:rgba(245,245,245,.55);font-size:.86rem}
+.org-estado{font-family:var(--font-ui);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:999px;white-space:nowrap;border:1px solid}
+.org-estado[data-estado="pendiente"]{color:rgba(245,245,245,.5);border-color:rgba(245,245,245,.16)}
+.org-estado[data-estado="verificado"]{color:#93d5f7;border-color:rgba(147,213,247,.45)}
+.org-estado[data-estado="difundido"]{color:#ea478a;border-color:rgba(234,71,138,.5)}
+.org-semana{margin-top:16px;padding:14px 16px;background:rgba(245,245,245,.03);border-radius:10px}
+.org-rotulo{display:block;font-family:var(--font-ui);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#93d5f7;margin-bottom:8px}
+.org-semana ul{margin:0 0 12px;padding-left:18px;color:rgba(245,245,245,.7);font-size:.88rem;line-height:1.6}
+.org-correcciones{margin-top:14px;padding:12px 15px;border-left:2px solid #ea478a;background:rgba(234,71,138,.06);border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.6}
+.org-acciones{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;align-items:center}
+.org-acciones .adm-btn{text-decoration:none;display:inline-flex;align-items:center}
+.org-nota{margin-top:11px;color:rgba(245,245,245,.4);font-size:.82rem}
 .adm-chip--falta{color:#ffb35a;border:1px solid rgba(255,179,90,.45)}
 .adm-aviso{background:rgba(255,179,90,.08);border:1px solid rgba(255,179,90,.3);border-radius:10px;padding:12px 15px;font-family:var(--font-body);font-size:.86rem;line-height:1.55;color:rgba(245,245,245,.75);margin-bottom:18px}
 `;
 
-export default function PanelAdmin({ articulos, glosario }) {
+export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [seccion, setSeccion] = useState("articulos");
+  const [orgs, setOrgs] = useState(organizadores?.eventos || []);
+  const hayFirma = organizadores?.hayFirma !== false;
+  const [copiado, setCopiado] = useState("");
+  const [difundiendo, setDifundiendo] = useState("");
   const [lista, setLista] = useState(articulos);
   const [glo, setGlo] = useState(glosario || []);
   const [abiertoGlo, setAbiertoGlo] = useState(null);
@@ -71,6 +90,58 @@ export default function PanelAdmin({ articulos, glosario }) {
 
   const borradores = lista.filter((a) => !a.publicado).length;
   const borradoresGlo = glo.filter((t) => !t.publicado).length;
+
+  // Dónde está cada evento del circuito.
+  const sinContactar = orgs.filter((e) => !e.verificado).length;
+  const paraDifundir = orgs.filter(
+    (e) => e.verificado && !e.difundido && e.aTiempo
+  ).length;
+
+  async function copiar(texto, clave) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopiado(clave);
+      setTimeout(() => setCopiado(""), 2000);
+    } catch {
+      // Si el navegador no deja copiar, el link igual está a la vista.
+    }
+  }
+
+  // Se tilda después de subir la historia. Le avisa al organizador si dejó
+  // su mail al confirmar.
+  async function marcarDifundido(ev) {
+    if (
+      !confirm(
+        `¿Ya publicaste ${ev.nombre} en las redes?` +
+          (ev.email
+            ? `\n\nSe le va a avisar a ${ev.email}.`
+            : "\n\nNo dejó mail, así que solo queda marcado.")
+      )
+    )
+      return;
+    setDifundiendo(ev.slug);
+    try {
+      const res = await fetch("/api/admin/difundido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: ev.slug }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "No se pudo guardar.");
+      setOrgs((previa) =>
+        previa.map((e) =>
+          e.slug === ev.slug ? { ...e, difundido: true } : e
+        )
+      );
+      if (data.aviso && data.aviso.startsWith("falló")) {
+        alert(`Quedó marcado, pero el aviso al organizador ${data.aviso}.`);
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setDifundiendo("");
+    }
+  }
 
   function abrirTermino(t) {
     setAbiertoGlo(t.id);
@@ -226,7 +297,13 @@ export default function PanelAdmin({ articulos, glosario }) {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="adm-top">
-        <h1>{seccion === "articulos" ? "Artículos" : "Glosario"}</h1>
+        <h1>
+          {seccion === "articulos"
+            ? "Artículos"
+            : seccion === "glosario"
+              ? "Glosario"
+              : "Organizadores"}
+        </h1>
         <button className="adm-salir" type="button" onClick={salir}>
           Cerrar sesión
         </button>
@@ -235,7 +312,9 @@ export default function PanelAdmin({ articulos, glosario }) {
       <div className="adm-resumen">
         {seccion === "articulos"
           ? `${lista.length} artículos · ${borradores} sin revisar`
-          : `${glo.length} términos · ${borradoresGlo} sin revisar`}
+          : seccion === "glosario"
+            ? `${glo.length} términos · ${borradoresGlo} sin revisar`
+            : `${orgs.length} eventos próximos · ${sinContactar} sin verificar · ${paraDifundir} listos para difundir`}
       </div>
 
       <div className="adm-tabs">
@@ -254,6 +333,15 @@ export default function PanelAdmin({ articulos, glosario }) {
           onClick={() => setSeccion("glosario")}
         >
           Glosario{borradoresGlo ? <span>{borradoresGlo} sin revisar</span> : null}
+        </button>
+        <button
+          type="button"
+          className="adm-tab"
+          data-on={seccion === "organizadores" ? "si" : "no"}
+          onClick={() => setSeccion("organizadores")}
+        >
+          Organizadores
+          {paraDifundir ? <span>{paraDifundir} para difundir</span> : null}
         </button>
       </div>
 
@@ -416,6 +504,142 @@ export default function PanelAdmin({ articulos, glosario }) {
             );
           })}
         </div>
+      ) : seccion === "organizadores" ? (
+        <>
+          {!hayFirma ? (
+            <div className="adm-vacio">
+              Falta cargar AGENDA_FIRMA_SECRET en Vercel: sin esa clave no se
+              pueden armar los links de confirmación.
+            </div>
+          ) : null}
+          {orgs.length === 0 ? (
+            <div className="adm-vacio">
+              No hay eventos próximos en la agenda. Si Airtable no responde,
+              probá «Actualizar desde Airtable» acá arriba.
+            </div>
+          ) : (
+            <div className="adm-lista">
+              {orgs.map((ev) => {
+                const estado = ev.difundido
+                  ? "difundido"
+                  : ev.verificado
+                    ? "verificado"
+                    : "pendiente";
+                return (
+                  <article className="adm-item org" key={ev.slug}>
+                    <div className="org-cab">
+                      <div>
+                        <h3>{ev.nombre}</h3>
+                        <div className="org-meta">
+                          {ev.fechas}
+                          {ev.organizador ? ` · ${ev.organizador}` : ""}
+                          {typeof ev.dias === "number"
+                            ? ` · en ${ev.dias} día${ev.dias === 1 ? "" : "s"}`
+                            : ""}
+                        </div>
+                      </div>
+                      <span className="org-estado" data-estado={estado}>
+                        {estado === "difundido"
+                          ? "Difundido"
+                          : estado === "verificado"
+                            ? "Verificado"
+                            : "Sin verificar"}
+                      </span>
+                    </div>
+
+                    {ev.correcciones ? (
+                      <div className="org-correcciones">
+                        <strong>Pidió corregir:</strong> {ev.correcciones}
+                      </div>
+                    ) : null}
+
+                    {ev.semana.length ? (
+                      <div className="org-semana">
+                        <span className="org-rotulo">
+                          Esa semana también
+                        </span>
+                        <ul>
+                          {ev.semana.map((o) => (
+                            <li key={o.nombre}>
+                              {o.nombre}
+                              {o.fechas ? ` — ${o.fechas}` : ""}
+                              {o.ciudad ? `, ${o.ciudad}` : ""}
+                            </li>
+                          ))}
+                        </ul>
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn--sec"
+                          onClick={() =>
+                            copiar(
+                              ev.semana
+                                .map(
+                                  (o) =>
+                                    `- ${o.nombre}${o.fechas ? ` — ${o.fechas}` : ""}${o.ciudad ? `, ${o.ciudad}` : ""}`
+                                )
+                                .join("\n"),
+                              `semana-${ev.slug}`
+                            )
+                          }
+                        >
+                          {copiado === `semana-${ev.slug}`
+                            ? "Copiado"
+                            : "Copiar la lista"}
+                        </button>
+                      </div>
+                    ) : null}
+
+                    <div className="org-acciones">
+                      {ev.link ? (
+                        <button
+                          type="button"
+                          className="adm-btn"
+                          onClick={() => copiar(ev.link, `link-${ev.slug}`)}
+                        >
+                          {copiado === `link-${ev.slug}`
+                            ? "Copiado"
+                            : "Copiar link de confirmación"}
+                        </button>
+                      ) : null}
+
+                      {ev.verificado && !ev.difundido ? (
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn--sec"
+                          disabled={difundiendo === ev.slug}
+                          onClick={() => marcarDifundido(ev)}
+                        >
+                          {difundiendo === ev.slug
+                            ? "Guardando…"
+                            : "Ya lo difundimos"}
+                        </button>
+                      ) : null}
+
+                      <a
+                        className="adm-btn adm-btn--sec"
+                        href={ev.ficha}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Ver la ficha
+                      </a>
+                    </div>
+
+                    {ev.verificado && !ev.aTiempo && !ev.difundido ? (
+                      <div className="org-nota">
+                        Ya no llegamos a difundirlo con tiempo: faltan menos de
+                        cinco días.
+                      </div>
+                    ) : null}
+                    {ev.email ? (
+                      <div className="org-nota">Contacto: {ev.email}</div>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </>
       ) : glo.length === 0 ? (
         <div className="adm-vacio">
           Todavía no hay términos. Corré la Action de Glosario en GitHub y
