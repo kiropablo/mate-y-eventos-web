@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
 import { getEventos, getEventoFresco, yaPaso } from "../../../lib/agenda";
-import { mismaSemana } from "../../../lib/semana";
+import { mismaSemana, propiosEsaSemana } from "../../../lib/semana";
 import { linkDeConfirmacion, hayClave } from "../../../lib/firma";
 import { armarInvitacion } from "../../../lib/mail-invitacion";
 import { mandarCorreo, hayCorreo } from "../../../lib/correo";
@@ -63,11 +63,14 @@ export async function POST(request) {
   // El reporte de la semana sale de la misma agenda, ya sin los eventos del
   // propio organizador.
   const todos = await getEventos();
-  const semana = mismaSemana(ev, todos.filter((e) => !yaPaso(e)));
+  const vigentes = todos.filter((e) => !yaPaso(e));
+  const semana = mismaSemana(ev, vigentes);
+  const propios = propiosEsaSemana(ev, vigentes);
 
   const { asunto, texto, html } = armarInvitacion({
     ev,
     semana,
+    propios,
     link: linkDeConfirmacion(ev.slug),
   });
 

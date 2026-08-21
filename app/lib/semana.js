@@ -67,6 +67,26 @@ export function mismaSemana(evento, eventos, { max = MAXIMO } = {}) {
     .slice(0, max);
 }
 
+// Los eventos de la MISMA semana que organiza la misma gente.
+//
+// mismaSemana los descarta, pero conviene nombrarlos igual: decirle a Messe
+// Frankfurt "no cuento Intersec, que la organizan ustedes" muestra que
+// sabemos de qué hablamos. Callarlos y que él note el hueco, no.
+export function propiosEsaSemana(evento, eventos) {
+  if (!evento || !evento.fechaInicio) return [];
+  const hoy = hoyISO();
+  return eventos
+    .filter(
+      (e) =>
+        e.slug !== evento.slug &&
+        e.fechaInicio &&
+        (e.fechaFin || e.fechaInicio) >= hoy &&
+        mismaSemanaQue(e.fechaInicio, evento.fechaInicio) &&
+        mismoOrganizador(e, evento)
+    )
+    .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio));
+}
+
 // Cuántos días faltan para que arranque el evento.
 export function diasHasta(fechaISO, desde = hoyISO()) {
   if (!fechaISO || !desde) return null;
