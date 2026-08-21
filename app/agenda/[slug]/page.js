@@ -72,16 +72,26 @@ export default async function Evento({ params }) {
     .join(" · ");
   const pasado = yaPaso(ev);
 
-  // Schema Event. Solo se emite si el evento tiene fecha de inicio: sin
-  // startDate, Google descarta la ficha entera y además estaríamos diciendo
-  // que hay un evento cuando todavía no hay nada confirmado.
-  const jsonLd = ev.fechaInicio
+  // Schema Event. Se emite solo si sabemos CUÁNDO y DÓNDE.
+  //
+  // Sin fecha de inicio, Google descarta la ficha entera. Y sin sede ni
+  // ciudad no se puede armar una dirección: sale un Event sin location, que
+  // es exactamente el error que marca Search Console. Son ocho eventos, casi
+  // todos itinerantes o "internacionales", donde de verdad no sabemos dónde
+  // se hacen todavía.
+  //
+  // La ficha se publica igual y se ve igual: lo único que no hacemos es
+  // afirmarle a Google una ubicación que no tenemos.
+  const sabemosDonde = Boolean(ev.venue || ev.ciudad);
+  const jsonLd = ev.fechaInicio && sabemosDonde
     ? {
         "@context": "https://schema.org",
         "@type": "Event",
         name: ev.nombre,
         startDate: ev.fechaInicio,
-        ...(ev.fechaFin ? { endDate: ev.fechaFin } : {}),
+        // Un evento de un solo día igual tiene fecha de cierre: es la misma
+        // que la de inicio. Sin esto, Google lo marca como campo faltante.
+        endDate: ev.fechaFin || ev.fechaInicio,
         // Las fechas estimadas o sin anunciar no se declaran como programadas.
         eventStatus:
           ev.estadoFechas === "Confirmadas"
@@ -89,7 +99,9 @@ export default async function Evento({ params }) {
             : "https://schema.org/EventPostponed",
         eventAttendanceMode:
           "https://schema.org/OfflineEventAttendanceMode",
-        ...(ev.descCorta ? { description: ev.descCorta } : {}),
+        ...(ev.descCorta || ev.descLarga
+          ? { description: ev.descCorta || ev.descLarga.slice(0, 300) }
+          : {}),
         // La portada que generamos nosotros, no el adjunto de Airtable: ese
         // link lleva la hora de vencimiento adentro de la propia URL y Google
         // lo leía vivo o muerto según cuándo pasara. Esta sale de nuestro
@@ -115,7 +127,12 @@ export default async function Evento({ params }) {
                   ...(ev.venue ? { streetAddress: ev.venue } : {}),
                   ...(ev.ciudad ? { addressLocality: ev.ciudad } : {}),
                   ...(ev.provincia ? { addressRegion: ev.provincia } : {}),
-                  ...(paisISO(ev.pais) ? { addressCountry: paisISO(ev.pais) } : {}),
+                  // El código ISO si lo conocemos; si no, el nombre tal cual.
+                  // "Internacional" no entra por ninguna de las dos: no es un
+                  // país, y ponerlo como tal es declarar algo falso.
+                  ...(paisComoDireccion(ev.pais)
+                    ? { addressCountry: paisComoDireccion(ev.pais) }
+                    : {}),
                 },
               },
             }
@@ -405,6 +422,19 @@ const PAISES_ISO = {
 
 function paisISO(nombre) {
   return PAISES_ISO[String(nombre || "").trim()] || null;
+}
+
+// Lo que se puede declarar como país en una dirección.
+//
+// La lista de la agenda tiene entradas que no son países: "Internacional" es
+// una etiqueta nuestra para los eventos que rotan de sede. Ponerla en
+// addressCountry sería afirmarle a Google que existe un país llamado así.
+const NO_SON_PAISES = new Set(["Internacional", "Itinerante", "Otro"]);
+
+function paisComoDireccion(nombre) {
+  const limpio = String(nombre || "").trim();
+  if (!limpio || NO_SON_PAISES.has(limpio)) return null;
+  return paisISO(limpio) || limpio;
 }
 
 function acortar(url) {
