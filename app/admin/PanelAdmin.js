@@ -66,6 +66,8 @@ const CSS = `
 .org-enviado{color:rgba(245,245,245,.45);font-size:.8rem}
 .org-invitar[data-sinmail="si"]{background:rgba(245,245,245,.03);border-color:rgba(245,245,245,.1)}
 .org-estado[data-estado="espera"]{color:#f2c14e;border-color:rgba(242,193,78,.5)}
+.adm-exportar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px;padding:14px 18px;background:rgba(90,160,255,.07);border:1px solid rgba(90,160,255,.22);border-radius:12px}
+.adm-exportar span{color:rgba(245,245,245,.65);font-size:.88rem}
 .adm-buscador{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
 .adm-busca{flex:1 1 260px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:11px 20px;font-family:var(--font-ui);font-size:.9rem}
 .adm-busca::placeholder{color:rgba(245,245,245,.34)}
@@ -497,6 +499,48 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           {listos ? <span>{listos} para escribir</span> : null}
         </button>
       </div>
+
+      {seccion === "organizadores" && listos > 0 ? (
+        <div className="adm-exportar">
+          <span>
+            {listos} evento{listos === 1 ? "" : "s"} con mail y con tiempo.
+          </span>
+          <button
+            type="button"
+            className="adm-btn"
+            onClick={() =>
+              copiar(
+                JSON.stringify(
+                  orgs
+                    .filter(
+                      (e) =>
+                        !e.fechaContacto &&
+                        !e.verificado &&
+                        e.emailSugerido &&
+                        e.aTiempo
+                    )
+                    .map((e) => ({
+                      nombre: e.nombre,
+                      email: e.emailSugerido,
+                      link: e.link,
+                      ficha: e.ficha,
+                      fechas: e.fechas,
+                      organizador: e.organizador,
+                      semana: e.semana,
+                    })),
+                  null,
+                  1
+                ),
+                "exportar"
+              )
+            }
+          >
+            {copiado === "exportar"
+              ? "Copiado"
+              : "Copiar los datos para armar los borradores"}
+          </button>
+        </div>
+      ) : null}
 
       <div className="adm-buscador">
         <input
