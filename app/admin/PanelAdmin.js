@@ -56,7 +56,7 @@ const CSS = `
 .org-semana{margin-top:16px;padding:14px 16px;background:rgba(245,245,245,.03);border-radius:10px}
 .org-rotulo{display:block;font-family:var(--font-ui);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#93d5f7;margin-bottom:8px}
 .org-semana ul{margin:0 0 12px;padding-left:18px;color:rgba(245,245,245,.7);font-size:.88rem;line-height:1.6}
-.org-correcciones{margin-top:14px;padding:12px 15px;border-left:2px solid #ea478a;background:rgba(234,71,138,.06);border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.6}
+.org-correcciones{white-space:pre-wrap;margin-top:14px;padding:12px 15px;border-left:2px solid #ea478a;background:rgba(234,71,138,.06);border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.6}
 .org-acciones{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;align-items:center}
 .org-acciones .adm-btn{text-decoration:none;display:inline-flex;align-items:center}
 .org-nota{margin-top:11px;color:rgba(245,245,245,.4);font-size:.82rem}
@@ -110,8 +110,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
 
   // Dónde está cada evento del circuito.
   const sinContactar = orgs.filter((e) => !e.verificado).length;
+  // Mismo criterio que el filtro «Para difundir»: si el contador dijera 0 y
+  // el filtro mostrara uno, no se sabría a cuál creerle.
   const paraDifundir = orgs.filter(
-    (e) => e.verificado && !e.difundido && e.aTiempo
+    (e) => e.verificado && !e.difundido && !e.revisionPendiente
   ).length;
 
   async function copiar(texto, clave) {
@@ -379,7 +381,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           : filtro === "sinverificar"
             ? !e.verificado && !e.revisionPendiente
             : filtro === "paradifundir"
-              ? e.verificado && !e.difundido
+              ? e.verificado && !e.difundido && !e.revisionPendiente
               : true))
   );
 
@@ -765,6 +767,37 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                       </div>
                     ) : null}
 
+                    {!ev.verificado && !ev.revisionPendiente ? (
+                      <div className="org-invitar">
+                        <input
+                          type="email"
+                          className="org-mail"
+                          value={paraQuien[ev.slug] ?? ev.emailSugerido ?? ""}
+                          onChange={(e) =>
+                            setParaQuien((p) => ({ ...p, [ev.slug]: e.target.value }))
+                          }
+                          placeholder="mail del organizador"
+                        />
+                        <button
+                          type="button"
+                          className="adm-btn"
+                          disabled={invitando === ev.slug}
+                          onClick={() => invitar(ev)}
+                        >
+                          {invitando === ev.slug
+                            ? "Enviando…"
+                            : ev.fechaContacto
+                              ? "Volver a enviar"
+                              : "Enviar la invitación"}
+                        </button>
+                        {ev.fechaContacto ? (
+                          <span className="org-enviado">
+                            Enviado el {ev.fechaContacto}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
+
                     <div className="org-acciones">
                       {ev.link ? (
                         <button
@@ -799,7 +832,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         </>
                       ) : null}
 
-                      {ev.verificado && !ev.difundido ? (
+                      {ev.verificado && !ev.difundido && !ev.revisionPendiente ? (
                         <button
                           type="button"
                           className="adm-btn adm-btn--sec"

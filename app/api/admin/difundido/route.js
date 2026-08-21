@@ -41,6 +41,23 @@ export async function POST(request) {
     return Response.json({ ok: false, error: "No existe ese evento." }, { status: 404 });
   }
 
+  // Si ya estaba difundido no se vuelve a avisar: dos personas con el panel
+  // abierto tildando a la vez le mandarían dos mails al organizador.
+  if (ev.difundido) {
+    return Response.json({ ok: true, aviso: "ya-estaba" });
+  }
+  // Tampoco se difunde algo que está esperando nuestra revisión: los datos
+  // que íbamos a publicar son justamente los que están en duda.
+  if (ev.revisionPendiente) {
+    return Response.json(
+      {
+        ok: false,
+        error: "Ese evento está esperando tu OK. Revisalo antes de difundirlo.",
+      },
+      { status: 409 }
+    );
+  }
+
   const hoy = new Date().toLocaleDateString("en-CA", {
     timeZone: "America/Argentina/Buenos_Aires",
   });
@@ -81,10 +98,10 @@ export async function POST(request) {
         `Hola:`,
         "",
         `Como te habíamos dicho, ${ev.nombre} ya está publicado en las redes de ${SITE.name}.`,
-        LINKS.instagram ? `Podés verlo acá: ${LINKS.instagram}` : "",
+        LINKS.instagram ? `Podés verlo acá: ${LINKS.instagram}` : null,
         "",
         `La ficha con el sello Verificado quedó en ${SITE.url}/agenda/${ev.slug}`,
-        formatRango(ev) ? `Fechas: ${formatRango(ev)}` : "",
+        formatRango(ev) ? `Fechas: ${formatRango(ev)}` : null,
         "",
         `Si querés, podés poner el sello en tu propio sitio: el código está en ${SITE.url}/agenda/verificado`,
         "",
@@ -93,7 +110,7 @@ export async function POST(request) {
         `Pablo Quiroga`,
         `${SITE.name}`,
       ]
-        .filter((l) => l !== "")
+        .filter((l) => l !== null)
         .join("\n"),
     });
     aviso = r.ok ? "enviado" : `falló (${r.motivo})`;

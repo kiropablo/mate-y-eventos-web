@@ -1,5 +1,5 @@
 import { formatRango, nombreConAnio } from "./agenda";
-import { DIAS_PARA_DIFUNDIR, llegamosADifundir } from "./semana";
+import { DIAS_PARA_DIFUNDIR, llegamosADifundir, lunesDe, MAXIMO_SEMANA } from "./semana";
 import { SITE } from "./site";
 
 // El mail que le llega al organizador.
@@ -34,18 +34,37 @@ export function armarInvitacion({ ev, semana = [], link }) {
   const nombre = nombreConAnio(ev);
   const cuando = formatRango(ev) || "Fechas por anunciar";
   const donde = [ev.venue, ev.ciudad].filter(Boolean).join(", ");
-  const arranque = diaYMes(ev.fechaInicio);
+  // La semana se agrupa de lunes a domingo, así que se la nombra por su
+  // lunes. Si se usara la fecha del evento, un evento que arranca domingo
+  // titularía "la semana del 20" arriba de una lista que empieza el 14.
+  const arranque = diaYMes(lunesDe(ev.fechaInicio) || ev.fechaInicio);
   const difundimos = llegamosADifundir(ev);
   const hay = semana.length;
 
-  // El asunto lleva el dato, no la marca: es lo que hace que lo abran.
+  // Uno o varios: el plural va acá y no repetido en cada frase, que es como
+  // salía "los otros 1 eventos".
+  // Dos formas porque las dos frases piden distinto artículo:
+  //   "Hotelga y EL OTRO EVENTO de esa semana"  (asunto)
+  //   "esa semana hay OTRO EVENTO en la región" (cuerpo)
+  const cuantos = hay === 1 ? "el otro evento" : `los otros ${hay} eventos`;
+  const cuantosHay = hay === 1 ? "otro evento" : `otros ${hay} eventos`;
+  const evento = hay === 1 ? "evento" : "eventos";
+
+  // El asunto lleva el dato, no la marca: es lo que hace que lo abran. Y el
+  // nombre va con el año de ESTA edición en todos lados, igual que en la caja
+  // de datos: si el asunto dijera el año viejo y la caja el nuevo, el mail se
+  // contradiría solo.
   const asunto = hay
-    ? `${ev.nombre} y los otros ${hay} eventos de esa semana`
-    : `${ev.nombre} está publicado en la agenda de ${SITE.name}`;
+    ? `${nombre} y ${cuantos} de esa semana`
+    : `${nombre} está publicado en la agenda de ${SITE.name}`;
 
   const titular = hay
-    ? `La semana del ${arranque} hay ${hay} evento${hay === 1 ? "" : "s"} más`
-    : `${ev.nombre} ya está en nuestra agenda`;
+    ? `La semana del ${arranque} hay ${hay} ${evento} más`
+    : `${nombre} ya está en nuestra agenda`;
+
+  // Si la lista vino recortada, se avisa: decir "los otros 5" cuando hay
+  // nueve es afirmar algo falso sobre su propia semana.
+  const recortada = hay >= MAXIMO_SEMANA;
 
   const filasSemana = semana.map((o) => ({
     nombre: o.nombre,
@@ -57,13 +76,13 @@ export function armarInvitacion({ ev, semana = [], link }) {
     "Hola:",
     "",
     hay
-      ? `Además de ${ev.nombre}, la semana del ${arranque} en nuestra agenda hay otros ${hay} eventos en la región:`
-      : `${ev.nombre} está publicado en nuestra agenda de eventos de la industria.`,
+      ? `Además de ${nombre}, la semana del ${arranque} en nuestra agenda hay ${cuantosHay} en la región:`
+      : `${nombre} está publicado en nuestra agenda de eventos de la industria.`,
     "",
     ...filasSemana.map((f) => `- ${f.nombre} — ${f.detalle}`),
     hay ? "" : null,
     hay
-      ? "Te lo paso porque a veces una superposición no está en el radar."
+      ? `Te lo paso porque a veces una superposición no está en el radar.${recortada ? " Son los primeros que aparecen en la agenda; puede haber alguno más." : ""}`
       : null,
     hay ? "" : null,
     `Soy Pablo Quiroga, de ${SITE.name}: un podcast de la industria de eventos de Latinoamérica y una agenda pública con más de 260 eventos de la región.`,
@@ -96,10 +115,13 @@ export function armarInvitacion({ ev, semana = [], link }) {
     SITE.url,
     "",
     "—",
-    `Te escribimos porque ${ev.nombre} figura en nuestra agenda pública de eventos (${SITE.url}/agenda). Si preferís que lo saquemos, o que no te escribamos más, respondé este mail con la palabra "baja" y listo.`,
+    `Te escribimos porque ${nombre} figura en nuestra agenda pública de eventos (${SITE.url}/agenda). Si preferís que lo saquemos, o que no te escribamos más, respondé este mail con la palabra "baja" y listo.`,
   ]
     .filter((l) => l !== null)
-    .join("\n");
+    .join("\n")
+    // Tres o más saltos seguidos quedan cuando un bloque opcional no se
+    // escribe: se colapsan a un renglón en blanco.
+    .replace(/\n{3,}/g, "\n\n");
 
   // ----------------------------------------------------------------- html
   const html = `<!DOCTYPE html>
@@ -143,8 +165,8 @@ export function armarInvitacion({ ev, semana = [], link }) {
     <p class="txt" style="margin:0 0 16px;font-size:16px;line-height:1.62;color:#3a3548;">Hola:</p>
     <p class="txt" style="margin:0 0 18px;font-size:16px;line-height:1.62;color:#3a3548;">${
       hay
-        ? `Además de <strong class="fuerte" style="color:#14111c;">${esc(ev.nombre)}</strong>, esa semana en nuestra agenda hay otros ${hay} eventos en la región:`
-        : `<strong class="fuerte" style="color:#14111c;">${esc(ev.nombre)}</strong> está publicado en nuestra agenda de eventos de la industria.`
+        ? `Además de <strong class="fuerte" style="color:#14111c;">${esc(nombre)}</strong>, esa semana en nuestra agenda hay ${esc(cuantosHay)} en la región:`
+        : `<strong class="fuerte" style="color:#14111c;">${esc(nombre)}</strong> está publicado en nuestra agenda de eventos de la industria.`
     }</p>
   </td></tr>
 
@@ -163,7 +185,7 @@ export function armarInvitacion({ ev, semana = [], link }) {
     </td></tr></table>
   </td></tr>
   <tr><td class="pad" style="padding:16px 34px 0;">
-    <p class="tenue" style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#6c667e;">Te lo paso porque a veces una superposición no está en el radar.</p>
+    <p class="tenue" style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#6c667e;">Te lo paso porque a veces una superposición no está en el radar.${recortada ? " Son los primeros que aparecen en la agenda; puede haber alguno más." : ""}</p>
   </td></tr>`
       : ""
   }
@@ -213,7 +235,7 @@ export function armarInvitacion({ ev, semana = [], link }) {
   </td></tr>
 
   <tr><td bgcolor="#f7f7fa" class="caja pad" style="background:#f7f7fa;border-top:1px solid #e3e1e9;padding:18px 34px 22px;">
-    <p class="tenue" style="margin:0;font-size:12.5px;line-height:1.6;color:#8a8498;">Te escribimos porque ${esc(ev.nombre)} figura en nuestra <a href="${esc(SITE.url)}/agenda" style="color:#8a8498;">agenda pública de eventos</a>. Si preferís que lo saquemos, o que no te escribamos más, respondé este mail con la palabra <strong>baja</strong> y listo.</p>
+    <p class="tenue" style="margin:0;font-size:12.5px;line-height:1.6;color:#8a8498;">Te escribimos porque ${esc(nombre)} figura en nuestra <a href="${esc(SITE.url)}/agenda" style="color:#8a8498;">agenda pública de eventos</a>. Si preferís que lo saquemos, o que no te escribamos más, respondé este mail con la palabra <strong>baja</strong> y listo.</p>
   </td></tr>
 </table>
 </td></tr></table>

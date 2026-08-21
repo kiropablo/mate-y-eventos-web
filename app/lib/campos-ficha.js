@@ -12,7 +12,12 @@ import { formatRango } from "./agenda";
 
 export const CAMPOS = [
   { clave: "nombre", rotulo: "Nombre del evento", campo: "Nombre" },
-  { clave: "fechas", rotulo: "Fechas", campo: "—", ayuda: "Día de inicio y de cierre" },
+  {
+    clave: "fechas",
+    rotulo: "Fechas",
+    campo: "—",
+    ayuda: "Día de inicio y de cierre",
+  },
   { clave: "venue", rotulo: "Sede", campo: "Venue", ayuda: "El predio o lugar" },
   { clave: "ciudad", rotulo: "Ciudad y provincia", campo: "Ciudad" },
   { clave: "organizador", rotulo: "Quién organiza", campo: "Organizador" },
@@ -34,13 +39,19 @@ export function valoresDe(ev) {
   const ubicacion = [ev.ciudad, ev.provincia, ev.pais].filter(Boolean).join(", ");
   return {
     nombre: ev.nombre || "",
-    fechas: formatRango(ev) || "",
+    fechas: `${formatRango(ev) || "Sin fecha"}${
+      ev.estadoFechas && ev.estadoFechas !== "Confirmadas"
+        ? ` (publicadas como «${ev.estadoFechas.toLowerCase()}»)`
+        : ""
+    }`,
     venue: ev.venue || "",
     ciudad: ubicacion,
     organizador: ev.organizador || "",
     web: ev.web || "",
     redes: (ev.redes || []).join("\n"),
-    descripcion: ev.descCorta || "",
+    // La misma que se publica en la ficha, no la corta: si el organizador
+    // repasara un texto y en la web saliera otro, el sello no diría nada.
+    descripcion: ev.descLarga || ev.descCorta || "",
     contactos: (ev.contactos || []).join("\n"),
     // Para el logo el "valor" es la imagen misma: se dibuja, no se lee.
     logo: ev.imagen || "",
@@ -55,6 +66,11 @@ export function filasDe(ev) {
     valor: valores[c.clave] || "",
     falta: !valores[c.clave],
   }));
+}
+
+// Deja las líneas que siguen alineadas bajo la primera.
+function sangrar(texto) {
+  return String(texto).split("\n").join("\n          ");
 }
 
 // Arma el texto que queda en Airtable con lo que respondió el organizador.
@@ -78,8 +94,11 @@ export function resumirRespuesta(ev, revisiones, fecha) {
           ? "(hay un logo cargado)"
           : "(sin logo)"
         : valores[c.clave] || "(vacío)";
+      // Redes y Contactos vienen con varias líneas. Sin sangrar las que
+      // siguen, la segunda queda pegada al margen y se confunde con una
+      // etiqueta del reporte.
       cambios.push(
-        `• ${c.rotulo}\n    dice: ${actual}\n    debería decir: ${String(r.correccion).trim()}`
+        `• ${c.rotulo}\n    dice: ${sangrar(actual)}\n    debería decir: ${sangrar(String(r.correccion).trim())}`
       );
     }
   }

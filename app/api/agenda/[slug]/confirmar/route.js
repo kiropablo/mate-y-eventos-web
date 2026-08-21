@@ -16,6 +16,13 @@ const TABLA = "tblaLHf2VSyyyeN2s";
 const recortar = (v, max) => String(v ?? "").trim().slice(0, max);
 const esEmail = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
 
+// Cuántas respuestas se aceptan por evento y por día.
+const MAXIMO_POR_DIA = 2;
+// Cuánto se guarda de historial de correcciones. Al llenarse se descarta lo
+// más VIEJO, no lo más nuevo: si se cortara al revés, el día que se llena
+// dejaríamos de anotar las correcciones que sí importan.
+const MAXIMO_CORRECCIONES = 20000;
+
 export async function POST(req, { params }) {
   const slug = String(params?.slug || "");
   const { searchParams } = new URL(req.url);
@@ -75,6 +82,25 @@ export async function POST(req, { params }) {
     timeZone: "America/Argentina/Buenos_Aires",
   });
 
+  // Tope por evento y por día.
+  //
+  // El link firmado no vence ni se agota: quien lo tenga puede volver a
+  // mandarlo. Y cada envío escribe en Airtable y dispara un mail. Sin tope,
+  // alguien con el link puede llenarnos la casilla, quemarnos la cuota de
+  // correo y hacer que Airtable nos corte la agenda entera, que sale de la
+  // misma base. Dos respuestas por día alcanzan para cualquier uso normal.
+  const yaHoy = (ev.correcciones.match(new RegExp(`\\[${hoy}\\]`, "g")) || [])
+    .length;
+  if (yaHoy >= MAXIMO_POR_DIA) {
+    return Response.json(
+      {
+        error:
+          "Ya recibimos tu respuesta hoy. Si te falta algo, respondé el mail que te mandamos.",
+      },
+      { status: 429 }
+    );
+  }
+
   const pidioCambios = Object.values(limpias).some((r) => !r.ok);
   const resumen = resumirRespuesta(ev, limpias, hoy);
 
@@ -83,12 +109,25 @@ export async function POST(req, { params }) {
   // aplicar y recién ahí verifica. Si el sello se encendiera solo, diría
   // "el organizador apretó un botón", no "los datos están bien".
   const previas = ev.correcciones ? `${ev.correcciones}\n\n` : "";
+  const historial = `${previas}${resumen}`;
   const fields = {
     "Revisión pendiente": true,
-    "Correcciones del organizador": `${previas}${resumen}`.slice(0, 100000),
+    "Correcciones del organizador":
+      historial.length > MAXIMO_CORRECCIONES
+        ? `…\n\n${historial.slice(-MAXIMO_CORRECCIONES)}`
+        : historial,
   };
   if (email) fields["Email del organizador"] = email;
-  if (pidioCambios) fields["Revisar"] = true;
+  if (pidioCambios) {
+    fields["Revisar"] = true;
+    // Si el organizador avisa que un dato está mal, el sello no puede seguir
+    // encendido: dice que él confirmó los datos, y acaba de decir que no.
+    // Vuelve a encenderse cuando lo revisamos y le damos el OK.
+    if (ev.verificado) {
+      fields["Verificado por el organizador"] = false;
+      fields["Fecha de verificación"] = null;
+    }
+  }
 
   const res = await fetch(`https://api.airtable.com/v0/${BASE}/${TABLA}`, {
     method: "PATCH",
@@ -138,7 +177,7 @@ export async function POST(req, { params }) {
       `Falta tu OK: entrá al panel, pestaña Organizadores, y dale "Dar el OK" cuando esté.`,
       `${SITE.url}/admin`,
     ]
-      .filter((l) => l !== "")
+      .filter((l) => l !== null)
       .join("\n"),
     responderA: email || undefined,
   });

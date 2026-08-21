@@ -12,7 +12,8 @@ import { hoyISO, sumarDias, pelado } from "./agenda";
 // lista de todas las semanas del bimestre sin ser una superposición real.
 
 // Cuántos se muestran. Más que esto deja de ser un dato y pasa a ser una lista.
-const MAXIMO = 5;
+export const MAXIMO_SEMANA = 5;
+const MAXIMO = MAXIMO_SEMANA;
 
 // El lunes de la semana que contiene esa fecha.
 export function lunesDe(fechaISO) {
@@ -36,8 +37,13 @@ function mismaSemanaQue(a, b) {
 // peladas mayúsculas y acentos. Alcanza: no hace falta que sea exacto, hace
 // falta que no se le mande a Messe Frankfurt un aviso sobre su propio evento.
 function mismoOrganizador(a, b) {
-  const oa = pelado(a.organizador || "");
-  const ob = pelado(b.organizador || "");
+  // Para comparar identidad se saca TODO lo que no sea letra o número, sin
+  // dejar espacio en el medio. En la base conviven "La Rural S.A." y
+  // "La  Rural SA": si los puntos se reemplazaran por espacios quedaría
+  // "la rural s a" contra "la rural sa", que no coinciden.
+  const limpiar = (t) => pelado(t || "").replace(/[^a-z0-9]/g, "");
+  const oa = limpiar(a.organizador);
+  const ob = limpiar(b.organizador);
   return Boolean(oa && ob && oa === ob);
 }
 
