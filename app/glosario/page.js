@@ -85,7 +85,7 @@ export default function Glosario() {
             <span className="n">—</span>Glosario
           </div>
           <h1>
-            Las palabras
+            Las palabras{" "}
             <br />
             del rubro.
           </h1>

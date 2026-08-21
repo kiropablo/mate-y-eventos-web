@@ -31,7 +31,7 @@ export default function Sobre() {
             <span className="n">—</span>Sobre el proyecto
           </div>
           <h1>
-            Un medio hecho<br />desde adentro.
+            Un medio hecho <br />desde adentro.
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             {SITE.name} nace de años viviendo los eventos desde el backstage, y

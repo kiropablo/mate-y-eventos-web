@@ -54,7 +54,7 @@ export default async function EdicionDelMes({ params }) {
             {mesLargo(edicion.mes)}
           </div>
           <h1>
-            Los imperdibles
+            Los imperdibles{" "}
             <br />
             de {mesLargo(edicion.mes)}.
           </h1>

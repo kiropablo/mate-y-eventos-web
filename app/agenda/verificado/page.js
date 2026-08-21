@@ -120,7 +120,7 @@ export default async function Verificado() {
             <Link href="/agenda">Agenda</Link> / Verificado
           </div>
           <h1>
-            Qué significa
+            Qué significa{" "}
             <br />
             el sello Verificado.
           </h1>

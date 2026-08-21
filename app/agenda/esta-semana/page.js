@@ -167,7 +167,7 @@ export default async function EstaSemana() {
             <Link href="/agenda">Agenda</Link> / Esta semana
           </div>
           <h1>
-            Esta semana
+            Esta semana{" "}
             <br />
             en eventos.
           </h1>

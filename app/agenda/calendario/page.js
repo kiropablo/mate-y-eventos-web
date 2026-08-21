@@ -126,7 +126,7 @@ export default async function Calendario() {
             <Link href="/agenda">Agenda</Link> / Calendario
           </div>
           <h1>
-            La agenda,
+            La agenda,{" "}
             <br />
             dentro de tu calendario.
           </h1>

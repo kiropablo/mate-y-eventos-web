@@ -51,6 +51,7 @@ export default async function Imperdibles() {
             Los imperdibles
             {ultima ? (
               <>
+                {" "}
                 <br />
                 de {mesLargo(ultima.mes)}.
               </>

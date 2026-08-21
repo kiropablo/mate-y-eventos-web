@@ -23,7 +23,7 @@ export default function Newsletter() {
             <span className="n">—</span>Newsletter
           </div>
           <h1>
-            La comunidad,<br />directo a tu mail.
+            La comunidad, <br />directo a tu mail.
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             Ideas, aprendizajes y detrás de escena de la industria de eventos.

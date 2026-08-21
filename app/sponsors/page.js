@@ -84,7 +84,7 @@ export default async function Sponsors() {
             <span className="n">—</span>Para marcas
           </div>
           <h1>
-            Llegá a los que<br />deciden en eventos.
+            Llegá a los que <br />deciden en eventos.
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             No es una audiencia masiva y genérica: es una comunidad específica de

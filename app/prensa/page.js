@@ -22,7 +22,7 @@ export default function Prensa() {
             <span className="n">—</span>Prensa
           </div>
           <h1>
-            Material<br />para prensa.
+            Material <br />para prensa.
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             Todo lo que necesitás para escribir sobre Mate y Eventos o sumarnos a
