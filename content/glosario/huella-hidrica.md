@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 Se menciona como uno de los frentes que hay que decidir si se aborda o no al armar la política ambiental de un evento, junto con residuos, energía y catering. El ejemplo concreto que se da es el manejo del hielo: qué se hace con el hielo sobrante y con el agua que se derrite, algo que en un evento grande puede representar un volumen considerable y que rara vez se planifica.
 
 La lógica que propone el episodio es la misma que para la huella de carbono: no hace falta resolver todo de una, sino elegir en qué frente se puede mejorar realmente (por ejemplo, empezar por la huella hídrica en vez de intentar cubrir absolutamente todo), porque abarcar todos los frentes ambientales a la vez requiere mucho más equipo y presupuesto.
