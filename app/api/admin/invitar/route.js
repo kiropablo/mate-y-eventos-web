@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEventos, getEvento, yaPaso } from "../../../lib/agenda";
+import { getEventos, getEventoFresco, yaPaso } from "../../../lib/agenda";
 import { mismaSemana } from "../../../lib/semana";
 import { linkDeConfirmacion, hayClave } from "../../../lib/firma";
 import { armarInvitacion } from "../../../lib/mail-invitacion";
@@ -55,7 +55,7 @@ export async function POST(request) {
     );
   }
 
-  const ev = await getEvento(slug);
+  const ev = await getEventoFresco(slug);
   if (!ev) {
     return Response.json({ ok: false, error: "No existe ese evento." }, { status: 404 });
   }

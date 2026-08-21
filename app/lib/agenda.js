@@ -134,13 +134,20 @@ export async function getEventos(opciones) {
   return eventos;
 }
 
+// La ficha de un evento, sin pasar por la copia guardada. La usa el panel
+// después de escribir en Airtable, para no mostrar lo que acaba de pisar.
+export async function getEventoFresco(slug) {
+  const { eventos } = await getEventosConEstado({ fresco: true });
+  return eventos.find((e) => e.slug === slug) || null;
+}
+
 // Igual que getEventos, pero además dice si la lectura salió entera.
 //
 // Hace falta para no mentir: el hub muestra "actualizada al {fecha}", y si
 // Airtable cortó a mitad del paginado esa leyenda estaría afirmando frescura
 // sobre una lista incompleta. Con "completa" en false, la página muestra los
 // eventos que pudo traer pero se guarda el sello.
-export async function getEventosConEstado({ estricto = false } = {}) {
+export async function getEventosConEstado({ estricto = false, fresco = false } = {}) {
   const key = process.env.AIRTABLE_API_KEY;
   if (!key) {
     if (estricto) throw new Error("Agenda: falta AIRTABLE_API_KEY");
@@ -162,9 +169,18 @@ export async function getEventosConEstado({ estricto = false } = {}) {
         `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}?${params}`,
         {
           headers: { Authorization: `Bearer ${key}` },
-          // La etiqueta permite refrescar de un saque todo lo que lee la
-          // agenda —páginas, fichas y los .ics— desde /api/agenda/revalidar.
-          next: { revalidate: 3600, tags: ["agenda"] },
+          // Con "fresco" se saltea la copia guardada y se va a Airtable.
+          // Lo usa el panel interno: ahí ver algo de hace media hora no es
+          // "un poco viejo", es cargar un evento en Airtable, no verlo, y no
+          // entender por qué.
+          ...(fresco
+            ? { cache: "no-store" }
+            : {
+                // La etiqueta permite refrescar de un saque todo lo que lee
+                // la agenda —páginas, fichas y los .ics— desde
+                // /api/agenda/revalidar.
+                next: { revalidate: 3600, tags: ["agenda"] },
+              }),
         }
       );
       if (!res.ok) {

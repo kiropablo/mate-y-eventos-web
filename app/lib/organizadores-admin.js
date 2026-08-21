@@ -24,7 +24,7 @@ function primerEmail(lineas) {
 export async function listarOrganizadoresParaPanel() {
   let eventos = [];
   try {
-    eventos = await getEventos();
+    eventos = await getEventos({ fresco: true });
   } catch {
     return { eventos: [], hayFirma: false };
   }

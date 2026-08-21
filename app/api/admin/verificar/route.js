@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEvento } from "../../../lib/agenda";
+import { getEventoFresco } from "../../../lib/agenda";
 
 // "Le doy el OK": el sello se enciende acá, con una persona del otro lado.
 //
@@ -37,7 +37,7 @@ export async function POST(request) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
 
-  const ev = await getEvento(slug);
+  const ev = await getEventoFresco(slug);
   if (!ev) {
     return Response.json({ ok: false, error: "No existe ese evento." }, { status: 404 });
   }

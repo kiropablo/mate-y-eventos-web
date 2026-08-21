@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
 
 // Las dos acciones de la agenda que se disparan desde la consola.
@@ -31,6 +31,11 @@ export async function POST(request) {
   }
 
   if (accion === "refrescar") {
+    // La etiqueta es lo que de verdad tira abajo la copia guardada de
+    // Airtable, que es la que comparten TODOS los que leen la agenda. Sin
+    // esto solo se refrescaban las páginas listadas abajo, y el resto del
+    // sitio seguía sirviendo datos de hasta una hora.
+    revalidateTag("agenda");
     revalidatePath("/agenda");
     revalidatePath("/agenda/[slug]", "page");
     return Response.json({

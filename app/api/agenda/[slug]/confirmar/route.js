@@ -1,5 +1,5 @@
 import { revalidateTag } from "next/cache";
-import { getEvento, formatRango } from "../../../../lib/agenda";
+import { getEventoFresco, formatRango } from "../../../../lib/agenda";
 import { firmaValida } from "../../../../lib/firma";
 import { mandarCorreo, correoInterno } from "../../../../lib/correo";
 import { SITE } from "../../../../lib/site";
@@ -45,7 +45,10 @@ export async function POST(req, { params }) {
     return Response.json({ error: "Pedido inválido." }, { status: 400 });
   }
 
-  const ev = await getEvento(slug);
+  // Sin caché a propósito: el tope de abajo cuenta las respuestas de hoy
+  // leyendo el campo de correcciones. Con una copia guardada, la segunda
+  // llamada no vería la primera y el tope no serviría para nada.
+  const ev = await getEventoFresco(slug);
   if (!ev) {
     return Response.json({ error: "No encontramos el evento." }, { status: 404 });
   }
