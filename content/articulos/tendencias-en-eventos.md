@@ -1,12 +1,12 @@
 ---
 titulo: "Tendencias en eventos: experiencias multisensoriales y qué viene"
 bajada: "Pantallas, streaming, apps y sostenibilidad medible: así se está rediseñando la experiencia del asistente en los eventos que vienen."
-metaDescripcion: "Tendencias 2025 en eventos: experiencias multisensoriales, streaming, apps companion y sostenibilidad medible."
+metaDescripcion: "Tendencias en eventos: experiencias multisensoriales, streaming, apps companion y sostenibilidad medible."
 episodio: "P8Kp5rQilZM"
 episodioTitulo: "T01E01 - Tendencias 2025  qué piden ahora los clientes"
 fecha: "2025-09-17"
 eje: "Tendencias & Tecnología"
-etiquetas: ["tendencias 2025", "experiencias multisensoriales", "streaming", "apps companion", "sostenibilidad"]
+etiquetas: ["tendencias en eventos", "experiencias multisensoriales", "streaming", "apps companion", "sostenibilidad"]
 slugsAnteriores: ["P8Kp5rQilZM"]
 lectura: 5
 generado: "2026-07-22"
