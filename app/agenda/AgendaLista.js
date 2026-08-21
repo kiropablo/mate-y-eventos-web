@@ -377,11 +377,19 @@ export default function AgendaLista({ proximos, pasados }) {
                   ? "Ocultar ediciones pasadas"
                   : `Ver ediciones pasadas (${pasadosVisibles.length})`}
               </button>
-              {verPasados && (
-                <div style={{ marginTop: "22px", textAlign: "left" }}>
-                  <ListaCompacta eventos={pasadosVisibles} pasado />
-                </div>
-              )}
+              {/* Siempre en el HTML, escondida con CSS y no con un if.
+                  Antes se dibujaba solo después del clic, así que los links a
+                  las ediciones pasadas no existían para un rastreador: esas
+                  fichas quedaban en el sitemap sin un solo link interno que
+                  llevara a ellas. Con hidden alcanza: el navegador no las
+                  muestra y el buscador las encuentra igual. */}
+              <div
+                className="ag-pasados__lista"
+                hidden={!verPasados}
+                style={{ marginTop: "22px", textAlign: "left" }}
+              >
+                <ListaCompacta eventos={pasadosVisibles} pasado />
+              </div>
             </div>
           )}
         </>
