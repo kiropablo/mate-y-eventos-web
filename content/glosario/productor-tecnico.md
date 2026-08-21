@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 El productor técnico trabaja sobre la maqueta o render que dejó el diseño, y de ahí extrae toda la documentación técnica necesaria: vistas de costado, cortes, mapeos de sonido (por ejemplo, dónde puede haber cancelación de audio), y la pone a disposición de cada proveedor u operador que trabaje en el evento.
 
 En el episodio se remarca que, muchas veces, la intervención de este rol termina modificando el plano funcional que se había armado originalmente, porque algo que se ve bien en un render no siempre es viable tal cual en la realidad técnica del espacio.
