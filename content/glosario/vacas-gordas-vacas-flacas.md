@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 Es un concepto clave para entender la vida del freelance en la industria de eventos. En Argentina, meses como octubre, noviembre y diciembre suelen ser de mucho trabajo y buenos ingresos —las vacas gordas—, mientras que en otras épocas del año la actividad baja drásticamente y el freelance puede pasar semanas sin proyectos ni cobros —las vacas flacas.
 
 Quien elige el camino freelance en vez del trabajo bajo agencia tiene que aprender a administrar este ciclo: ahorrar en las vacas gordas para sostenerse en las vacas flacas, y entender que a diferencia de un sueldo fijo en agencia, el flujo de ingresos depende enteramente del propio empuje para conseguir clientes y proyectos.
