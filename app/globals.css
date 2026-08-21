@@ -2914,3 +2914,23 @@ footer.site {
   background: rgba(245, 245, 245, 0.06);
   border-radius: 8px; padding: 9px 12px; object-fit: contain;
 }
+
+/* Declaración del espacio pago en la tira de destacados */
+.ag-dest__aviso {
+  margin: -6px 0 16px;
+  font-size: 0.82rem;
+  color: var(--faint);
+}
+.ag-dest__aviso a { color: var(--mute); text-decoration: underline; }
+.ag-dest__pago {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-top: 6px;
+}

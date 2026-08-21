@@ -307,6 +307,15 @@ export default function AgendaLista({ proximos, pasados }) {
       {destacados.length > 0 && vista === "lista" ? (
         <section className="ag-dest">
           <h2 className="ag-dest__tit">★ Destacados</h2>
+          {/* Si alguno de los que están arriba pagó por estar ahí, se dice.
+              No declararlo sería vender publicidad disfrazada de curaduría, y
+              además Google lo penaliza. */}
+          {destacados.some((e) => e.destacadoPago) ? (
+            <p className="ag-dest__aviso">
+              Algunos de estos eventos contrataron este espacio.{" "}
+              <a href="/sponsors">Cómo funciona</a>.
+            </p>
+          ) : null}
           <div className="ag-dest__tira">
             {destacados.map((ev) => (
               <Link key={ev.slug} href={`/agenda/${ev.slug}`} className="ag-dest__card">
@@ -318,6 +327,9 @@ export default function AgendaLista({ proximos, pasados }) {
                   </span>
                 )}
                 <span className="ag-dest__nombre">{ev.nombre}</span>
+                {ev.destacadoPago ? (
+                  <span className="ag-dest__pago">Espacio contratado</span>
+                ) : null}
                 <span className="ag-dest__meta">{ev.fechas}</span>
                 <span className="ag-dest__meta">
                   {[ev.ciudad || ev.provincia, ev.pais].filter(Boolean).join(", ")}

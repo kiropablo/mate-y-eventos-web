@@ -291,7 +291,14 @@ export default async function Evento({ params }) {
                   className="btn"
                   href={ev.web}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  /* Si el evento contrató el destacado, el link a su sitio
+                     es un link pago y hay que declararlo. Google trata como
+                     compra de enlaces los que no lo dicen. */
+                  rel={
+                    ev.destacadoPago
+                      ? "noopener noreferrer sponsored"
+                      : "noopener noreferrer"
+                  }
                 >
                   Sitio oficial
                 </a>

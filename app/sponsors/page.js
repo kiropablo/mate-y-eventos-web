@@ -50,7 +50,7 @@ const FORMATOS = [
   // el activo con más tráfico propio— figure en la vidriera comercial.
   [
     "Destacado en Agenda",
-    "Tu evento arriba de todo en la agenda de la industria, con ficha propia.",
+    "Tu evento arriba de todo en la agenda de la industria, todo el mes. Seis lugares.",
     true,
   ],
 ];

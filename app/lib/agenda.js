@@ -60,7 +60,21 @@ function mapear(record) {
     slug,
     tipo: f["Tipo"] || "",
     interes: f["Interés MyE"] || [],
-    destacado: Boolean(f["Destacado"]),
+    // El destacado del mes es un espacio pago y vence solo.
+    //
+    // Sin fecha de vencimiento habría que acordarse de destildarlo a mano: se
+    // vende un mes, alguien se olvida, y el evento queda arriba gratis medio
+    // año. Con "Destacado hasta" cargado, el sitio lo saca el día que
+    // corresponde.
+    //
+    // Si está tildado y sin fecha, es un destacado editorial nuestro: no vence
+    // y no se declara como pago, porque no lo es.
+    destacado: Boolean(f["Destacado"]) && vigenteDestacado(f["Destacado hasta"]),
+    destacadoHasta: f["Destacado hasta"] || null,
+    // Solo los que tienen fecha de vencimiento son pagos. Es lo que decide si
+    // la tarjeta lleva la etiqueta y si el link al sitio del evento sale
+    // marcado como patrocinado.
+    destacadoPago: Boolean(f["Destacado"]) && Boolean(f["Destacado hasta"]),
     // El sello solo se enciende con la casilla que marca Pablo a mano después
     // de hablar con el organizador. Ojo: NO usar "Última verificación", que
     // la escribe el robot en cada pasada y la tienen todos los eventos.
@@ -109,6 +123,12 @@ function mesValido(crudo) {
   const mes = Number(m[2]);
   if (mes < 1 || mes > 12) return null;
   return `${m[1]}-${String(mes).padStart(2, "0")}`;
+}
+
+// ¿Sigue vigente el destacado? Sin fecha, sí: es editorial y no vence.
+function vigenteDestacado(hasta) {
+  if (!hasta) return true;
+  return String(hasta).slice(0, 10) >= hoyISO();
 }
 
 // Divide un campo de texto largo en líneas limpias.
