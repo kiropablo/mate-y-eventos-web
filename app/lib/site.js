@@ -92,10 +92,19 @@ export const EJES = [
 // El crecimiento y los países siguen cargados a mano porque no hay de dónde
 // sacarlos gratis. Por eso llevan fecha de corte a la vista: un dato viejo
 // con cartel de "actualizado" es peor que un dato viejo con su fecha.
+// Los números que se muestran en la home y en /sponsors.
+//
+// Están CONGELADOS a propósito: antes las vistas salían en vivo de la API de
+// YouTube y se movían solas. Se pasó a número fijo por decisión de Pablo, en
+// agosto de 2026, hasta nuevo aviso.
+//
+// El valor de abajo es el que la API devolvía el día que se congeló, no uno
+// viejo: congelar hacia atrás habría sido mostrar menos de lo que el canal
+// tiene. Para actualizarlos, se cambian acá y se cambia la fecha.
 export const STATS = {
-  vistasYouTube: 32513,
+  vistasYouTube: 46287,
   crecimientoMensual: 5,
   paises: 17,
-  // Cuándo se actualizaron a mano el crecimiento y los países.
-  actualizado: "2026-07-22",
+  // Cuándo se actualizaron a mano. Es la fecha que se publica al pie.
+  actualizado: "2026-08-21",
 };

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
-import { getEpisodes, getEstadisticasCanal } from "./lib/youtube";
+import { getEpisodes } from "./lib/youtube";
 import { getArticulos, formatFecha } from "./lib/articulos";
 import {
   getEventos,
@@ -22,8 +22,9 @@ export default async function Home() {
   const episodes = await getEpisodes();
   // Vistas en vivo desde YouTube; si la API no contesta, el número
   // cargado a mano.
-  const canal = await getEstadisticasCanal();
-  const vistas = canal?.vistas ?? STATS.vistasYouTube;
+  // Congelado: antes salía en vivo de la API de YouTube. Ver STATS en
+  // lib/site.js.
+  const vistas = STATS.vistasYouTube;
 
   // Lo que se viene y lo último escrito, para que la home mande tráfico a las
   // dos secciones que hoy no linkea desde ningún lado.

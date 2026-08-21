@@ -1,7 +1,6 @@
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { SITE, STATS } from "../lib/site";
-import { getEstadisticasCanal } from "../lib/youtube";
 
 const DESCRIPCION =
   "Sumá tu marca a Mate y Eventos y llegá a una audiencia específica de profesionales, productoras y agencias de la industria de eventos en LATAM.";
@@ -67,10 +66,9 @@ function fechaCorta(iso) {
 }
 
 export default async function Sponsors() {
-  // Vistas en vivo desde YouTube; si la API no contesta, el número
-  // cargado a mano.
-  const canal = await getEstadisticasCanal();
-  const vistas = canal?.vistas ?? STATS.vistasYouTube;
+  // Congelado: antes salía en vivo de la API de YouTube. Ver STATS en
+  // lib/site.js.
+  const vistas = STATS.vistasYouTube;
 
   return (
     <>
@@ -150,23 +148,18 @@ export default async function Sponsors() {
 
           <div className="hold reveal" style={{ marginTop: "48px" }}>
             <span className="tag">
-              {canal
-                ? `Vistas en vivo desde YouTube · resto al ${fechaCorta(STATS.actualizado)}`
-                : `Datos al ${fechaCorta(STATS.actualizado)}`}
+              {`Datos al ${fechaCorta(STATS.actualizado)}`}
             </span>
             <p>
-              Métricas reales de nuestras plataformas (Instagram, YouTube y
-              TikTok). El detalle en vivo, con la evolución día a día,
-              transparente y abierto en nuestro panel.
+              Métricas reales de nuestras plataformas: Instagram, YouTube y
+              TikTok. Los números están a la vista y actualizados a la fecha
+              de arriba; si querés el detalle de una campaña puntual, pedilo y
+              te lo pasamos.
             </p>
-            <a
-              className="btn btn--ghost"
-              href={SITE.datosUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Ver panel de métricas
-            </a>
+            {/* Acá iba el botón al panel de métricas. Se saca mientras el
+                panel muestre todo en cero: mandar a un anunciante a un tablero
+                vacío es peor que no ofrecerlo. Para reponerlo, este bloque
+                vuelve tal cual con href={SITE.datosUrl}. */}
           </div>
         </div>
       </section>
