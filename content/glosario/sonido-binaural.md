@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 En experiencias donde se anula la vista, el sonido binaural es una de las herramientas centrales para "ubicar" al espectador en un espacio imaginario. A diferencia de un disco o una mezcla de audio tradicional, con esta tecnología una voz puede escucharse arriba de la cabeza, detrás de la nuca o a una distancia lejana, aunque el oyente tenga apenas dos auriculares puestos.
 
 Todas las piezas sonoras se trabajan con un ingeniero de sonido que arma cada elemento con dinamismo: el audio se va moviendo acorde a la historia que se quiere contar, llevando al espectador de una sensación de lejanía a una de cercanía según lo que necesite la narrativa. Es una técnica más habitual en cine que en el mundo del teatro o los eventos en vivo, y se la considera técnicamente compleja de implementar.
