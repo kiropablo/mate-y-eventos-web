@@ -93,7 +93,17 @@ export default function Confirmar({ slug, firma, nombre, filas }) {
               <div className="cf-fila-dato">
                 <span className="cf-fila-rotulo">{f.rotulo}</span>
                 {f.falta ? (
-                  <span className="cf-falta">Este dato no lo tenemos</span>
+                  <span className="cf-falta">
+                    {f.esImagen
+                      ? "No tenemos el logo del evento"
+                      : "Este dato no lo tenemos"}
+                  </span>
+                ) : f.esImagen ? (
+                  /* El logo se mira, no se lee. Va como <img> suelto y no con
+                     el componente de Next porque acá la imagen viene de
+                     Airtable con un link que vence. */
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className="cf-logo" src={f.valor} alt="Logo del evento" />
                 ) : (
                   <span className="cf-fila-valor">{f.valor}</span>
                 )}
@@ -128,7 +138,11 @@ export default function Confirmar({ slug, firma, nombre, filas }) {
                   autoFocus
                   onChange={(e) => corregir(f.clave, e.target.value)}
                   placeholder={
-                    f.falta ? "Escribí el dato" : "Escribí cómo tiene que decir"
+                    f.esImagen
+                      ? "Pegá el link a tu logo, o escribí «te lo mando por mail»"
+                      : f.falta
+                        ? "Escribí el dato"
+                        : "Escribí cómo tiene que decir"
                   }
                 />
               ) : null}

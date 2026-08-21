@@ -20,6 +20,13 @@ export const CAMPOS = [
   { clave: "redes", rotulo: "Redes", campo: "Redes", ayuda: "Instagram, LinkedIn" },
   { clave: "descripcion", rotulo: "Descripción", campo: "Descripción corta" },
   { clave: "contactos", rotulo: "Contacto", campo: "Contactos", ayuda: "Mail o teléfono público" },
+  {
+    clave: "logo",
+    rotulo: "Logo",
+    campo: "Imagen/Logo",
+    ayuda: "Pegá el link a la imagen, o mandánosla respondiendo el mail",
+    esImagen: true,
+  },
 ];
 
 // El valor publicado de cada campo, en texto plano.
@@ -35,6 +42,8 @@ export function valoresDe(ev) {
     redes: (ev.redes || []).join("\n"),
     descripcion: ev.descCorta || "",
     contactos: (ev.contactos || []).join("\n"),
+    // Para el logo el "valor" es la imagen misma: se dibuja, no se lee.
+    logo: ev.imagen || "",
   };
 }
 
@@ -62,8 +71,15 @@ export function resumirRespuesta(ev, revisiones, fecha) {
     if (r.ok) {
       bien.push(c.rotulo);
     } else if (String(r.correccion || "").trim()) {
+      // Del logo no se escribe el valor: es un link larguísimo de Airtable que
+      // además vence. Alcanza con decir si había uno cargado.
+      const actual = c.esImagen
+        ? valores[c.clave]
+          ? "(hay un logo cargado)"
+          : "(sin logo)"
+        : valores[c.clave] || "(vacío)";
       cambios.push(
-        `• ${c.rotulo}\n    dice: ${valores[c.clave] || "(vacío)"}\n    debería decir: ${String(r.correccion).trim()}`
+        `• ${c.rotulo}\n    dice: ${actual}\n    debería decir: ${String(r.correccion).trim()}`
       );
     }
   }

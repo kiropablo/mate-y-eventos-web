@@ -2909,3 +2909,8 @@ footer.site {
   .cf-fila { grid-template-columns: 1fr; }
   .cf-fila-acciones { justify-content: space-between; }
 }
+.cf-logo {
+  max-width: 190px; max-height: 84px; width: auto; height: auto;
+  background: rgba(245, 245, 245, 0.06);
+  border-radius: 8px; padding: 9px 12px; object-fit: contain;
+}
