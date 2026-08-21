@@ -60,6 +60,10 @@ const CSS = `
 .org-acciones{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;align-items:center}
 .org-acciones .adm-btn{text-decoration:none;display:inline-flex;align-items:center}
 .org-nota{margin-top:11px;color:rgba(245,245,245,.4);font-size:.82rem}
+.org-invitar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:16px;padding:14px 16px;background:rgba(90,160,255,.06);border:1px solid rgba(90,160,255,.2);border-radius:10px}
+.org-mail{flex:1 1 220px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:10px 18px;font-family:var(--font-ui);font-size:.88rem}
+.org-mail:focus{outline:none;border-color:#5aa0ff}
+.org-enviado{color:rgba(245,245,245,.45);font-size:.8rem}
 .org-estado[data-estado="espera"]{color:#f2c14e;border-color:rgba(242,193,78,.5)}
 .adm-buscador{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
 .adm-busca{flex:1 1 260px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:11px 20px;font-family:var(--font-ui);font-size:.9rem}
@@ -79,6 +83,8 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [copiado, setCopiado] = useState("");
   const [difundiendo, setDifundiendo] = useState("");
   const [aprobando, setAprobando] = useState("");
+  const [invitando, setInvitando] = useState("");
+  const [paraQuien, setParaQuien] = useState({});
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState("todos");
   const [lista, setLista] = useState(articulos);
@@ -302,6 +308,44 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     }
   }
 
+  // Manda el mail de invitación. El link firmado lo arma el servidor.
+  async function invitar(ev) {
+    const para = (paraQuien[ev.slug] ?? ev.emailSugerido ?? "").trim();
+    if (!para) return alert("Escribí a qué mail se lo mando.");
+    if (
+      !confirm(
+        `¿Le mando la invitación de ${ev.nombre} a ${para}?` +
+          (ev.fechaContacto
+            ? `\n\nOJO: ya le escribiste el ${ev.fechaContacto}.`
+            : "")
+      )
+    )
+      return;
+    setInvitando(ev.slug);
+    try {
+      const res = await fetch("/api/admin/invitar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: ev.slug, para }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "No se pudo enviar.");
+      const hoy = new Date().toLocaleDateString("en-CA");
+      setOrgs((previa) =>
+        previa.map((e) =>
+          e.slug === ev.slug ? { ...e, fechaContacto: hoy, email: para } : e
+        )
+      );
+      if (!data.anotado) {
+        alert("El mail salió, pero no se pudo anotar la fecha en Airtable.");
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setInvitando("");
+    }
+  }
+
   // Un solo buscador para las tres pestañas. Sin acentos ni mayúsculas, para
   // que "produccion" encuentre "Producción".
   const pelar = (t) =>
@@ -328,7 +372,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     (e) =>
       coincide(e.nombre, e.organizador, e.email) &&
       (filtro === "todos" ||
-        (filtro === "pendientes"
+        (filtro === "sincontactar"
+          ? !e.fechaContacto && !e.verificado
+          : filtro === "pendientes"
           ? e.revisionPendiente
           : filtro === "sinverificar"
             ? !e.verificado && !e.revisionPendiente
@@ -343,6 +389,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       ? [
           ["todos", "Todos"],
           ["pendientes", "Esperan tu OK"],
+          ["sincontactar", "Sin escribir"],
           ["paradifundir", "Para difundir"],
           ["sinverificar", "Sin verificar"],
         ]
@@ -722,7 +769,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                       {ev.link ? (
                         <button
                           type="button"
-                          className="adm-btn"
+                          className="adm-btn adm-btn--sec"
                           onClick={() => copiar(ev.link, `link-${ev.slug}`)}
                         >
                           {copiado === `link-${ev.slug}`

@@ -12,6 +12,15 @@ import { SITE } from "./site";
 // Más allá de esto no tiene sentido escribirle a nadie todavía.
 const MESES_ADELANTE = 4;
 
+// El primer mail que aparezca en el campo Contactos, que es texto libre.
+function primerEmail(lineas) {
+  for (const l of lineas || []) {
+    const m = String(l).match(/[^\s<>()[\],;:"]+@[^\s<>()[\],;:"]+\.[a-z]{2,}/i);
+    if (m) return m[0].replace(/[.,;]+$/, "");
+  }
+  return "";
+}
+
 export async function listarOrganizadoresParaPanel() {
   let eventos = [];
   try {
@@ -40,7 +49,11 @@ export async function listarOrganizadoresParaPanel() {
       revisionPendiente: ev.revisionPendiente,
       fechaVerificacion: ev.fechaVerificacion,
       difundido: ev.difundido,
+      fechaContacto: ev.fechaContacto || null,
       email: ev.emailOrganizador || "",
+      // Si en Contactos ya hay un mail, se ofrece como destinatario para no
+      // tener que buscarlo a mano. Se puede cambiar antes de enviar.
+      emailSugerido: ev.emailOrganizador || primerEmail(ev.contactos),
       correcciones: ev.correcciones || "",
       aTiempo: llegamosADifundir(ev),
       ficha: `${SITE.url}/agenda/${ev.slug}`,

@@ -70,6 +70,7 @@ function mapear(record) {
     // lo publicamos en las redes.
     correcciones: (f["Correcciones del organizador"] || "").trim(),
     revisionPendiente: Boolean(f["Revisión pendiente"]),
+    fechaContacto: f["Fecha de contacto"] || null,
     emailOrganizador: (f["Email del organizador"] || "").trim(),
     difundido: Boolean(f["Difundido"]),
     fechaDifusion: f["Fecha de difusión"] || null,
