@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 Luciano usa esta expresión para describir la experiencia de tocar con una banda internacional en un estadio, armando en el momento, con apenas un ensayo de unas horas antes del show y sin margen de error: "one shot, no 20 años haciendo lo mismo".
 
 El término marca la diferencia entre un show ensayado durante meses y una intervención puntual, improvisada, donde todo se define en tiempo real arriba del escenario. En el caso relatado, implicó que un director escénico coordinara en el momento a 14 músicos que nunca habían tocado juntos esa música, sin posibilidad de una segunda toma si algo fallaba.
