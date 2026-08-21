@@ -97,6 +97,7 @@ Variables en Vercel: `WINDSOR_API_KEY`, `SPOTIFY_CSV_URL`, `PAUTA_DESDE` (fecha 
 2. **Mientras una GitHub Action está corriendo, no tocar el repo** (el push falla por conflicto).
 3. Los números que se ven en la web (`STATS` en `site.js`) están **escritos a mano**, no vienen de ningún lado automático.
 4. La web y el panel son proyectos separados: un cambio en uno no afecta al otro.
+6. **Los imperdibles se cargan desde Airtable**, en el campo `Imperdible del mes` de cada evento: es un desplegable con los meses. Elegís el mes y el evento entra en `/imperdibles/{mes}`. Sin ningún evento etiquetado, la sección se publica vacía.
 5. **Un artículo no se renombra a mano.** Su nombre de archivo es su URL. Si hay que cambiarla, hay que sumar la dirección vieja a `slugsAnteriores` en la cabecera: de ahí salen solas las redirecciones (`app/lib/redirecciones.js` → `next.config.js`). Renombrar sin eso deja la URL vieja en la nada.
 
 ---

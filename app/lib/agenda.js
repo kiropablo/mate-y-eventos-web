@@ -116,6 +116,10 @@ function mapear(record) {
 // Acepta "2026-09" y también "2026-09-15" o "2026-9", que es lo que sale si
 // alguien lo escribe apurado. Cualquier otra cosa se ignora en silencio: un
 // mes mal escrito no tiene que hacer aparecer una edición fantasma.
+//
+// En Airtable el campo es un desplegable con los meses cargados, así que hoy
+// no debería llegar nada raro. La tolerancia se deja igual: el campo se puede
+// volver a tocar, y un error acá sería una sección entera vacía.
 function mesValido(crudo) {
   const t = String(crudo || "").trim();
   const m = t.match(/^(\d{4})-(\d{1,2})/);
