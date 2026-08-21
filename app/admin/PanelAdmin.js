@@ -64,6 +64,11 @@ const CSS = `
 .org-mail{flex:1 1 220px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:10px 18px;font-family:var(--font-ui);font-size:.88rem}
 .org-mail:focus{outline:none;border-color:#5aa0ff}
 .org-enviado{color:rgba(245,245,245,.45);font-size:.8rem}
+.org-mails{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:2px}
+.org-chip{background:none;border:1px solid rgba(245,245,245,.16);color:rgba(245,245,245,.6);border-radius:999px;padding:5px 12px;font-family:var(--font-ui);font-size:.76rem;cursor:pointer}
+.org-chip[data-on="si"]{border-color:#5aa0ff;color:#f5f5f5}
+.org-contactos{width:100%;margin-top:4px;color:rgba(245,245,245,.4);font-size:.78rem;line-height:1.5}
+.org-contactos span{color:rgba(245,245,245,.55)}
 .org-invitar[data-sinmail="si"]{background:rgba(245,245,245,.03);border-color:rgba(245,245,245,.1)}
 .org-estado[data-estado="espera"]{color:#f2c14e;border-color:rgba(242,193,78,.5)}
 .adm-exportar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px;padding:14px 18px;background:rgba(90,160,255,.07);border:1px solid rgba(90,160,255,.22);border-radius:12px}
@@ -381,7 +386,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     (e) =>
       coincide(e.nombre, e.organizador, e.email) &&
       (filtro === "todos" ||
-        (filtro === "listos"
+        (filtro === "conmail"
+          ? Boolean(e.emailSugerido)
+          : filtro === "listos"
           ? // Los que se pueden escribir hoy mismo: nadie les escribió, no
             // están verificados, les sacamos un mail del campo Contactos y
             // todavía da el tiempo para ofrecerles la difusión.
@@ -403,6 +410,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       ? [
           ["todos", "Todos"],
           ["listos", "Listos para escribir"],
+          ["conmail", "Con mail"],
           ["pendientes", "Esperan tu OK"],
           ["sincontactar", "Sin escribir"],
           ["paradifundir", "Para difundir"],
@@ -855,6 +863,36 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                           <span className="org-enviado">
                             No tenemos su mail: buscalo y pegalo acá
                           </span>
+                        ) : null}
+
+                        {/* Si en la ficha hay más de un mail, se ofrecen
+                            todos: el primero no siempre es el que sirve. */}
+                        {ev.emailsSugeridos && ev.emailsSugeridos.length > 1 ? (
+                          <div className="org-mails">
+                            {ev.emailsSugeridos.map((m) => (
+                              <button
+                                key={m}
+                                type="button"
+                                className="org-chip"
+                                data-on={
+                                  (paraQuien[ev.slug] ?? ev.emailSugerido) === m
+                                    ? "si"
+                                    : "no"
+                                }
+                                onClick={() =>
+                                  setParaQuien((p) => ({ ...p, [ev.slug]: m }))
+                                }
+                              >
+                                {m}
+                              </button>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        {ev.contactos ? (
+                          <div className="org-contactos">
+                            <span>Contactos de la ficha:</span> {ev.contactos}
+                          </div>
                         ) : null}
                       </div>
                     ) : null}
