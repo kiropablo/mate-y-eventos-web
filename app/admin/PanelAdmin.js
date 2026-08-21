@@ -60,6 +60,14 @@ const CSS = `
 .org-acciones{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;align-items:center}
 .org-acciones .adm-btn{text-decoration:none;display:inline-flex;align-items:center}
 .org-nota{margin-top:11px;color:rgba(245,245,245,.4);font-size:.82rem}
+.org-estado[data-estado="espera"]{color:#f2c14e;border-color:rgba(242,193,78,.5)}
+.adm-buscador{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
+.adm-busca{flex:1 1 260px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:11px 20px;font-family:var(--font-ui);font-size:.9rem}
+.adm-busca::placeholder{color:rgba(245,245,245,.34)}
+.adm-busca:focus{outline:none;border-color:#5aa0ff}
+.adm-filtros{display:flex;gap:6px;flex-wrap:wrap}
+.adm-filtro{background:none;border:1px solid rgba(245,245,245,.12);color:rgba(245,245,245,.5);border-radius:999px;padding:7px 15px;font-family:var(--font-ui);font-size:.78rem;cursor:pointer}
+.adm-filtro[data-on="si"]{border-color:#ea478a;color:#f5f5f5}
 .adm-chip--falta{color:#ffb35a;border:1px solid rgba(255,179,90,.45)}
 .adm-aviso{background:rgba(255,179,90,.08);border:1px solid rgba(255,179,90,.3);border-radius:10px;padding:12px 15px;font-family:var(--font-body);font-size:.86rem;line-height:1.55;color:rgba(245,245,245,.75);margin-bottom:18px}
 `;
@@ -70,6 +78,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const hayFirma = organizadores?.hayFirma !== false;
   const [copiado, setCopiado] = useState("");
   const [difundiendo, setDifundiendo] = useState("");
+  const [aprobando, setAprobando] = useState("");
+  const [busca, setBusca] = useState("");
+  const [filtro, setFiltro] = useState("todos");
   const [lista, setLista] = useState(articulos);
   const [glo, setGlo] = useState(glosario || []);
   const [abiertoGlo, setAbiertoGlo] = useState(null);
@@ -258,6 +269,89 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     setGuardando(false);
   }
 
+  // Le damos el OK definitivo. Ver app/api/admin/verificar.
+  async function aprobar(ev, si) {
+    if (
+      !confirm(
+        si
+          ? `¿Ya aplicaste lo que pidió y le encendemos el sello a ${ev.nombre}?`
+          : `¿Descartar la revisión de ${ev.nombre}? Lo que escribió queda guardado igual.`
+      )
+    )
+      return;
+    setAprobando(ev.slug);
+    try {
+      const res = await fetch("/api/admin/verificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: ev.slug, aprueba: si }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "No se pudo guardar.");
+      setOrgs((previa) =>
+        previa.map((e) =>
+          e.slug === ev.slug
+            ? { ...e, revisionPendiente: false, verificado: si ? true : e.verificado }
+            : e
+        )
+      );
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setAprobando("");
+    }
+  }
+
+  // Un solo buscador para las tres pestañas. Sin acentos ni mayúsculas, para
+  // que "produccion" encuentre "Producción".
+  const pelar = (t) =>
+    String(t || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  const q = pelar(busca).trim();
+  const coincide = (...campos) => !q || pelar(campos.join(" ")).includes(q);
+
+  const listaFiltrada = lista.filter(
+    (a) =>
+      coincide(a.titulo, a.eje, (a.etiquetas || []).join(" "), a.episodioTitulo) &&
+      (filtro === "todos" ||
+        (filtro === "borradores" ? !a.publicado : a.publicado))
+  );
+  const gloFiltrado = glo.filter(
+    (t) =>
+      coincide(t.termino, t.definicionCorta, t.eje) &&
+      (filtro === "todos" ||
+        (filtro === "borradores" ? !t.publicado : t.publicado))
+  );
+  const orgsFiltrados = orgs.filter(
+    (e) =>
+      coincide(e.nombre, e.organizador, e.email) &&
+      (filtro === "todos" ||
+        (filtro === "pendientes"
+          ? e.revisionPendiente
+          : filtro === "sinverificar"
+            ? !e.verificado && !e.revisionPendiente
+            : filtro === "paradifundir"
+              ? e.verificado && !e.difundido
+              : true))
+  );
+
+  // Los filtros que tienen sentido en cada pestaña.
+  const filtros =
+    seccion === "organizadores"
+      ? [
+          ["todos", "Todos"],
+          ["pendientes", "Esperan tu OK"],
+          ["paradifundir", "Para difundir"],
+          ["sinverificar", "Sin verificar"],
+        ]
+      : [
+          ["todos", "Todos"],
+          ["borradores", "Sin revisar"],
+          ["publicados", "Publicados"],
+        ];
+
   // Los dos botones de la agenda. "refrescar" trae lo de Airtable al
   // instante; "buscar" dispara la Action que rastrea internet.
   async function accionAgenda(accion) {
@@ -345,6 +439,35 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
         </button>
       </div>
 
+      <div className="adm-buscador">
+        <input
+          type="search"
+          className="adm-busca"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder={
+            seccion === "articulos"
+              ? "Buscar por título, eje o etiqueta…"
+              : seccion === "glosario"
+                ? "Buscar un término…"
+                : "Buscar por evento u organizador…"
+          }
+        />
+        <div className="adm-filtros">
+          {filtros.map(([clave, rotulo]) => (
+            <button
+              key={clave}
+              type="button"
+              className="adm-filtro"
+              data-on={filtro === clave ? "si" : "no"}
+              onClick={() => setFiltro(clave)}
+            >
+              {rotulo}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <section className="adm-bloque">
         <h2>Agenda de eventos</h2>
         <p>
@@ -380,14 +503,15 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
         </div>
       </section>
 
-      {seccion === "articulos" && lista.length === 0 ? (
+      {seccion === "articulos" && listaFiltrada.length === 0 ? (
         <div className="adm-vacio">
-          Todavía no hay artículos. Corré la Action de Artículos en GitHub y
-          volvé a entrar acá.
+          {lista.length === 0
+            ? "Todavía no hay artículos. Corré la Action de Artículos en GitHub y volvé a entrar acá."
+            : "Ningún artículo coincide con lo que buscás."}
         </div>
       ) : seccion === "articulos" ? (
         <div className="adm-lista">
-          {lista.map((art) => {
+          {listaFiltrada.map((art) => {
             const estaAbierto = abierto === art.id;
             return (
               <article
@@ -512,19 +636,22 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
               pueden armar los links de confirmación.
             </div>
           ) : null}
-          {orgs.length === 0 ? (
+          {orgsFiltrados.length === 0 ? (
             <div className="adm-vacio">
-              No hay eventos próximos en la agenda. Si Airtable no responde,
-              probá «Actualizar desde Airtable» acá arriba.
+              {orgs.length === 0
+                ? "No hay eventos próximos en la agenda. Si Airtable no responde, probá «Actualizar desde Airtable» acá arriba."
+                : "Ningún evento coincide con lo que buscás."}
             </div>
           ) : (
             <div className="adm-lista">
-              {orgs.map((ev) => {
-                const estado = ev.difundido
-                  ? "difundido"
-                  : ev.verificado
-                    ? "verificado"
-                    : "pendiente";
+              {orgsFiltrados.map((ev) => {
+                const estado = ev.revisionPendiente
+                  ? "espera"
+                  : ev.difundido
+                    ? "difundido"
+                    : ev.verificado
+                      ? "verificado"
+                      : "pendiente";
                 return (
                   <article className="adm-item org" key={ev.slug}>
                     <div className="org-cab">
@@ -539,11 +666,13 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         </div>
                       </div>
                       <span className="org-estado" data-estado={estado}>
-                        {estado === "difundido"
-                          ? "Difundido"
-                          : estado === "verificado"
-                            ? "Verificado"
-                            : "Sin verificar"}
+                        {estado === "espera"
+                          ? "Espera tu OK"
+                          : estado === "difundido"
+                            ? "Difundido"
+                            : estado === "verificado"
+                              ? "Verificado"
+                              : "Sin verificar"}
                       </span>
                     </div>
 
@@ -602,6 +731,27 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         </button>
                       ) : null}
 
+                      {ev.revisionPendiente ? (
+                        <>
+                          <button
+                            type="button"
+                            className="adm-btn"
+                            disabled={aprobando === ev.slug}
+                            onClick={() => aprobar(ev, true)}
+                          >
+                            {aprobando === ev.slug ? "Guardando…" : "Dar el OK"}
+                          </button>
+                          <button
+                            type="button"
+                            className="adm-btn adm-btn--sec"
+                            disabled={aprobando === ev.slug}
+                            onClick={() => aprobar(ev, false)}
+                          >
+                            Descartar
+                          </button>
+                        </>
+                      ) : null}
+
                       {ev.verificado && !ev.difundido ? (
                         <button
                           type="button"
@@ -640,14 +790,15 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
             </div>
           )}
         </>
-      ) : glo.length === 0 ? (
+      ) : gloFiltrado.length === 0 ? (
         <div className="adm-vacio">
-          Todavía no hay términos. Corré la Action de Glosario en GitHub y
-          volvé a entrar acá.
+          {glo.length === 0
+            ? "Todavía no hay términos. Corré la Action de Glosario en GitHub y volvé a entrar acá."
+            : "Ningún término coincide con lo que buscás."}
         </div>
       ) : (
         <div className="adm-lista">
-          {glo.map((t) => {
+          {gloFiltrado.map((t) => {
             const estaAbierto = abiertoGlo === t.id;
             return (
               <article

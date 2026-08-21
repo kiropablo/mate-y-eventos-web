@@ -37,6 +37,7 @@ export async function listarOrganizadoresParaPanel() {
       fechaInicio: ev.fechaInicio,
       dias: diasHasta(ev.fechaInicio),
       verificado: ev.verificado,
+      revisionPendiente: ev.revisionPendiente,
       fechaVerificacion: ev.fechaVerificacion,
       difundido: ev.difundido,
       email: ev.emailOrganizador || "",

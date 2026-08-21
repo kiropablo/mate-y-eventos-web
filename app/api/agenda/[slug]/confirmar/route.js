@@ -3,6 +3,7 @@ import { getEvento, formatRango } from "../../../../lib/agenda";
 import { firmaValida } from "../../../../lib/firma";
 import { mandarCorreo, correoInterno } from "../../../../lib/correo";
 import { SITE } from "../../../../lib/site";
+import { resumirRespuesta, CAMPOS } from "../../../../lib/campos-ficha";
 
 // El organizador confirma su ficha desde el link firmado que le llegó por mail.
 //
@@ -42,13 +43,27 @@ export async function POST(req, { params }) {
     return Response.json({ error: "No encontramos el evento." }, { status: 404 });
   }
 
-  const confirma = datos?.confirma === true;
   const email = recortar(datos?.email, 160);
-  const correcciones = recortar(datos?.correcciones, 4000);
+  const revisiones = datos?.revisiones;
 
-  if (!confirma && !correcciones) {
+  if (!revisiones || typeof revisiones !== "object") {
+    return Response.json({ error: "Faltan las respuestas." }, { status: 400 });
+  }
+
+  // Solo se aceptan los campos que la ficha realmente muestra: así nadie
+  // manda claves inventadas que después alguien lee como si fueran datos.
+  const limpias = {};
+  for (const c of CAMPOS) {
+    const r = revisiones[c.clave];
+    if (!r || typeof r !== "object") continue;
+    const correccion = recortar(r.correccion, 1000);
+    if (r.ok === true) limpias[c.clave] = { ok: true };
+    else if (correccion) limpias[c.clave] = { ok: false, correccion };
+  }
+
+  if (Object.keys(limpias).length === 0) {
     return Response.json(
-      { error: "Contanos qué hay que corregir." },
+      { error: "Marcá al menos un dato antes de enviar." },
       { status: 400 }
     );
   }
@@ -60,22 +75,20 @@ export async function POST(req, { params }) {
     timeZone: "America/Argentina/Buenos_Aires",
   });
 
-  // Solo se tocan los campos del circuito. Nombre, fechas y sede no se
-  // modifican nunca desde acá: si el organizador pide un cambio, queda escrito
-  // en "Correcciones" y lo aplica una persona.
-  const fields = {};
-  if (confirma) {
-    fields["Verificado por el organizador"] = true;
-    fields["Fecha de verificación"] = hoy;
-  }
+  const pidioCambios = Object.values(limpias).some((r) => !r.ok);
+  const resumen = resumirRespuesta(ev, limpias, hoy);
+
+  // El sello NO se enciende acá. La respuesta del organizador queda como
+  // pendiente de revisión: una persona la mira, aplica lo que haya que
+  // aplicar y recién ahí verifica. Si el sello se encendiera solo, diría
+  // "el organizador apretó un botón", no "los datos están bien".
+  const previas = ev.correcciones ? `${ev.correcciones}\n\n` : "";
+  const fields = {
+    "Revisión pendiente": true,
+    "Correcciones del organizador": `${previas}${resumen}`.slice(0, 100000),
+  };
   if (email) fields["Email del organizador"] = email;
-  if (correcciones) {
-    const previas = ev.correcciones ? `${ev.correcciones}\n\n` : "";
-    fields["Correcciones del organizador"] =
-      `${previas}[${hoy}] ${correcciones}`.slice(0, 100000);
-    // Que aparezca en la revisión manual.
-    fields["Revisar"] = true;
-  }
+  if (pidioCambios) fields["Revisar"] = true;
 
   const res = await fetch(`https://api.airtable.com/v0/${BASE}/${TABLA}`, {
     method: "PATCH",
@@ -107,29 +120,28 @@ export async function POST(req, { params }) {
   const ficha = `${SITE.url}/agenda/${ev.slug}`;
   await mandarCorreo({
     para: correoInterno(),
-    asunto: confirma
-      ? `✅ ${ev.nombre} confirmó su ficha`
-      : `✏️ ${ev.nombre} pidió correcciones`,
+    asunto: pidioCambios
+      ? `✏️ ${ev.nombre} respondió con correcciones`
+      : `✅ ${ev.nombre} confirmó su ficha`,
     texto: [
-      confirma
-        ? `${ev.nombre} confirmó que los datos de su ficha están bien.`
-        : `${ev.nombre} pidió que corrijamos algo antes de verificar.`,
+      pidioCambios
+        ? `${ev.nombre} repasó su ficha y marcó cosas para corregir.`
+        : `${ev.nombre} repasó su ficha y está todo bien.`,
       "",
-      `Evento:  ${ev.nombre}`,
-      `Fechas:  ${formatRango(ev) || "sin fecha"}`,
-      `Ficha:   ${ficha}`,
+      `Evento:   ${ev.nombre}`,
+      `Fechas:   ${formatRango(ev) || "sin fecha"}`,
+      `Ficha:    ${ficha}`,
       email ? `Contacto: ${email}` : "Contacto: no dejó mail",
       "",
-      correcciones ? `Lo que pidió corregir:\n${correcciones}` : "",
+      resumen,
       "",
-      confirma
-        ? "Cuando lo publiques en las redes, tildá «Difundido» en el panel y se le avisa solo."
-        : "Corregí la ficha en Airtable y volvé a escribirle.",
+      `Falta tu OK: entrá al panel, pestaña Organizadores, y dale "Dar el OK" cuando esté.`,
+      `${SITE.url}/admin`,
     ]
       .filter((l) => l !== "")
       .join("\n"),
     responderA: email || undefined,
   });
 
-  return Response.json({ ok: true, confirmado: confirma });
+  return Response.json({ ok: true, pendiente: true });
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import Footer from "../../../components/Footer";
 import { getEvento, formatRango } from "../../../lib/agenda";
+import { filasDe } from "../../../lib/campos-ficha";
 import { firmaValida } from "../../../lib/firma";
 import { llegamosADifundir, DIAS_PARA_DIFUNDIR } from "../../../lib/semana";
 import { SITE } from "../../../lib/site";
@@ -50,9 +51,6 @@ export default async function ConfirmarFicha({ params, searchParams }) {
     );
   }
 
-  const lugar = [ev.venue, ev.ciudad, ev.provincia, ev.pais]
-    .filter(Boolean)
-    .join(" · ");
   const aTiempo = llegamosADifundir(ev);
 
   return (
@@ -70,57 +68,25 @@ export default async function ConfirmarFicha({ params, searchParams }) {
           <h1>¿Están bien los datos de {ev.nombre}?</h1>
 
           <p className="lead">
-            Así está publicado hoy en la agenda de {SITE.name}. Si está todo
-            bien, encendemos el sello <strong>Verificado</strong> en la ficha.
-            Si algo cambió, contanos qué y lo corregimos.
+            Así está publicado hoy en la agenda de {SITE.name}. Repasá cada
+            dato: marcá los que están bien y corregí los que no. Con eso
+            encendemos el sello <strong>Verificado</strong> en la ficha.
           </p>
 
           {ev.verificado ? (
             <p className="cf-yaesta">
               Esta ficha ya figura como verificada
               {ev.fechaVerificacion ? ` desde el ${ev.fechaVerificacion}` : ""}.
-              Podés volver a confirmarla o pedirnos una corrección igual.
+              Si algo cambió, podés corregirlo igual.
             </p>
           ) : null}
 
-          <div className="cf-ficha">
-            <h2>{ev.nombre}</h2>
-            <dl>
-              <div>
-                <dt>Fechas</dt>
-                <dd>{formatRango(ev) || "Sin confirmar"}</dd>
-              </div>
-              {lugar ? (
-                <div>
-                  <dt>Dónde</dt>
-                  <dd>{lugar}</dd>
-                </div>
-              ) : null}
-              {ev.organizador ? (
-                <div>
-                  <dt>Organiza</dt>
-                  <dd>{ev.organizador}</dd>
-                </div>
-              ) : null}
-              {ev.web ? (
-                <div>
-                  <dt>Sitio</dt>
-                  <dd>{ev.web.replace(/^https?:\/\//, "").replace(/\/$/, "")}</dd>
-                </div>
-              ) : null}
-              {ev.descCorta ? (
-                <div>
-                  <dt>Descripción</dt>
-                  <dd>{ev.descCorta}</dd>
-                </div>
-              ) : null}
-            </dl>
-            <Link className="cf-vermas" href={`/agenda/${ev.slug}`}>
-              Ver la ficha completa →
-            </Link>
-          </div>
-
-          <Confirmar slug={ev.slug} firma={firma} nombre={ev.nombre} />
+          <Confirmar
+            slug={ev.slug}
+            firma={firma}
+            nombre={ev.nombre}
+            filas={filasDe(ev)}
+          />
 
           {/* La ayuda con las redes solo se ofrece si todavía da el tiempo.
               Con el evento encima no se llega a armar nada, y prometerlo

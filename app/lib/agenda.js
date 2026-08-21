@@ -69,6 +69,7 @@ function mapear(record) {
     // El circuito de difusión: lo que el organizador pidió corregir, y si ya
     // lo publicamos en las redes.
     correcciones: (f["Correcciones del organizador"] || "").trim(),
+    revisionPendiente: Boolean(f["Revisión pendiente"]),
     emailOrganizador: (f["Email del organizador"] || "").trim(),
     difundido: Boolean(f["Difundido"]),
     fechaDifusion: f["Fecha de difusión"] || null,

@@ -2866,3 +2866,46 @@ footer.site {
   .cf-ficha dl > div { grid-template-columns: 1fr; gap: 2px; }
   .cf-ficha { padding: 22px 20px; }
 }
+
+/* Repaso dato por dato de la ficha */
+.cf-todo {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  padding-bottom: 20px; border-bottom: 1px solid var(--line);
+}
+.cf-cuenta { color: var(--mute); font-size: 0.86rem; font-family: var(--font-ui); }
+.cf-filas { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cf-fila {
+  display: grid; gap: 10px; padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  grid-template-columns: 1fr auto; align-items: start;
+}
+.cf-fila[data-ok="si"] { opacity: 0.62; }
+.cf-fila-dato { display: grid; gap: 4px; min-width: 0; }
+.cf-fila-rotulo {
+  font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--celeste);
+}
+.cf-fila-valor { color: var(--blanco); line-height: 1.5; white-space: pre-line; }
+.cf-falta { color: var(--faint); font-style: italic; }
+.cf-ayuda { color: var(--mute); font-size: 0.82rem; }
+.cf-fila-acciones { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cf-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.cf-check input { width: 19px; height: 19px; accent-color: var(--magenta); cursor: pointer; }
+.cf-check span { font-size: 0.88rem; color: var(--mute); font-family: var(--font-ui); }
+.cf-corregir {
+  background: none; border: 1px solid var(--line-2); color: var(--mute);
+  border-radius: 999px; padding: 6px 15px; font-family: var(--font-ui);
+  font-size: 0.8rem; cursor: pointer;
+}
+.cf-corregir:hover { border-color: var(--magenta); color: var(--blanco); }
+.cf-fila-input {
+  grid-column: 1 / -1; background: var(--panel);
+  border: 1px solid var(--magenta); color: var(--blanco);
+  border-radius: 10px; padding: 11px 14px; font-family: var(--font-ui);
+  font-size: 0.95rem; width: 100%; resize: vertical;
+}
+.cf-fila-input:focus { outline: none; }
+@media (max-width: 620px) {
+  .cf-fila { grid-template-columns: 1fr; }
+  .cf-fila-acciones { justify-content: space-between; }
+}

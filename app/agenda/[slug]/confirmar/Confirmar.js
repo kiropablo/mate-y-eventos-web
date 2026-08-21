@@ -2,22 +2,39 @@
 
 import { useState } from "react";
 
-// Los dos botones que ve el organizador. Uno confirma, el otro abre el
-// cuadro para escribir qué hay que corregir.
+// El repaso de la ficha, dato por dato.
 //
-// El mail es opcional a propósito: pedirlo como obligatorio para confirmar
-// convertiría un trámite de un clic en un formulario, y el clic es todo lo
-// que le pedimos.
+// Cada fila arranca SIN tildar a propósito. Si vinieran todas tildadas, el
+// camino cómodo sería mandar sin leer, y el sello dejaría de significar algo.
+// Para el caso normal —está todo bien— hay un "confirmar todo" arriba: sigue
+// siendo un clic, pero es un clic deliberado.
 
-export default function Confirmar({ slug, firma, nombre }) {
-  const [modo, setModo] = useState("");
+export default function Confirmar({ slug, firma, nombre, filas }) {
+  const [revisiones, setRevisiones] = useState({});
   const [email, setEmail] = useState("");
-  const [correcciones, setCorrecciones] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const [listo, setListo] = useState("");
+  const [listo, setListo] = useState(false);
   const [error, setError] = useState("");
 
-  async function enviar(confirma) {
+  const marcar = (clave, ok) =>
+    setRevisiones((p) => ({ ...p, [clave]: { ...p[clave], ok } }));
+
+  const corregir = (clave, correccion) =>
+    setRevisiones((p) => ({ ...p, [clave]: { ...p[clave], ok: false, correccion } }));
+
+  const todoBien = filas.every((f) => revisiones[f.clave]?.ok);
+
+  function confirmarTodo() {
+    const nuevo = {};
+    for (const f of filas) nuevo[f.clave] = { ok: true };
+    setRevisiones(nuevo);
+  }
+
+  const tocados = filas.filter(
+    (f) => revisiones[f.clave]?.ok || String(revisiones[f.clave]?.correccion || "").trim()
+  ).length;
+
+  async function enviar() {
     setEnviando(true);
     setError("");
     try {
@@ -26,12 +43,12 @@ export default function Confirmar({ slug, firma, nombre }) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ confirma, email, correcciones }),
+          body: JSON.stringify({ revisiones, email }),
         }
       );
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || "No se pudo guardar.");
-      setListo(confirma ? "confirmado" : "correcciones");
+      setListo(true);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -39,29 +56,18 @@ export default function Confirmar({ slug, firma, nombre }) {
     }
   }
 
-  if (listo === "confirmado") {
+  if (listo) {
     return (
       <div className="cf-listo">
-        <h2>Listo, quedó verificado</h2>
+        <h2>Listo, nos llegó</h2>
         <p>
-          Ya encendimos el sello en la ficha de <strong>{nombre}</strong>. Si nos
-          diste tu mail, te escribimos cuando lo publiquemos en nuestras redes.
+          Gracias por repasar la ficha de <strong>{nombre}</strong>. La miramos
+          nosotros, aplicamos lo que nos marcaste y ahí encendemos el sello.
         </p>
         <p className="cf-nota">
-          Gracias por el minuto. Cualquier cambio que surja más adelante,
-          respondé el mail que te mandamos y lo corregimos.
-        </p>
-      </div>
-    );
-  }
-
-  if (listo === "correcciones") {
-    return (
-      <div className="cf-listo">
-        <h2>Anotado, gracias</h2>
-        <p>
-          Nos llegó lo que hay que corregir de <strong>{nombre}</strong>. Lo
-          revisamos y te escribimos cuando esté arreglado.
+          {email
+            ? "Te escribimos a ese mail cuando esté."
+            : "Si querés que te avisemos cuando esté, respondé el mail que te mandamos."}
         </p>
       </div>
     );
@@ -69,80 +75,92 @@ export default function Confirmar({ slug, firma, nombre }) {
 
   return (
     <div className="cf-caja">
-      {modo !== "corregir" ? (
-        <>
-          <label className="cf-campo">
-            <span>Tu email (opcional)</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="para avisarte cuando lo difundamos"
-              autoComplete="email"
-            />
-          </label>
+      <div className="cf-todo">
+        <button type="button" className="btn btn--ghost" onClick={confirmarTodo}>
+          Está todo bien, confirmar los {filas.length} datos
+        </button>
+        <span className="cf-cuenta">
+          {tocados} de {filas.length} revisados
+        </span>
+      </div>
 
-          <div className="cf-botones">
-            <button
-              type="button"
-              className="btn"
-              onClick={() => enviar(true)}
-              disabled={enviando}
-            >
-              {enviando ? "Guardando…" : "Está todo bien"}
-            </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => setModo("corregir")}
-              disabled={enviando}
-            >
-              Hay algo para corregir
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <label className="cf-campo">
-            <span>¿Qué hay que corregir?</span>
-            <textarea
-              rows={5}
-              value={correcciones}
-              onChange={(e) => setCorrecciones(e.target.value)}
-              placeholder="Las fechas cambiaron, la sede es otra, el contacto ya no responde…"
-            />
-          </label>
-          <label className="cf-campo">
-            <span>Tu email (opcional)</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="para avisarte cuando esté corregido"
-              autoComplete="email"
-            />
-          </label>
+      <ul className="cf-filas">
+        {filas.map((f) => {
+          const r = revisiones[f.clave] || {};
+          const corrigiendo = r.ok === false;
+          return (
+            <li key={f.clave} className="cf-fila" data-ok={r.ok ? "si" : "no"}>
+              <div className="cf-fila-dato">
+                <span className="cf-fila-rotulo">{f.rotulo}</span>
+                {f.falta ? (
+                  <span className="cf-falta">Este dato no lo tenemos</span>
+                ) : (
+                  <span className="cf-fila-valor">{f.valor}</span>
+                )}
+                {f.ayuda ? <span className="cf-ayuda">{f.ayuda}</span> : null}
+              </div>
 
-          <div className="cf-botones">
-            <button
-              type="button"
-              className="btn"
-              onClick={() => enviar(false)}
-              disabled={enviando || !correcciones.trim()}
-            >
-              {enviando ? "Enviando…" : "Enviar la corrección"}
-            </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => setModo("")}
-              disabled={enviando}
-            >
-              Volver
-            </button>
-          </div>
-        </>
-      )}
+              <div className="cf-fila-acciones">
+                {!f.falta ? (
+                  <label className="cf-check">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(r.ok)}
+                      onChange={(e) => marcar(f.clave, e.target.checked)}
+                    />
+                    <span>Está bien</span>
+                  </label>
+                ) : null}
+                <button
+                  type="button"
+                  className="cf-corregir"
+                  onClick={() => corregir(f.clave, r.correccion || "")}
+                >
+                  {f.falta ? "Completar" : "Corregir"}
+                </button>
+              </div>
+
+              {corrigiendo ? (
+                <textarea
+                  className="cf-fila-input"
+                  rows={f.clave === "descripcion" ? 3 : 2}
+                  value={r.correccion || ""}
+                  autoFocus
+                  onChange={(e) => corregir(f.clave, e.target.value)}
+                  placeholder={
+                    f.falta ? "Escribí el dato" : "Escribí cómo tiene que decir"
+                  }
+                />
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+
+      <label className="cf-campo">
+        <span>Tu email {todoBien ? "" : "(opcional)"}</span>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="para avisarte cuando quede publicado"
+          autoComplete="email"
+        />
+      </label>
+
+      <div className="cf-botones">
+        <button
+          type="button"
+          className="btn"
+          onClick={enviar}
+          disabled={enviando || tocados === 0}
+        >
+          {enviando ? "Enviando…" : "Enviar"}
+        </button>
+        {tocados === 0 ? (
+          <span className="cf-cuenta">Marcá al menos un dato para enviar</span>
+        ) : null}
+      </div>
 
       {error ? <p className="cf-error">{error}</p> : null}
     </div>
