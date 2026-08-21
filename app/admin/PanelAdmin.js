@@ -64,6 +64,7 @@ const CSS = `
 .org-mail{flex:1 1 220px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:10px 18px;font-family:var(--font-ui);font-size:.88rem}
 .org-mail:focus{outline:none;border-color:#5aa0ff}
 .org-enviado{color:rgba(245,245,245,.45);font-size:.8rem}
+.org-invitar[data-sinmail="si"]{background:rgba(245,245,245,.03);border-color:rgba(245,245,245,.1)}
 .org-estado[data-estado="espera"]{color:#f2c14e;border-color:rgba(242,193,78,.5)}
 .adm-buscador{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
 .adm-busca{flex:1 1 260px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:11px 20px;font-family:var(--font-ui);font-size:.9rem}
@@ -110,6 +111,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
 
   // Dónde está cada evento del circuito.
   const sinContactar = orgs.filter((e) => !e.verificado).length;
+  // Los que se pueden escribir hoy: con mail y con tiempo.
+  const listos = orgs.filter(
+    (e) => !e.fechaContacto && !e.verificado && e.emailSugerido && e.aTiempo
+  ).length;
   // Mismo criterio que el filtro «Para difundir»: si el contador dijera 0 y
   // el filtro mostrara uno, no se sabría a cuál creerle.
   const paraDifundir = orgs.filter(
@@ -374,7 +379,12 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     (e) =>
       coincide(e.nombre, e.organizador, e.email) &&
       (filtro === "todos" ||
-        (filtro === "sincontactar"
+        (filtro === "listos"
+          ? // Los que se pueden escribir hoy mismo: nadie les escribió, no
+            // están verificados, les sacamos un mail del campo Contactos y
+            // todavía da el tiempo para ofrecerles la difusión.
+            !e.fechaContacto && !e.verificado && e.emailSugerido && e.aTiempo
+          : filtro === "sincontactar"
           ? !e.fechaContacto && !e.verificado
           : filtro === "pendientes"
           ? e.revisionPendiente
@@ -390,10 +400,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     seccion === "organizadores"
       ? [
           ["todos", "Todos"],
+          ["listos", "Listos para escribir"],
           ["pendientes", "Esperan tu OK"],
           ["sincontactar", "Sin escribir"],
           ["paradifundir", "Para difundir"],
-          ["sinverificar", "Sin verificar"],
         ]
       : [
           ["todos", "Todos"],
@@ -457,7 +467,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           ? `${lista.length} artículos · ${borradores} sin revisar`
           : seccion === "glosario"
             ? `${glo.length} términos · ${borradoresGlo} sin revisar`
-            : `${orgs.length} eventos próximos · ${sinContactar} sin verificar · ${paraDifundir} listos para difundir`}
+            : `${orgs.length} eventos próximos · ${listos} con mail listos para escribir · ${sinContactar} sin verificar`}
       </div>
 
       <div className="adm-tabs">
@@ -484,7 +494,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           onClick={() => setSeccion("organizadores")}
         >
           Organizadores
-          {paraDifundir ? <span>{paraDifundir} para difundir</span> : null}
+          {listos ? <span>{listos} para escribir</span> : null}
         </button>
       </div>
 
@@ -768,7 +778,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                     ) : null}
 
                     {!ev.verificado && !ev.revisionPendiente ? (
-                      <div className="org-invitar">
+                      <div
+                        className="org-invitar"
+                        data-sinmail={ev.emailSugerido ? "no" : "si"}
+                      >
                         <input
                           type="email"
                           className="org-mail"
@@ -793,6 +806,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         {ev.fechaContacto ? (
                           <span className="org-enviado">
                             Enviado el {ev.fechaContacto}
+                          </span>
+                        ) : !ev.emailSugerido ? (
+                          <span className="org-enviado">
+                            No tenemos su mail: buscalo y pegalo acá
                           </span>
                         ) : null}
                       </div>
