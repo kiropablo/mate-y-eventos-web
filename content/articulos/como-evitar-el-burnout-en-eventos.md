@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["burnout", "liderazgo", "equipos de trabajo", "comunicación en eventos", "producción"]
 lectura: 6
 generado: "2026-08-20"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 Un evento puede tener el mejor venue, el proveedor más prestigioso y un rider perfecto en el papel. Si el equipo que lo ejecuta llega quemado al momento clave, todo eso se diluye. El burnout no es un tema de recursos humanos que le compete a otra área: es una variable operativa que impacta directo en la calidad de la ejecución, y por eso hay que tratarlo con la misma seriedad que un timing de armado o un plan de contingencia.
 
 ## El burnout no es un defecto de carácter, es una alerta operativa
