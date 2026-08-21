@@ -18,6 +18,22 @@ function apiUrl(id) {
   )}.md`;
 }
 
+// Qué decirle a quien está en el panel según lo que contestó GitHub.
+//
+// Antes cualquier error salía como "No se encontró": con un 401 eso manda a
+// buscar un archivo que está perfecto, cuando el problema es que la llave de
+// GitHub venció. Los tokens tienen fecha de vencimiento y esto va a volver a
+// pasar, así que conviene que el mensaje lo diga.
+function explicar(estado, que) {
+  if (estado === 401)
+    return "GitHub rechazó la llave de acceso (401). Lo más probable es que el token haya vencido: hay que generar uno nuevo y cargarlo en Vercel como GITHUB_TOKEN.";
+  if (estado === 403)
+    return "GitHub aceptó la llave pero no la deja escribir (403). Al token le falta permiso de escritura sobre el repositorio, o se agotó el límite de pedidos por hora.";
+  if (estado === 404)
+    return `No se encontró ${que} en GitHub (404). Puede que el archivo se haya renombrado o que el token no tenga acceso a este repositorio.`;
+  return `GitHub contestó ${estado} al buscar ${que}.`;
+}
+
 function cabeceras(token) {
   return {
     Authorization: `Bearer ${token}`,
@@ -104,7 +120,7 @@ export async function POST(request) {
 
     if (!actual.ok) {
       return Response.json(
-        { ok: false, error: `No se encontró el artículo en GitHub (${actual.status}).` },
+        { ok: false, error: explicar(actual.status, "el artículo") },
         { status: 502 }
       );
     }
