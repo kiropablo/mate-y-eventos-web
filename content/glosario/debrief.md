@@ -8,8 +8,10 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-08-20"
-publicado: false
+publicado: true
+revisado: "2026-08-21"
 ---
+
 En el episodio se plantea el debrief como una herramienta clave para prevenir el burnout en los equipos de producción, y a la vez como algo que "nadie hace" pero que es fundamental. No se trata de una sesión de terapia ni de buscar culpables por lo que salió mal, sino de un espacio para bajar a tierra, sacar aprendizajes y cerrar emocionalmente el evento.
 
 Se destaca que el debrief no debe reservarse solo para el final del evento: en producciones de varios días de armado, con ensayos incluidos, conviene hacer este cierre también al final de cada jornada. Esto permite detectar a tiempo si alguien terminó "quemado" con una tarea puntual y reorganizar el trabajo para el día siguiente, incluso reemplazando a esa persona en esa función si hace falta.
