@@ -62,6 +62,14 @@ export default async function EdicionDelMes({ params }) {
             De todo lo que pasó ese mes en la industria, estos son los que
             elegimos, con el motivo de cada uno.
           </p>
+          {/* El puente con el listado completo: acá va la selección, allá
+              están todos. Que se linkeen evita que compitan por la misma
+              búsqueda. */}
+          <p className="lead reveal" style={{ transitionDelay: ".15s" }}>
+            <Link href={`/agenda/mes/${edicion.mes}`}>
+              Ver todos los eventos de {mesLargo(edicion.mes)} →
+            </Link>
+          </p>
         </div>
       </section>
 

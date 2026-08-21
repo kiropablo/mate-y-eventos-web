@@ -9,7 +9,7 @@ import {
   metaDeCorte,
   schemaDeCorte,
 } from "../../cortes";
-import { getEventos, yaPaso } from "../../../lib/agenda";
+import { getEventos, yaPaso, edicionesImperdibles, mesLargo } from "../../../lib/agenda";
 
 export const revalidate = 3600;
 
@@ -37,6 +37,11 @@ export default async function Corte({ params }) {
     .filter((c) => c.slug !== corte.slug)
     .slice(0, 8);
 
+  // Si ese mes tiene selección de imperdibles, se la ofrecemos.
+  const hayImperdibles = edicionesImperdibles(eventos).some(
+    (e) => e.mes === corte.valor
+  );
+
   return (
     <>
       <script
@@ -46,7 +51,18 @@ export default async function Corte({ params }) {
       <div className="wrap">
         <SiteNav />
       </div>
-      <Landing corte={corte} otros={hermanos} />
+      <Landing
+        corte={corte}
+        otros={hermanos}
+        recíproco={
+          hayImperdibles
+            ? {
+                href: `/imperdibles/${corte.valor}`,
+                texto: `¿Poco tiempo? Mirá los imperdibles de ${mesLargo(corte.valor)} →`,
+              }
+            : null
+        }
+      />
       <Footer />
     </>
   );

@@ -48,10 +48,10 @@ export async function generateMetadata({ params }) {
       url: `${SITE.url}/agenda/${ev.slug}`,
       siteName: SITE.name,
       locale: "es_AR",
-      // Portada de marca, no el logo del evento: los links de las imágenes
-      // de Airtable vencen a las pocas horas y quedarían rotos justo cuando
-      // alguien comparte la ficha.
-      images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
+      // No se declara imagen: Next usa la que genera opengraph-image.js para
+      // esta ficha, con el nombre, la fecha y la sede del evento. Antes iba
+      // una portada genérica igual para todos, porque el logo de Airtable
+      // llega con un link que vence a las pocas horas.
     },
     twitter: {
       card: "summary_large_image",
@@ -59,7 +59,6 @@ export async function generateMetadata({ params }) {
       description:
         ev.descCorta ||
         `${conAnio}${lugar ? `, ${lugar}` : ""}. Fechas e información oficial.`,
-      images: ["/og-default.jpg"],
     },
   };
 }
@@ -91,17 +90,11 @@ export default async function Evento({ params }) {
         eventAttendanceMode:
           "https://schema.org/OfflineEventAttendanceMode",
         ...(ev.descCorta ? { description: ev.descCorta } : {}),
-        // Sin imagen, a propósito y por ahora.
-        //
-        // Acá iba ev.imagen, que es el link directo al adjunto de Airtable, y
-        // ese link vence: lleva la hora de vencimiento adentro de la propia
-        // URL. Google la leía viva si pasaba dentro de la ventana y muerta si
-        // pasaba después, y una imagen muerta en el schema es peor que
-        // ninguna. El mismo criterio ya estaba escrito unas líneas más abajo
-        // para la portada de redes; faltaba aplicarlo acá.
-        //
-        // Vuelve cuando exista la portada generada por evento, servida desde
-        // nuestro dominio y sin vencimiento.
+        // La portada que generamos nosotros, no el adjunto de Airtable: ese
+        // link lleva la hora de vencimiento adentro de la propia URL y Google
+        // lo leía vivo o muerto según cuándo pasara. Esta sale de nuestro
+        // dominio, mide 1200×630 y no vence.
+        image: [`${SITE.url}/agenda/${ev.slug}/opengraph-image`],
         ...(ev.web ? { sameAs: ev.web } : {}),
         ...(ev.organizador
           ? {

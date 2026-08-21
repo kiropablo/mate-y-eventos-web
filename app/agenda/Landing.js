@@ -5,7 +5,7 @@ import { textosDe } from "./cortes";
 // El cuerpo de una landing de la agenda. Lo comparten los cuatro cortes
 // (país, tipo, provincia y mes) para que se vean y digan lo mismo.
 
-export default function Landing({ corte, otros = [] }) {
+export default function Landing({ corte, otros = [], recíproco = null }) {
   const t = textosDe(corte);
   const n = corte.eventos.length;
 
@@ -22,6 +22,14 @@ export default function Landing({ corte, otros = [] }) {
             {n} {n === 1 ? "evento" : "eventos"} en la agenda, con fecha, sede y
             el link a la ficha de cada uno.
           </p>
+          {/* El puente con la curaduría: esta página es el listado completo,
+              la otra es la selección con criterio. Que se linkeen evita que
+              compitan por la misma búsqueda. */}
+          {recíproco ? (
+            <p className="lead reveal" style={{ transitionDelay: ".15s" }}>
+              <Link href={recíproco.href}>{recíproco.texto}</Link>
+            </p>
+          ) : null}
         </div>
       </section>
 

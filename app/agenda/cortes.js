@@ -150,8 +150,12 @@ export function textosDe(corte) {
     const largo = mesLargo(corte.valor);
     const [, m] = corte.valor.split("-").map(Number);
     return {
-      titulo: `Eventos de ${largo} — agenda de la industria`,
-      h1: `Qué eventos hay en ${MESES_LARGO[m - 1].toLowerCase()}`,
+      // "agenda completa" a propósito: este corte es el listado exhaustivo
+      // del mes. La curaduría con voz propia y pocos elegidos vive en
+      // /imperdibles, y las dos se linkean entre sí para que no compitan por
+      // la misma búsqueda.
+      titulo: `Eventos en ${largo}: agenda completa`,
+      h1: `Todos los eventos de ${MESES_LARGO[m - 1].toLowerCase()}`,
       meta: `Los ${n} eventos de la industria que se hacen en ${largo} en Argentina y Latinoamérica, con fechas, sedes y organizadores.`,
       etiqueta: largo,
     };
