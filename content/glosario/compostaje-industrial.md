@@ -8,8 +8,10 @@ minuto: ""
 eje: "Técnico & Producción"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-08-22"
 ---
+
 Se explica como una de las dos vías de recuperación de residuos orgánicos en eventos: por un lado los desperdicios que ya no son comestibles van a plantas de compostaje industrial, que tienen una "dieta" y un proceso pensado para ese volumen; por otro lado están los sobrantes de comida todavía aptos para consumo, que se derivan a otro circuito.
 
 Se marca explícitamente la diferencia con intentar hacer lo mismo en un compost casero: llevar restos de comida como un pedazo de hamburguesa a un compost doméstico "mata" todo el proceso, porque no está diseñado para ese tipo de carga. Por eso, en producción de eventos, este tipo de recuperación requiere trabajar con proveedores o plantas específicas, no con soluciones caseras.
