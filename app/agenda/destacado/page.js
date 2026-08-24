@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
-import { getEventos } from "../../lib/agenda";
+import { getEventos, yaPaso } from "../../lib/agenda";
 import { SITE, STATS } from "../../lib/site";
 
 export const metadata = {
@@ -85,8 +85,12 @@ export default async function Destacado() {
   // Si la lectura de la base sale corta o falla, la cuenta da cero y la página
   // saldría diciendo "la agenda tiene 0 eventos" en la primera línea de una
   // propuesta comercial. Cuando no hay número confiable, no se pone número.
+  // Se cuentan los que faltan, que es lo que muestra /agenda. Contar todos los
+  // publicados daba 309 mientras la agenda decía 292 en la misma visita: dos
+  // números para la misma cosa, y encima en una página que promete que los
+  // números son medidos.
   const eventos = await getEventos();
-  const publicados = eventos.length;
+  const publicados = eventos.filter((e) => !yaPaso(e)).length;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -168,7 +172,7 @@ export default async function Destacado() {
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             {publicados > 0
-              ? `La agenda tiene ${publicados} eventos de la industria y es lo más visitado del sitio.`
+              ? `La agenda tiene ${publicados} eventos de la industria por delante y es lo más visitado del sitio.`
               : "La agenda reúne los eventos de la industria en la región y es lo más visitado del sitio."}{" "}
             Arriba de todo hay {LUGARES} lugares por mes. Uno puede ser tuyo.
           </p>
