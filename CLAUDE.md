@@ -78,16 +78,23 @@ Fondo negro `#010004`, magenta `#EA478A`, celeste `#93D5F7`, acento azul `#5aa0f
 
 Repo: **`kiropablo/mate-y-eventos-panel`** (privado) → Vercel. Es un **proyecto separado** de la web: no comparten código ni deploy.
 
-Son solo 3 archivos:
-- `index.html` — el dashboard entero (frontend, sin claves adentro)
-- `api/data.js` — función serverless que consulta **Windsor.ai** y arma los datos
-- `package.json`
+**Windsor.ai ya no existe acá** (se cortó en agosto 2026 y su histórico se perdió). Desde entonces el panel guarda su propio histórico en una **base Postgres en Neon**, y ese es el principio rector: los datos son nuestros, nada de ventanas móviles de un servicio pago.
 
-**Qué hace `api/data.js`**: pide a Windsor tres conectores — `instagram`, `youtube` y `tiktok_organic` — y arma series diarias, listas de piezas (posts de IG, videos de YouTube, videos de TikTok) y estadísticas derivadas. Cachea 6 horas. Si una plataforma falla, devuelve vacío y el resto del panel igual carga (`pullSafe`). **Spotify no pasa por Windsor**: sale de una Google Sheet publicada como CSV (`SPOTIFY_CSV_URL`) que cargo a mano cada mes.
+Cómo fluye:
+- **Cada hora** corre la Action **"Recolectar metricas"** → `scripts/recolectar.mjs`: guarda una foto de YouTube (Data API, misma clave que la web), del feed RSS del podcast y de las calificaciones de Apple por país. Solo guarda lo que cambió. Cada corrida queda anotada en la tabla `recolecciones`; si algo falla, la Action se pone en rojo y llega mail.
+- **Spotify no tiene API** (ninguna, está verificado a fondo): una vez por mes se bajan los CSV de Spotify for Creators y **se arrastran a `datos-manuales/spotify/` en la web de GitHub** → la Action "Importar datos cargados a mano" los mete en la base sola. Los CSV quedan commiteados como respaldo crudo. El circuito está explicado en `datos-manuales/LEEME.md`.
+- `api/data.js` (estilo CommonJS a propósito, no convertir a ESM) lee la base y arma el payload; `index.html` es el panel: pestañas Resumen / YouTube / Spotify / Podcast / Salud, **un botoncito "?" en cada métrica** que explica qué mide, y ningún número escrito a mano en el HTML.
+- Botón **"Ver que hay en la base"** en Actions: estado de todo sin saber nada técnico.
 
-Variables en Vercel: `WINDSOR_API_KEY`, `SPOTIFY_CSV_URL`, `PAUTA_DESDE` (fecha desde la que se marca la banda de pauta en el gráfico de IG).
+Claves: `DATABASE_URL` (Neon) y `YOUTUBE_API_KEY` en **GitHub Secrets** del repo del panel; `DATABASE_URL` también en **Vercel** para que la API lea.
 
-⚠️ Ojo con Spotify: desde el 11/06/2026 solo cuenta como "play" una reproducción de 30 segundos o más. Las comparaciones con meses anteriores muestran una caída que es cambio de regla, no pérdida de audiencia.
+Cosas sabidas y verificadas (no volver a investigar):
+- **Apple no muestra métricas con menos de 5 oyentes únicos** por período (umbral de privacidad documentado). Los guiones del dashboard no son un error. El Reporter tampoco sirve: mismo umbral y exige suscripciones pagas.
+- **Amazon Music**: el show está distribuido y activo, con 0 reproducciones reales. No tiene API.
+- El feed de reseñas RSS de Apple está **muerto para todo el mundo**: las estrellas se leen del HTML de la ficha pública (si Apple rediseña, la corrida se pone en roja, no devuelve ceros falsos).
+- **No mudar el hosting del podcast** (Anchor/Spotify for Creators): todos los episodios tienen video en Spotify, que no viaja por RSS, y mudarse no automatiza ni Apple ni Spotify.
+
+⚠️ Ojo con Spotify: desde el 11/06/2026 solo cuenta como "play" una reproducción de 30 segundos o más. Las comparaciones con meses anteriores muestran una caída que es cambio de regla, no pérdida de audiencia. Y no confundir: 30 s = "play" (analytics), 60 s = "stream" (monetización).
 
 ---
 
