@@ -85,7 +85,9 @@ export default async function sitemap() {
   let imps = [];
   try {
     const eventos = await getEventos();
-    imps = edicionesImperdibles(eventos).map((e) => ({
+    // La primera es la que se publica en /imperdibles, que ya está más arriba
+    // en este mismo sitemap: mandar las dos es ofrecerle a Google una copia.
+    imps = edicionesImperdibles(eventos).slice(1).map((e) => ({
       url: `${SITE.url}/imperdibles/${e.mes}`,
       lastModified: now,
       changeFrequency: "monthly",

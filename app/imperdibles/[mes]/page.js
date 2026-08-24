@@ -15,16 +15,26 @@ export async function generateStaticParams() {
 
 async function buscar(mes) {
   const ediciones = edicionesImperdibles(await getEventos());
+  const [ultima] = ediciones;
   return {
     edicion: ediciones.find((e) => e.mes === mes) || null,
     otras: ediciones.filter((e) => e.mes !== mes),
+    // Si este mes es el más nuevo, esta página y /imperdibles son la misma.
+    esLaVigente: Boolean(ultima && ultima.mes === mes),
   };
 }
 
 export async function generateMetadata({ params }) {
-  const { edicion } = await buscar(params.mes);
+  const { edicion, esLaVigente } = await buscar(params.mes);
   if (!edicion) return { title: "Imperdibles" };
-  return metaEdicion(edicion, { canonical: `/imperdibles/${edicion.mes}` });
+  // La edición más nueva es exactamente lo que muestra /imperdibles: mismo H1,
+  // mismo title, los mismos eventos. Dos direcciones para una sola página es
+  // una duplicada, así que la del mes apunta a la portada, que es la que tiene
+  // los links y la que está en el footer. Cuando pase el mes y deje de ser la
+  // última, vuelve a ser autocanónica: ahí ya es archivo y contenido propio.
+  return metaEdicion(edicion, {
+    canonical: esLaVigente ? "/imperdibles" : `/imperdibles/${edicion.mes}`,
+  });
 }
 
 export default async function EdicionDelMes({ params }) {
