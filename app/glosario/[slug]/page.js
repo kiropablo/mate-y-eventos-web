@@ -4,6 +4,7 @@ import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import ArticuloCuerpo from "../../components/ArticuloCuerpo";
 import { getTermino, getTerminos } from "../../lib/glosario";
+import { getArticuloDeEpisodio } from "../../lib/articulos";
 import { SITE } from "../../lib/site";
 
 export const revalidate = 3600;
@@ -40,6 +41,8 @@ export function generateMetadata({ params }) {
 export default function Termino({ params }) {
   const t = getTermino(params.slug);
   if (!t) notFound();
+
+  const articulo = getArticuloDeEpisodio(t.episodio);
 
   // Los relacionados que existen y están publicados.
   const todos = getTerminos();
@@ -145,6 +148,22 @@ export default function Termino({ params }) {
               <Link className="btn" href={`/episodios/${t.episodio}`}>
                 Ver el episodio
               </Link>
+
+              {/* El artículo de ese mismo episodio. Los 59 términos publicados
+                  tienen uno y hasta ahora no se linkeaban nunca: el glosario
+                  contesta qué es una palabra en tres líneas, el artículo la
+                  desarrolla, y el que llega buscando el término no se enteraba
+                  de que existía la pieza larga. */}
+              {articulo ? (
+                <>
+                  <h3 className="ev-datos__titulo">Leelo desarrollado</h3>
+                  <p className="glo-episodio">
+                    <Link href={`/articulos/${articulo.id}`}>
+                      {articulo.titulo}
+                    </Link>
+                  </p>
+                </>
+              ) : null}
 
               {relacionados.length > 0 && (
                 <>

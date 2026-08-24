@@ -10,6 +10,7 @@ import {
   relacionados,
 } from "../../lib/articulos";
 import { SITE } from "../../lib/site";
+import { terminosDelEpisodio } from "../../lib/glosario";
 
 export const revalidate = 3600;
 
@@ -47,6 +48,11 @@ export default function Articulo({ params }) {
   if (!art) notFound();
 
   const otros = relacionados(art, 3);
+  // Los términos del glosario que salieron de este mismo episodio. Van acá
+  // porque son la definición corta de las palabras que el artículo usa
+  // largo, y hasta ahora las dos secciones no se enlazaban en ninguna
+  // dirección aunque salen del mismo capítulo.
+  const terminos = terminosDelEpisodio(art.episodio);
 
   const url = `${SITE.url}/articulos/${art.id}`;
 
@@ -160,6 +166,21 @@ export default function Articulo({ params }) {
             </div>
           </div>
         </div>
+
+        {terminos.length > 0 && (
+          <div className="wrap">
+            <section className="rel reveal">
+              <h2 className="ag-mes">Las palabras de este episodio</h2>
+              <div className="ag-chips">
+                {terminos.map((t) => (
+                  <Link className="chip" href={`/glosario/${t.slug}`} key={t.slug}>
+                    {t.termino}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
 
         {otros.length > 0 && (
           <div className="wrap">
