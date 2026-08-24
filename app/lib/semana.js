@@ -36,16 +36,121 @@ function mismaSemanaQue(a, b) {
 // Dos eventos son "del mismo organizador" si el nombre coincide una vez
 // peladas mayúsculas y acentos. Alcanza: no hace falta que sea exacto, hace
 // falta que no se le mande a Messe Frankfurt un aviso sobre su propio evento.
-function mismoOrganizador(a, b) {
-  // Para comparar identidad se saca TODO lo que no sea letra o número, sin
-  // dejar espacio en el medio. En la base conviven "La Rural S.A." y
-  // "La  Rural SA": si los puntos se reemplazaran por espacios quedaría
-  // "la rural s a" contra "la rural sa", que no coinciden.
-  const limpiar = (t) => pelado(t || "").replace(/[^a-z0-9]/g, "");
-  const oa = limpiar(a.organizador);
-  const ob = limpiar(b.organizador);
-  return Boolean(oa && ob && oa === ob);
+// Palabras que cuelgan del nombre de una empresa y no la identifican.
+const FORMAS_JURIDICAS = new Set([
+  "sa", "s", "a", "srl", "r", "l", "sas", "sac", "ltda", "ltd", "inc", "llc",
+  "sociedad", "anonima",
+]);
+
+// Artículos y nexos: no aportan a la identidad de nadie.
+const NEXOS = new Set(["de", "del", "la", "el", "los", "las", "y", "e"]);
+
+// Palabras que describen QUÉ es una entidad, no CUÁL es. Una entidad hecha
+// solo de estas no distingue a nadie: "Cultura" o "Gobierno de la Provincia"
+// coinciden con media base. Si no queda ni una palabra propia, no se compara.
+const GENERICAS = new Set([
+  "gobierno", "municipalidad", "municipio", "provincia", "ciudad", "nacion",
+  "ministerio", "secretaria", "subsecretaria", "direccion", "ente", "agencia",
+  "asociacion", "camara", "federacion", "confederacion", "fundacion",
+  "instituto", "consejo", "colegio", "union", "centro", "comision",
+  "turismo", "cultura", "deporte", "deportes", "produccion", "industria",
+  "comercio", "grupo", "productora", "eventos", "argentina", "argentino",
+  "argentinas", "argentinos", "brasil", "chile", "uruguay", "mexico",
+  "colombia", "peru", "latinoamerica", "latinoamericana", "internacional",
+  "nacional", "sudamericana", "regional",
+]);
+
+// Nombres de país que cuelgan al final de una filial: "Messe Frankfurt
+// Argentina" y "Messe Frankfurt" son la misma empresa.
+const FILIALES = new Set([
+  "argentina", "argentino", "brasil", "brazil", "chile", "uruguay", "paraguay",
+  "mexico", "colombia", "peru", "latam", "latinoamerica", "sudamerica",
+]);
+
+// Las entidades que aparecen en un campo de organizador.
+//
+// El campo es texto libre y en 73 de las 268 fichas hay varias entidades
+// juntas: "CAFARA (Cámara de Ferreterías) + Messe Frankfurt Argentina",
+// "ARPEL, con producción de Messe Frankfurt Argentina". Comparar el string
+// entero contra otro string entero no sirve para nada: Messe Frankfurt
+// organiza dieciséis eventos de la agenda y el campo está escrito de diez
+// formas distintas.
+function entidadesDe(texto) {
+  const crudo = String(texto || "");
+  if (!crudo.trim()) return [];
+
+  const partes = [];
+
+  // Lo que va entre paréntesis suele ser la sigla o el nombre largo de la
+  // misma entidad: "Asociación … (ADRHA)". Vale como entidad aparte, porque
+  // otra ficha puede nombrarla solo por la sigla.
+  for (const m of crudo.matchAll(/\(([^)]+)\)/g)) partes.push(m[1]);
+
+  partes.push(
+    ...crudo
+      .replace(/\([^)]*\)/g, " ")
+      // Los separadores reales entre entidades, incluidas las frases que usa
+      // la base: "y", "con producción de", "en colaboración con", "junto a".
+      .split(
+        /\s*[+/;,]\s*|\s+(?:y|e|con|junto\s+a|para)\s+(?:produccion\s+de\s+|colaboracion\s+con\s+)?|\s+bajo\s+(?:el\s+)?\w+\s+de\s+/gi
+      )
+  );
+
+  // Cuando el separador que cortó fue la coma, el conector queda colgando
+  // adelante de la parte: "ARPEL, con producción de Messe Frankfurt" deja
+  // "con produccion de messe frankfurt". Se lo saca acá.
+  const ARRASTRE =
+    /^(?:y|e|con|en|junto\s+a|para|bajo)\s+(?:el|la|los|las)?\s*(?:produccion|coproduccion|colaboracion|organizacion)?\s*(?:de|del|con)?\s*(?:el|la|los|las)?\s+/;
+
+  // "Con el apoyo de X" no dice que X organice: dice que acompaña. Si se lo
+  // cuenta como organizador, a TecWeek —que solo tiene el apoyo del Gobierno
+  // de la Ciudad— se le atribuye el Buenos Aires Jazz, que sí es del Gobierno.
+  const APOYO = /^(?:con\s+|bajo\s+)?(?:el\s+|la\s+)?(?:apoyo|auspicio|acompanamiento|patrocinio|adhesion)\b/;
+
+  return partes
+    .map((parte) =>
+      pelado(parte)
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+    .filter((parte) => parte && !APOYO.test(parte))
+    .map((parte) => {
+      const palabras = parte
+        .replace(ARRASTRE, "")
+        .split(" ")
+        .filter((w) => w && !FORMAS_JURIDICAS.has(w));
+
+      // El país del final se saca solo si abajo queda un nombre de verdad:
+      // "Messe Frankfurt Argentina" → "Messe Frankfurt", pero "Expo Argentina"
+      // se deja entero para que no coincida con "Expo Brasil".
+      if (palabras.length > 2 && FILIALES.has(palabras[palabras.length - 1])) {
+        palabras.pop();
+      }
+      return palabras;
+    })
+    .filter((palabras) => {
+      if (!palabras.length) return false;
+      // Al menos una palabra propia, que no sea nexo ni categoría.
+      return palabras.some((w) => !NEXOS.has(w) && !GENERICAS.has(w));
+    });
 }
+
+// ¿Los dos eventos los organiza la misma gente?
+//
+// Alcanza con que compartan UNA entidad: si Messe Frankfurt organiza los dos,
+// da igual con quién más lo haga en cada caso.
+//
+// La comparación es por igualdad exacta de la entidad, no por prefijo. El
+// prefijo parecía más generoso y era peor: "Gobierno de la Provincia" es
+// prefijo de todos los gobiernos provinciales del país, y terminábamos
+// diciéndole a Vendimia que la Copa Davis en Neuquén la organizan ellos.
+function mismoOrganizador(a, b) {
+  const unas = entidadesDe(a.organizador).map((p) => p.join(" "));
+  const otras = new Set(entidadesDe(b.organizador).map((p) => p.join(" ")));
+  return unas.some((u) => otras.has(u));
+}
+
 
 export function mismaSemana(evento, eventos, { max = MAXIMO } = {}) {
   if (!evento || !evento.fechaInicio) return [];

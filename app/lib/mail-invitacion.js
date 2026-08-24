@@ -39,9 +39,12 @@ function armarAsunto(nombre, cuando, ev) {
   if (!ev.fechaInicio) {
     return `${nombre} está publicado en nuestra agenda — ¿están bien los datos?`;
   }
-  for (const lugar of [ev.venue, ev.ciudad, ""]) {
-    const asunto = `${nombre}: ${cuando}${lugar ? ` en ${lugar}` : ""} — ¿está bien?`;
-    if (asunto.length <= LARGO_ASUNTO || !lugar) return asunto;
+  // Los vacíos se sacan ANTES de probar. Si no, una sede vacía cortaba la
+  // vuelta en la primera pasada y la ciudad no se probaba nunca: eventos con
+  // ciudad cargada y sin sede salían con un asunto sin lugar, pudiendo tenerlo.
+  for (const lugar of [ev.venue, ev.ciudad].filter(Boolean)) {
+    const asunto = `${nombre}: ${cuando} en ${lugar} — ¿está bien?`;
+    if (asunto.length <= LARGO_ASUNTO) return asunto;
   }
   return `${nombre}: ${cuando} — ¿está bien?`;
 }
@@ -65,7 +68,15 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
   // titularía "la semana del 20" arriba de una lista que empieza el 14.
   const arranque = diaYMes(lunesDe(ev.fechaInicio) || ev.fechaInicio);
   const difundimos = llegamosADifundir(ev);
-  const hay = semana.length;
+
+  // La lista llega SIN recortar, con uno más de los que se muestran. Es la
+  // única forma de distinguir "esa semana hay cinco" de "hay nueve y muestro
+  // cinco": contar los que se muestran da cinco en los dos casos, y así el
+  // mail decía "puede haber alguno más" sin que hubiera ninguno más. De 95
+  // envíos posibles, 30 caen justo en cinco.
+  const recortada = semana.length > MAXIMO_SEMANA;
+  const visibles = semana.slice(0, MAXIMO_SEMANA);
+  const hay = visibles.length;
 
   // Uno o varios: el plural va acá y no repetido en cada frase, que es como
   // salía "los otros 1 eventos".
@@ -84,11 +95,7 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
 
   const titular = `Publicamos ${ev.nombre} en nuestra agenda. ¿Están bien estos datos?`;
 
-  // Si la lista vino recortada, se avisa: decir "los otros 5" cuando hay
-  // nueve es afirmar algo falso sobre su propia semana.
-  const recortada = hay >= MAXIMO_SEMANA;
-
-  const filasSemana = semana.map((o) => ({
+  const filasSemana = visibles.map((o) => ({
     nombre: o.nombre,
     detalle: [formatRango(o), o.ciudad || o.pais].filter(Boolean).join(" · "),
   }));

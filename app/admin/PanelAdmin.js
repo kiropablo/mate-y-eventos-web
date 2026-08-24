@@ -91,7 +91,17 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [copiado, setCopiado] = useState("");
   const [difundiendo, setDifundiendo] = useState("");
   const [aprobando, setAprobando] = useState("");
-  const [invitando, setInvitando] = useState("");
+  // Un conjunto y no un solo slug: con uno solo, el primer envío que
+  // terminaba le devolvía el botón a TODOS los que estuvieran en curso, y el
+  // segundo se podía apretar de nuevo mientras seguía andando.
+  const [invitando, setInvitando] = useState(() => new Set());
+  const marcarInvitando = (slug, activo) =>
+    setInvitando((previa) => {
+      const copia = new Set(previa);
+      if (activo) copia.add(slug);
+      else copia.delete(slug);
+      return copia;
+    });
   const [paraQuien, setParaQuien] = useState({});
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState("todos");
@@ -335,14 +345,25 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       )
     )
       return;
-    setInvitando(ev.slug);
+
+    marcarInvitando(ev.slug, true);
     try {
-      const res = await fetch("/api/admin/invitar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: ev.slug, para }),
-      });
-      const data = await res.json().catch(() => ({}));
+      // El servidor corta el reenvío por su cuenta y devuelve 409: la fecha
+      // que ve el panel puede tener una hora de atraso, la de él no.
+      let res = await mandarInvitacion(ev.slug, para, false);
+      let data = await res.json().catch(() => ({}));
+
+      if (res.status === 409 && data?.yaContactado) {
+        if (
+          !confirm(
+            `Según Airtable ya se le escribió el ${data.yaContactado}.\n\n¿Mandarlo igual?`
+          )
+        )
+          return;
+        res = await mandarInvitacion(ev.slug, para, true);
+        data = await res.json().catch(() => ({}));
+      }
+
       if (!res.ok) throw new Error(data?.error || "No se pudo enviar.");
       const hoy = new Date().toLocaleDateString("en-CA");
       setOrgs((previa) =>
@@ -356,8 +377,16 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     } catch (e) {
       alert(e.message);
     } finally {
-      setInvitando("");
+      marcarInvitando(ev.slug, false);
     }
+  }
+
+  function mandarInvitacion(slug, para, forzar) {
+    return fetch("/api/admin/invitar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, para, forzar }),
+    });
   }
 
   // Un solo buscador para las tres pestañas. Sin acentos ni mayúsculas, para
@@ -846,10 +875,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         <button
                           type="button"
                           className="adm-btn"
-                          disabled={invitando === ev.slug}
+                          disabled={invitando.has(ev.slug)}
                           onClick={() => invitar(ev)}
                         >
-                          {invitando === ev.slug
+                          {invitando.has(ev.slug)
                             ? "Enviando…"
                             : ev.fechaContacto
                               ? "Volver a enviar"
