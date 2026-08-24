@@ -9,7 +9,7 @@ export const metadata = {
   alternates: { canonical: "/glosario" },
   title: "Glosario de la industria de eventos",
   description:
-    "Qué quiere decir rider, backline, dry hire o RFP, explicado como se usa de verdad en la industria de eventos, y con el episodio donde lo hablamos.",
+    "Qué quiere decir rider técnico, backline, contra rider o photo opportunity, explicado como se usa de verdad en la industria de eventos, y con el episodio donde lo hablamos.",
   openGraph: {
     type: "website",
     title: "Glosario de la industria de eventos · Mate y Eventos",
@@ -90,7 +90,7 @@ export default function Glosario() {
             del rubro.
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
-            Rider, backline, dry hire, RFP. El vocabulario que en la industria
+            Rider técnico, backline, contra rider, photo opportunity. El vocabulario que en la industria
             se usa todo el tiempo y casi nunca se explica. Acá está cada uno
             como se dice de verdad, y con el episodio donde lo hablamos.
           </p>

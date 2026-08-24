@@ -343,7 +343,15 @@ export function formatRango(ev) {
   if (!ev.fechaInicio) return "Fechas por anunciar";
   const [ai, mi, di] = ev.fechaInicio.split("-").map(Number);
   const ini = `${di} de ${MESES[mi - 1]}`;
-  if (!ev.fechaFin || ev.fechaFin === ev.fechaInicio) {
+  // La fecha de cierre anterior a la de inicio no se dibuja: sale publicada
+  // como "22 de sep al 24 de ago" en la ficha, en el og:title y en el mail al
+  // organizador. Si el dato está mal en la base, es mejor mostrar solo el
+  // inicio —que es cierto— que un rango imposible. Hoy hay un caso así.
+  if (
+    !ev.fechaFin ||
+    ev.fechaFin === ev.fechaInicio ||
+    ev.fechaFin < ev.fechaInicio
+  ) {
     return `${ini} ${ai}`;
   }
   const [af, mf, df] = ev.fechaFin.split("-").map(Number);

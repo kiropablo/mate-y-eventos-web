@@ -14,7 +14,7 @@ Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 
 - [Episodios](https://www.mateyeventos.com/episodios): todos los capítulos del podcast, con video y transcripción completa, dividida en secciones con subtítulos temáticos.
 - [Artículos](https://www.mateyeventos.com/articulos): artículos propios que amplían cada episodio, con preguntas frecuentes.
 - [Agenda de eventos](https://www.mateyeventos.com/agenda): congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, con fechas, sedes, organizadores y contactos.
-- [Glosario del rubro](https://www.mateyeventos.com/glosario): qué significan rider, backline, dry hire, RFP y demás términos de la industria de eventos, con el episodio donde se hablaron.
+- [Glosario del rubro](https://www.mateyeventos.com/glosario): qué significan rider técnico, backline, contra rider, photo opportunity y demás términos de la industria de eventos, con el episodio donde se hablaron.
 - [Los imperdibles del mes](https://www.mateyeventos.com/imperdibles): selección editorial mensual de eventos de la industria, con el motivo de cada elección.
 - [Esta semana en eventos](https://www.mateyeventos.com/agenda/esta-semana): los eventos que arrancan en los próximos siete días, actualizado solo.
 - [Agenda por país, tipo y mes](https://www.mateyeventos.com/agenda): la agenda tiene además una página propia por país (`/agenda/pais/argentina`), por tipo de evento (`/agenda/tipo/expo-feria`), por provincia (`/agenda/provincia/cordoba`) y por mes (`/agenda/mes/2026-09`).

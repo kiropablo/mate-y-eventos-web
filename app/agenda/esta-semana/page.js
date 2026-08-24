@@ -110,10 +110,9 @@ export default async function EstaSemana() {
             name: ev.nombre,
             startDate: ev.fechaInicio,
             ...(ev.fechaFin ? { endDate: ev.fechaFin } : {}),
-            eventStatus:
-              ev.estadoFechas === "Confirmadas"
-                ? "https://schema.org/EventScheduled"
-                : "https://schema.org/EventPostponed",
+            // Ver la nota en agenda/[slug]/page.js: "pospuesto" es una
+            // afirmación falsa sobre un evento que solo tiene fecha tentativa.
+            eventStatus: "https://schema.org/EventScheduled",
             url: `${SITE.url}/agenda/${ev.slug}`,
             ...(ev.ciudad || ev.pais
               ? {

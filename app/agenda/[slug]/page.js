@@ -15,6 +15,7 @@ import {
   tituloDeEvento,
 } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
+import { todosLosCortes, textosDe } from "../cortes";
 
 export const revalidate = 3600;
 
@@ -67,6 +68,23 @@ export default async function Evento({ params }) {
   const ev = await getEvento(params.slug);
   if (!ev) notFound();
 
+  // Los cortes a los que pertenece este evento: su país, su tipo, su
+  // provincia, su mes.
+  //
+  // Se sacan de todosLosCortes y no se arman a mano con ev.tipo porque una
+  // landing solo existe si el grupo llega al mínimo de eventos: armar la URL
+  // por las nuestras generaría links a 404 para los tipos con dos eventos.
+  //
+  // Hasta ahora las 314 fichas no linkeaban a ninguna de las 27 landings. El
+  // tipo estaba impreso en el encabezado como texto plano al lado de un link
+  // a /agenda. O sea que las páginas pensadas para las búsquedas genéricas
+  // ("congresos en Argentina") no recibían nada de las fichas, que son por
+  // donde entra el 91% de las visitas de búsqueda.
+  const cortesDelEvento = todosLosCortes(await getEventos())
+    .filter((c) => c.eventos.some((e) => e.slug === ev.slug))
+    .map((c) => ({ url: c.url, etiqueta: textosDe(c).etiqueta, tipo: c.tipo }));
+  const corteDelTipo = cortesDelEvento.find((c) => c.tipo === "tipo");
+
   const lugar = [ev.venue, ev.ciudad, ev.provincia, ev.pais]
     .filter(Boolean)
     .join(" · ");
@@ -92,11 +110,14 @@ export default async function Evento({ params }) {
         // Un evento de un solo día igual tiene fecha de cierre: es la misma
         // que la de inicio. Sin esto, Google lo marca como campo faltante.
         endDate: ev.fechaFin || ev.fechaInicio,
-        // Las fechas estimadas o sin anunciar no se declaran como programadas.
-        eventStatus:
-          ev.estadoFechas === "Confirmadas"
-            ? "https://schema.org/EventScheduled"
-            : "https://schema.org/EventPostponed",
+        // Schema.org no tiene un estado para "la fecha todavía no es firme":
+        // los estados son programado, pospuesto, movido, cancelado. Poníamos
+        // "pospuesto" a todo lo que no estuviera confirmado, así que seis
+        // eventos con fecha tentativa le decían a Google —y a las IA— que la
+        // organización los había pospuesto. No es un matiz: es una afirmación
+        // falsa sobre un evento de un tercero. La fecha tentativa se aclara en
+        // el texto de la ficha, que es donde corresponde.
+        eventStatus: "https://schema.org/EventScheduled",
         eventAttendanceMode:
           "https://schema.org/OfflineEventAttendanceMode",
         ...(ev.descCorta || ev.descLarga
@@ -187,7 +208,16 @@ export default async function Evento({ params }) {
           <div className="eyebrow reveal">
             <span className="n">—</span>
             <Link href="/agenda">Agenda</Link>
-            {ev.tipo ? ` / ${ev.tipo}` : ""}
+            {ev.tipo ? (
+              <>
+                {" / "}
+                {corteDelTipo ? (
+                  <Link href={corteDelTipo.url}>{ev.tipo}</Link>
+                ) : (
+                  ev.tipo
+                )}
+              </>
+            ) : null}
           </div>
           {ev.imagen ? (
             <Image
@@ -365,6 +395,22 @@ export default async function Evento({ params }) {
               </ul>
             </details>
           )}
+
+          {cortesDelEvento.length > 0 ? (
+            <section className="sem-bloque reveal" style={{ marginTop: "40px" }}>
+              <h2 className="ag-mes">Seguir por acá</h2>
+              <p className="sem-nota" style={{ marginBottom: "12px" }}>
+                Los otros eventos de la agenda que comparten algo con este:
+              </p>
+              <div className="ag-chips">
+                {cortesDelEvento.map((c) => (
+                  <Link key={c.url} href={c.url} className="chip">
+                    {c.etiqueta}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <div style={{ marginTop: "40px" }}>
             <Link className="btn" href="/agenda">
