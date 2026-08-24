@@ -73,6 +73,16 @@ export default async function Imperdibles() {
               </>
             )}
           </p>
+          {/* El puente con el listado completo, igual que en la página de cada
+              mes archivado: acá va la selección, allá están todos. Faltaba
+              justo en esta, que es la que linkea el footer. */}
+          {ultima ? (
+            <p className="lead reveal" style={{ transitionDelay: ".15s" }}>
+              <Link href={`/agenda/mes/${ultima.mes}`}>
+                Ver todos los eventos de {mesLargo(ultima.mes)} &rarr;
+              </Link>
+            </p>
+          ) : null}
         </div>
       </section>
 

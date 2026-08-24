@@ -552,8 +552,12 @@ Devolvé JSON sin texto alrededor y sin backticks:
 async function verificarVigente(r) {
   const f = r.fields;
   const prompt = `Verificá contra las fuentes oficiales si cambió algo de este evento
-de la agenda de Mate y Eventos. Buscá en la web el sitio oficial y las
-comunicaciones de la organización.
+de la agenda de Mate y Eventos. Hoy es ${hoy}. Buscá en la web el sitio oficial
+y las comunicaciones de la organización.
+
+La agenda publica lo que TODAVÍA NO PASÓ. Si lo único que encontrás son las
+fechas de una edición que ya se hizo, eso NO es una confirmación: contalo en el
+resumen, pero devolvé las fechas vacías.
 
 FICHA ACTUAL
 Nombre: ${f["Nombre"]}
@@ -571,6 +575,8 @@ QUÉ MIRAR
 REGLAS
 - Nunca inventes. Si no encontrás nada nuevo o no podés confirmarlo, decilo.
 - Una fecha solo vale si la publica la organización o una fuente oficial.
+- Solo devolvé fechas POSTERIORES a ${hoy}. Una fecha ya pasada va en el resumen,
+  nunca en el campo de fechas.
 - No repitas lo que ya dice la ficha: solo lo que cambió o se confirmó.
 
 Devolvé JSON sin texto alrededor y sin backticks:
@@ -591,11 +597,25 @@ Devolvé JSON sin texto alrededor y sin backticks:
     // Completar fechas solo cuando antes NO estaban firmes. Si ya figuraban
     // como confirmadas, no se tocan: queda el aviso y decide Pablo.
     const eranFirmes = f["Estado de fechas"] === "Confirmadas";
-    if (!eranFirmes && esFecha(d.fechaInicio) && d.estadoFechas === "Confirmadas") {
+
+    // La fecha tiene que ser futura. reciclarEdicion() ya lo exigía y a esta
+    // rama le faltaba: preguntándole "¿se confirmaron las fechas?" sin decirle
+    // qué día es hoy, el modelo contestaba con la edición que YA SE HIZO y la
+    // dábamos por confirmada. El evento se llenaba de una fecha pasada, salía
+    // de la agenda sin que nadie se enterara, y como quedaba en "Confirmadas"
+    // esta misma función no lo volvía a mirar. El 24/8/2026 pasó con cinco
+    // eventos en una sola corrida.
+    const esFutura = esFecha(d.fechaInicio) && d.fechaInicio >= hoy;
+
+    if (!eranFirmes && esFutura && d.estadoFechas === "Confirmadas") {
       campos["Fecha inicio"] = d.fechaInicio;
       if (esFecha(d.fechaFin)) campos["Fecha fin"] = d.fechaFin;
       campos["Estado de fechas"] = "Confirmadas";
       console.log(`  ${f["Nombre"]}: fechas confirmadas → ${d.fechaInicio}`);
+    } else if (esFecha(d.fechaInicio) && !esFutura) {
+      // Se avisa aparte para que en el log se vea que el modelo trajo una
+      // edición vieja, y no quede como un "hallazgo" cualquiera.
+      console.log(`  ${f["Nombre"]}: descartada fecha pasada (${d.fechaInicio}), queda para revisar`);
     } else {
       console.log(`  ${f["Nombre"]}: hallazgo para revisar`);
     }
