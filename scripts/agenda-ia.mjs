@@ -24,7 +24,21 @@ const API = `https://api.airtable.com/v0/${BASE}/${TABLA}`;
 
 const MODO = (process.env.MODO || "verificar").trim();
 const TEMA = (process.env.TEMA || "").trim();
-const MAX = Number(process.env.MAX_EVENTOS || 12);
+// Cuántos eventos se le piden al modelo por rubro.
+//
+// Es a propósito un número chico. Pedirle diez de una hace que investigue poco
+// cada uno y devuelva fichas a medias; pedirle cuatro y barrer más rubros por
+// día trae menos volumen por tanda pero fichas que se pueden publicar. Un
+// evento incompleto en la agenda es peor que un evento que todavía no está.
+const MAX_POR_RUBRO = Number(process.env.MAX_EVENTOS || 4);
+
+// Cuántos rubros se barren en la corrida diaria. Con 3 sobre 10, la rotación
+// completa da la vuelta cada tres días y pico.
+const RUBROS_POR_DIA = Number(process.env.RUBROS_POR_DIA || 3);
+
+// Cuántas fichas ya cargadas se repasan por día. Va aparte del número de
+// arriba: antes compartían variable y bajar uno bajaba el otro sin querer.
+const MAX_VERIFICAR = Number(process.env.MAX_VERIFICAR || 10);
 
 // Los rubros que barre la búsqueda. Están acá adentro para que nadie
 // tenga que escribir nada: el botón dispara el barrido completo.
@@ -179,9 +193,9 @@ async function main() {
   } else if (MODO === "descubrir") {
     await descubrir(registros, TEMA ? [TEMA] : RUBROS);
   } else if (MODO === "diario") {
-    // El mantenimiento de todos los días: repasa lo cargado y suma un
-    // rubro por jornada, rotando, para que la base siga creciendo sola.
-    await descubrir(registros, [rubroDelDia()]);
+    // El mantenimiento de todos los días: repasa lo cargado y barre unos
+    // cuantos rubros, rotando, para que la base siga creciendo sola.
+    await descubrir(registros, rubrosDelDia());
     await verificar(await traerTodos());
   } else {
     await verificar(registros);
@@ -304,9 +318,14 @@ async function limpiarProvincias(registros) {
 }
 
 // Un rubro distinto cada día, en ciclo.
-function rubroDelDia() {
+function rubrosDelDia() {
   const dias = Math.floor(Date.now() / 86400000);
-  return RUBROS[dias % RUBROS.length];
+  const cuantos = Math.min(Math.max(RUBROS_POR_DIA, 1), RUBROS.length);
+  const desde = (dias * cuantos) % RUBROS.length;
+  return Array.from(
+    { length: cuantos },
+    (_, i) => RUBROS[(desde + i) % RUBROS.length]
+  );
 }
 
 /* ─────────────────────────── Modo descubrir ─────────────────────────── */
@@ -333,6 +352,62 @@ async function descubrir(registros, temas) {
     }
   }
   console.log(`\nTotal cargado: ${total} eventos como Borrador IA.`);
+}
+
+// La segunda pasada: se le pregunta al modelo SOLO por lo que falta.
+//
+// La tanda grande le pide varios eventos de una y ahí investiga poco cada uno.
+// Acá va de a uno, con los huecos nombrados, y busca en la web solo eso. Es la
+// diferencia entre descartar el evento y publicarlo entero.
+async function completarFicha(e, huecos) {
+  const prompt = `Estos son los datos que tenemos de un evento para la agenda de
+Mate y Eventos. Están incompletos y sin lo que falta no lo podemos publicar.
+
+LO QUE TENEMOS
+Nombre: ${e.nombre}
+Organiza: ${e.organizador || "—"}
+Fechas: ${e.fechaInicio || "sin cargar"} a ${e.fechaFin || "sin cargar"} (${e.estadoFechas || "—"})
+Lugar: ${[e.venue, e.ciudad, e.provincia, e.pais].filter(Boolean).join(", ") || "—"}
+Web: ${e.web || "—"}
+Fuentes: ${(e.fuentes || []).join(" ") || "—"}
+
+LO QUE FALTA
+${huecos.map((h) => `- ${h}`).join("\n")}
+
+Buscá en la web el sitio oficial del evento y las comunicaciones de la
+organización, y completá SOLO esos huecos.
+
+REGLAS
+- Hoy es ${hoy}. La fecha de inicio tiene que ser futura y estar publicada por
+  la organización o una fuente oficial. Si la próxima edición todavía no se
+  anunció, decilo con encontrado: false. No la estimes.
+- Nunca inventes. Un dato que no puedas verificar se deja vacío.
+- La provincia va sin barras ni aclaraciones: solo el nombre.
+
+Devolvé JSON sin texto alrededor y sin backticks:
+{"encontrado": true|false,
+ "fechaInicio":"YYYY-MM-DD o vacío", "fechaFin":"YYYY-MM-DD o vacío",
+ "estadoFechas":"Confirmadas | Estimadas | Por anunciar | vacío",
+ "tipo":"uno de: ${TIPOS.join(" | ")} — o vacío",
+ "pais":"", "provincia":"", "ciudad":"", "venue":"",
+ "organizador":"", "web":"",
+ "descCorta":"una o dos oraciones, o vacío", "descLarga":"2 a 4 párrafos, o vacío",
+ "fuentes":["url"]}`;
+
+  const d = await preguntarleAClaude(prompt, 4000);
+  if (!d || d.encontrado === false) return;
+
+  // Solo se rellenan huecos: nunca se pisa un dato que ya teníamos.
+  for (const campo of [
+    "fechaInicio", "fechaFin", "estadoFechas", "tipo", "pais",
+    "provincia", "ciudad", "venue", "organizador", "web", "descCorta", "descLarga",
+  ]) {
+    const nuevo = String(d[campo] || "").trim();
+    if (nuevo && !String(e[campo] || "").trim()) e[campo] = nuevo;
+  }
+  if (Array.isArray(d.fuentes) && d.fuentes.length) {
+    e.fuentes = [...new Set([...(e.fuentes || []), ...d.fuentes])];
+  }
 }
 
 async function descubrirTema(tema, yaEstan, conocidos, conocidosSinAnio = new Set()) {
@@ -366,8 +441,19 @@ ${foco}
 YA ESTÁN EN LA BASE (no los repitas, ni con otro nombre):
 ${yaEstan.join("\n") || "(la base está vacía)"}
 
+PREFERIMOS POCOS Y ENTEROS
+No cargamos fichas a medias. Un evento solo entra si podés traer TODO esto:
+fecha de inicio futura ya anunciada por la organización, tipo, país, provincia
+o región, ciudad, organizador, web oficial, descripción corta, descripción
+larga y al menos una fuente verificable. La sede suma pero no es obligatoria.
+
+Si un evento existe pero todavía no anunció la fecha de su próxima edición,
+NO lo traigas: no lo podemos publicar y lo vamos a encontrar más adelante.
+Es preferible que devuelvas dos eventos completos a ${MAX_POR_RUBRO} a medias.
+
 REGLAS INNEGOCIABLES
-- Nunca inventes datos. Si no encontrás un dato, dejá el campo vacío.
+- Nunca inventes datos. Si no encontrás un dato, dejá el campo vacío. Un evento
+  al que le falte algo de la lista de arriba: mejor no lo traigas.
 - HOY ES ${hoy}. Las fechas que cargues tienen que ser futuras. Si el evento es
   periódico y la única edición que encontrás ya se hizo, esa fecha NO va en
   fechaInicio: va en "edicionesAnteriores", y el evento queda con las fechas
@@ -382,7 +468,7 @@ REGLAS INNEGOCIABLES
   sirve a un profesional de eventos. Ese es el valor que aportamos nosotros.
 - Escribí en español rioplatense, sin exagerar ni hacer publicidad del evento.
 
-Devolvé hasta ${MAX} eventos en JSON, sin texto alrededor y sin backticks:
+Devolvé hasta ${MAX_POR_RUBRO} eventos en JSON, sin texto alrededor y sin backticks:
 {"eventos":[{
   "nombre":"", "tipo":"uno de: ${TIPOS.join(" | ")}",
   "interes":["uno o más de: ${INTERESES.join(" | ")}"],
@@ -402,23 +488,49 @@ Devolvé hasta ${MAX} eventos en JSON, sin texto alrededor y sin backticks:
   const nuevos = eventos.filter(
     (e) => !conocidos.has(normalizar(e.nombre)) && !conocidosSinAnio.has(sinAnio(e.nombre))
   );
-  const conFuente = nuevos.filter(
-    (e) => Array.isArray(e.fuentes) && e.fuentes.length > 0
-  );
+  // Nada entra a medias. Al que le falta poco se le da una segunda pasada
+  // buscando solo los huecos; al que sigue incompleto después de eso, se lo
+  // deja pasar y se anota por qué. No es una pérdida: si el evento existe, va
+  // a volver a aparecer cuando la organización publique lo que falta.
+  const listos = [];
+  const descartados = [];
+  let completados = 0;
+
+  for (const e of nuevos) {
+    let huecos = huecosDe(e);
+    if (huecos.length) {
+      try {
+        await completarFicha(e, huecos);
+        const antes = huecos.length;
+        huecos = huecosDe(e);
+        if (huecos.length < antes) completados++;
+      } catch (err) {
+        console.error(`  No se pudo completar "${e.nombre}": ${err.message}`);
+      }
+    }
+    if (huecos.length) descartados.push(`${e.nombre} (falta: ${huecos.join(", ")})`);
+    else listos.push(e);
+  }
 
   console.log(
-    `  Propone ${eventos.length} · repetidos ${eventos.length - nuevos.length} · sin fuente ${nuevos.length - conFuente.length}`
+    `  Propone ${eventos.length} · ya estaban ${eventos.length - nuevos.length} · completados ${completados} · descartados ${descartados.length} · listos ${listos.length}`
   );
-  if (conFuente.length === 0) return 0;
+  for (const d of descartados) console.log(`    ✗ ${d}`);
+  for (const e of listos) {
+    const sinSede = DESEABLES.filter(([c]) => !String(e[c] || "").trim());
+    if (sinSede.length) console.log(`    ! ${e.nombre}: sin ${sinSede.map(([, n]) => n).join(", ")}`);
+  }
+  if (listos.length === 0) return 0;
 
   // Los damos por cargados antes de escribir, así la próxima tanda no
   // los vuelve a traer.
-  for (const e of conFuente) {
+  for (const e of listos) {
     conocidos.add(normalizar(e.nombre));
+    conocidosSinAnio.add(sinAnio(e.nombre));
     yaEstan.push(e.nombre);
   }
 
-  const filas = conFuente.map((e) => ({ fields: aCampos(e) }));
+  const filas = listos.map((e) => ({ fields: aCampos(e) }));
   for (let i = 0; i < filas.length; i += 10) {
     await escribir("POST", filas.slice(i, i + 10));
   }
@@ -504,7 +616,7 @@ async function verificar(registros) {
         b.fields["Última verificación"] || ""
       );
     })
-    .slice(0, MAX);
+    .slice(0, MAX_VERIFICAR);
 
   if (candidatos.length === 0) {
     console.log("No hay eventos aprobados para verificar.");
@@ -796,6 +908,59 @@ function esUnicaVez(r) {
 // ficha que ya está cargada como "Expo Eventos 2026".
 function sinAnio(nombre) {
   return normalizar(String(nombre || "").replace(/\b(19|20)\d{2}\b/g, " "));
+}
+
+// Lo que una ficha necesita para poder publicarse. Sin esto no se carga.
+//
+// El criterio es de Pablo y es el correcto: la agenda es la cara del sitio y
+// el 91% del tráfico de búsqueda entra por ahí. Una ficha sin fecha no se
+// puede agendar, no arma el schema de evento, no entra en el calendario y no
+// sirve para el mail al organizador. Mejor pocas y enteras.
+//
+// El precio de esto es volumen: hoy 41 de los 42 borradores no tienen fecha,
+// o sea que con este listón casi ninguno habría entrado. Por eso se barren
+// más rubros por día y se le da a cada evento una segunda pasada para
+// completarlo antes de descartarlo.
+const OBLIGATORIOS = [
+  ["fechaInicio", "fecha de inicio"],
+  ["tipo", "tipo de evento"],
+  ["pais", "país"],
+  ["provincia", "provincia o región"],
+  ["ciudad", "ciudad"],
+  ["organizador", "organizador"],
+  ["web", "web oficial"],
+  ["descCorta", "descripción corta"],
+  ["descLarga", "descripción larga"],
+];
+
+// La sede queda afuera de los obligatorios a propósito: hay eventos con fecha
+// anunciada y sede todavía sin confirmar, y eso es un estado real, no una
+// ficha a medias. Se intenta completar igual y se avisa si falta.
+const DESEABLES = [["venue", "sede"]];
+
+// Qué le falta a un evento propuesto para poder cargarse.
+function huecosDe(e) {
+  const faltan = [];
+  for (const [campo, comoSeLlama] of OBLIGATORIOS) {
+    if (campo === "fechaInicio") {
+      if (!esFecha(e.fechaInicio) || e.fechaInicio < hoy) faltan.push(comoSeLlama);
+      continue;
+    }
+    if (campo === "tipo") {
+      if (!TIPOS.includes(e.tipo)) faltan.push(comoSeLlama);
+      continue;
+    }
+    if (campo === "provincia") {
+      if (!normalizarProvincia(e.provincia, e.ciudad, e.pais)) faltan.push(comoSeLlama);
+      continue;
+    }
+    if (!String(e[campo] || "").trim()) faltan.push(comoSeLlama);
+  }
+  // "Por anunciar" con una fecha cargada es una contradicción: o la
+  // organización la anunció, o no hay fecha que cargar.
+  if (e.estadoFechas === "Por anunciar") faltan.push("fecha anunciada por la organización");
+  if (!Array.isArray(e.fuentes) || e.fuentes.length === 0) faltan.push("fuente verificable");
+  return faltan;
 }
 
 function esFecha(v) {

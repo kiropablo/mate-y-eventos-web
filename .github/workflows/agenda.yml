@@ -20,9 +20,9 @@ on:
         required: false
         default: ""
       cantidad:
-        description: "Máximo de eventos por rubro"
+        description: "Máximo de eventos por rubro (pocos y completos rinde más que muchos a medias)"
         required: false
-        default: "10"
+        default: "4"
   schedule:
     # Todos los días a las 11:00 UTC (8 de la mañana en Argentina),
     # una hora antes que las transcripciones para no pisarse.
@@ -55,7 +55,7 @@ jobs:
           # repasa lo cargado y suma un rubro nuevo, rotando.
           MODO: ${{ inputs.modo || 'diario' }}
           TEMA: ${{ inputs.tema }}
-          MAX_EVENTOS: ${{ inputs.cantidad || '10' }}
+          MAX_EVENTOS: ${{ inputs.cantidad || '4' }}
         run: node scripts/agenda-ia.mjs
       - name: Refrescar la web
         env:
