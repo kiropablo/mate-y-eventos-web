@@ -1,6 +1,8 @@
+import Link from "next/link";
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { SITE, STATS } from "../lib/site";
+import { PRECIO_MES, LUGARES } from "../agenda/destacado/page";
 
 const DESCRIPCION =
   "Sumá tu marca a Mate y Eventos y llegá a una audiencia específica de profesionales, productoras y agencias de la industria de eventos en LATAM.";
@@ -44,13 +46,14 @@ const FORMATOS = [
   ["Contenido co-creado", "Clips y piezas pensadas junto a tu equipo."],
   ["Presencia en redes", "Amplificación en Instagram, TikTok y LinkedIn."],
   ["Newsletter", "Un espacio en el mail semanal de la comunidad."],
-  // El séptimo formato queda maquetado y marcado como "muy pronto": el copy
-  // y el precio los define Pablo. Aparece igual para que la agenda —que es
-  // el activo con más tráfico propio— figure en la vidriera comercial.
+  // El único formato con precio publicado, porque es el único que se vende
+  // solo: la agenda es el 91% del tráfico de búsqueda del sitio. El precio
+  // sale de la página, no está escrito acá dos veces.
   [
     "Destacado en Agenda",
-    "Tu evento arriba de todo en la agenda de la industria, todo el mes. Seis lugares.",
-    true,
+    `Tu evento arriba de todo en la agenda de la industria, todo el mes. ${LUGARES} lugares.`,
+    `USD ${PRECIO_MES} por mes`,
+    "/agenda/destacado",
   ],
 ];
 
@@ -197,7 +200,7 @@ export default async function Sponsors() {
             Formatos de sponsoreo.
           </h2>
           <div className="grid">
-            {FORMATOS.map(([t, d, pronto], i) => (
+            {FORMATOS.map(([t, d, precio, adonde], i) => (
               <article
                 className="card reveal"
                 key={t}
@@ -205,9 +208,14 @@ export default async function Sponsors() {
               >
                 <h3 style={{ fontSize: "1.25rem" }}>
                   {t}
-                  {pronto ? <span className="card__pronto">Muy pronto</span> : null}
+                  {precio ? <span className="card__pronto">{precio}</span> : null}
                 </h3>
                 <p>{d}</p>
+                {adonde ? (
+                  <p style={{ marginTop: "10px" }}>
+                    <Link href={adonde}>Qué incluye y qué no &rarr;</Link>
+                  </p>
+                ) : null}
               </article>
             ))}
           </div>

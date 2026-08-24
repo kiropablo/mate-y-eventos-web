@@ -17,6 +17,7 @@ export default async function sitemap() {
     "/agenda/esta-semana",
     "/agenda/calendario",
     "/agenda/verificado",
+    "/agenda/destacado",
     "/agenda/sugerir",
     "/imperdibles",
     "/glosario",

@@ -313,7 +313,7 @@ export default function AgendaLista({ proximos, pasados }) {
           {destacados.some((e) => e.destacadoPago) ? (
             <p className="ag-dest__aviso">
               Algunos de estos eventos contrataron este espacio.{" "}
-              <a href="/sponsors">Cómo funciona</a>.
+              <a href="/agenda/destacado">Cómo funciona</a>.
             </p>
           ) : null}
           <div className="ag-dest__tira">
