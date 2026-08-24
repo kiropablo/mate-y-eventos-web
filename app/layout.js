@@ -2,6 +2,7 @@ import { Inter, Space_Grotesk, Rajdhani } from "next/font/google";
 import "./globals.css";
 import Atmosphere from "./components/Atmosphere";
 import Motion from "./components/Motion";
+import Contador from "./components/Contador";
 import { SITE, LINKS } from "./lib/site";
 
 const inter = Inter({
@@ -107,6 +108,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Atmosphere />
+        <Contador />
         {children}
         <Motion />
       </body>
