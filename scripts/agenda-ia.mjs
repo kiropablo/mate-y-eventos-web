@@ -73,6 +73,17 @@ function normalizarProvincia(texto, ciudad, pais) {
 
   const plano = sinAcentos(crudo);
 
+  // La Ciudad gana siempre, aunque el texto traiga una aclaración: el atajo de
+  // alias de abajo pide coincidencia exacta, y con "Ciudad Autónoma de Buenos
+  // Aires (CABA)" caíamos al bloque de menciones, donde "Buenos Aires" matchea
+  // adentro y el evento terminaba cargado en la PROVINCIA. "CABA, Argentina"
+  // era peor todavía: se iba sin provincia ninguna.
+  // (sinAcentos no baja a minúsculas: por eso las dos van con /i)
+  if (/\b(caba|capital federal)\b/i.test(plano) ||
+      /\bciudad (autonoma de |de )?buenos aires\b/i.test(plano)) {
+    return "Ciudad de Buenos Aires";
+  }
+
   // Sedes que cambian de edición en edición.
   if (/variable|itinerant|rotativ|varias sedes|distintas sedes|cambia/i.test(plano)) {
     return ITINERANTE;
@@ -136,7 +147,13 @@ if (!AIRTABLE_KEY || !ANTHROPIC_KEY) {
   process.exit(1);
 }
 
-const hoy = new Date().toISOString().slice(0, 10);
+// Igual que hoyISO() en app/lib/agenda.js. Con toISOString() se usaba la hora
+// del runner, que es UTC: apretando el botón de /admin a las 22 de Argentina
+// ya era "mañana", y un evento que estaba pasando en ese momento caía en
+// quedoEnElPasado() y se archivaba como edición vieja mientras sucedía.
+const hoy = new Date().toLocaleDateString("en-CA", {
+  timeZone: "America/Argentina/Buenos_Aires",
+});
 
 main().catch((e) => {
   console.error(e);
@@ -221,6 +238,12 @@ async function archivarDuplicados(registros) {
     if (grupo.length < 2) continue;
     // Se queda el registro más completo; si empatan, el más viejo.
     grupo.sort((a, b) => {
+      // Lo que ya está publicado gana siempre. Antes se elegía solo por
+      // cantidad de campos llenos: un aprobado al que Pablo le vació campos
+      // podía perder contra su propio borrador y terminar en "Archivado",
+      // o sea desaparecer de la web sin ningún error de por medio.
+      const rango = (r) => (r.fields["Estado"] === "Aprobado" ? 0 : 1);
+      if (rango(a) !== rango(b)) return rango(a) - rango(b);
       const peso = (r) => Object.keys(r.fields).length;
       if (peso(a) !== peso(b)) return peso(b) - peso(a);
       return String(a.createdTime).localeCompare(String(b.createdTime));
@@ -293,12 +316,18 @@ async function descubrir(registros, temas) {
   // que un rubro no vuelva a proponer lo que trajo el anterior.
   const yaEstan = registros.map((r) => r.fields["Nombre"]).filter(Boolean);
   const conocidos = new Set(yaEstan.map(normalizar));
+  // También sin el año. Cuando a un evento se le mueve la fecha al año que
+  // viene, el nombre no se toca: la ficha sigue diciendo "Expo Eventos 2026"
+  // con fechas de 2027. Comparando el nombre exacto, la próxima vez que el
+  // rubro vuelve a tocar en la rotación el robot propone "Expo Eventos 2027",
+  // no lo reconoce, y carga una segunda ficha del mismo evento.
+  const conocidosSinAnio = new Set(yaEstan.map(sinAnio));
   let total = 0;
 
   for (const [i, tema] of temas.entries()) {
     console.log(`\n[${i + 1}/${temas.length}] ${tema.slice(0, 70)}…`);
     try {
-      total += await descubrirTema(tema, yaEstan, conocidos);
+      total += await descubrirTema(tema, yaEstan, conocidos, conocidosSinAnio);
     } catch (e) {
       console.error(`  Falló esta tanda: ${e.message}`);
     }
@@ -306,7 +335,7 @@ async function descubrir(registros, temas) {
   console.log(`\nTotal cargado: ${total} eventos como Borrador IA.`);
 }
 
-async function descubrirTema(tema, yaEstan, conocidos) {
+async function descubrirTema(tema, yaEstan, conocidos, conocidosSinAnio = new Set()) {
   const foco = `Enfocate en: ${tema}. Buscá lo que ocurra en los próximos 18 meses.`;
 
   const prompt = `Sos el investigador de la agenda de eventos de Mate y Eventos, un medio
@@ -370,7 +399,9 @@ Devolvé hasta ${MAX} eventos en JSON, sin texto alrededor y sin backticks:
   const datos = await preguntarleAClaude(prompt, 16000);
   const eventos = (datos.eventos || []).filter((e) => e && e.nombre);
 
-  const nuevos = eventos.filter((e) => !conocidos.has(normalizar(e.nombre)));
+  const nuevos = eventos.filter(
+    (e) => !conocidos.has(normalizar(e.nombre)) && !conocidosSinAnio.has(sinAnio(e.nombre))
+  );
   const conFuente = nuevos.filter(
     (e) => Array.isArray(e.fuentes) && e.fuentes.length > 0
   );
@@ -408,12 +439,22 @@ function aCampos(e) {
     "Última verificación": hoy,
   };
   if (TIPOS.includes(e.tipo)) f["Tipo"] = e.tipo;
-  const interes = (e.interes || []).filter((i) => INTERESES.includes(i));
+  // El modelo a veces manda un texto suelto en vez de una lista cuando el
+  // evento entra en una sola categoría. Sin esto, .filter no existe, aCampos
+  // explota antes del primer POST y se pierden los diez eventos de la tanda
+  // —con la Action igual en verde, porque el error lo traga el try/catch.
+  const crudoInteres = Array.isArray(e.interes)
+    ? e.interes
+    : e.interes
+      ? [e.interes]
+      : [];
+  const interes = crudoInteres.filter((i) => INTERESES.includes(i));
   if (interes.length) f["Interés MyE"] = interes;
   if (e.organizador) f["Organizador"] = e.organizador;
   if (e.edicion) f["Edición/Frecuencia"] = e.edicion;
   if (esFecha(e.fechaInicio)) f["Fecha inicio"] = e.fechaInicio;
-  if (esFecha(e.fechaFin)) f["Fecha fin"] = e.fechaFin;
+  const finNuevo = fechaFinValida(e.fechaFin, e.fechaInicio);
+  if (finNuevo) f["Fecha fin"] = finNuevo;
   f["Estado de fechas"] = ["Confirmadas", "Estimadas", "Por anunciar"].includes(
     e.estadoFechas
   )
@@ -533,17 +574,28 @@ Devolvé JSON sin texto alrededor y sin backticks:
 
   if (d.hayProxima && esFecha(d.fechaInicio) && d.fechaInicio > hoy) {
     campos["Fecha inicio"] = d.fechaInicio;
-    campos["Fecha fin"] = esFecha(d.fechaFin) ? d.fechaFin : null;
+    campos["Fecha fin"] = fechaFinValida(d.fechaFin, d.fechaInicio);
     campos["Estado de fechas"] = d.estadoFechas === "Confirmadas" ? "Confirmadas" : "Estimadas";
-    campos["Hallazgos IA"] = `[${hoy}] Próxima edición: ${d.fechaInicio}. ${sinCitas(d.resumen || "")}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
+    apagarSello(f, campos);
+    campos["Hallazgos IA"] = `[${hoy}] Próxima edición: ${d.fechaInicio}. ${sinCitas(d.resumen || "")}${d.fuente ? `\nFuente: ${sinCitas(d.fuente)}` : ""}`;
     console.log(`  ${f["Nombre"]}: próxima edición → ${d.fechaInicio}`);
   } else {
     // Sin anuncio: se limpian las fechas para que no siga figurando como pasado.
     campos["Fecha inicio"] = null;
     campos["Fecha fin"] = null;
     campos["Estado de fechas"] = "Por anunciar";
-    campos["Hallazgos IA"] = `[${hoy}] La edición ${rango} ya se hizo y todavía no anunciaron la próxima. Queda a la espera.${d.resumen ? `\n${d.resumen}` : ""}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
-    console.log(`  ${f["Nombre"]}: edición pasada archivada, sin próxima fecha`);
+    // Dos casos distintos, y antes los dos decían lo mismo. Si el modelo avisa
+    // que hay próxima edición pero la fecha no se puede usar —"2027-03" sin
+    // día, o un mes de un solo dígito—, afirmar que "no anunciaron la próxima"
+    // contradice al resumen que va dos renglones más abajo.
+    const anunciadaSinFecha = d.hayProxima && !esFecha(d.fechaInicio);
+    const cabecera = anunciadaSinFecha
+      ? `La edición ${rango} ya se hizo. Anunciaron la próxima pero sin una fecha que se pueda cargar: hay que ponerla a mano.`
+      : `La edición ${rango} ya se hizo y todavía no anunciaron la próxima. Queda a la espera.`;
+    campos["Hallazgos IA"] = `[${hoy}] ${cabecera}${d.resumen ? `\n${sinCitas(d.resumen)}` : ""}${d.fuente ? `\nFuente: ${sinCitas(d.fuente)}` : ""}`;
+    console.log(
+      `  ${f["Nombre"]}: ${anunciadaSinFecha ? "próxima anunciada sin fecha usable" : "edición pasada archivada, sin próxima fecha"}`
+    );
   }
 
   await escribir("PATCH", [{ id: r.id, fields: campos }]);
@@ -591,7 +643,7 @@ Devolvé JSON sin texto alrededor y sin backticks:
   const campos = { "Última verificación": hoy };
 
   if (d.cambio && d.resumen) {
-    campos["Hallazgos IA"] = `[${hoy}] ${sinCitas(d.resumen)}${d.fuente ? `\nFuente: ${d.fuente}` : ""}`;
+    campos["Hallazgos IA"] = `[${hoy}] ${sinCitas(d.resumen)}${d.fuente ? `\nFuente: ${sinCitas(d.fuente)}` : ""}`;
     campos["Revisar"] = true;
 
     // Completar fechas solo cuando antes NO estaban firmes. Si ya figuraban
@@ -609,8 +661,9 @@ Devolvé JSON sin texto alrededor y sin backticks:
 
     if (!eranFirmes && esFutura && d.estadoFechas === "Confirmadas") {
       campos["Fecha inicio"] = d.fechaInicio;
-      if (esFecha(d.fechaFin)) campos["Fecha fin"] = d.fechaFin;
+      campos["Fecha fin"] = fechaFinValida(d.fechaFin, d.fechaInicio);
       campos["Estado de fechas"] = "Confirmadas";
+      apagarSello(f, campos);
       console.log(`  ${f["Nombre"]}: fechas confirmadas → ${d.fechaInicio}`);
     } else if (esFecha(d.fechaInicio) && !esFutura) {
       // Se avisa aparte para que en el log se vea que el modelo trajo una
@@ -739,6 +792,41 @@ function esUnicaVez(r) {
   return f.includes("única") || f.includes("unica") || f.includes("único") || f.includes("unico");
 }
 
+// El nombre sin el año, para reconocer que "Expo Eventos 2027" es la misma
+// ficha que ya está cargada como "Expo Eventos 2026".
+function sinAnio(nombre) {
+  return normalizar(String(nombre || "").replace(/\b(19|20)\d{2}\b/g, " "));
+}
+
 function esFecha(v) {
   return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+}
+
+// La fecha de cierre que se puede guardar junto a una de inicio dada.
+//
+// Devuelve null —o sea, BORRA la que hubiera— en vez de dejar la vieja. Si se
+// escribe una fecha de inicio nueva y la de fin se deja como estaba, el evento
+// queda terminando antes de empezar: la web lo lista como "17 al 12 de sep",
+// el .ics sale con el cierre antes de la apertura (los calendarios lo tiran) y
+// yaPaso() —que mira la fecha fin primero— lo saca de la agenda el día del
+// cierre viejo, o sea ANTES de que el evento ocurra.
+//
+// Y se descarta la que venga anterior al inicio: al modelo se le escapa el año
+// de la edición pasada en el cierre ("inicio 2027-03-12, fin 2026-03-14"), y
+// con eso el evento se hace invisible aunque falte un año.
+// El sello "Verificado" dice que los datos los confirmó el organizador. Si el
+// robot cambia las fechas por su cuenta, deja de ser cierto: la ficha seguiría
+// mostrando "datos verificados por el organizador" y el schema seguiría
+// emitiendo lastReviewed sobre un dato que salió de una búsqueda web. Se apaga
+// y queda Revisar en true, que es lo que corresponde: lo vuelve a encender
+// Pablo cuando el organizador confirme de nuevo.
+function apagarSello(f, campos) {
+  if (!f["Verificado por el organizador"]) return;
+  campos["Verificado por el organizador"] = false;
+  campos["Fecha de verificación"] = null;
+}
+
+function fechaFinValida(fin, inicio) {
+  if (!esFecha(fin) || !esFecha(inicio)) return null;
+  return fin >= inicio ? fin : null;
 }
