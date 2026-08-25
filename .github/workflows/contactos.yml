@@ -52,6 +52,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: contactos-encontrados
-          path: datos-contactos/encontrados.json
+          path: datos-contactos/
           if-no-files-found: warn
           retention-days: 14

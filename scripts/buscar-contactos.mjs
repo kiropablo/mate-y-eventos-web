@@ -49,20 +49,24 @@ const AGENTE =
 // Las páginas donde un sitio pone su contacto. Se prueban en este orden y se
 // corta apenas aparece algo bueno: no hace falta recorrer el sitio entero.
 const RUTAS = [
-  "",
   "/contacto",
   "/contact",
+  "/contato",       // los eventos de Brasil son un rubro entero de la agenda
+  "/fale-conosco",
   "/contactanos",
-  "/contacto/",
-  "/es/contacto",
+  "/contactenos",
   "/institucional",
   "/quienes-somos",
   "/nosotros",
-  "/about",
   "/prensa",
 ];
 
-const MAX_PAGINAS = 5;
+// Cómo se llama un link de contacto. Se usa para seguir los que el sitio ya
+// tiene en su menú en vez de adivinar direcciones: es más certero y son menos
+// pedidos, porque no se piden páginas que no existen.
+const ES_CONTACTO = /contact|contato|conosco|prensa|press|institucional|nosotros|quienes/i;
+
+const MAX_PAGINAS = 6;
 const ESPERA_MS = 600;
 const TIMEOUT_MS = 12000;
 const MAX_BYTES = 900_000;
@@ -74,6 +78,24 @@ const BUENOS = [
   "expositores", "sponsors", "marketing", "eventos", "atencion", "mail",
   "secretaria", "produccion", "organizacion",
 ];
+
+// Buzones que existen en el dominio pero NO son para esto. Escribirle a
+// compliance@ —el canal de denuncias éticas— para preguntar por las fechas de
+// una feria es peor que no escribir. La primera corrida eligió justo ese para
+// Messe Frankfurt, busquedas@ (empleo) para el Automóvil Club y competitors@
+// (los corredores) para el Desafío Ruta 40.
+const PROHIBIDOS = [
+  "compliance", "legal", "denuncias", "etica", "ethics", "whistle",
+  "busquedas", "empleo", "rrhh", "recursoshumanos", "jobs", "cv", "trabaja",
+  "postulaciones", "reclutamiento", "seleccion",
+  "competitors", "competidores", "inscripciones", "inscripcion", "socios",
+  "cobranzas", "facturacion", "pagos", "finanzas", "tesoreria",
+  "soporte", "support", "webmaster", "hosting", "abuse", "dpo", "privacidad",
+  "unsubscribe", "bajas", "spam", "postmaster",
+];
+
+// Casillas gratuitas: sirven para mirar, no para que un robot las guarde solo.
+const GRATUITO = /@(gmail|hotmail|yahoo|outlook|live|icloud|proton)\./i;
 
 // Basura que aparece en el HTML y no es un contacto de nadie.
 const BASURA =
@@ -136,21 +158,35 @@ function puntuar({ mail, deMailto }, dominio) {
     raiz(host).endsWith("." + raiz(dominio)) ||
     raiz(dominio).endsWith("." + raiz(host));
 
-  const institucional = BUENOS.some(
-    (b) => buzon === b || buzon.startsWith(b + ".") || buzon.startsWith(b + "-")
+  const prohibido = PROHIBIDOS.some(
+    (b) => buzon === b || buzon.startsWith(b) || buzon.endsWith(b)
   );
+  const institucional =
+    !prohibido &&
+    BUENOS.some(
+      (b) => buzon === b || buzon.startsWith(b + ".") || buzon.startsWith(b + "-")
+    );
   // Un buzón con nombre y apellido es de una persona. Sirve, pero es la
   // última opción: preferimos escribirle a la organización.
   const personal = !institucional && /^[a-z]+([._-][a-z]+)+$/.test(buzon);
 
-  let puntos = 0;
-  if (mismoDominio) puntos += 10;
-  if (institucional) puntos += 6;
-  if (deMailto) puntos += 3;
-  if (personal) puntos -= 4;
-  if (/gmail|hotmail|yahoo|outlook/.test(host)) puntos -= 2;
+  const gratuito = GRATUITO.test(mail);
 
-  return { puntos, institucional, personal, mismoDominio };
+  let puntos = 0;
+  if (institucional) puntos += 12;
+  if (mismoDominio) puntos += 8;
+  if (deMailto) puntos += 3;
+  if (personal) puntos -= 6;
+  if (gratuito) puntos -= 5;
+  if (prohibido) puntos -= 30;
+
+  // Lo único que se puede guardar sin que lo mire nadie: un buzón
+  // institucional, del dominio del propio sitio y que no sea gratuito. Todo
+  // lo demás va al informe. Es el mismo criterio que en la agenda: mejor
+  // pocos y buenos que muchos y a medias.
+  const confiable = institucional && mismoDominio && !gratuito && !prohibido;
+
+  return { puntos, institucional, personal, mismoDominio, prohibido, gratuito, confiable };
 }
 
 // Todas las direcciones que publica un sitio, mirando pocas páginas.
@@ -163,28 +199,60 @@ async function contactosDe(web) {
   }
   const dominio = url.hostname;
   const encontrados = new Map();
+  const vistas = new Set();
   let paginas = 0;
   let ultimoError = null;
 
-  for (const ruta of RUTAS) {
-    if (paginas >= MAX_PAGINAS) break;
-    // Con un buzón institucional del propio dominio ya alcanza.
-    if ([...encontrados.values()].some((c) => c.puntos >= 16)) break;
+  // Se arranca siempre por la home, y de ahí salen las páginas que el propio
+  // sitio llama "contacto". Las rutas adivinadas quedan de respaldo, para
+  // cuando el menú está armado con JavaScript y no viene en el HTML.
+  const cola = [url.href];
 
-    const destino = ruta ? new URL(ruta, url.origin).href : url.href;
+  const mirar = async (destino) => {
+    if (vistas.has(destino) || paginas >= MAX_PAGINAS) return null;
+    vistas.add(destino);
     try {
       const html = await bajar(destino);
       paginas++;
-      if (!html) continue;
+      await esperar(ESPERA_MS);
+      if (!html) return null;
       for (const c of mailsDe(html, dominio)) {
         if (!encontrados.has(c.mail)) encontrados.set(c.mail, c);
       }
+      return html;
     } catch (e) {
       ultimoError = e.name === "TimeoutError" ? "tardó demasiado" : e.message;
-      // Si la home no contesta, el resto del sitio tampoco: no insistimos.
-      if (!ruta) break;
+      await esperar(ESPERA_MS);
+      return null;
     }
-    await esperar(ESPERA_MS);
+  };
+
+  const yaEstaBien = () =>
+    [...encontrados.values()].some((c) => c.confiable);
+
+  const home = await mirar(cola[0]);
+  if (home) {
+    for (const m of home.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([^<]*)</gi)) {
+      if (!ES_CONTACTO.test(m[1]) && !ES_CONTACTO.test(m[2])) continue;
+      try {
+        const abs = new URL(m[1], url.href);
+        // Solo dentro del mismo sitio: un link a la agencia que lo hizo no.
+        if (abs.hostname !== url.hostname) continue;
+        cola.push(abs.href);
+      } catch {}
+    }
+  } else if (ultimoError) {
+    // Si la home no contesta, el resto del sitio tampoco.
+    return { dominio, lista: [], error: ultimoError };
+  }
+
+  for (const destino of cola.slice(1)) {
+    if (yaEstaBien() || paginas >= MAX_PAGINAS) break;
+    await mirar(destino);
+  }
+  for (const ruta of RUTAS) {
+    if (yaEstaBien() || paginas >= MAX_PAGINAS) break;
+    await mirar(new URL(ruta, url.origin).href);
   }
 
   const lista = [...encontrados.values()].sort((a, b) => b.puntos - a.puntos);
@@ -222,6 +290,9 @@ async function traerSinMail() {
       organizador: r.fields["Organizador"] || "",
       web: String(r.fields["Web oficial"]).trim(),
       fecha: r.fields["Fecha inicio"] || "",
+      // Se trae para poder AGREGAR abajo y no pisar lo que ya diga: ahí
+      // escriben también el robot de la agenda y el archivado de duplicados.
+      notas: String(r.fields["Notas internas"] || ""),
     }));
 }
 
@@ -294,6 +365,8 @@ async function main() {
         institucional: mejor?.institucional || false,
         personal: mejor?.personal || false,
         mismoDominio: mejor?.mismoDominio || false,
+        confiable: mejor?.confiable || false,
+        notas: ev.notas || "",
         alternativos: (r.lista || []).slice(1, 4).map((c) => c.mail),
         error: r.error || "",
       });
@@ -305,12 +378,55 @@ async function main() {
   const salida = path.join(dir, "encontrados.json");
   fs.writeFileSync(salida, JSON.stringify(resultados, null, 2), "utf8");
 
+  // Y una planilla, que es lo que se mira de verdad. Ordenada por fecha del
+  // evento: los que arrancan antes son a los que hay que escribirles ya.
+  const celda = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const orden = { guardar: 0, revisar: 1, "sin datos": 2 };
+  const filas = [...resultados]
+    .map((r) => ({
+      ...r,
+      estado: !r.mail ? "sin datos" : r.confiable ? "guardar" : "revisar",
+      motivo: !r.mail
+        ? r.error || "no publica el mail en el sitio"
+        : r.confiable
+          ? ""
+          : [
+              r.personal && "parece de una persona",
+              r.gratuito && "casilla gratuita",
+              !r.mismoDominio && "de otro dominio",
+              r.prohibido && "buzón que no es para esto",
+            ]
+              .filter(Boolean)
+              .join(" · ") || "no es un buzón institucional",
+    }))
+    .sort(
+      (a, b) =>
+        orden[a.estado] - orden[b.estado] ||
+        String(a.fecha).localeCompare(String(b.fecha))
+    );
+
+  const csv = [
+    ["Estado", "Motivo", "Evento", "Fecha", "Organizador", "Mail encontrado", "Otros mails", "Sitio"]
+      .map(celda)
+      .join(","),
+    ...filas.map((r) =>
+      [
+        r.estado, r.motivo, r.nombre, r.fecha, r.organizador,
+        r.mail, (r.alternativos || []).join(" "), r.web,
+      ].map(celda).join(",")
+    ),
+  ].join("\n");
+  const planilla = path.join(dir, "contactos.csv");
+  // Con BOM para que Excel no rompa los acentos.
+  fs.writeFileSync(planilla, "\uFEFF" + csv, "utf8");
+
   const con = resultados.filter((r) => r.mail);
-  const inst = con.filter((r) => r.institucional);
+  const inst = con.filter((r) => r.confiable);
   console.log(`\n${con.length} de ${resultados.length} eventos con mail encontrado.`);
-  console.log(`  buzón institucional (contacto@, info@, prensa@…): ${inst.length}`);
-  console.log(`  buzón de una persona: ${con.length - inst.length}`);
+  console.log(`  para guardar solos (institucional, del propio dominio): ${inst.length}`);
+  console.log(`  para que los mires vos (personales, de otro dominio, gratuitos): ${con.length - inst.length}`);
   console.log(`Informe: ${salida}`);
+  console.log(`Planilla: ${planilla}`);
 
   if (!ESCRIBIR) {
     console.log("\nNo se escribió nada. Repasá el informe y volvé a correrlo con --escribir.");
@@ -320,15 +436,22 @@ async function main() {
   // Solo los institucionales se guardan solos. Los que parecen de una
   // persona quedan en el informe para que los mire Pablo: escribirle al mail
   // personal de alguien sin querer es exactamente lo que no queremos.
+  const hoy = new Date().toISOString().slice(0, 10);
   const aGuardar = con
-    .filter((r) => r.institucional)
-    .map((r) => ({
-      id: r.id,
-      fields: {
-        "Email del organizador": r.mail,
-        "Notas internas": `Mail tomado de ${r.dominio} el ${new Date().toISOString().slice(0, 10)}. Sin confirmar con el organizador.`,
-      },
-    }));
+    .filter((r) => r.confiable)
+    .map((r) => {
+      const linea = `[${hoy}] Mail tomado de ${r.dominio}. Sin confirmar con el organizador.`;
+      return {
+        id: r.id,
+        fields: {
+          "Email del organizador": r.mail,
+          // Se agrega abajo, no se pisa: el campo ya puede traer la nota de
+          // provincia que escribe el robot de la agenda, o la de un duplicado
+          // archivado. Mandar solo la línea nueva las borraba.
+          "Notas internas": r.notas ? `${r.notas}\n${linea}` : linea,
+        },
+      };
+    });
   await guardar(aGuardar);
   console.log(`\nGuardados ${aGuardar.length} mails en Airtable.`);
   console.log(`Quedaron ${con.length - aGuardar.length} para revisar a mano en el informe.`);
