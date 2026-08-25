@@ -18,7 +18,12 @@ export function generateMetadata({ params }) {
   if (!t) return { title: "Glosario" };
   return {
     alternates: { canonical: `/glosario/${t.slug}` },
-    title: `${t.termino} — qué significa en la industria de eventos`,
+    // "{término}: qué es" y no "— qué significa en la industria de eventos".
+    // Ese sufijo medía 60 caracteres y el layout le sumaba " · Mate y Eventos":
+    // ninguna de las 59 páginas entraba entera en lo que muestra Google, ni
+    // siquiera "VJ", que son dos letras. Además esta forma coincide con cómo
+    // se busca de verdad ("qué es un rider técnico").
+    title: `${t.termino}: qué es`,
     description: t.definicionCorta,
     openGraph: {
       type: "article",

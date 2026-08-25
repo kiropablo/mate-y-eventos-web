@@ -17,6 +17,16 @@ import { SITE } from "../lib/site";
 // es una página flaca, y las páginas flacas restan en vez de sumar.
 const MINIMO = 3;
 const MINIMO_PROVINCIA = 6;
+
+// Qué porción de los eventos de su país puede tener una provincia antes de que
+// su landing deje de ser una página distinta.
+//
+// São Paulo tenía 17 de los 22 eventos de Brasil: las 17 filas idénticas
+// carácter por carácter, el 86% del texto igual. Eso no es un corte, es la
+// misma lista con otro título, y las dos compiten por lo mismo. En cambio la
+// Ciudad de Buenos Aires tiene 136 de 231 (59%) y sí es una página propia:
+// "eventos en CABA" es una búsqueda real y quedan 95 eventos afuera.
+const TOPE_PROVINCIA = 0.7;
 // Cuántos meses hacia adelante. Más allá la agenda se vuelve muy rala.
 const MESES_ADELANTE = 6;
 
@@ -73,8 +83,32 @@ export function cortesDe(tipo, eventos) {
     grupos.get(clave).eventos.push(e);
   }
 
-  return [...grupos.values()]
-    .filter((g) => g.eventos.length >= def.minimo)
+  let grupitos = [...grupos.values()].filter(
+    (g) => g.eventos.length >= def.minimo
+  );
+
+  if (tipo === "provincia") {
+    // Cuántos eventos tiene cada país, para medir contra eso.
+    const porPais = new Map();
+    for (const e of eventos) {
+      const clave = pelado(String(e.pais || ""));
+      if (clave) porPais.set(clave, (porPais.get(clave) || 0) + 1);
+    }
+    grupitos = grupitos.filter((g) => {
+      // El país de la provincia es el de la mayoría de sus eventos, y no el
+      // del primero: una provincia mal cargada podría tener eventos de dos.
+      const cuenta = new Map();
+      for (const e of g.eventos) {
+        const clave = pelado(String(e.pais || ""));
+        if (clave) cuenta.set(clave, (cuenta.get(clave) || 0) + 1);
+      }
+      const [suPais] = [...cuenta.entries()].sort((a, b) => b[1] - a[1])[0] || [];
+      const total = porPais.get(suPais) || 0;
+      return !(total > 0 && g.eventos.length / total >= TOPE_PROVINCIA);
+    });
+  }
+
+  return grupitos
     .map((g) => ({
       tipo,
       valor: g.valor,
