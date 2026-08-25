@@ -73,7 +73,7 @@ const MAX_BYTES = 900_000;
 
 // Buzones institucionales: son los que queremos.
 const BUENOS = [
-  "contacto", "contact", "info", "informacion", "hola", "consultas",
+  "contacto", "contact", "info", "informacion", "hola", "hello", "consultas",
   "prensa", "press", "comunicacion", "comercial", "ventas", "administracion",
   "expositores", "sponsors", "marketing", "eventos", "atencion", "mail",
   "secretaria", "produccion", "organizacion",
@@ -100,6 +100,12 @@ const GRATUITO = /@(gmail|hotmail|yahoo|outlook|live|icloud|proton)\./i;
 // Basura que aparece en el HTML y no es un contacto de nadie.
 const BASURA =
   /(^|@)(example|ejemplo|test|noreply|no-reply|donotreply|sentry|wixpress|godaddy|localhost|domain|email|tu-?mail|yourmail|nombre)\b/i;
+
+// Las direcciones que vienen de fábrica en las plantillas y quedan sin cambiar.
+// ubrafe.org.br publica contact@mysite.com, que es el ejemplo de Wix: no es de
+// nadie y mandarle un mail es hablarle a la pared.
+const PLANTILLA =
+  /@(mysite|yoursite|sitename|yourdomain|domain|company|empresa|tusitio|misitio|website|email|mail)\.[a-z.]+$/i;
 const ARCHIVO = /\.(png|jpe?g|gif|webp|svg|css|js|woff2?|ttf|ico|pdf|mp4)$/i;
 
 const RE_MAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,24}/g;
@@ -133,7 +139,7 @@ function mailsDe(html, dominio) {
     // A veces el HTML trae la entidad, o el mailto viene con parámetros.
     m = m.replace(/^mailto:/, "").split("?")[0].replace(/&#64;|%40/gi, "@");
     if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,24}$/.test(m)) return;
-    if (BASURA.test(m) || ARCHIVO.test(m)) return;
+    if (BASURA.test(m) || ARCHIVO.test(m) || PLANTILLA.test(m)) return;
     // "logo@2x.png" y compañía ya cayeron arriba; esto saca los sufijos
     // de imágenes retina que igual se cuelan.
     if (/@\d+x$/.test(m.split(".")[0])) return;
@@ -149,23 +155,35 @@ function mailsDe(html, dominio) {
   return [...vistos.values()].map((v) => ({ ...v, ...puntuar(v, dominio) }));
 }
 
+// El dominio "de verdad", sin subdominios. ar.messefrankfurt.com y
+// argentina.messefrankfurt.com son la misma empresa, y comparando el host
+// entero quedaban como si fueran ajenos. Los .com.ar y .org.br llevan tres
+// pedazos en vez de dos.
+const TLD_LARGO = /\.(com|org|net|gob|gov|edu|mil|ind|tur|co)\.[a-z]{2}$/i;
+function dominioBase(host) {
+  const h = String(host || "").replace(/^www\./, "").toLowerCase();
+  const partes = h.split(".");
+  return partes.slice(TLD_LARGO.test(h) ? -3 : -2).join(".");
+}
+
 // Qué tan buena es una dirección como contacto del evento.
 function puntuar({ mail, deMailto }, dominio) {
   const [buzon, host] = mail.split("@");
-  const raiz = (d) => String(d || "").replace(/^www\./, "").toLowerCase();
-  const mismoDominio =
-    raiz(host) === raiz(dominio) ||
-    raiz(host).endsWith("." + raiz(dominio)) ||
-    raiz(dominio).endsWith("." + raiz(host));
+  const base = dominioBase(dominio);
+  const mismoDominio = dominioBase(host) === base;
 
   const prohibido = PROHIBIDOS.some(
     (b) => buzon === b || buzon.startsWith(b) || buzon.endsWith(b)
   );
+  // Muchas entidades usan su propia sigla de buzón: adrha@adrha.org.ar. Es
+  // tan institucional como info@, y se estaba yendo a revisión a mano.
+  const comoLaCasa = buzon === base.split(".")[0];
   const institucional =
     !prohibido &&
-    BUENOS.some(
-      (b) => buzon === b || buzon.startsWith(b + ".") || buzon.startsWith(b + "-")
-    );
+    (comoLaCasa ||
+      BUENOS.some(
+        (b) => buzon === b || buzon.startsWith(b + ".") || buzon.startsWith(b + "-")
+      ));
   // Un buzón con nombre y apellido es de una persona. Sirve, pero es la
   // última opción: preferimos escribirle a la organización.
   const personal = !institucional && /^[a-z]+([._-][a-z]+)+$/.test(buzon);
