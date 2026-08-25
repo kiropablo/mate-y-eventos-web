@@ -21,3 +21,6 @@ yarn-error.log*
 .env*.local
 .vercel
 *.tsbuildinfo
+
+# Informe de la busqueda de contactos: son datos de terceros, no van al repo
+datos-contactos/

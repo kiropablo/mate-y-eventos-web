@@ -1,0 +1,57 @@
+name: Buscar contactos
+
+# Busca el mail de contacto de cada evento aprobado que no tenga uno, entrando
+# al sitio oficial del propio evento. No corre solo: se dispara a mano desde
+# esta pestaña, porque visita sitios de terceros y conviene mirar el resultado.
+on:
+  workflow_dispatch:
+    inputs:
+      escribir:
+        description: "Guardar en Airtable. En 'no' solo deja el informe para revisar."
+        required: false
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "si"
+      limite:
+        description: "Cuántos eventos mirar. 0 = todos los que falten."
+        required: false
+        default: "0"
+
+# Dos búsquedas a la vez le pegarían dos veces a los mismos sitios.
+concurrency:
+  group: contactos
+  cancel-in-progress: false
+
+jobs:
+  contactos:
+    runs-on: ubuntu-latest
+    # Entra a ~200 sitios con una pausa entre cada uno: le damos aire.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Buscar los mails
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+        run: |
+          node scripts/buscar-contactos.mjs \
+            --limite "${{ inputs.limite || '0' }}" \
+            ${{ inputs.escribir == 'si' && '--escribir' || '' }}
+
+      # El informe queda para bajar desde esta misma corrida. No se commitea:
+      # son datos de contacto de terceros y no tienen por qué vivir en el repo.
+      - name: Dejar el informe para bajar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contactos-encontrados
+          path: datos-contactos/encontrados.json
+          if-no-files-found: warn
+          retention-days: 14
