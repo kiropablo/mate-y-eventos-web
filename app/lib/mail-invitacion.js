@@ -1,6 +1,7 @@
 import { formatRango, nombreConAnio } from "./agenda";
 import { DIAS_PARA_DIFUNDIR, llegamosADifundir, lunesDe, MAXIMO_SEMANA } from "./semana";
 import { SITE } from "./site";
+import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes";
 
 // El mail que le llega al organizador.
 //
@@ -35,18 +36,27 @@ function diaYMes(fechaISO) {
 // lugar. Un asunto que se corta a la mitad no sirve para nada.
 const LARGO_ASUNTO = 78;
 
-function armarAsunto(nombre, cuando, ev) {
+function armarAsunto(nombre, cuando, ev, plantilla) {
   if (!ev.fechaInicio) {
     return `${nombre} está publicado en nuestra agenda — ¿están bien los datos?`;
   }
+  // La plantilla la edita Pablo desde /admin. Si sacó el lugar, se usa tal
+  // cual; si lo dejó, se prueba con sede y después con ciudad, y si el asunto
+  // queda ilegible de largo se manda sin lugar.
+  const conLugar = (lugar) =>
+    reemplazar(plantilla, { evento: nombre, cuando, lugar }).replace(
+      /\s+en\s*$|\s+en\s+—/,
+      (t) => (t.includes("—") ? " —" : "")
+    );
+  if (!/\{lugar\}/.test(plantilla)) return conLugar("");
   // Los vacíos se sacan ANTES de probar. Si no, una sede vacía cortaba la
   // vuelta en la primera pasada y la ciudad no se probaba nunca: eventos con
   // ciudad cargada y sin sede salían con un asunto sin lugar, pudiendo tenerlo.
   for (const lugar of [ev.venue, ev.ciudad].filter(Boolean)) {
-    const asunto = `${nombre}: ${cuando} en ${lugar} — ¿está bien?`;
+    const asunto = conLugar(lugar);
     if (asunto.length <= LARGO_ASUNTO) return asunto;
   }
-  return `${nombre}: ${cuando} — ¿está bien?`;
+  return conLugar("");
 }
 
 // "No cuento Intersec, que la organizan ustedes."
@@ -59,8 +69,13 @@ function frasePropios(propios) {
   return `No cuento ${lista}, que ${nombres.length === 1 ? "lo organizan" : "los organizan"} ustedes.`;
 }
 
-export function armarInvitacion({ ev, semana = [], propios = [], link }) {
+export function armarInvitacion({ ev, semana = [], propios = [], link, mensaje }) {
   const nombre = nombreConAnio(ev);
+  // Los textos editables. Si nunca se tocaron, son los de fábrica. El panel
+  // pasa los de la pantalla —todavía sin guardar— para poder previsualizar.
+  const M = mensaje || getMensaje();
+  const marcas = { ...MARCAS_BASE(), evento: nombre };
+  const t = (id, extra) => reemplazar(M[id], { ...marcas, ...extra });
   const cuando = formatRango(ev) || "Fechas por anunciar";
   const donde = [ev.venue, ev.ciudad].filter(Boolean).join(", ");
   // La semana se agrupa de lunes a domingo, así que se la nombra por su
@@ -91,9 +106,9 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
   //
   // La sede solo entra si el asunto no se vuelve ilegible: se prueba con
   // sede, después con ciudad, y si ninguna entra va sin lugar.
-  const asunto = armarAsunto(nombre, cuando, ev);
+  const asunto = armarAsunto(nombre, cuando, ev, M.asunto);
 
-  const titular = `Publicamos ${ev.nombre} en nuestra agenda. ¿Están bien estos datos?`;
+  const titular = t("titular");
 
   const filasSemana = visibles.map((o) => ({
     nombre: o.nombre,
@@ -102,9 +117,9 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
 
   // ---------------------------------------------------------------- texto
   const texto = [
-    "Hola:",
+    t("saludo"),
     "",
-    `Publicamos ${ev.nombre} en nuestra agenda de eventos de la industria. Así quedó:`,
+    t("entrada"),
     "",
     `  ${nombre}`,
     `  Fechas: ${cuando}`,
@@ -112,15 +127,15 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
     ev.organizador ? `  Organiza: ${ev.organizador}` : null,
     ev.web ? `  Sitio: ${ev.web.replace(/^https?:\/\//, "").replace(/\/$/, "")}` : null,
     "",
-    "Los datos los armamos con información pública, así que puede haber algo desactualizado. Antes de dejarlo así queremos que lo mires vos.",
+    t("aclaracion"),
     "",
-    `Repasar los datos: ${link}`,
+    `${t("boton")}: ${link}`,
     "",
-    "Son dos minutos: marcás lo que está bien, corregís lo que no. Si está todo correcto, le encendemos el sello Verificado, que dice que los datos los confirmó el organizador y no que los copiamos de algún lado.",
+    t("queGana"),
     "",
     "—",
     "",
-    `Soy Pablo Quiroga, de ${SITE.name}: un podcast de la industria de eventos de Latinoamérica y una agenda pública con más de 260 eventos de la región.`,
+    t("quienesSomos"),
     hay ? "" : null,
     hay
       ? `De paso, un dato que capaz te sirve. Esa misma semana, además de ${ev.nombre}, hay ${cuantosHay} en la agenda:`
@@ -141,15 +156,13 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
       ? `Para llegar a tiempo necesitamos la confirmación ${DIAS_PARA_DIFUNDIR} días antes.`
       : null,
     "",
-    "Cualquier cosa, respondeme acá.",
+    t("cierre"),
     "",
-    "Un abrazo,",
-    "Pablo Quiroga",
-    `Co-creador de ${SITE.name}, junto a Alexis Vidal`,
+    t("firma"),
     SITE.url,
     "",
     "—",
-    `Te escribimos porque ${nombre} figura en nuestra agenda pública de eventos (${SITE.url}/agenda). Si preferís que lo saquemos, o que no te escribamos más, respondé este mail con la palabra "baja" y listo.`,
+    t("pie"),
   ]
     .filter((l) => l !== null)
     .join("\n")
@@ -200,7 +213,7 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
   <tr><td bgcolor="#ea478a" style="background:#ea478a;height:4px;line-height:4px;font-size:4px;">&nbsp;</td></tr>
 
   ${bloque(
-    `<h1 class="h1 fuerte" style="margin:0 0 18px;font-size:23px;line-height:1.26;color:#14111c;font-weight:bold;">${esc(titular)}</h1>${parrafo("Hola:", "0 0 22px")}`,
+    `<h1 class="h1 fuerte" style="margin:0 0 18px;font-size:23px;line-height:1.26;color:#14111c;font-weight:bold;">${esc(titular)}</h1>${parrafo(esc(t("saludo")), "0 0 22px")}`,
     "32px 34px 6px"
   )}
 
@@ -226,10 +239,10 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
   <tr><td align="center" class="pad" style="padding:20px 34px 8px;">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
       <td align="center" bgcolor="#ea478a" style="background:#ea478a;border-radius:6px;">
-        <a href="${esc(link)}" style="display:inline-block;padding:15px 34px;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:6px;">Repasar los datos</a>
+        <a href="${esc(link)}" style="display:inline-block;padding:15px 34px;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:6px;">${esc(t("boton"))}</a>
       </td>
     </tr></table>
-    ${tenue("Son dos minutos: marcás lo que está bien, corregís lo que no.", "12px 0 0")}
+    ${tenue(esc(t("queGana")), "12px 0 0")}
   </td></tr>
 
   ${bloque(
@@ -286,18 +299,37 @@ export function armarInvitacion({ ev, semana = [], propios = [], link }) {
   )}
 
   ${bloque(
-    parrafo("Cualquier cosa, respondeme acá.", "0 0 22px") +
+    parrafo(esc(t("cierre")), "0 0 22px") +
+      // La firma se escribe libre, un renglón por línea. La primera va en
+      // grande y las de abajo en gris, como estaba: si mañana hay tres
+      // renglones o uno, se dibuja igual sin tocar el código.
       `<p class="txt" style="margin:0;font-size:16px;line-height:1.62;color:#3a3548;">
-      Un abrazo,<br>
-      <strong class="fuerte" style="color:#14111c;">Pablo Quiroga</strong><br>
-      <span class="tenue" style="font-size:14px;color:#6c667e;">Co-creador de ${esc(SITE.name)}, junto a Alexis Vidal</span><br>
+      ${t("firma")
+        .split("\n")
+        .map((l, i) =>
+          i === 1
+            ? `<strong class="fuerte" style="color:#14111c;">${esc(l)}</strong>`
+            : i === 0
+              ? esc(l)
+              : `<span class="tenue" style="font-size:14px;color:#6c667e;">${esc(l)}</span>`
+        )
+        .join("<br>\n      ")}<br>
       <a href="${esc(SITE.url)}" style="font-size:14px;color:#c22e70;text-decoration:none;">mateyeventos.com</a>
     </p>`,
     "8px 34px 30px"
   )}
 
   <tr><td bgcolor="#f7f7fa" class="caja pad" style="background:#f7f7fa;border-top:1px solid #e3e1e9;padding:18px 34px 22px;">
-    <p class="tenue" style="margin:0;font-size:12.5px;line-height:1.6;color:#8a8498;">Te escribimos porque ${esc(nombre)} figura en nuestra <a href="${esc(SITE.url)}/agenda" style="color:#8a8498;">agenda pública de eventos</a>. Si preferís que lo saquemos, o que no te escribamos más, respondé este mail con la palabra <strong>baja</strong> y listo.</p>
+    <p class="tenue" style="margin:0;font-size:12.5px;line-height:1.6;color:#8a8498;">${esc(reemplazar(M.pie, { ...marcas, agenda: "" }))
+      // El paréntesis vacío que dejó la marca {agenda} se llena con el link.
+      .replace(
+        /\(\s*\)/,
+        `(<a href="${esc(SITE.url)}/agenda" style="color:#8a8498;">${esc(SITE.url.replace(/^https?:\/\//, ""))}/agenda</a>)`
+      )
+      // Lo que va entre comillas se pone en negrita, como estaba antes: es la
+      // palabra que tiene que responder para que no le escribamos más, y en un
+      // párrafo gris chiquito entre comillas se pierde.
+      .replace(/&quot;([^&]{1,24})&quot;/, "<strong>$1</strong>")}</p>
   </td></tr>
 </table>
 </td></tr></table>

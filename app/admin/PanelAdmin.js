@@ -91,6 +91,16 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [copiado, setCopiado] = useState("");
   const [difundiendo, setDifundiendo] = useState("");
   const [aprobando, setAprobando] = useState("");
+  // El mensaje de primer contacto: los textos editables, la vista previa y si
+  // hay algo sin guardar. Se carga recién cuando se entra a la pestaña.
+  const [msj, setMsj] = useState(null);
+  const [msjOriginal, setMsjOriginal] = useState(null);
+  const [previa, setPrevia] = useState(null);
+  const [cargandoMsj, setCargandoMsj] = useState(false);
+  const [guardandoMsj, setGuardandoMsj] = useState(false);
+  const [avisoMsj, setAvisoMsj] = useState("");
+  const [conQue, setConQue] = useState("");
+
   // Un conjunto y no un solo slug: con uno solo, el primer envío que
   // terminaba le devolvía el botón a TODOS los que estuvieran en curso, y el
   // segundo se podía apretar de nuevo mientras seguía andando.
@@ -333,6 +343,72 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   }
 
   // Manda el mail de invitación. El link firmado lo arma el servidor.
+  async function cargarMensaje() {
+    setCargandoMsj(true);
+    setAvisoMsj("");
+    try {
+      const res = await fetch("/api/admin/mensaje");
+      const d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d?.error || "No se pudo leer el mensaje.");
+      setMsj(d.campos.map((c) => ({ ...c, valor: d.valores[c.id] ?? c.porDefecto })));
+      setMsjOriginal(d.valores);
+      if (!d.guardadoAlgunaVez) {
+        setAvisoMsj("Nunca se editó: estos son los textos con los que sale hoy.");
+      }
+    } catch (e) {
+      setAvisoMsj(e.message);
+    } finally {
+      setCargandoMsj(false);
+    }
+  }
+
+  function valoresDelMensaje() {
+    const out = {};
+    for (const c of msj || []) out[c.id] = c.valor;
+    return out;
+  }
+
+  const hayCambios =
+    msj && msjOriginal && msj.some((c) => (c.valor || "") !== (msjOriginal[c.id] || ""));
+
+  async function verPrevia(slug) {
+    setAvisoMsj("");
+    try {
+      const res = await fetch("/api/admin/mensaje/previsualizar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ valores: valoresDelMensaje(), slug: slug || conQue }),
+      });
+      const d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d?.error || "No se pudo armar la vista previa.");
+      setPrevia(d);
+      setConQue(d.slug);
+    } catch (e) {
+      setAvisoMsj(e.message);
+    }
+  }
+
+  async function guardarMensaje() {
+    if (!confirm("¿Guardo estos textos? El próximo mail que mandes sale así.")) return;
+    setGuardandoMsj(true);
+    setAvisoMsj("");
+    try {
+      const res = await fetch("/api/admin/mensaje", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ valores: valoresDelMensaje() }),
+      });
+      const d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d?.error || "No se pudo guardar.");
+      setMsjOriginal(valoresDelMensaje());
+      setAvisoMsj(d.mensaje || "Guardado.");
+    } catch (e) {
+      setAvisoMsj(e.message);
+    } finally {
+      setGuardandoMsj(false);
+    }
+  }
+
   async function invitar(ev) {
     const para = (paraQuien[ev.slug] ?? ev.emailSugerido ?? "").trim();
     if (!para) return alert("Escribí a qué mail se lo mando.");
@@ -494,7 +570,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
             ? "Artículos"
             : seccion === "glosario"
               ? "Glosario"
-              : "Organizadores"}
+              : seccion === "mensaje"
+                ? "Mensaje de primer contacto"
+                : "Organizadores"}
         </h1>
         <button className="adm-salir" type="button" onClick={salir}>
           Cerrar sesión
@@ -506,7 +584,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           ? `${lista.length} artículos · ${borradores} sin revisar`
           : seccion === "glosario"
             ? `${glo.length} términos · ${borradoresGlo} sin revisar`
-            : `${orgs.length} eventos próximos · ${listos} con mail listos para escribir · ${sinContactar} sin verificar`}
+            : seccion === "mensaje"
+              ? "El mail que sale la primera vez que le escribimos a un organizador"
+              : `${orgs.length} eventos próximos · ${listos} con mail listos para escribir · ${sinContactar} sin verificar`}
       </div>
 
       <div className="adm-tabs">
@@ -534,6 +614,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
         >
           Organizadores
           {listos ? <span>{listos} para escribir</span> : null}
+        </button>
+        <button
+          type="button"
+          className="adm-tab"
+          data-on={seccion === "mensaje" ? "si" : "no"}
+          onClick={() => {
+            setSeccion("mensaje");
+            if (!msj) cargarMensaje();
+          }}
+        >
+          Mensaje
+          {hayCambios ? <span>sin guardar</span> : null}
         </button>
       </div>
 
@@ -768,6 +860,119 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
             );
           })}
         </div>
+      ) : seccion === "mensaje" ? (
+        <>
+          {avisoMsj ? <div className="adm-vacio">{avisoMsj}</div> : null}
+          {cargandoMsj || !msj ? (
+            <div className="adm-vacio">Cargando el mensaje…</div>
+          ) : (
+            <>
+              <div className="adm-msj">
+                {msj.map((c, i) => (
+                  <label className="adm-campo" key={c.id}>
+                    <span className="adm-campo__tit">{c.titulo}</span>
+                    <span className="adm-campo__ayuda">{c.ayuda}</span>
+                    <textarea
+                      className="adm-campo__caja"
+                      rows={c.valor.length > 120 ? 4 : 2}
+                      value={c.valor}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setMsj((prev) =>
+                          prev.map((x, j) => (j === i ? { ...x, valor: v } : x))
+                        );
+                      }}
+                    />
+                    <span className="adm-campo__pie">
+                      {c.marcas.length ? (
+                        <>
+                          Se reemplazan solas:{" "}
+                          {c.marcas.map((m) => (
+                            <code key={m}>{m}</code>
+                          ))}
+                        </>
+                      ) : (
+                        "Sin datos automáticos."
+                      )}
+                      {c.valor.trim() !== c.porDefecto.trim() ? (
+                        <button
+                          type="button"
+                          className="adm-volver"
+                          onClick={() =>
+                            setMsj((prev) =>
+                              prev.map((x, j) =>
+                                j === i ? { ...x, valor: x.porDefecto } : x
+                              )
+                            )
+                          }
+                        >
+                          volver al original
+                        </button>
+                      ) : null}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="adm-exportar">
+                <span>
+                  {hayCambios
+                    ? "Hay cambios sin guardar."
+                    : "Sin cambios sin guardar."}
+                </span>
+                <button type="button" onClick={() => verPrevia()}>
+                  Ver cómo queda
+                </button>
+                <button
+                  type="button"
+                  onClick={guardarMensaje}
+                  disabled={!hayCambios || guardandoMsj}
+                >
+                  {guardandoMsj ? "Guardando…" : "Guardar"}
+                </button>
+              </div>
+
+              {previa ? (
+                <div className="adm-previa">
+                  <div className="adm-previa__barra">
+                    <span>Así le llega a</span>
+                    <select
+                      value={conQue}
+                      onChange={(e) => verPrevia(e.target.value)}
+                    >
+                      {previa.opciones.map((o) => (
+                        <option value={o.slug} key={o.slug}>
+                          {o.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="adm-previa__asunto">
+                    <strong>Asunto:</strong> {previa.asunto}
+                    <span className="adm-campo__ayuda">
+                      {previa.asunto.length} caracteres
+                      {previa.asunto.length > 78
+                        ? " — se va a cortar en la bandeja de entrada"
+                        : ""}
+                    </span>
+                  </div>
+                  {/* El mail de verdad, no una aproximacion: lo arma la misma
+                      funcion que lo manda. Va en un iframe para que sus
+                      estilos no se mezclen con los del panel. */}
+                  <iframe
+                    className="adm-previa__mail"
+                    title="Vista previa del mail"
+                    srcDoc={previa.html}
+                  />
+                  <details className="adm-previa__texto">
+                    <summary>Ver la versión sin formato</summary>
+                    <pre>{previa.texto}</pre>
+                  </details>
+                </div>
+              ) : null}
+            </>
+          )}
+        </>
       ) : seccion === "organizadores" ? (
         <>
           {!hayFirma ? (
