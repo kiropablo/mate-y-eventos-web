@@ -1,4 +1,4 @@
-import { hoyISO, sumarDias, pelado } from "./agenda";
+import { hoyISO, sumarDias, pelado } from "./agenda.js";
 
 // Los otros eventos de la misma semana que uno dado.
 //
@@ -75,7 +75,7 @@ const FILIALES = new Set([
 // entero contra otro string entero no sirve para nada: Messe Frankfurt
 // organiza dieciséis eventos de la agenda y el campo está escrito de diez
 // formas distintas.
-function entidadesDe(texto) {
+export function entidadesDe(texto) {
   const crudo = String(texto || "");
   if (!crudo.trim()) return [];
 
@@ -145,7 +145,7 @@ function entidadesDe(texto) {
 // prefijo parecía más generoso y era peor: "Gobierno de la Provincia" es
 // prefijo de todos los gobiernos provinciales del país, y terminábamos
 // diciéndole a Vendimia que la Copa Davis en Neuquén la organizan ellos.
-function mismoOrganizador(a, b) {
+export function mismoOrganizador(a, b) {
   const unas = entidadesDe(a.organizador).map((p) => p.join(" "));
   const otras = new Set(entidadesDe(b.organizador).map((p) => p.join(" ")));
   return unas.some((u) => otras.has(u));

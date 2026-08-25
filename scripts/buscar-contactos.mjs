@@ -24,6 +24,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { mismoOrganizador, entidadesDe } from "../app/lib/semana.js";
 
 const AIRTABLE_KEY = process.env.AIRTABLE_API_KEY;
 const BASE = "app6q7METE3ofZz1S";
@@ -277,6 +278,70 @@ async function contactosDe(web) {
   return { dominio, lista, error: lista.length ? null : ultimoError };
 }
 
+// ¿El buzón es de la organización o de un evento suyo en particular?
+//
+// Messe Frankfurt usa uno por feria: expoefi@, intersec@, hotelga@. Heredar
+// expoefi@ a ExpoCehap sería escribirle al buzón de otra feria. Solo se hereda
+// un buzón genérico, que es el que atiende por toda la organización.
+function esDeLaOrganizacion(mail, nombreDelEvento) {
+  const buzon = String(mail).split("@")[0].toLowerCase();
+  const pelar = (t) => String(t || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
+  const evento = pelar(nombreDelEvento);
+  if (buzon.length >= 3 && evento.includes(pelar(buzon))) return false;
+  return BUENOS.some((b) => buzon === b || buzon.startsWith(b));
+}
+
+// ¿TODOS los que organizan el evento que presta el mail organizan también el
+// que lo recibe?
+//
+// No alcanza con que compartan uno. La Conferencia ARPEL la organizan ARPEL y
+// Messe Frankfurt, y su mail es de ARPEL: heredarlo a ExpoCehap —que es solo
+// de Messe— mandaba el mail de una feria de vivienda a una asociación uruguaya
+// de petróleo. Pidiendo que el donante esté entero adentro del receptor, el
+// buzón que se presta pertenece sí o sí a alguien que organiza los dos.
+function organizanTambienEste(donante, receptor) {
+  const clave = (t) => entidadesDe(t).map((p) => p.join(" "));
+  const suyas = clave(donante);
+  const ajenas = new Set(clave(receptor));
+  return suyas.length > 0 && suyas.every((e) => ajenas.has(e));
+}
+
+// Los eventos que no tienen mail pero cuyo organizador sí lo tiene en otra
+// ficha. Es el caso de las carreras de Ñandú o de las ferias de Messe: una
+// misma gente organiza varios y atiende por el mismo lado.
+function heredados(todos) {
+  const con = todos.filter((e) => e.mail);
+  const sin = todos.filter((e) => !e.mail);
+  const salida = [];
+  for (const s of sin) {
+    const donante = con.find(
+      (c) =>
+        organizanTambienEste(c.organizador, s.organizador) &&
+        esDeLaOrganizacion(c.mail, c.nombre)
+    );
+    if (donante) salida.push({ ...s, mail: donante.mail, deQuien: donante.nombre });
+  }
+  return salida;
+}
+
+async function traerTodo() {
+  const todos = [];
+  let offset = "";
+  do {
+    const u = new URL(API);
+    u.searchParams.set("pageSize", "100");
+    if (offset) u.searchParams.set("offset", offset);
+    const res = await fetch(u, {
+      headers: { Authorization: `Bearer ${AIRTABLE_KEY}` },
+    });
+    if (!res.ok) throw new Error(`Airtable ${res.status}: ${await res.text()}`);
+    const d = await res.json();
+    todos.push(...d.records);
+    offset = d.offset || "";
+  } while (offset);
+  return todos;
+}
+
 async function traerSinMail() {
   const RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
   const todos = [];
@@ -391,6 +456,56 @@ async function main() {
     }
   }
 
+  // Segunda vuelta: los que siguen sin mail pero cuyo organizador ya lo tiene
+  // en otra ficha —sea de antes o recién encontrado acá—. No se guardan solos:
+  // van a la planilla diciendo de qué evento salieron, porque acá se apilan
+  // dos deducciones (que son el mismo organizador, y que ese buzón atiende por
+  // toda la organización) y eso lo mira una persona.
+  if (!DESDE) {
+    const crudos = await traerTodo();
+    const RE_MAIL_SIMPLE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+    const yaEncontrado = new Map(
+      resultados.filter((r) => r.mail).map((r) => [r.id, r.mail])
+    );
+    const universo = crudos
+      .filter((r) => r.fields["Estado"] === "Aprobado")
+      .map((r) => {
+        const propio =
+          String(r.fields["Email del organizador"] || "").trim() ||
+          (RE_MAIL_SIMPLE.exec(String(r.fields["Contactos"] || "")) || [""])[0];
+        return {
+          id: r.id,
+          nombre: r.fields["Nombre"] || "",
+          organizador: r.fields["Organizador"] || "",
+          fecha: r.fields["Fecha inicio"] || "",
+          web: String(r.fields["Web oficial"] || "").trim(),
+          notas: String(r.fields["Notas internas"] || ""),
+          mail: propio || yaEncontrado.get(r.id) || "",
+        };
+      });
+
+    const yaListos = new Set(resultados.filter((r) => r.mail).map((r) => r.id));
+    for (const h of heredados(universo)) {
+      if (yaListos.has(h.id)) continue;
+      const previo = resultados.find((r) => r.id === h.id);
+      const fila = {
+        ...(previo || h),
+        mail: h.mail,
+        dominio: previo?.dominio || "",
+        heredadoDe: h.deQuien,
+        confiable: false,
+        institucional: true,
+        mismoDominio: false,
+        alternativos: [],
+        error: "",
+      };
+      if (previo) Object.assign(previo, fila);
+      else resultados.push(fila);
+    }
+    const cuantos = resultados.filter((r) => r.heredadoDe).length;
+    if (cuantos) console.log(`\n${cuantos} eventos heredan el mail de otro evento del mismo organizador.`);
+  }
+
   const dir = path.join(process.cwd(), "datos-contactos");
   fs.mkdirSync(dir, { recursive: true });
   const salida = path.join(dir, "encontrados.json");
@@ -406,16 +521,18 @@ async function main() {
       estado: !r.mail ? "sin datos" : r.confiable ? "guardar" : "revisar",
       motivo: !r.mail
         ? r.error || "no publica el mail en el sitio"
-        : r.confiable
-          ? ""
-          : [
+        : r.heredadoDe
+          ? `heredado de "${r.heredadoDe}" (mismo organizador)`
+          : r.confiable
+            ? ""
+            : [
               r.personal && "parece de una persona",
               r.gratuito && "casilla gratuita",
               !r.mismoDominio && "de otro dominio",
               r.prohibido && "buzón que no es para esto",
             ]
-              .filter(Boolean)
-              .join(" · ") || "no es un buzón institucional",
+                .filter(Boolean)
+                .join(" · ") || "no es un buzón institucional",
     }))
     .sort(
       (a, b) =>
