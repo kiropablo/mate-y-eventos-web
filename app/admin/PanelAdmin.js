@@ -88,6 +88,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [seccion, setSeccion] = useState("articulos");
   const [orgs, setOrgs] = useState(organizadores?.eventos || []);
   const hayFirma = organizadores?.hayFirma !== false;
+  const linkEquipo = organizadores?.linkEquipo || "";
   const [copiado, setCopiado] = useState("");
   const [difundiendo, setDifundiendo] = useState("");
   const [aprobando, setAprobando] = useState("");
@@ -307,6 +308,38 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       setMsg({ tipo: "mal", texto: "No se pudo conectar." });
     }
     setGuardando(false);
+  }
+
+  // El sello a mano, sin que el organizador haya usado el link. Es el caso
+  // normal: confirman por mail o por teléfono.
+  async function marcarVerificado(ev, encender) {
+    if (
+      !confirm(
+        encender
+          ? `¿Confirmó el organizador los datos de ${ev.nombre}? El sello dice eso, así que conviene que sea cierto.`
+          : `¿Le saco el sello a ${ev.nombre}?`
+      )
+    )
+      return;
+    setAprobando(ev.slug);
+    try {
+      const res = await fetch("/api/admin/verificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: ev.slug, quitar: !encender }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "No se pudo guardar.");
+      setOrgs((previa) =>
+        previa.map((e) =>
+          e.slug === ev.slug ? { ...e, verificado: encender } : e
+        )
+      );
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setAprobando("");
+    }
   }
 
   // Le damos el OK definitivo. Ver app/api/admin/verificar.
@@ -628,6 +661,30 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           {hayCambios ? <span>sin guardar</span> : null}
         </button>
       </div>
+
+      {/* El link para el equipo. Va arriba de todo en esta pestaña porque es
+          lo que se pega una vez en el grupo y después no se toca más. */}
+      {seccion === "organizadores" && linkEquipo ? (
+        <div className="adm-exportar">
+          <span>
+            Vista para el equipo: los verificados que faltan publicar.
+          </span>
+          <button
+            type="button"
+            onClick={() => copiar(linkEquipo, "equipo")}
+          >
+            {copiado === "equipo" ? "Copiado" : "Copiar el link"}
+          </button>
+          <a
+            className="adm-btn adm-btn--sec"
+            href={linkEquipo}
+            target="_blank"
+            rel="noopener"
+          >
+            Abrirla
+          </a>
+        </div>
+      ) : null}
 
       {seccion === "organizadores" && listos > 0 ? (
         <div className="adm-exportar">
@@ -1163,6 +1220,26 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                             Descartar
                           </button>
                         </>
+                      ) : null}
+
+                      {/* El sello a mano. El botón de arriba solo aparece si el
+                          organizador respondió por el link, y la mayoría
+                          confirma por mail, por teléfono o por WhatsApp: sin
+                          esto había que entrar a Airtable cada vez. Se puede
+                          apagar, así un click de más se arregla acá. */}
+                      {!ev.revisionPendiente ? (
+                        <button
+                          type="button"
+                          className={ev.verificado ? "adm-btn adm-btn--sec" : "adm-btn"}
+                          disabled={aprobando === ev.slug}
+                          onClick={() => marcarVerificado(ev, !ev.verificado)}
+                        >
+                          {aprobando === ev.slug
+                            ? "Guardando…"
+                            : ev.verificado
+                              ? "Sacar el sello"
+                              : "Marcar verificado"}
+                        </button>
                       ) : null}
 
                       {ev.verificado && !ev.difundido && !ev.revisionPendiente ? (

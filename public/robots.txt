@@ -13,6 +13,10 @@ Allow: /
 # Panel interno: no se indexa nunca.
 Disallow: /admin
 
+# La cola de difusión que mira el equipo. La página ya sale con noindex; esto
+# es el segundo cerrojo, para que ni siquiera se pida.
+Disallow: /equipo
+
 # Los calendarios .ics de la agenda son públicos a propósito: Google no se
 # suscribe a una URL bloqueada acá. La regla más específica gana, y además
 # va primero por los lectores viejos que toman la primera que coincide.
@@ -30,6 +34,7 @@ User-agent: PerplexityBot
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin
+Disallow: /equipo
 Allow: /api/agenda/
 Disallow: /api/
 

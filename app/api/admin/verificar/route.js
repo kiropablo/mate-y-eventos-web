@@ -26,10 +26,14 @@ export async function POST(request) {
 
   let slug = "";
   let aprueba = true;
+  // "quitar" apaga el sello. Existe para que un click de más se arregle en el
+  // panel y no obligue a entrar a Airtable, que es de lo que se trata todo esto.
+  let quitar = false;
   try {
     const body = await request.json();
     slug = String(body?.slug || "");
     aprueba = body?.aprueba !== false;
+    quitar = body?.quitar === true;
   } catch {
     slug = "";
   }
@@ -48,13 +52,18 @@ export async function POST(request) {
 
   // Aprobar enciende el sello. Descartar solo saca el pendiente: lo que
   // escribió el organizador queda igual, que para eso lo escribió.
-  const fields = aprueba
+  const fields = quitar
     ? {
-        "Verificado por el organizador": true,
-        "Fecha de verificación": hoy,
-        "Revisión pendiente": false,
+        "Verificado por el organizador": false,
+        "Fecha de verificación": null,
       }
-    : { "Revisión pendiente": false };
+    : aprueba
+      ? {
+          "Verificado por el organizador": true,
+          "Fecha de verificación": hoy,
+          "Revisión pendiente": false,
+        }
+      : { "Revisión pendiente": false };
 
   const res = await fetch(`https://api.airtable.com/v0/${BASE}/${TABLA}`, {
     method: "PATCH",

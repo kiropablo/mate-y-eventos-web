@@ -51,6 +51,39 @@ export function firmaValida(slug, firma) {
   }
 }
 
+// La clave de la vista del equipo.
+//
+// Es una sola para todos y no vence: la idea es pegarla en el grupo una vez y
+// que el equipo la tenga. No abre el panel ni deja tocar nada, solo mostrar la
+// lista de lo que hay para publicar. Si alguna vez hay que cortarla, se cambia
+// AGENDA_FIRMA_SECRET en Vercel y el link viejo deja de servir —ojo que eso
+// también invalida los links de confirmación que estén dando vueltas.
+export function claveEquipo() {
+  if (!hayClave()) {
+    throw new Error("Falta AGENDA_FIRMA_SECRET: no se puede armar el link del equipo.");
+  }
+  return crypto
+    .createHmac("sha256", CLAVE)
+    .update("equipo:difusion")
+    .digest("hex")
+    .slice(0, 20);
+}
+
+export function claveEquipoValida(clave) {
+  if (!hayClave() || typeof clave !== "string") return false;
+  const esperada = claveEquipo();
+  if (clave.length !== esperada.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(clave), Buffer.from(esperada));
+  } catch {
+    return false;
+  }
+}
+
+export function linkDelEquipo() {
+  return `${SITE.url}/equipo/${claveEquipo()}`;
+}
+
 export function linkDeConfirmacion(slug) {
   return `${SITE.url}/agenda/${slug}/confirmar?f=${firmar(slug)}`;
 }

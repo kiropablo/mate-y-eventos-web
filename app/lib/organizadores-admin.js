@@ -1,5 +1,5 @@
 import { getEventos, yaPaso, formatRango } from "./agenda";
-import { hayClave, firmar } from "./firma";
+import { hayClave, firmar, linkDelEquipo } from "./firma";
 import { mismaSemana, llegamosADifundir, diasHasta } from "./semana";
 import { SITE } from "./site";
 
@@ -35,7 +35,7 @@ export async function listarOrganizadoresParaPanel() {
   try {
     eventos = await getEventos({ fresco: true });
   } catch {
-    return { eventos: [], hayFirma: false };
+    return { eventos: [], hayFirma: false, linkEquipo: "" };
   }
 
   const vigentes = eventos.filter((e) => !yaPaso(e) && e.fechaInicio);
@@ -85,5 +85,5 @@ export async function listarOrganizadoresParaPanel() {
     }))
     .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio));
 
-  return { eventos: lista, hayFirma };
+  return { eventos: lista, hayFirma, linkEquipo: hayFirma ? linkDelEquipo() : "" };
 }
