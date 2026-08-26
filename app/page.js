@@ -11,6 +11,7 @@ import {
   yaPaso,
 } from "./lib/agenda";
 import { STATS } from "./lib/site";
+import CarruselEpisodios from "./components/CarruselEpisodios";
 
 export const revalidate = 3600;
 
@@ -38,6 +39,10 @@ export default async function Home() {
 
   const latestHref =
     episodes.length > 0 ? `/episodios/${episodes[0].id}` : "/episodios";
+
+  // Los que van al carrusel de arriba. Ocho: con más, el cilindro se cierra
+  // tanto que los de las puntas quedan de canto y no se leen.
+  const paraElCarrusel = episodes.slice(0, 8);
 
   const faqItems = [
     {
@@ -80,10 +85,10 @@ export default async function Home() {
         <div className="hfade" aria-hidden="true" />
         <div className="ui">
           <SiteNav />
-          <div className="hstage" id="hstage">
+          <div className="hstage hstage--corto" id="hstage">
             <div
               className="eyebrow"
-              style={{ color: "#fff", marginBottom: "26px" }}
+              style={{ color: "#fff", marginBottom: "16px" }}
             >
               Podcast · Industria de eventos · LATAM
             </div>
@@ -94,6 +99,21 @@ export default async function Home() {
               El backstage de la industria, en voz alta. Nuevo episodio cada
               miércoles.
             </div>
+          </div>
+
+          {/* Los últimos episodios, arriba de todo: es lo primero que se ve
+              al entrar. Abajo del carrusel queda el link a la sección, que es
+              adonde va el que quiere verlos todos. */}
+          {paraElCarrusel.length > 0 ? (
+            <div className="hcarr">
+              <CarruselEpisodios episodios={paraElCarrusel} />
+              <div className="hcarr__pie">
+                <Link href="/episodios" className="hcarr__todos">
+                  Ver todos los episodios
+                </Link>
+              </div>
+            </div>
+          ) : (
             <Link href={latestHref} className="hplay" aria-label="Mirá el último episodio">
               <span className="hplay__disc" aria-hidden="true">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -106,7 +126,7 @@ export default async function Home() {
                 último episodio
               </span>
             </Link>
-          </div>
+          )}
         </div>
         <div className="scrollhint">Scrolleá</div>
       </section>

@@ -2934,3 +2934,209 @@ footer.site {
   padding: 2px 8px;
   margin-top: 6px;
 }
+
+/* ============================================================
+   CARRUSEL DE EPISODIOS (home)
+   El HTML de abajo es una tira horizontal común: así funciona sin
+   JavaScript y en celular. El 3D se enciende con data-modo="3d".
+   ============================================================ */
+.carr { position: relative; }
+
+.carr__escena { position: relative; }
+
+.carr__pista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.carr__item { flex: none; }
+
+.carr__panel {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.carr__foto {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0b0910;
+  border: 1px solid rgba(245, 245, 245, 0.1);
+}
+.carr__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.carr__panel:hover .carr__foto img { transform: scale(1.04); }
+
+.carr__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(10, 8, 14, 0.55);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(245, 245, 245, 0.3);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.carr__play svg { width: 22px; height: 22px; fill: #fff; }
+.carr__panel:hover .carr__play,
+.carr__panel:focus-visible .carr__play { opacity: 1; }
+
+.carr__tit {
+  display: block;
+  margin-top: 13px;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.35;
+  color: rgba(245, 245, 245, 0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.carr__mando {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.carr__cuenta {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: rgba(245, 245, 245, 0.45);
+  margin-right: auto;
+}
+.carr__cuenta i { font-style: normal; margin: 0 5px; opacity: 0.5; }
+.carr__flecha {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 245, 245, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f5f5;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+.carr__flecha svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.carr__flecha:hover:not(:disabled) { border-color: var(--accent, #5aa0ff); }
+.carr__flecha:disabled { opacity: 0.28; cursor: default; }
+
+/* ---------- tira: sin JS, en celular y con movimiento reducido ---------- */
+.carr[data-modo="tira"] .carr__pista {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+.carr[data-modo="tira"] .carr__pista::-webkit-scrollbar { display: none; }
+.carr[data-modo="tira"] .carr__item {
+  width: min(78vw, 420px);
+  scroll-snap-align: center;
+}
+
+/* ---------- cilindro ---------- */
+.carr[data-modo="3d"] {
+  --radio: 1500px;
+  --perspectiva: 1300px;
+}
+.carr[data-modo="3d"] .carr__escena {
+  perspective: var(--perspectiva);
+  height: clamp(300px, 42vh, 460px);
+  cursor: grab;
+  outline: none;
+  /* Los paneles de los costados se van desvaneciendo en vez de cortarse
+     de golpe contra el borde de la pantalla. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 14%,
+    #000 86%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 14%,
+    #000 86%,
+    transparent
+  );
+}
+.carr[data-modo="3d"] .carr__escena:active { cursor: grabbing; }
+.carr[data-modo="3d"] .carr__escena:focus-visible {
+  outline: 2px solid var(--accent, #5aa0ff);
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+.carr[data-modo="3d"] .carr__pista {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--radio) * -1));
+}
+.carr[data-modo="3d"] .carr__item {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: clamp(320px, 34vw, 540px);
+  margin-left: calc(clamp(320px, 34vw, 540px) / -2);
+  /* La posicion la escribe el JS en cada cuadro: cada panel se ubica por su
+     distancia al centro, para que el anillo no tenga costados vacios. */
+}
+.carr[data-modo="3d"] .carr__panel { user-select: none; }
+.carr[data-modo="3d"] .carr__tit {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.carr[data-modo="3d"] .carr__item[data-centro="si"] .carr__tit {
+  opacity: 1;
+  transform: none;
+}
+
+/* La primera pantalla con el carrusel: la marca se achica para dejarle
+   lugar a los episodios, que es lo que se quiere ver al entrar. */
+.hstage--corto h1 { font-size: clamp(2.6rem, 7vw, 5.4rem); line-height: 0.92; }
+.hstage--corto .hsub { margin-top: 14px; max-width: 46ch; }
+
+.hcarr { margin-top: clamp(26px, 4vh, 54px); }
+.hcarr__pie { display: flex; justify-content: flex-end; margin-top: 4px; }
+.hcarr__todos {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: rgba(245, 245, 245, 0.6);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(245, 245, 245, 0.25);
+  padding-bottom: 2px;
+}
+.hcarr__todos:hover { color: #fff; border-color: #fff; }
