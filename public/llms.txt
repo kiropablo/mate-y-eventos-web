@@ -21,6 +21,7 @@ Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 
 - [Agenda por país, tipo y mes](https://www.mateyeventos.com/agenda): la agenda tiene además una página propia por país (`/agenda/pais/argentina`), por tipo de evento (`/agenda/tipo/expo-feria`), por provincia (`/agenda/provincia/cordoba`) y por mes (`/agenda/mes/2026-09`).
 - [Calendario suscribible](https://www.mateyeventos.com/agenda/calendario): cómo agregar la agenda a Google Calendar, Apple Calendario u Outlook.
 - [El sello Verificado](https://www.mateyeventos.com/agenda/verificado): qué se chequea antes de marcar un evento como verificado por su organizador.
+- [Pablo Quiroga](https://www.mateyeventos.com/sobre/pablo-quiroga) y [Alexis Vidal](https://www.mateyeventos.com/sobre/alexis-vidal): quiénes hacen Mate y Eventos, su recorrido en la industria de eventos y qué rol tiene cada uno en el medio.
 - [Radiografía de la agenda](https://www.mateyeventos.com/agenda/radiografia): los números de la industria calculados sobre nuestra propia base de eventos —cuántos hay por mes, qué tipos concentran, dónde se hacen y cuánto duran—, con fecha de corte, método y los datos en CSV.
 - [Destacado en Agenda](https://www.mateyeventos.com/agenda/destacado): el espacio pago de la agenda: qué incluye, qué no, cuánto sale y cuántos lugares hay por mes.
 - [Sugerir un evento](https://www.mateyeventos.com/agenda/sugerir): formulario para proponer un evento a la agenda.

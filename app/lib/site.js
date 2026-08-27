@@ -82,6 +82,25 @@ export const AUTORES = [
     cargo: "Productor de eventos y co-conductor",
     bio: "Productor con más de 18 años en la industria de eventos. Empezó como productor técnico en shows masivos y hoy trabaja en el sector corporativo. En Mate y Eventos lleva la visión editorial y estratégica.",
     perfil: "https://www.linkedin.com/in/pablomquiroga/",
+    // Lo que hace acá adentro, que es distinto de lo que hace en el rubro.
+    enElMedio:
+      "Lleva la visión editorial y estratégica: define qué se cubre, revisa y publica cada artículo del sitio, y mantiene la agenda de eventos de la región.",
+    recorrido: [
+      [
+        "Empezó en la técnica",
+        "Productor técnico en shows masivos: recitales internacionales en estadios, donde un error no se puede corregir después.",
+      ],
+      [
+        "Pasó a la producción general",
+        "De la técnica al armado completo del evento, con la logística, los proveedores y los equipos adentro.",
+      ],
+      [
+        "Hoy, corporativo",
+        "Enfocado en el sector corporativo y dirigiendo AV Eventos junto a Alexis Vidal.",
+      ],
+    ],
+    obsesion:
+      "Profesionalizar la industria y compartir lo que casi nunca se cuenta.",
   },
   {
     id: "alexis-vidal",
@@ -90,6 +109,24 @@ export const AUTORES = [
     cargo: "Productor de eventos y co-conductor",
     bio: "Productor y creativo, especializado en la operación real de los eventos, donde la creatividad y la técnica conviven todo el tiempo. En Mate y Eventos lleva la producción.",
     perfil: "https://www.linkedin.com/in/alexis-vidal-av/",
+    enElMedio:
+      "Aporta el análisis y la experiencia de cancha: la mirada de alguien que estuvo en la operación real y cuenta los desafíos de cada día sin adornarlos.",
+    recorrido: [
+      [
+        "Productor y creativo",
+        "De cabeza práctica y resolutiva: de los que hacen que las cosas pasen cuando el plan se cae.",
+      ],
+      [
+        "La operación real",
+        "Su fuerte es el terreno, donde la creatividad y la técnica tienen que convivir todo el tiempo y sin margen.",
+      ],
+      [
+        "Hoy, al frente de AV Eventos",
+        "Dirige la productora junto a Pablo Quiroga.",
+      ],
+    ],
+    obsesion:
+      "Que lo que se cuenta sea lo que pasa de verdad, no la versión prolija.",
   },
 ];
 

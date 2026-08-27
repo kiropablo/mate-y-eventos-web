@@ -131,8 +131,17 @@ export default function Articulo({ params }) {
             </div>
             <h1>{art.titulo}</h1>
             <p className="lead">{art.bajada}</p>
+            {/* La firma, visible. Estaba solo en el schema: el lector no
+                tenía forma de saber quién se hace cargo de lo que lee, que es
+                lo primero que mira alguien que va a usar esto para tomar una
+                decisión de plata. */}
             <div className="ep-date" style={{ marginTop: "18px" }}>
-              {formatFecha(art.fecha)}
+              {formatFecha(art.fecha)} · Por el equipo de {SITE.name}, editado
+              por{" "}
+              <Link href="/sobre/pablo-quiroga">Pablo Quiroga</Link>
+              {art.revisado && art.revisado !== art.fecha
+                ? ` · Revisado el ${formatFecha(art.revisado)}`
+                : ""}
             </div>
           </div>
         </div>

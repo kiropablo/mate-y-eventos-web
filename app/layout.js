@@ -80,7 +80,10 @@ const jsonLd = {
       // La productora que dirigen: es lo que respalda el oficio que cuenta la
       // biografía, y es una empresa distinta del medio.
       affiliation: { "@id": `${SITE.url}/#av-eventos` },
-      url: `${SITE.url}/sobre`,
+      // Cada uno tiene su página: hasta ahora los dos apuntaban a /sobre, o
+      // sea que para una máquina compartían dirección y no se distinguían.
+      url: `${SITE.url}/sobre/${a.id}`,
+      mainEntityOfPage: { "@id": `${SITE.url}/sobre/${a.id}` },
       ...(a.perfil ? { sameAs: [a.perfil] } : {}),
     })),
     // AV Eventos entra como nodo propio, no como texto suelto dentro de la

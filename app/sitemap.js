@@ -24,6 +24,8 @@ export default async function sitemap() {
     "/imperdibles",
     "/glosario",
     "/sobre",
+    "/sobre/pablo-quiroga",
+    "/sobre/alexis-vidal",
     "/sponsors",
     "/newsletter",
     "/prensa",

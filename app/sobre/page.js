@@ -1,3 +1,4 @@
+import Link from "next/link";
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { SITE } from "../lib/site";
@@ -124,7 +125,9 @@ export default function Sobre() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/pablo.jpg" alt="Pablo Quiroga" />
               </div>
-              <h3 className="host__name">Pablo Quiroga</h3>
+              <h3 className="host__name">
+                <Link href="/sobre/pablo-quiroga">Pablo Quiroga</Link>
+              </h3>
               <div className="host__role">Co-conductor · Visión editorial</div>
               <p className="host__bio">
                 Pablo lleva más de 18 años en los eventos, y los conoce desde
@@ -143,7 +146,9 @@ export default function Sobre() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/alexis.jpg" alt="Alexis Vidal" />
               </div>
-              <h3 className="host__name">Alexis Vidal</h3>
+              <h3 className="host__name">
+                <Link href="/sobre/alexis-vidal">Alexis Vidal</Link>
+              </h3>
               <div className="host__role">Co-conductor · Producción</div>
               <p className="host__bio">
                 Alexis es productor y creativo, de cabeza práctica y resolutiva:

@@ -3506,3 +3506,24 @@ footer.site {
 @media (max-width: 560px) {
   .radio-barra { grid-template-columns: minmax(72px, 1fr) 2fr auto; font-size: 0.78rem; }
 }
+
+/* La página de cada uno: foto a un lado, texto al otro. En pantalla angosta
+   la foto va arriba y no se agranda: es un retrato, no una portada. */
+.persona {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 38px;
+  align-items: start;
+}
+.persona__foto img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+}
+.persona__texto .sem-bloque:first-child { margin-top: 0; }
+@media (max-width: 720px) {
+  .persona { grid-template-columns: 1fr; gap: 26px; }
+  .persona__foto { max-width: 240px; }
+}
