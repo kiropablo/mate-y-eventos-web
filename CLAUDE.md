@@ -22,55 +22,109 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
 
 ### Estructura
 
-**`app/lib/`**
-- `site.js` — config central: `SITE` (nombre, tagline, frase institucional, url, email), `LINKS` (redes, IDs de playlists de YouTube, Drives de prensa), `NAV` (menú), `EJES` (4 ejes temáticos), `STATS` (métricas curadas **a mano**).
-- `youtube.js` — trae episodios con la YouTube Data API. **Junta las dos playlists** (Temporada 2 + Temporada 1) con `unirEpisodios()`, saca repetidos y ordena por fecha. Fallback: RSS de playlists → feed del canal.
-- `transcripts.js` — lee `content/transcripts/{videoId}.txt`.
-- `articulos.js` — lee `content/articulos/{direccion-del-articulo}.md`. Por defecto **solo los publicados**. Separa cabecera, cuerpo y preguntas frecuentes. El archivo se llama por su tema (esa es la URL); lo que lo ata a su episodio es el campo `episodio` de la cabecera, no el nombre.
-- `articulos-admin.js` — igual pero trae **también los borradores**, para el panel interno.
-- `admin.js` — seguridad del panel: cookie con huella SHA-256 de `ADMIN_PASSWORD`.
+**`app/lib/`** — todo lo que no es una página vive acá.
+
+*Contenido en archivos del repo*
+- `site.js` — config central: `SITE`, `LINKS`, `NAV`, `EJES` (los 4 ejes editoriales, con la frase con la que se los nombra en un título), `AUTORES` (Pablo y Alexis, con cargo, bio, recorrido y LinkedIn), `STATS` (métricas **a mano**, hoy congeladas) y `fechaCorta()`.
+- `articulos.js` / `articulos-admin.js` — leen `content/articulos/{direccion}.md`. El de admin trae también los borradores. El archivo se llama por su tema (esa es la URL); lo que lo ata a su episodio es el campo `episodio`, no el nombre.
+- `glosario.js` / `glosario-admin.js` — igual, sobre `content/glosario/`.
+- `transcripts.js` — `content/transcripts/{videoId}.txt` y sus subtítulos en `secciones/{videoId}.json`.
+- `mensajes.js` — los textos de los mails a organizadores, editables desde `/admin`. Dos mensajes: `primer-contacto` y `confirmacion`, cada uno en `content/mensajes/{id}.md`.
+- `ejes.js` — agrupa los artículos por eje editorial para las landings de `/articulos/eje/`.
+- `redirecciones.js` — las direcciones viejas de los artículos mudados salen del propio contenido.
+
+*La agenda (Airtable)*
+- `agenda.js` — el corazón. Lee la base, mapea los campos y expone `getEventos()`, `getEventosConEstado()` (que además dice si la lectura vino **completa**), `yaPaso()`, `formatRango()`, `nombreConAnio()`, `mesLargo()`. La lectura se cachea una hora con la etiqueta `agenda`.
+- `semana.js` — los otros eventos de la misma semana, los del mismo organizador (`delMismoOrganizador`) y si llegamos a difundir con tiempo. El comparador de organizadores parte el campo en entidades: Messe Frankfurt está escrito de diez formas distintas.
+- `radiografia.js` — los números de la agenda y su CSV.
+- `organizadores-admin.js`, `campos-ficha.js`, `firma.js` (links firmados con HMAC), `ics.js`.
+
+*Los mails*
+- `mail-base.js` — el marco compartido: cabecera, el arreglo del modo oscuro de Apple Mail, el pie, y los ladrillos. **Está compartido a propósito**: con una copia por mail, el día que haya que tocar el arreglo de Apple se arregla uno y nadie se entera.
+- `mail-invitacion.js` — el primer mail: "revisá tu ficha".
+- `mail-confirmacion.js` — el segundo: "quedó verificada".
+- `correo.js` — Resend. Regla: **un mail que no sale nunca voltea la operación que lo disparó**.
+
+*Otros*: `admin.js` (cookie con huella del `ADMIN_PASSWORD`), `youtube.js`, `migas.js` (BreadcrumbList), `bots.js`.
 
 **Páginas**
-- home (hero + manifiesto + stats + FAQ con schema FAQPage)
-- `/episodios` y `/episodios/[id]` (video + descripción + tarjeta al artículo + transcripción desplegable; schemas VideoObject y PodcastEpisode)
-- `/articulos` y `/articulos/[id]` (cuerpo + bloque destacado + preguntas en acordeón + descargas; **schemas Article + FAQPage**)
-- `/articulos/[id]/imprimir` (hoja blanca para guardar en PDF, **noindex a propósito**)
-- `/articulos/[id]/opengraph-image.js` (portada de marca autogenerada para cuando se comparte el link)
-- `/admin` (panel interno con contraseña)
-- `/sobre`, `/sponsors`, `/newsletter`, `/prensa`, `/contacto`
+- home — hero, el párrafo que define qué es esto, agenda, artículos, métricas, newsletter y FAQ
+- `/episodios` y `/episodios/[id]` — video, descripción, transcripción con subtítulos, tarjeta al artículo y a los términos del episodio
+- `/articulos`, `/articulos/[id]`, `/articulos/eje/[eje]` (4 hubs por eje), `/articulos/[id]/imprimir` (**noindex a propósito**)
+- `/glosario` y `/glosario/[slug]`
+- **La agenda**, que es lo más grande y por donde entra el 91% del tráfico de búsqueda:
+  - `/agenda` (lista, calendario, filtros y la tira de destacados)
+  - `/agenda/[slug]` — la ficha, con su portada 1200×630 autogenerada
+  - `/agenda/[slug]/confirmar` — el link firmado donde el organizador revisa campo por campo
+  - `/agenda/{pais,tipo,provincia,mes}/…` — 26 landings automáticas
+  - `/agenda/esta-semana`, `/agenda/calendario`, `/agenda/sugerir`
+  - `/agenda/verificado` — qué es el sello y el generador del badge para la web del organizador
+  - `/agenda/destacado` — el espacio pago, con precio publicado
+  - **`/agenda/radiografia`** y su `datos.csv` — los números propios de la base
+- `/imperdibles` y `/imperdibles/[mes]`
+- `/sobre` y `/sobre/[quien]` (Pablo y Alexis)
+- `/admin` — el panel: artículos, glosario, organizadores y los textos de los mails
+- `/sponsors`, `/newsletter`, `/prensa`, `/contacto`
 
-**`app/api/`**: `subscribe` (beehiiv), `articulos/[id]/descargar` (.txt), `admin/login`, `admin/guardar` (escribe en GitHub vía API → dispara redeploy).
+**`app/api/`**: `subscribe` (beehiiv) · `agenda/[slug]/confirmar` (**la única ruta pública que escribe en Airtable**, con firma y tope de 2 por día) · `agenda/[slug]/badge.svg` · `agenda/ics` y `agenda/[slug]/ics` · `agenda/revalidar` · `agenda/sugerir` · `articulos/[id]/descargar` · y bajo `admin/`: `login`, `guardar`, `glosario`, `agenda`, `verificar`, `invitar`, `confirmacion`, `difundido`, `mensaje` y `mensaje/previsualizar`.
 
-**Componentes**: `SiteNav`, `EpisodePlayer`, `SpotifyButton`, `NewsletterForm`, `Atmosphere`, `Motion`, `Footer`, `ArticuloCuerpo`, `BotonImprimir`.
-
-### Pipeline de artículos con IA (lo más importante del sitio)
+### El pipeline de contenido con IA (lo más importante del sitio)
 
 1. Subo el episodio a YouTube **y lo agrego a la playlist de la temporada**.
-2. Todos los días a las 9 AM (Argentina) corre la Action **Transcripciones** → `scripts/fetch-transcripts.mjs` (Supadata + YouTube API) → guarda el `.txt`.
-3. Al terminar dispara sola la Action **Articulos** → `scripts/generar-articulos.mjs` llama a la API de Claude y escribe el artículo como **borrador** (`publicado: false`).
-4. `scripts/avisar-borradores.mjs` abre un **issue en GitHub** asignado a mí → me llega por mail con el link al panel.
-5. Entro a `/admin`, reviso, corrijo y publico. Eso escribe en GitHub y redeploya.
+2. **9 AM**: la Action **Transcripciones** (`fetch-transcripts.mjs`, Supadata + YouTube API) guarda el `.txt`.
+3. Al terminar dispara sola la Action **Articulos** (`generar-articulos.mjs`): llama a la API de Claude y escribe el artículo como **borrador**.
+4. Igual la Action **Glosario** (`generar-glosario.mjs`) y la Action **Secciones** (`segmentar-transcripciones.mjs`), que le pone subtítulos a la transcripción **sin reescribir el texto**: guarda posiciones, rearma la página y compara carácter por carácter antes de publicar. Si no coincide, descarta.
+5. `avisar-borradores.mjs` abre un **issue en GitHub** asignado a mí, y me llega por mail.
+6. Entro a `/admin`, reviso, corrijo y publico. Eso escribe en GitHub y redeploya.
 
-**Formato de cada artículo** (`content/articulos/{direccion-del-articulo}.md`): cabecera entre `---` con `titulo`, `bajada`, `metaDescripcion`, `episodio`, `episodioTitulo`, `fecha`, `eje`, `etiquetas`, `slugsAnteriores`, `lectura`, `generado`, `publicado`. Después el cuerpo en Markdown con `##` para subtítulos, un bloque `:::checklist ... :::` (recuadro destacado) y al final `## Preguntas frecuentes` con cada pregunta en `###`.
-
-**Criterio editorial** (está todo escrito en castellano en la constante `INSTRUCCIONES` dentro de `generar-articulos.mjs` — si hay que cambiar el estilo, se cambia ahí y en ningún otro lado):
+**Criterio editorial** (todo escrito en castellano en la constante `INSTRUCCIONES` de `generar-articulos.mjs` — si hay que cambiar el estilo, se cambia ahí y en ningún otro lado):
 - Los artículos **no son resúmenes**: amplían el episodio. ~1200 palabras.
-- Español argentino, voz del medio (no de Pablo ni de Alexis), sin relleno motivacional.
+- Español argentino, **voz del medio** (no de Pablo ni de Alexis), sin relleno motivacional.
 - **Prohibido inventar** datos, cifras o nombres que no estén en la transcripción.
-- 5 a 7 preguntas frecuentes por artículo pensadas para AI SEO; **cada respuesta se tiene que entender sola**.
-- El script lee las preguntas ya usadas en artículos anteriores **para no repetirlas**.
+- 5 a 7 preguntas frecuentes por artículo; **cada respuesta se tiene que entender sola**.
+- El script lee las preguntas ya usadas **para no repetirlas**.
 
-Las dos Actions tienen un **bucle de 3 reintentos con `git pull --rebase`** antes de pushear: si el repo cambia mientras corren, el push se rechaza y se pierde el trabajo (ya nos pasó, se perdieron 24 artículos generados).
+Las Actions tienen un **bucle de 3 reintentos con `git pull --rebase`** antes de pushear: si el repo cambia mientras corren, el push se rechaza y se pierde el trabajo (ya nos pasó: se perdieron 24 artículos generados).
+
+### El circuito con los organizadores
+
+1. En el panel, pestaña **Organizadores**, se elige un evento y se manda la **invitación**: un mail con su ficha tal como está publicada, los otros eventos de esa semana —sin los suyos— y un link firmado.
+2. El organizador entra al link y **confirma o corrige campo por campo**. Eso deja la ficha en "revisión pendiente".
+3. Pablo da el OK desde el panel y **se enciende el sello Verificado**, con el mes.
+4. Se manda la **confirmación**: el sello, el código del badge para su web, cuándo sale la difusión, y recién ahí se pide algo —los otros eventos que organizan— y se ofrece cobertura y contactos. No se vende: al pie una línea aclara que el sello no se paga.
+5. Cuando se postea en redes, el botón **"Ya lo difundimos"** se lo avisa.
+
+Los textos de los dos mails se editan desde `/admin` → Mensaje, con vista previa sobre un evento real.
+
+### Cómo se carga la agenda sola
+
+La Action **Agenda** corre todos los días a las 8 (Argentina) y hace dos cosas:
+- **descubre**: barre 3 rubros por día (rotando entre 10) y trae hasta 4 eventos de cada uno. **Solo carga los que están completos** —fecha futura anunciada, tipo, país, provincia, ciudad, organizador, web y descripciones—; al que le falta algo le da una segunda pasada buscando solo los huecos, y si sigue incompleto no entra y el log dice qué le faltaba. Todo entra como **Borrador IA**: nunca publica nada.
+- **verifica**: repasa 10 fichas ya aprobadas contra sus fuentes. Nunca pisa datos: deja el hallazgo y marca "Revisar". Solo completa fechas si estaban sin anunciar **y la fecha es futura**.
 
 ### Diseño ("neón cinematográfico")
 Fondo negro `#010004`, magenta `#EA478A`, celeste `#93D5F7`, acento azul `#5aa0ff`. Fuentes: **Rajdhani** (display), **Space Grotesk** (UI), **Inter** (cuerpo). Animaciones reveal con IntersectionObserver, acento por sección (`body[data-accent]`). Hero: `public/fondo-v3.jpg`. Fotos de bios: `public/pablo.jpg` y `public/alexis.jpg`, ambas **800×1000**.
 
-### SEO / AI-SEO (ya implementado)
-`robots.txt` permite bots de IA (GPTBot, ClaudeBot, PerplexityBot…) y bloquea `/admin` y `/api/`. Hay `llms.txt`, sitemap dinámico con episodios y artículos, canonicals por página. Schemas: Organization + PodcastSeries (layout), FAQPage (home), VideoObject + PodcastEpisode + transcript (episodios), Article + FAQPage (artículos). Search Console verificado.
+### SEO / AI-SEO
+
+`robots.txt` habilita a los bots de IA (GPTBot, ClaudeBot, PerplexityBot…) y bloquea `/admin` y `/api/`. Sitemap dinámico (~500 URLs), canonicals por página, `llms.txt`.
+
+**El grafo de entidades** (en `app/layout.js`, una sola vez, y el resto lo referencia por `@id`): `Organization` con `knowsAbout` y `areaServed` · `WebSite` · los dos `Person` con su cargo, su LinkedIn y su página propia · `AV Eventos` como la productora que dirigen. Los artículos los **firma el equipo** (`author` = la organización) y llevan `editor` apuntando a Pablo, que es quien revisa y publica.
+
+Por tipo de página: `Article` + `FAQPage` (artículos) · `VideoObject` + `PodcastEpisode` (episodios) · `Event` (fichas) · `CollectionPage` + `ItemList` (landings) · `DefinedTerm` (glosario) · `ProfilePage` (personas) · `Dataset` con licencia y CSV (radiografía) · `BreadcrumbList` en las tres plantillas de detalle.
+
+**Lo que aprendimos sobre el llms.txt**: Google dijo en junio de 2026 que no lo usa, y Ahrefs midió que el 97% nunca fueron leídos. Se mantiene porque no cuesta nada, pero **no invertir más ahí ni contarlo como estrategia**.
+
+**Los FAQPage no son un adorno de venta.** Google dejó de mostrar resultados enriquecidos de FAQ en 2023 salvo gobierno y salud; el valor que queda es que una IA lo levante. Marcar los bullets de una oferta comercial como preguntas frecuentes es justamente por lo que penaliza.
 
 ### Claves
-- **GitHub Secrets**: `YOUTUBE_API_KEY`, `SUPADATA_API_KEY`, `ANTHROPIC_API_KEY`
-- **Vercel**: `YOUTUBE_API_KEY`, `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`, `ADMIN_PASSWORD`, `GITHUB_TOKEN`
+
+Nunca van en el chat: se cargan en Vercel (Environment Variables) o en GitHub Secrets.
+
+- **GitHub Secrets** (las usan las Actions): `YOUTUBE_API_KEY`, `SUPADATA_API_KEY`, `ANTHROPIC_API_KEY`, `AIRTABLE_API_KEY`, `REVALIDATE_TOKEN`
+- **Vercel** (las usa el sitio): `YOUTUBE_API_KEY`, `AIRTABLE_API_KEY`, `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`, `ADMIN_PASSWORD`, `GITHUB_TOKEN`, `RESEND_API_KEY`, `AGENDA_FIRMA_SECRET`, `REVALIDATE_TOKEN`
+
+`AGENDA_FIRMA_SECRET` es la que firma los links de confirmación: sin ella el panel no puede armar el link, y si cambia se invalidan todos los que ya se mandaron.
 
 ---
 
@@ -104,23 +158,35 @@ Cosas sabidas y verificadas (no volver a investigar):
 2. **Mientras una GitHub Action está corriendo, no tocar el repo** (el push falla por conflicto).
 3. Los números que se ven en la web (`STATS` en `site.js`) están **escritos a mano**, no vienen de ningún lado automático.
 4. La web y el panel son proyectos separados: un cambio en uno no afecta al otro.
-6. **Los imperdibles se cargan desde Airtable**, en el campo `Imperdible del mes` de cada evento: es un desplegable con los meses. Elegís el mes y el evento entra en `/imperdibles/{mes}`. Sin ningún evento etiquetado, la sección se publica vacía.
-5. **Un artículo no se renombra a mano.** Su nombre de archivo es su URL. Si hay que cambiarla, hay que sumar la dirección vieja a `slugsAnteriores` en la cabecera: de ahí salen solas las redirecciones (`app/lib/redirecciones.js` → `next.config.js`). Renombrar sin eso deja la URL vieja en la nada.
+5. **Los imperdibles se cargan desde Airtable**, en el campo `Imperdible del mes` de cada evento: es un desplegable con los meses. Elegís el mes y el evento entra en `/imperdibles/{mes}`. Sin ningún evento etiquetado, la sección se publica vacía.
+6. **Un artículo no se renombra a mano.** Su nombre de archivo es su URL. Si hay que cambiarla, hay que sumar la dirección vieja a `slugsAnteriores` en la cabecera: de ahí salen solas las redirecciones (`app/lib/redirecciones.js` → `next.config.js`). Renombrar sin eso deja la URL vieja en la nada.
+
+7. **`content/` tiene que viajar a las funciones del servidor.** Los artículos, el glosario y las transcripciones son archivos del repo. Next los lee bien en el build, pero cuando una página se regenera en el servidor no están, y la lectura falla. Nos pasó con el sitemap: el build generaba 152 URLs con artículos y glosario, y producción servía 395 **sin ninguno de los dos**. Se resuelve con `outputFileTracingIncludes` en `next.config.js`.
+8. **Un `try/catch` con `= []` adentro es una fuga silenciosa.** Así se escondió lo de arriba durante quién sabe cuánto: la lectura fallaba, las URLs desaparecían y el archivo seguía devolviendo 200. Si algo puede quedar vacío, tiene que quedar escrito en los registros.
+9. **El build en verde no prueba nada.** Compilar el archivo viejo también compila: si un script de edición falla a mitad y no escribe, `npm run build` pasa igual. **Verificar contra el archivo o contra producción**, nunca contra el build.
+10. **Un número sin fecha de corte es un pasivo.** Una IA que lo cite lo va a citar viejo y no tiene cómo saber que envejeció. Y si un número se puede contar del contenido, se cuenta: no se escribe a mano.
+11. **Lo editorial no se vende ni se regala.** El sello Verificado y los imperdibles no se compran ni se dan a cambio de un favor. El Destacado es pago y **se declara en todos los listados donde aparece**. Es lo que hace que el resto valga.
 
 ---
 
 ## ESTADO Y PENDIENTES
 
-- ~38 transcripciones y ~38 artículos generados, la mayoría todavía en borrador.
-- **Criterio: publicar de a 4 o 5 artículos por semana**, no todos juntos (para no disparar señales de contenido masivo en Google y para poder revisarlos de verdad).
+Al 28/8/2026, contado sobre el repo y la base:
 
-Pendientes que quiero encarar:
+- **42 transcripciones**, 41 con subtítulos.
+- **41 artículos**, todos publicados.
+- **59 términos de glosario publicados** de 89 generados: quedan 30 en borrador.
+- **~308 eventos aprobados** en la agenda y ~50 borradores esperando aprobación en Airtable.
+- **2 eventos verificados** por su organizador. El circuito recién arranca.
+- Search Console, semana 16–22/8: **54 clics y 4.396 impresiones**, el 91% por fichas de agenda.
 
-1. **Bajar el costo de Windsor.ai** — hoy se usa solo en el panel, para Instagram, YouTube y TikTok. La idea es empezar por **sacar YouTube de Windsor y traerlo con la YouTube Data API / YouTube Analytics API** (gratis, y ya tengo la clave andando en la web). Si con eso puedo bajar de plan en Windsor, ya se justifica. Instagram y TikTok después, con calma, evaluando cuánto trabajo real es conectarlos directo.
-2. **Newsletter automático semanal** con los artículos nuevos vía beehiiv. Primero hay que verificar si mi plan permite **crear y enviar campañas por API** (hoy solo uso el alta de suscriptores). Si no lo permite, que la Action deje el borrador armado y lo envío yo.
-3. **Decidir** si la web, además de las playlists, debería mirar el canal de YouTube y sumar episodios faltantes (evitaría que un olvido de playlist corte toda la cadena, pero pierdo control sobre qué aparece).
+Pendientes:
 
----
+1. **Los datos de Airtable**: ~113 eventos aprobados sin fecha anunciada, 19 sin provincia, y una ficha (`curso-de-produccion-de-espectaculos`) con las fechas al revés. ExpoCehap publica una nota interna de redacción en su descripción.
+2. **8 títulos de episodio abren pregunta sin «¿»** — se corrige en YouTube y la web lo toma solo.
+3. **Newsletter automático semanal** con los artículos nuevos vía beehiiv. Falta verificar si el plan permite crear y enviar campañas por API.
+4. **Contenido que falta**: piezas de comparación ("A o B") y de costos con rangos propios fechados. Son las consultas que más se le hacen a una IA y las que hoy no cubrimos.
+5. **Enlazar artículos y glosario por schema** (`about` / `mentions`), no solo visualmente.
 
 ## MI PEDIDO DE HOY
 
