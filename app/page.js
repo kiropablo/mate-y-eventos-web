@@ -3,7 +3,7 @@ import Image from "next/image";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
 import NewsletterForm from "./components/NewsletterForm";
-import { getEpisodes } from "./lib/youtube";
+import { getEpisodes, partirTitulo } from "./lib/youtube";
 import { getArticulos, formatFecha } from "./lib/articulos";
 import {
   getEventos,
@@ -49,7 +49,14 @@ export default async function Home() {
   // Los que van al carrusel de arriba. Dieciséis: el anillo nunca se ve
   // entero —los que quedan a más de tres lugares del centro se ocultan— así
   // que sumar episodios no recarga la pantalla, solo da más para girar.
-  const paraElCarrusel = episodes.slice(0, 16);
+  // El título va limpio, sin el "T02E25 | " adelante: en un panel angosto ese
+  // código se come los primeros caracteres, que es justo donde está el tema.
+  // Se limpia acá y no adentro del carrusel para no tocar ese componente, que
+  // se está trabajando en paralelo.
+  const paraElCarrusel = episodes.slice(0, 16).map((ep) => ({
+    ...ep,
+    title: partirTitulo(ep.title).tema || ep.title,
+  }));
 
   const faqItems = [
     {

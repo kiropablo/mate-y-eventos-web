@@ -1,6 +1,7 @@
 import { SITE } from "./lib/site";
 import { getEpisodes } from "./lib/youtube";
 import { getArticulos } from "./lib/articulos";
+import { cortesDeEje } from "./lib/ejes";
 import { getEventos, edicionesImperdibles } from "./lib/agenda";
 import { getTerminos } from "./lib/glosario";
 import { todosLosCortes } from "./agenda/cortes";
@@ -67,6 +68,19 @@ export default async function sitemap() {
     arts = [];
   }
 
+  // Las landings por eje editorial, mismo criterio que las de la agenda.
+  let ejes = [];
+  try {
+    ejes = cortesDeEje().map((c) => ({
+      url: `${SITE.url}${c.url}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
+  } catch {
+    ejes = [];
+  }
+
   let evs = [];
   try {
     const eventos = await getEventos();
@@ -127,5 +141,5 @@ export default async function sitemap() {
     cortes = [];
   }
 
-  return [...base, ...eps, ...arts, ...evs, ...imps, ...glo, ...cortes];
+  return [...base, ...eps, ...arts, ...ejes, ...evs, ...imps, ...glo, ...cortes];
 }

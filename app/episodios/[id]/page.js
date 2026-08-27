@@ -129,7 +129,10 @@ export default async function Episodio({ params }) {
     podcastEpisode,
     migas([
       ["Episodios", "/episodios"],
-      [ep.title, null],
+      // El tema, no el título crudo de YouTube: en la ruta, "T02E20 | Cómo
+      // definir el precio…" arranca con un código que no le dice nada a nadie.
+      // partirTitulo() ya separa código, tema e invitado y la ficha la usa.
+      [partes.tema || ep.title, null],
     ]),
   ];
 

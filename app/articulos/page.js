@@ -3,6 +3,7 @@ import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { getArticulos, formatFecha } from "../lib/articulos";
 import { SITE } from "../lib/site";
+import { cortesDeEje } from "../lib/ejes";
 
 export const metadata = {
   alternates: { canonical: "/articulos" },
@@ -15,6 +16,7 @@ export const revalidate = 3600;
 
 export default function Articulos() {
   const articulos = getArticulos();
+  const ejes = cortesDeEje();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -57,6 +59,17 @@ export default function Articulos() {
 
       <section className="section-p" data-accent="magenta">
         <div className="wrap">
+          {/* Los cuatro ejes, arriba de la grilla. Sin esto las landings por
+              tema quedan huérfanas: solo se llega por el sitemap. */}
+          {ejes.length > 1 ? (
+            <div className="ag-chips" style={{ marginBottom: "34px" }}>
+              {ejes.map((c) => (
+                <Link key={c.slug} href={c.url} className="chip">
+                  {c.titulo} ({c.articulos.length})
+                </Link>
+              ))}
+            </div>
+          ) : null}
           {articulos.length === 0 ? (
             <div className="hold reveal">
               <span className="tag">Muy pronto</span>

@@ -14,6 +14,7 @@ Mate y Eventos publica un episodio nuevo cada miércoles (duración aproximada: 
 - [Episodios](https://www.mateyeventos.com/episodios): todos los capítulos del podcast, con video y transcripción completa, dividida en secciones con subtítulos temáticos.
 - [Artículos](https://www.mateyeventos.com/articulos): artículos propios que amplían cada episodio, con preguntas frecuentes.
 - [Agenda de eventos](https://www.mateyeventos.com/agenda): congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, con fechas, sedes, organizadores y contactos.
+- [Artículos por tema](https://www.mateyeventos.com/articulos): los análisis agrupados por los cuatro ejes del proyecto: humano, estrategia y negocio, técnico y producción, tendencias y tecnología.
 - [Glosario del rubro](https://www.mateyeventos.com/glosario): qué significan rider técnico, backline, contra rider, photo opportunity y demás términos de la industria de eventos, con el episodio donde se hablaron.
 - [Los imperdibles del mes](https://www.mateyeventos.com/imperdibles): selección editorial mensual de eventos de la industria, con el motivo de cada elección.
 - [Esta semana en eventos](https://www.mateyeventos.com/agenda/esta-semana): los eventos que arrancan en los próximos siete días, actualizado solo.

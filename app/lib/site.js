@@ -101,28 +101,38 @@ export function fechaCorta(iso) {
   }).format(new Date(Date.UTC(a, m - 1, d)));
 }
 
+// Los cuatro ejes editoriales.
+//
+// "frase" es cómo se nombra el eje cuando va adentro de una oración o de un
+// título: bajar "Humano" a minúscula da "artículos de humano en eventos", que
+// no lo escribiría nadie y no lo busca nadie. La frase está escrita como se
+// busca, que es para lo que sirve la landing.
 export const EJES = [
   {
     n: "01",
     titulo: "Humano",
+    frase: "liderazgo y equipos en eventos",
     texto:
       "Los eventos son experiencias hechas por personas para personas: liderazgo, equipos, presión, decisiones y todo lo que no se ve.",
   },
   {
     n: "02",
     titulo: "Estrategia & Negocio",
+    frase: "estrategia y negocio de eventos",
     texto:
       "Detrás de cada gran evento hay una estrategia: propuesta de valor, rentabilidad, posicionamiento y cómo vender una idea.",
   },
   {
     n: "03",
     titulo: "Técnico & Producción",
+    frase: "producción técnica de eventos",
     texto:
       "El sistema invisible que hace posible cada experiencia: logística, timing, coordinación, proveedores y resolución real.",
   },
   {
     n: "04",
     titulo: "Tendencias & Tecnología",
+    frase: "tecnología y tendencias en eventos",
     texto:
       "Hacia dónde va la industria: innovación, IA aplicada, formatos híbridos y experiencias inmersivas con criterio.",
   },
