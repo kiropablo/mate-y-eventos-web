@@ -2972,9 +2972,11 @@ footer.site {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.carr__panel:hover .carr__foto img { transform: scale(1.04); }
+/* Al pasar el mouse no se agranda la imagen: agrandarla obligaba a escalar el
+   contenedor de las tajadas, y un scale sobre un contexto 3D lo aplana, o sea
+   que se perdía la curva justo al mirarlo. En su lugar se enciende el halo. */
+.carr__panel:hover .carr__glow { opacity: 0.8; }
 
 .carr__play {
   position: absolute;
@@ -3202,7 +3204,9 @@ footer.site {
   bottom: -34%;
   z-index: 0;
   pointer-events: none;
-  perspective: 340px;
+  /* Perspectiva corta = las rayas convergen fuerte. Ojo con pasarse: a 190px
+     con 80° de rotación el piso se aplastaba a 37px de alto y desaparecía. */
+  perspective: 230px;
   perspective-origin: 50% 0%;
   overflow: hidden;
 }
@@ -3212,17 +3216,17 @@ footer.site {
   right: -80%;
   top: 0;
   height: 640%;
-  transform: rotateX(74deg);
+  transform: rotateX(67deg);
   transform-origin: 50% 0%;
   background-image:
     repeating-linear-gradient(
       to right,
-      rgba(196, 214, 236, 0.13) 0 1px,
+      rgba(196, 214, 236, 0.2) 0 1px,
       transparent 1px 104px
     ),
     repeating-linear-gradient(
       to bottom,
-      rgba(196, 214, 236, 0.1) 0 1px,
+      rgba(196, 214, 236, 0.16) 0 1px,
       transparent 1px 104px
     );
   /* Se apaga hacia el horizonte, si no la grilla corta a lo bestia arriba. */
@@ -3248,8 +3252,11 @@ footer.site {
 .carr { --tajadas: 9; }
 
 /* La imagen entera queda de respaldo: es la que existe en el HTML para los
-   buscadores y la que se ve si el navegador no compone bien las tajadas. */
-.carr__plana { position: absolute; inset: 0; }
+   buscadores y la que se ve si el navegador no compone bien las tajadas.
+   Va metida hacia adentro porque las tajadas, al estar giradas, proyectan más
+   angosto que ella: sin este margen asomaba 8px por cada costado y se veían
+   dos franjas al lado de la miniatura. */
+.carr__plana { position: absolute; inset: 0 4%; }
 
 .carr__curva {
   position: absolute;
@@ -3316,19 +3323,41 @@ footer.site {
     background-image:
       repeating-linear-gradient(
         to right,
-        rgba(196, 214, 236, 0.14) 0 1px,
+        rgba(196, 214, 236, 0.2) 0 1px,
         transparent 1px 58px
       ),
       repeating-linear-gradient(
         to bottom,
-        rgba(196, 214, 236, 0.11) 0 1px,
+        rgba(196, 214, 236, 0.16) 0 1px,
         transparent 1px 58px
       );
   }
-  .carr__piso { top: 70%; bottom: -26%; perspective: 260px; }
+  .carr__piso { top: 70%; bottom: -26%; perspective: 170px; }
 
   /* En una pantalla alta y angosta, apoyar el carrusel abajo dejaba un pozo
      entre la bajada y los videos. Centrado en el espacio que sobra queda
      equilibrado y los videos se siguen viendo apenas se abre. */
   .hcarr { justify-content: center; }
 }
+
+/* ---------- el resplandor de cada recuadro ---------- */
+.carr__panel { position: relative; }
+.carr__glow {
+  position: absolute;
+  /* Se desborda sobre todo hacia arriba y abajo. A lo ancho casi no, porque
+     entre panel y panel hay 22px: desbordando de costado el halo de uno se
+     metía en el de al lado y los ocho se fundían en una pared sola. */
+  inset: -13% -1% 2% -1%;
+  background-image: var(--foto);
+  background-size: cover;
+  background-position: center;
+  /* hqdefault alcanza y sobra para algo que va a 46px de desenfoque, y evita
+     bajar la imagen grande dos veces. */
+  filter: blur(52px) saturate(1.8) brightness(1.1);
+  opacity: 0.4;
+  border-radius: 40px;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+/* El del centro brilla un poco más: acompaña a dónde está mirando el ojo. */
+.carr[data-modo="3d"] .carr__item[data-centro="si"] .carr__glow { opacity: 0.62; }

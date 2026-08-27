@@ -331,6 +331,17 @@ export default function CarruselEpisodios({ episodios = [] }) {
                   if (arrastre.current?.movio) e.preventDefault();
                 }}
               >
+                {/* El resplandor: la misma miniatura, desenfocada y por
+                    detrás. Toma los colores del propio episodio, así cada
+                    recuadro tiñe el negro con lo suyo en vez de llevar todos
+                    el mismo halo puesto a mano. */}
+                <span
+                  className="carr__glow"
+                  aria-hidden="true"
+                  style={{
+                    "--foto": `url(https://i.ytimg.com/vi/${ep.id}/hqdefault.jpg)`,
+                  }}
+                />
                 <span className="carr__foto">
                   {/* La imagen de verdad, para que exista en el HTML y la lean
                       los buscadores. En pantalla la tapan las tajadas. */}
