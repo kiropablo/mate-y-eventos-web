@@ -31,8 +31,14 @@ Aprovecho: veo que también organizan {otros}. Si querés, hacemos lo mismo con 
 ## otrosEventosSinLista
 Aprovecho: ¿organizan otros eventos este año? Si me pasás cuáles, los cargo y hacemos lo mismo con todos.
 
-## podcast
-Y si alguna vez querés contar cómo se produce {evento}, en {medio} sale un capítulo por semana y nos interesa escuchar a los que arman los eventos, no a los que opinan sobre ellos. Avisame y lo coordinamos.
+## cobertura
+Dos cosas más que podemos hacer. Una: si tenés un evento por delante y nos avisás con tiempo, vemos de ir a cubrirlo. No prometo estar en todos, pero si sabemos con anticipación se puede organizar.
+
+## contactos
+Y dos: si en algún momento estás buscando proveedores —sonido, estructuras, catering, lo que sea— avisame y te conecto con gente del rubro que conocemos. No cobramos comisión ni tenemos acuerdos con nadie: es simplemente presentarte.
+
+## visibilidad
+De paso, tener la ficha verificada nos deja usarla con confianza: para el listado del mes, para el newsletter y para cuando alguien nos pregunta qué hay esa semana. Con una ficha sin confirmar siempre tenemos que volver a chequear antes de nombrarla.
 
 ## destacado
 Una aclaración por las dudas: el sello no se pide ni se paga, lo proponemos nosotros. Distinto es el espacio destacado de arriba de la agenda, que sí es pago y está explicado acá por si alguna vez te sirve: {destacado}

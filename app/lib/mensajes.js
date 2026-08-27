@@ -189,12 +189,28 @@ export const CAMPOS_CONFIRMACION = [
       "Aprovecho: ¿organizan otros eventos este año? Si me pasás cuáles, los cargo y hacemos lo mismo con todos.",
   },
   {
-    id: "podcast",
-    titulo: "La invitación al podcast",
-    ayuda: "Lo único que podemos ofrecer que no tiene nadie más. Sale un capítulo por semana y necesitamos invitados: acá los dos ganan.",
-    marcas: ["{evento}", "{medio}"],
+    id: "cobertura",
+    titulo: "La cobertura de sus próximos eventos",
+    ayuda: "Se ofrece la conversación, no la cobertura. Prometer que vamos y después no ir es peor que no ofrecerlo: la próxima vez no contesta.",
+    marcas: ["{medio}"],
     porDefecto:
-      "Y si alguna vez querés contar cómo se produce {evento}, en {medio} sale un capítulo por semana y nos interesa escuchar a los que arman los eventos, no a los que opinan sobre ellos. Avisame y lo coordinamos.",
+      "Dos cosas más que podemos hacer. Una: si tenés un evento por delante y nos avisás con tiempo, vemos de ir a cubrirlo. No prometo estar en todos, pero si sabemos con anticipación se puede organizar.",
+  },
+  {
+    id: "contactos",
+    titulo: "Conectarlos con gente del rubro",
+    ayuda: "Dice CONECTAR, no recomendar. Recomendar un proveedor es ponerle la firma: si sale mal en el evento de otro, vuelve acá. Presentar gente tiene el mismo valor y ninguno de esos problemas.",
+    marcas: [],
+    porDefecto:
+      "Y dos: si en algún momento estás buscando proveedores —sonido, estructuras, catering, lo que sea— avisame y te conecto con gente del rubro que conocemos. No cobramos comisión ni tenemos acuerdos con nadie: es simplemente presentarte.",
+  },
+  {
+    id: "visibilidad",
+    titulo: "Qué le suma tener la ficha verificada",
+    ayuda: "Dice para qué sirve el sello adentro del sitio, sin prometer un lugar concreto. No promete los imperdibles ni el destacado: uno es curaduría editorial y el otro es pago, y prometer cualquiera de los dos por haber confirmado unos datos rompe justo lo que hace que valgan.",
+    marcas: [],
+    porDefecto:
+      "De paso, tener la ficha verificada nos deja usarla con confianza: para el listado del mes, para el newsletter y para cuando alguien nos pregunta qué hay esa semana. Con una ficha sin confirmar siempre tenemos que volver a chequear antes de nombrarla.",
   },
   {
     id: "destacado",

@@ -28,6 +28,10 @@ const SEPARACION = 22; // px de aire entre panel y panel, medidos sobre el arco
 // yéndose al fondo— sin que haga falta tocar nada.
 const ARRANQUE = 0.34;
 
+// Cuánto gira solo, en paneles por segundo. Un panel cada siete segundos: se
+// nota que está vivo sin marear ni pelearle al que quiere leer un título.
+const DERIVA = 1 / 7;
+
 // En cuántas tajadas verticales se corta cada miniatura.
 //
 // CSS no sabe doblar una imagen. Para que el panel se flexione como una cinta
@@ -73,6 +77,13 @@ export default function CarruselEpisodios({ episodios = [] }) {
 
   const [activo, setActivo] = useState(false);
   const [centro, setCentro] = useState(0);
+  // Se frena mientras el mouse está encima o mientras se arrastra: si no, el
+  // título que estabas leyendo se va solo.
+  const [quietoPorMouse, setQuietoPorMouse] = useState(false);
+  const quietoRef = useRef(false);
+  quietoRef.current = quietoPorMouse;
+  const centroRef = useRef(0);
+  const reloj = useRef(0);
   // El mismo dato en un ref, para poder leerlo desde los manejadores sin
   // rearmarlos en cada cambio.
   const activoRef = useRef(false);
@@ -193,7 +204,15 @@ export default function CarruselEpisodios({ episodios = [] }) {
   useEffect(() => {
     if (!activo) return undefined;
 
-    const dibujar = () => {
+    const dibujar = (ahora) => {
+      // El giro se mide por tiempo y no por cuadro: en una pantalla de 120Hz
+      // iría al doble de velocidad que en una de 60.
+      const salto = reloj.current ? Math.min((ahora - reloj.current) / 1000, 0.1) : 0;
+      reloj.current = ahora;
+      if (!arrastre.current && !quietoRef.current) {
+        destino.current += DERIVA * salto;
+      }
+
       pos.current += (destino.current - pos.current) * SUAVE;
       if (Math.abs(destino.current - pos.current) < 0.0004) {
         pos.current = destino.current;
@@ -212,8 +231,18 @@ export default function CarruselEpisodios({ episodios = [] }) {
         el.style.visibility = lejos > 3.4 ? "hidden" : "visible";
         el.dataset.centro = lejos < 0.5 ? "si" : "no";
       }
+
+      // El contador se toca solo cuando cambia de número: llamar a React en
+      // cada cuadro es sesenta renders por segundo para mover dos dígitos.
+      const cual = (((Math.round(pos.current) % cuantos) + cuantos) % cuantos) || 0;
+      if (cual !== centroRef.current) {
+        centroRef.current = cual;
+        setCentro(cual);
+      }
+
       cuadro.current = requestAnimationFrame(dibujar);
     };
+    reloj.current = 0;
     cuadro.current = requestAnimationFrame(dibujar);
 
     return () => {
@@ -303,7 +332,15 @@ export default function CarruselEpisodios({ episodios = [] }) {
         <span />
       </div>
 
-      <div className="carr__escena" tabIndex={activo ? 0 : -1} {...alArrastrar}>
+      <div
+        className="carr__escena"
+        tabIndex={activo ? 0 : -1}
+        onPointerEnter={() => setQuietoPorMouse(true)}
+        onPointerLeave={() => setQuietoPorMouse(false)}
+        onFocus={() => setQuietoPorMouse(true)}
+        onBlur={() => setQuietoPorMouse(false)}
+        {...alArrastrar}
+      >
         <ul
           className="carr__pista"
           ref={pistaRef}

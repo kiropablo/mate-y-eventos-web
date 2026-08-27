@@ -3072,27 +3072,23 @@ footer.site {
 }
 .carr[data-modo="3d"] .carr__escena {
   perspective: var(--perspectiva);
-  height: clamp(250px, 41vh, 430px);
+  height: clamp(215px, 35vh, 380px);
   cursor: grab;
   outline: none;
-  /* Los paneles de los costados se van desvaneciendo en vez de cortarse
-     de golpe contra el borde de la pantalla. */
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 14%,
-    #000 86%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 14%,
-    #000 86%,
-    transparent
-  );
+  /* Acá NO va una máscara. Ponerla obliga al navegador a componer la escena en
+     una capa propia, y ahí recorta el desenfoque del resplandor de cada
+     recuadro: quedaba un corte recto horizontal cruzando toda la pantalla. El
+     desvanecido de los costados lo hace .carr__velo, que va por encima. */
 }
 .carr[data-modo="3d"] .carr__escena:active { cursor: grabbing; }
+
+/* Sin desvanecido en los costados: los paneles se cortan contra el borde de
+   la pantalla, como en la referencia.
+   Se probaron las dos formas de hacerlo y las dos traen su propio problema.
+   Como máscara sobre la escena, el navegador compone en una capa aparte y
+   recorta el desenfoque de los resplandores: quedaba un corte recto cruzando
+   la pantalla. Como velo pintado encima, el velo no llega al borde —vive
+   dentro del margen de la página— y se ve su propio rectángulo. */
 .carr[data-modo="3d"] .carr__escena:focus-visible {
   outline: 2px solid var(--accent, #5aa0ff);
   outline-offset: 6px;
@@ -3111,8 +3107,8 @@ footer.site {
   left: 50%;
   /* El alto del panel sale de su ancho (16:9). Si el ancho se pasa, el panel
      queda más alto que la escena y la máscara se come el título de abajo. */
-  width: clamp(320px, 38vw, 660px);
-  margin-left: calc(clamp(320px, 38vw, 660px) / -2);
+  width: clamp(300px, 34vw, 600px);
+  margin-left: calc(clamp(300px, 34vw, 600px) / -2);
   /* La posicion la escribe el JS en cada cuadro: cada panel se ubica por su
      distancia al centro, para que el anillo no tenga costados vacios. */
 }
@@ -3393,10 +3389,21 @@ footer.site {
      carrusel fuera de la pantalla. Logo y nombre bajan de tamaño para que las
      dos cosas entren en la primera pantalla, que es de lo que se trata. */
   .hmarca__logo { width: clamp(56px, 5vw, 84px); }
-  .hstage--corto h1 { font-size: clamp(2.3rem, 5.2vw, 4.6rem); }
-  .hstage--corto .hsub { margin-top: 10px; }
-  .hstage--corto { padding-top: clamp(6px, 1.2vh, 16px); }
-  .hstage--corto .eyebrow { margin-bottom: 8px !important; }
+  .hstage--corto h1 { font-size: clamp(2.2rem, 4.9vw, 4.3rem); }
+
+  /* El aire de la cabecera. Estaba todo apretado porque se lo habia comprimido
+     para que entrara el carrusel, y la volanta terminaba pegada al menú: se
+     leían como dos renglones de lo mismo. Ahora cada pieza respira y se
+     distingue de la de al lado. */
+  .hstage--corto { padding-top: clamp(26px, 4.6vh, 58px); }
+  .hstage--corto .eyebrow {
+    margin-bottom: clamp(18px, 2.8vh, 34px) !important;
+    letter-spacing: 0.34em;
+    font-size: 0.7rem;
+    color: rgba(245, 245, 245, 0.5) !important;
+  }
+  .hmarca { gap: clamp(14px, 1.8vw, 26px); }
+  .hstage--corto .hsub { margin-top: clamp(14px, 2vh, 24px); }
   /* El escalón de la segunda línea es para un bloque alineado a la izquierda:
      centrado, ese sangrado deja el nombre corrido de su propio eje. */
   .hstage--corto h1 .l2 { padding-left: 0; }

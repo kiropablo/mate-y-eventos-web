@@ -98,7 +98,11 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
     "",
     elPedido,
     "",
-    t("podcast"),
+    t("visibilidad"),
+    "",
+    t("cobertura"),
+    "",
+    t("contactos"),
     "",
     t("destacado"),
     "",
@@ -127,7 +131,14 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
     bloque(
       `<div style="border-top:1px solid #e3e1e9;height:1px;line-height:1px;font-size:1px;">&nbsp;</div>`
     ),
-    bloque(parrafo(esc(elPedido)) + parrafo(esc(t("podcast"))), "22px 34px 4px"),
+    bloque(
+      parrafo(esc(elPedido)) + tenue(esc(t("visibilidad")), "0 0 4px"),
+      "22px 34px 4px"
+    ),
+    bloque(
+      parrafo(esc(t("cobertura"))) + parrafo(esc(t("contactos"))),
+      "16px 34px 4px"
+    ),
     bloque(tenue(conLinks(esc(t("destacado")))), "10px 34px 6px"),
     bloque(firma(t("firma")), "8px 34px 30px"),
   ].join("\n\n");

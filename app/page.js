@@ -41,9 +41,10 @@ export default async function Home() {
   const latestHref =
     episodes.length > 0 ? `/episodios/${episodes[0].id}` : "/episodios";
 
-  // Los que van al carrusel de arriba. Ocho: con más, el cilindro se cierra
-  // tanto que los de las puntas quedan de canto y no se leen.
-  const paraElCarrusel = episodes.slice(0, 8);
+  // Los que van al carrusel de arriba. Dieciséis: el anillo nunca se ve
+  // entero —los que quedan a más de tres lugares del centro se ocultan— así
+  // que sumar episodios no recarga la pantalla, solo da más para girar.
+  const paraElCarrusel = episodes.slice(0, 16);
 
   const faqItems = [
     {
