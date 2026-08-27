@@ -3219,28 +3219,29 @@ footer.site {
   background-image:
     repeating-linear-gradient(
       to right,
-      rgba(196, 214, 236, 0.2) 0 1px,
+      rgba(196, 214, 236, 0.075) 0 1px,
       transparent 1px 104px
     ),
     repeating-linear-gradient(
       to bottom,
-      rgba(196, 214, 236, 0.16) 0 1px,
+      rgba(196, 214, 236, 0.055) 0 1px,
       transparent 1px 104px
     );
   /* Se apaga hacia el horizonte, si no la grilla corta a lo bestia arriba. */
+  /* Apenas un rastro: nace, se insinúa y se apaga. */
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    #000 7%,
-    #000 30%,
-    transparent 62%
+    #000 9%,
+    #000 24%,
+    transparent 48%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    #000 7%,
-    #000 30%,
-    transparent 62%
+    #000 9%,
+    #000 24%,
+    transparent 48%
   );
 }
 
@@ -3332,12 +3333,12 @@ footer.site {
     background-image:
       repeating-linear-gradient(
         to right,
-        rgba(196, 214, 236, 0.2) 0 1px,
+        rgba(196, 214, 236, 0.08) 0 1px,
         transparent 1px 58px
       ),
       repeating-linear-gradient(
         to bottom,
-        rgba(196, 214, 236, 0.16) 0 1px,
+        rgba(196, 214, 236, 0.06) 0 1px,
         transparent 1px 58px
       );
   }

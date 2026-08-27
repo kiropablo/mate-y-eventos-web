@@ -77,11 +77,7 @@ export default function CarruselEpisodios({ episodios = [] }) {
 
   const [activo, setActivo] = useState(false);
   const [centro, setCentro] = useState(0);
-  // Se frena mientras el mouse está encima o mientras se arrastra: si no, el
-  // título que estabas leyendo se va solo.
-  const [quietoPorMouse, setQuietoPorMouse] = useState(false);
-  const quietoRef = useRef(false);
-  quietoRef.current = quietoPorMouse;
+  const escenaRef = useRef(null);
   const centroRef = useRef(0);
   const reloj = useRef(0);
   // El mismo dato en un ref, para poder leerlo desde los manejadores sin
@@ -209,7 +205,19 @@ export default function CarruselEpisodios({ episodios = [] }) {
       // iría al doble de velocidad que en una de 60.
       const salto = reloj.current ? Math.min((ahora - reloj.current) / 1000, 0.1) : 0;
       reloj.current = ahora;
-      if (!arrastre.current && !quietoRef.current) {
+      // ¿Está el mouse encima? Se pregunta al DOM en vez de llevar la cuenta
+      // con pointerenter/pointerleave.
+      //
+      // Con los eventos no funcionaba: mientras se arrastra, el navegador
+      // dispara pointerleave una y otra vez —efecto de la captura del
+      // puntero— y cada uno decía "ya no está encima", así que al soltar el
+      // giro automático seguía andando con el mouse todavía apoyado. Se veía
+      // como si la rueda quedara pegada a la mano.
+      const escena = escenaRef.current;
+      const encima =
+        escena &&
+        (escena.matches(":hover") || escena.contains(document.activeElement));
+      if (!arrastre.current && !encima) {
         destino.current += DERIVA * salto;
       }
 
@@ -334,11 +342,8 @@ export default function CarruselEpisodios({ episodios = [] }) {
 
       <div
         className="carr__escena"
+        ref={escenaRef}
         tabIndex={activo ? 0 : -1}
-        onPointerEnter={() => setQuietoPorMouse(true)}
-        onPointerLeave={() => setQuietoPorMouse(false)}
-        onFocus={() => setQuietoPorMouse(true)}
-        onBlur={() => setQuietoPorMouse(false)}
         {...alArrastrar}
       >
         <ul
