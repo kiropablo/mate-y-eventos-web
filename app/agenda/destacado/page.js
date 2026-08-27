@@ -40,7 +40,7 @@ export const LUGARES = 6;
 const INCLUYE = [
   {
     q: "Arriba de todo en la agenda, el mes entero",
-    a: "En la tira de destacados de /agenda, que es la primera pantalla. También en el corte del mes y en «Esta semana» cuando el evento cae en esa semana.",
+    a: "En la tira de destacados de /agenda, que es la primera pantalla. Y con la estrella de destacado en el listado completo, en el corte de su mes, de su país y de su tipo, y en «Esta semana» cuando el evento cae en esos días.",
   },
   {
     q: "La ficha completa",
@@ -77,7 +77,7 @@ const NO_INCLUYE = [
   },
   {
     q: "El espacio se declara siempre",
-    a: "La tarjeta dice «espacio contratado» y arriba de la tira avisamos que algunos eventos lo contrataron. El link a tu sitio sale marcado como link pago, que es lo que corresponde: no declararlo sería publicidad disfrazada de recomendación, y además Google lo penaliza.",
+    a: "En todos lados: la tarjeta de la tira dice «espacio contratado», arriba de la tira avisamos que algunos eventos lo son, y en cada listado donde aparece la estrella va el mismo cartel al lado del nombre. El link a tu sitio sale marcado como link pago. No declararlo sería publicidad disfrazada de recomendación, y además Google lo penaliza.",
   },
 ];
 
@@ -174,7 +174,8 @@ export default async function Destacado() {
             {publicados > 0
               ? `La agenda tiene ${publicados} eventos de la industria por delante y es lo más visitado del sitio.`
               : "La agenda reúne los eventos de la industria en la región y es lo más visitado del sitio."}{" "}
-            Arriba de todo hay {LUGARES} lugares por mes. Uno puede ser tuyo.
+            Arriba de todo hay {LUGARES} lugares al mismo tiempo. Uno puede ser
+            tuyo.
           </p>
         </div>
       </section>
@@ -186,9 +187,10 @@ export default async function Destacado() {
             <div className="hold" style={{ marginBottom: "18px" }}>
               <span className="tag">USD {PRECIO_MES} por mes</span>
               <p>
-                Un evento, un mes, {LUGARES} lugares en total. Si además querés
-                el mes anterior —que es cuando más te buscan por nombre— los dos
-                salen USD {PRECIO_DOS_MESES}.
+                Un evento, un mes. Hay {LUGARES} lugares al mismo tiempo, así
+                que si el mes que querés ya está lleno vamos al siguiente. Si
+                además querés el mes anterior —que es cuando más te buscan por
+                nombre— los dos salen USD {PRECIO_DOS_MESES}.
               </p>
             </div>
             <p className="sem-nota">

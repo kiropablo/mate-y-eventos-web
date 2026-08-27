@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Destaque from "../Destaque";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import {
@@ -271,7 +272,7 @@ function Tabla({ eventos }) {
                 className="dot"
                 style={{ background: TIPO_COLOR[ev.tipo] || "#9aa3b2" }}
               />
-              {ev.destacado ? <span className="ev-star">★ </span> : null}
+              <Destaque destacado={ev.destacado} pago={ev.destacadoPago} />
               {ev.nombre}
             </span>
             <span className="ag-fila__meta">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Destaque from "./Destaque";
 import Link from "next/link";
 import { TIPO_COLOR, MESES_LARGO, pasaFiltros, pelado } from "../lib/agenda";
 
@@ -132,7 +133,16 @@ export default function AgendaLista({ proximos, pasados }) {
   const pasadosVisibles = pasados.filter(visible);
 
   // Hasta seis destacados vigentes, respetando los filtros puestos.
-  const destacados = proximosVisibles.filter((e) => e.destacado).slice(0, 6);
+  //
+  // Los contratados van primero. Antes se cortaba por orden de fecha, así que
+  // si los seis casilleros se llenaban —los pagos comparten tira con los
+  // destacados editoriales, que elegimos nosotros y no vencen— el .slice
+  // descartaba al de fecha más lejana sin avisar. Podía ser un cliente que
+  // pagó, y ni él ni nosotros nos íbamos a enterar.
+  const destacados = proximosVisibles
+    .filter((e) => e.destacado)
+    .sort((a, b) => Number(Boolean(b.destacadoPago)) - Number(Boolean(a.destacadoPago)))
+    .slice(0, 6);
 
   // Los que puede dibujar el calendario (necesitan fecha), ya filtrados.
   const eventosCalendario = todos.filter(
@@ -456,8 +466,8 @@ function ListaCompacta({ eventos, pasado = false }) {
                       className="dot"
                       style={{ background: color(ev.tipo) }}
                     />
-                    {ev.destacado && !pasado ? (
-                      <span className="ev-star">★ </span>
+                    {!pasado ? (
+                      <Destaque destacado={ev.destacado} pago={ev.destacadoPago} />
                     ) : null}
                     {ev.nombre}
                     {ev.verificado ? (

@@ -51,7 +51,7 @@ const FORMATOS = [
   // sale de la página, no está escrito acá dos veces.
   [
     "Destacado en Agenda",
-    `Tu evento arriba de todo en la agenda de la industria, todo el mes. ${LUGARES} lugares.`,
+    `Tu evento arriba de todo en la agenda de la industria, todo el mes. ${LUGARES} lugares al mismo tiempo.`,
     `USD ${PRECIO_MES} por mes`,
     "/agenda/destacado",
   ],

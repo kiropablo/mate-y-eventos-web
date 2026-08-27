@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Destaque from "./Destaque";
 import { formatRango, TIPO_COLOR } from "../lib/agenda";
 import { textosDe } from "./cortes";
 
@@ -51,6 +52,7 @@ export default function Landing({ corte, otros = [], recíproco = null }) {
                       className="dot"
                       style={{ background: TIPO_COLOR[ev.tipo] || "#9aa3b2" }}
                     />
+                    <Destaque destacado={ev.destacado} pago={ev.destacadoPago} />
                     {ev.nombre}
                     {ev.verificado ? (
                       <span

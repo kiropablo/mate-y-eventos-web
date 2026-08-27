@@ -3527,3 +3527,23 @@ footer.site {
   .persona { grid-template-columns: 1fr; gap: 26px; }
   .persona__foto { max-width: 240px; }
 }
+
+/* La declaración del espacio pago, al lado del nombre en los listados.
+   Chiquita y en gris: no compite con el nombre del evento, pero está. Sin
+   esto la estrella del destacado contratado sale igual que la del editorial,
+   que es exactamente lo que la página del Destacado describe como publicidad
+   disfrazada de recomendación. */
+.ev-pago {
+  display: inline-block;
+  margin-left: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 1px 7px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
