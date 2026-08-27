@@ -72,7 +72,7 @@ export default async function Calendario() {
         url: `${SITE.url}/agenda/calendario`,
         description:
           "Suscripción al calendario de eventos de la industria de eventos en Argentina y Latinoamérica, en formato iCalendar.",
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#website` },
       },
       {
         "@type": "HowTo",

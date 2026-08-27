@@ -63,12 +63,30 @@ function frasePropios(propios) {
   return `No cuento ${lista}, que ${nombres.length === 1 ? "lo organizan" : "los organizan"} ustedes.`;
 }
 
-export function armarInvitacion({ ev, semana = [], propios = [], link, mensaje }) {
+export function armarInvitacion({
+  ev,
+  semana = [],
+  propios = [],
+  link,
+  mensaje,
+  cuantosEventos = 0,
+}) {
   const nombre = nombreConAnio(ev);
   // Los textos editables. Si nunca se tocaron, son los de fábrica. El panel
   // pasa los de la pantalla —todavía sin guardar— para poder previsualizar.
   const M = mensaje || getMensaje();
-  const marcas = { ...MARCAS_BASE(), evento: nombre };
+  // Cuántos eventos tiene la agenda, redondeado para abajo a la centena.
+  //
+  // El texto decía "más de 260" con el número escrito a mano y la agenda ya
+  // tiene más de 300: se subvendía un 15% justo en el párrafo donde el mail se
+  // gana la credibilidad con alguien que no nos conoce, y que además puede
+  // entrar al sitio y ver otro número. Ahora sale de la base.
+  const cuantos = Math.floor(cuantosEventos / 100) * 100;
+  const marcas = {
+    ...MARCAS_BASE(),
+    evento: nombre,
+    eventos: cuantos > 0 ? String(cuantos) : "260",
+  };
   const t = (id, extra) => reemplazar(M[id], { ...marcas, ...extra });
   const cuando = formatRango(ev) || "Fechas por anunciar";
   const donde = [ev.venue, ev.ciudad].filter(Boolean).join(", ");

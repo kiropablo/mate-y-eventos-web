@@ -240,7 +240,7 @@ export function schemaDeCorte(corte) {
         url,
         name: `${t.titulo} · ${SITE.name}`,
         description: t.meta,
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#website` },
       },
       {
         "@type": "ItemList",

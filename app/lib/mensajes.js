@@ -70,9 +70,9 @@ export const CAMPOS = [
     id: "quienesSomos",
     titulo: "Quiénes somos",
     ayuda: "Va después del pedido, no antes: primero el dato que le sirve.",
-    marcas: ["{medio}"],
+    marcas: ["{medio}", "{eventos}"],
     porDefecto:
-      "Soy Pablo Quiroga, de {medio}: un podcast de la industria de eventos de Latinoamérica y una agenda pública con más de 260 eventos de la región.",
+      "Soy Pablo Quiroga, de {medio}: un podcast de la industria de eventos de Latinoamérica y una agenda pública con más de {eventos} eventos de la región.",
   },
   {
     id: "cierre",

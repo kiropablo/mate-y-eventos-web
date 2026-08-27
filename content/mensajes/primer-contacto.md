@@ -20,7 +20,7 @@ Repasar los datos
 Son dos minutos: marcás lo que está bien, corregís lo que no. Si está todo correcto, le encendemos el sello Verificado, que dice que los datos los confirmó el organizador y no que los copiamos de algún lado.
 
 ## quienesSomos
-Soy Pablo Quiroga, de {medio}: un podcast de la industria de eventos de Latinoamérica y una agenda pública con más de 260 eventos de la región.
+Soy Pablo Quiroga, de {medio}: un podcast de la industria de eventos de Latinoamérica y una agenda pública con más de {eventos} eventos de la región.
 
 ## cierre
 Cualquier cosa, respondeme acá.

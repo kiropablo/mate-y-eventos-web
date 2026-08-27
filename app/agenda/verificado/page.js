@@ -72,7 +72,7 @@ export default async function Verificado() {
         url: `${SITE.url}/agenda/verificado`,
         description:
           "Qué significa el sello Verificado en la agenda de eventos de Mate y Eventos y qué se chequea antes de darlo.",
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#website` },
       },
       {
         "@type": "FAQPage",

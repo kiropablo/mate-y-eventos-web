@@ -16,7 +16,7 @@ import {
 } from "../../lib/transcripts";
 import { getArticuloDeEpisodio } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
-import { SITE, LINKS } from "../../lib/site";
+import { SITE, LINKS, AUTORES } from "../../lib/site";
 import { migas } from "../../lib/migas";
 
 export const revalidate = 3600;
@@ -86,16 +86,27 @@ export default async function Episodio({ params }) {
   const terminos = terminosDelEpisodio(ep.id);
   const articulo = getArticuloDeEpisodio(ep.id);
 
+  // Cada entidad se declara UNA vez y con @id, y lo demás la referencia.
+  //
+  // Antes cada página de episodio publicaba su propia PodcastSeries, su propia
+  // Organization y el VideoObject dos veces —suelto y adentro de
+  // associatedMedia—: 41 páginas creando dos series de podcast homónimas con
+  // URL distinta y dos organizaciones homónimas, sin nada que las una. Es lo
+  // contrario de lo que hace el layout, donde cada entidad lleva @id
+  // justamente para que la máquina entienda que son la misma.
+  const idVideo = `${SITE.url}/episodios/${ep.id}#video`;
+
   const videoObject = {
     "@context": "https://schema.org",
     "@type": "VideoObject",
+    "@id": idVideo,
     name: ep.title,
     description: cleanDesc,
     thumbnailUrl: ep.thumb,
     uploadDate: ep.published,
     embedUrl: `https://www.youtube.com/embed/${ep.id}`,
     url: `${SITE.url}/episodios/${ep.id}`,
-    publisher: { "@type": "Organization", name: SITE.name },
+    publisher: { "@id": `${SITE.url}/#organization` },
     ...(transcript ? { transcript } : {}),
   };
 
@@ -110,18 +121,13 @@ export default async function Episodio({ params }) {
     ...(se
       ? { partOfSeason: { "@type": "PodcastSeason", seasonNumber: se.season } }
       : {}),
-    partOfSeries: {
-      "@type": "PodcastSeries",
-      name: SITE.name,
-      url: SITE.url,
-    },
-    associatedMedia: {
-      "@type": "VideoObject",
-      name: ep.title,
-      embedUrl: `https://www.youtube.com/embed/${ep.id}`,
-      thumbnailUrl: ep.thumb,
-      uploadDate: ep.published,
-    },
+    // La serie y el video son los que ya están declarados: la del layout y el
+    // VideoObject de arriba de este mismo archivo.
+    partOfSeries: { "@id": `${SITE.url}/#podcast` },
+    associatedMedia: { "@id": idVideo },
+    publisher: { "@id": `${SITE.url}/#organization` },
+    // Los dos que conducen, por @id contra los Person del layout.
+    author: AUTORES.map((a) => ({ "@id": `${SITE.url}/#${a.id}` })),
   };
 
   const jsonLd = [

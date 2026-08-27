@@ -87,6 +87,7 @@ export async function POST(request) {
     // El link real lleva firma y no se arma acá: esto es una muestra.
     link: `https://www.mateyeventos.com/agenda/${ev.slug}/confirmar?f=muestra`,
     mensaje,
+    cuantosEventos: vigentes.length,
   });
 
   return Response.json({

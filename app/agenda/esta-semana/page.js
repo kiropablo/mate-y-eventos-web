@@ -96,7 +96,7 @@ export default async function EstaSemana() {
         name: `Esta semana en eventos · ${SITE.name}`,
         url: `${SITE.url}/agenda/esta-semana`,
         description: `Eventos de la industria activos o que arrancan entre el ${legible(hoy)} y el ${legible(hasta)}.`,
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#website` },
       },
       {
         "@type": "ItemList",

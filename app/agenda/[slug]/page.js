@@ -160,7 +160,11 @@ export default async function Evento({ params }) {
             }
           : {}),
         url: `${SITE.url}/agenda/${ev.slug}`,
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        // Sin isPartOf: Event no tiene esa propiedad —para anidar eventos está
+        // superEvent— y además un evento de un tercero no es "parte de"
+        // nosotros: nosotros lo listamos. La propiedad se descartaba y la
+        // ficha quedaba sin ninguna relación declarada con el sitio; esa
+        // relación la da el nodo WebPage de más abajo.
       }
     : null;
 
@@ -188,7 +192,7 @@ export default async function Evento({ params }) {
         name: ev.nombre,
         ...(ev.fechaVerificacion ? { lastReviewed: ev.fechaVerificacion } : {}),
         reviewedBy: { "@id": `${SITE.url}/#organization` },
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#website` },
       }
     : null;
 

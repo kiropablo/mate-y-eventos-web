@@ -89,6 +89,7 @@ export async function POST(request) {
     semana,
     propios,
     link: linkDeConfirmacion(ev.slug),
+    cuantosEventos: vigentes.length,
   });
 
   const enviado = await mandarCorreo({ para, asunto, texto, html });

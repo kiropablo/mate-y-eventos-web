@@ -46,7 +46,7 @@ export function schemaEdicion(edicion, { canonical }) {
         url,
         name: `Los imperdibles de ${mesLargo(edicion.mes)} · ${SITE.name}`,
         description: `Selección editorial de eventos de la industria para ${mesLargo(edicion.mes)}, con el motivo de cada elección.`,
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#website` },
       },
       {
         "@type": "ItemList",

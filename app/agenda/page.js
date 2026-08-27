@@ -66,7 +66,7 @@ export default async function Agenda() {
     url: `${SITE.url}/agenda`,
     description:
       "Agenda de congresos, expos, festivales y grandes eventos de la industria en Argentina y Latinoamérica.",
-    isPartOf: { "@id": `${SITE.url}/#organization` },
+    isPartOf: { "@id": `${SITE.url}/#website` },
   };
 
   return (

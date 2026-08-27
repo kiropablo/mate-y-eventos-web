@@ -102,7 +102,7 @@ export default async function Destacado() {
         url: `${SITE.url}/agenda/destacado`,
         description:
           "Cómo funciona el espacio destacado de la agenda de eventos de Mate y Eventos: qué incluye, qué no, cuánto sale y cuántos lugares hay por mes.",
-        isPartOf: { "@id": `${SITE.url}/#organization` },
+        isPartOf: { "@id": `${SITE.url}/#website` },
       },
       {
         "@type": "Service",
@@ -120,14 +120,13 @@ export default async function Destacado() {
           url: `${SITE.url}/agenda/destacado`,
         },
       },
-      {
-        "@type": "FAQPage",
-        mainEntity: [...INCLUYE, ...NO_INCLUYE].map((c) => ({
-          "@type": "Question",
-          name: c.q,
-          acceptedAnswer: { "@type": "Answer", text: c.a },
-        })),
-      },
+      // Sin FAQPage: lo que hay en esta página son los entregables de una
+      // oferta comercial —"La ficha completa", "El reporte al cierre"— y no
+      // preguntas frecuentes. Marcar los bullets de venta de un producto como
+      // Question, en la misma página donde hay un Offer de USD 100, es
+      // exactamente el uso de FAQPage por el que Google saca los resultados
+      // enriquecidos y, si insiste, penaliza. El contenido no cambia: sigue
+      // estando escrito y visible, que es donde importa.
       {
         "@type": "BreadcrumbList",
         itemListElement: [

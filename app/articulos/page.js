@@ -25,7 +25,7 @@ export default function Articulos() {
     url: `${SITE.url}/articulos`,
     description:
       "Análisis en profundidad sobre la industria de eventos en Latinoamérica.",
-    isPartOf: { "@id": `${SITE.url}/#organization` },
+    isPartOf: { "@id": `${SITE.url}/#website` },
   };
 
   return (
