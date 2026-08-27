@@ -1,6 +1,6 @@
 ---
 titulo: "El artista que interrumpe: cómo captar atención en un evento"
-bajada: "En un evento nadie vino a verte a vos. Un mentalista explica por qué esa diferencia con el teatro cambia todo, y qué hacer con los primeros minutos."
+bajada: "En un evento nadie vino a verte a vos. Un mentalista explica por qué esa diferencia con el teatro lo cambia todo, y qué hacer con los primeros minutos."
 metaDescripcion: "Cómo captar la atención del público en eventos: por qué el show corporativo compite distinto que el teatro y qué hacer al respecto."
 episodio: "dY0vy_KLcGA"
 episodioTitulo: "T02E26 | El arte de captar la atención | Michel, mentalista"
@@ -9,8 +9,10 @@ eje: "Humano"
 etiquetas: ["entretenimiento en vivo", "experiencia del público", "shows corporativos", "diseño de eventos", "mentalismo"]
 lectura: 5
 generado: "2026-08-27"
-publicado: false
+publicado: true
+revisado: "2026-08-27"
 ---
+
 Hay una frase que circula en la industria del entretenimiento en vivo y que casi nadie se anima a decir en voz alta frente a un cliente: en muchos eventos, el artista contratado es, al principio, una mala noticia. No porque haga mal su trabajo, sino porque interrumpe algo que ya estaba funcionando. Michel, mentalista con recorrido en Europa y América, lo planteó sin vueltas en Mate y Eventos, y esa idea sirve para pensar cualquier show, activación o momento en vivo dentro de un evento corporativo o social.
 
 ## El público del evento no eligió estar ahí para vos
