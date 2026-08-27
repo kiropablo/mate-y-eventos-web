@@ -4,7 +4,8 @@ import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import ArticuloCuerpo from "../../components/ArticuloCuerpo";
 import { getTermino, getTerminos } from "../../lib/glosario";
-import { getArticuloDeEpisodio } from "../../lib/articulos";
+import { getArticuloDeEpisodio, getArticulos } from "../../lib/articulos";
+import { articulosQueMencionan } from "../../lib/enlaces";
 import { SITE } from "../../lib/site";
 
 export const revalidate = 3600;
@@ -55,6 +56,19 @@ export default function Termino({ params }) {
     .map((slug) => todos.find((x) => x.slug === slug))
     .filter(Boolean);
 
+  // Los artículos donde esta palabra está efectivamente escrita. Es distinto
+  // del artículo del mismo episodio, que es de dónde salió la definición:
+  // acá está dónde se usa. Al 27/8/2026, de los 59 términos publicados 43
+  // aparecen en al menos un artículo, así que la mayoría deja de ser una
+  // página suelta.
+  // Se cortan en cuatro, y el corte es el mismo para lo que se ve y para lo
+  // que se marca: "Timing" aparece en 13 artículos y una lista de 13 en una
+  // barra lateral no la lee nadie. Declarar en el schema más de lo que la
+  // página muestra sería marcar una relación que el lector no puede ver.
+  const usadaEn = articulosQueMencionan(t, getArticulos())
+    .filter((a) => !articulo || a.id !== articulo.id)
+    .slice(0, 4);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -71,12 +85,24 @@ export default function Termino({ params }) {
           name: "Glosario de la industria de eventos",
           url: `${SITE.url}/glosario`,
         },
-        // De dónde salió la definición: el episodio donde se habló.
-        subjectOf: {
-          "@type": "PodcastEpisode",
-          name: t.episodioTitulo || "Episodio de Mate y Eventos",
-          url: `${SITE.url}/episodios/${t.episodio}`,
-        },
+        // De dónde salió la definición y dónde se usa. El episodio es el
+        // origen; los artículos son las páginas donde la palabra aparece
+        // escrita, que es lo que cierra el circuito entre las dos secciones:
+        // el artículo declara qué términos nombra y el término declara en qué
+        // artículos está, con el mismo @id de los dos lados.
+        subjectOf: [
+          {
+            "@type": "PodcastEpisode",
+            name: t.episodioTitulo || "Episodio de Mate y Eventos",
+            url: `${SITE.url}/episodios/${t.episodio}`,
+          },
+          ...usadaEn.map((a) => ({
+            "@type": "Article",
+            "@id": `${SITE.url}/articulos/${a.id}`,
+            name: a.titulo,
+            url: `${SITE.url}/articulos/${a.id}`,
+          })),
+        ],
       },
       {
         "@type": "BreadcrumbList",
@@ -169,6 +195,26 @@ export default function Termino({ params }) {
                   </p>
                 </>
               ) : null}
+
+              {/* Dónde se usa la palabra, además del artículo de su propio
+                  episodio. Sale de buscar el término en el texto de los 42
+                  artículos publicados, no de una lista escrita a mano: si acá
+                  figura un artículo, la palabra está escrita ahí y se puede
+                  comprobar con Ctrl+F. Es lo mismo que declara el schema, y va
+                  visible porque marcar en el código una relación que el lector
+                  no puede ver es justamente lo que Google penaliza. */}
+              {usadaEn.length > 0 && (
+                <>
+                  <h3 className="ev-datos__titulo">Dónde se usa</h3>
+                  <ul className="ev-lista">
+                    {usadaEn.map((a) => (
+                      <li key={a.id}>
+                        <Link href={`/articulos/${a.id}`}>{a.titulo}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
 
               {relacionados.length > 0 && (
                 <>

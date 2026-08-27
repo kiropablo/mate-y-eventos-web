@@ -11,7 +11,8 @@ import {
 } from "../../lib/articulos";
 import { SITE } from "../../lib/site";
 import { migas } from "../../lib/migas";
-import { terminosDelEpisodio } from "../../lib/glosario";
+import { terminosDelEpisodio, getTerminos } from "../../lib/glosario";
+import { terminosMencionados, terminosDelTema } from "../../lib/enlaces";
 
 export const revalidate = 3600;
 
@@ -55,6 +56,13 @@ export default function Articulo({ params }) {
   // dirección aunque salen del mismo capítulo.
   const terminos = terminosDelEpisodio(art.episodio);
 
+  // Y estos son los que el artículo NOMBRA de verdad, salgan del episodio que
+  // salgan. Es otra relación: la de arriba es de origen —se definió en el
+  // mismo capítulo—, esta es de contenido. Se usa para el schema, que hasta
+  // ahora no declaraba en ningún lado de qué habla cada artículo.
+  const mencionados = terminosMencionados(art, getTerminos());
+  const delTema = terminosDelTema(art, mencionados);
+
   const url = `${SITE.url}/articulos/${art.id}`;
 
   const articleLd = {
@@ -83,6 +91,35 @@ export default function Articulo({ params }) {
     publisher: { "@id": `${SITE.url}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     isBasedOn: `${SITE.url}/episodios/${art.episodio}`,
+    // De qué habla y qué nombra, apuntando a los términos del glosario por su
+    // @id —o sea a la misma entidad, no a una copia con el mismo nombre—.
+    //
+    // "about" son los términos que se definieron en el episodio que este
+    // artículo amplía Y que además están escritos en el texto: eso es de lo
+    // que trata. "mentions" es todo lo que nombra, incluidas palabras
+    // definidas en otros capítulos. La diferencia es la que hace schema.org y
+    // acá tiene una regla medible, no una opinión.
+    //
+    // Se pueden verificar con Ctrl+F: si el término está marcado, la palabra
+    // está en la página.
+    ...(delTema.length
+      ? {
+          about: delTema.map((t) => ({
+            "@type": "DefinedTerm",
+            "@id": `${SITE.url}/glosario/${t.slug}`,
+            name: t.termino,
+          })),
+        }
+      : {}),
+    ...(mencionados.length
+      ? {
+          mentions: mencionados.map((t) => ({
+            "@type": "DefinedTerm",
+            "@id": `${SITE.url}/glosario/${t.slug}`,
+            name: t.termino,
+          })),
+        }
+      : {}),
   };
 
   // Este bloque es el que leen Google y los asistentes de IA para citar
