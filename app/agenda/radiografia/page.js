@@ -43,7 +43,18 @@ export const metadata = {
 // Una hora, como el resto de la agenda. Los números se mueven todos los días.
 export const revalidate = 3600;
 
-const pct = (parte, total) => (total ? Math.round((parte / total) * 100) : 0);
+// El porcentaje, ya escrito con su signo.
+//
+// Un corte de un evento sobre 308 da 0,32% y redondeaba a "0%": la página
+// afirmaba que Uruguay es el 0% de la agenda. Un humano ve el "1" al lado y
+// compensa; un modelo que lea esto para contestar "qué peso tiene Uruguay en
+// la agenda de LATAM" se lleva el cero. Abajo del 1% se dice lo que es.
+function pct(parte, total) {
+  if (!total) return "0%";
+  const p = (parte / total) * 100;
+  if (p > 0 && p < 1) return "menos del 1%";
+  return `${Math.round(p)}%`;
+}
 
 export default async function Radiografia() {
   const { eventos, completa } = await getEventosConEstado();
@@ -179,7 +190,7 @@ export default async function Radiografia() {
                   {bi.desde.nombre} y {bi.hasta.nombre} concentran {bi.n}{" "}
                   eventos
                 </strong>
-                : el {pct(bi.n, r.enLosDoceMeses)}% de todo lo que hay anunciado
+                : el {pct(bi.n, r.enLosDoceMeses)} de todo lo que hay anunciado
                 para los próximos doce meses, en dos meses. Es el dato que más
                 le sirve a alguien que está eligiendo cuándo hacer el suyo.
               </p>
@@ -189,9 +200,13 @@ export default async function Radiografia() {
           <section className="sem-bloque reveal">
             <h2 className="ag-mes">Eventos por mes</h2>
             <p className="sem-nota" style={{ marginBottom: "18px" }}>
-              Los {r.enLosDoceMeses} eventos con fecha anunciada, repartidos en
-              los doce meses que vienen. Los {r.sinFecha} que todavía no
-              anunciaron fecha no están en ningún mes.
+              Los {r.enLosDoceMeses} eventos que arrancan dentro de los doce
+              meses que vienen.{" "}
+              {r.fueraDeLaVentana > 0
+                ? `Hay ${r.fueraDeLaVentana} más con fecha anunciada que caen fuera de esta ventana —ya en curso o anunciados para más adelante— y `
+                : "Y "}
+              los {r.sinFecha} que todavía no anunciaron fecha no están en
+              ningún mes. Las tres cifras suman los {r.total} de arriba.
             </p>
             <div className="radio-barras">
               {r.porMes.map((m) => (
@@ -218,7 +233,7 @@ export default async function Radiografia() {
                   <span className="ag-fila__cuerpo">
                     <span className="ag-fila__nombre">{t.valor}</span>
                     <span className="ag-fila__meta">
-                      {pct(t.n, r.total)}% de los {r.total}
+                      {pct(t.n, r.total)} de los {r.total}
                     </span>
                   </span>
                 </div>
@@ -235,7 +250,7 @@ export default async function Radiografia() {
                   <span className="ag-fila__cuerpo">
                     <span className="ag-fila__nombre">{p.valor}</span>
                     <span className="ag-fila__meta">
-                      {pct(p.n, r.total)}% de los {r.total}
+                      {pct(p.n, r.total)} de los {r.total}
                     </span>
                   </span>
                 </div>
@@ -298,7 +313,7 @@ export default async function Radiografia() {
               estimadas por la propia organización— y{" "}
               <strong>{r.sinFecha} todavía no anunciaron la suya</strong>. Ese
               último número también es un dato: a esta altura del año, un{" "}
-              {pct(r.sinFecha, r.total)}% del calendario de la industria
+              {pct(r.sinFecha, r.total)} del calendario de la industria
               todavía no está publicado.
             </p>
             <p className="sem-nota">
