@@ -216,13 +216,21 @@ export default async function Home() {
 
       {/* ---------- MANIFIESTO ---------- */}
       <section className="manif" data-accent="blue">
-        <div className="wrap">
-          <div className="eyebrow reveal">
-            <span className="n">01</span>Lo que defendemos
+        {/* Dos columnas de 1100px para arriba: el título a la izquierda y el
+            texto a la derecha. En una pantalla ancha, apilado, la mitad
+            derecha quedaba vacía y la sección medía casi mil píxeles de alto.
+            Abajo de 1100 los dos bloques son divs comunes y queda apilado
+            exactamente como estaba. */}
+        <div className="wrap manif__cols">
+          <div className="manif__izq">
+            <div className="eyebrow reveal">
+              <span className="n">01</span>Lo que defendemos
+            </div>
+            <h2 className="clip">
+              Un medio hecho <em>desde adentro</em> de la industria.
+            </h2>
           </div>
-          <h2 className="clip">
-            Un medio hecho <em>desde adentro</em> de la industria.
-          </h2>
+          <div className="manif__der">
           {/* El párrafo que faltaba: qué es esto, en castellano llano y sin
               depender del resto de la página. Hasta ahora la única definición
               del sitio estaba en la primera pregunta del FAQ, al pie. Un
@@ -230,13 +238,14 @@ export default async function Home() {
               títulos primero, y los títulos no decían nada. */}
           <p className="body reveal" style={{ transitionDelay: ".06s" }}>
             <strong>Mate y Eventos</strong> es un medio audiovisual argentino
-            especializado en la industria de eventos de Latinoamérica. Lo hacen
-            Pablo Quiroga y Alexis Vidal, productores con más de 18 años en el
-            rubro. Publican un episodio de unos 20 minutos por semana; además
-            mantienen la agenda de eventos de la región —más de 300 fichas con
-            sede y organizador, y {conFechaAnunciada} de ellas ya con la fecha
-            confirmada por la organización—, un glosario del oficio y artículos
-            que amplían cada conversación.
+            especializado en la <em>industria de eventos de Latinoamérica</em>.
+            Lo hacen <strong>Pablo Quiroga y Alexis Vidal</strong>, productores
+            con más de 18 años en el rubro. Publican un episodio de unos 20
+            minutos por semana; además mantienen la agenda de eventos de la
+            región —<strong>más de 300 fichas</strong> con sede y organizador, y{" "}
+            {conFechaAnunciada} de ellas ya con la fecha confirmada por la
+            organización—, un glosario del oficio y artículos que amplían cada
+            conversación.
           </p>
           <p className="body reveal" style={{ transitionDelay: ".1s" }}>
             Mate y Eventos nace de años viviendo los eventos desde el backstage,
@@ -251,6 +260,7 @@ export default async function Home() {
           >
             Conocé el proyecto
           </Link>
+          </div>
         </div>
       </section>
 
@@ -265,12 +275,13 @@ export default async function Home() {
               La agenda de la industria, actualizada todos los días.
             </h2>
             <p className="body reveal" style={{ marginBottom: "26px" }}>
-              Congresos, expos, festivales y grandes producciones de Argentina y
-              Latinoamérica, con su sede, su organizador y el link al sitio
-              oficial. Hoy hay más de 300 eventos cargados y{" "}
-              {conFechaAnunciada} con la fecha ya anunciada. A los
-              organizadores les escribimos uno por uno para que confirmen los
-              datos de su ficha.
+              <em>Congresos, expos, festivales</em> y grandes producciones de
+              Argentina y Latinoamérica, con su sede, su organizador y el link
+              al sitio oficial. Hoy hay{" "}
+              <strong>más de 300 eventos cargados</strong> y{" "}
+              <strong>{conFechaAnunciada}</strong> con la fecha ya anunciada. A
+              los organizadores les escribimos uno por uno para que confirmen
+              los datos de su ficha.
             </p>
             <div className="ag-tabla">
               {proximos.map((ev) => (
@@ -325,9 +336,10 @@ export default async function Home() {
             </h2>
             <p className="body reveal" style={{ marginBottom: "26px" }}>
               Cada conversación del podcast se convierte en un análisis con
-              preguntas frecuentes al final. Ya hay {todosLosArticulos.length}{" "}
-              publicados sobre presupuestos, proveedores, producción, liderazgo
-              y tecnología.
+              preguntas frecuentes al final. Ya hay{" "}
+              <strong>{todosLosArticulos.length} publicados</strong> sobre{" "}
+              <em>presupuestos, proveedores, producción</em>, liderazgo y
+              tecnología.
             </p>
             <div className="home-arts">
               {ultimosArticulos.map((art, i) => (
@@ -463,8 +475,8 @@ export default async function Home() {
             Lo de la semana, en tu mail.
           </h2>
           <p className="body reveal" style={{ marginBottom: "26px" }}>
-            El episodio nuevo, los artículos y los eventos que se vienen. Sin
-            spam y con un click para darte de baja.
+            El episodio nuevo, los artículos y los eventos que se vienen.{" "}
+            <strong>Sin spam</strong> y con un click para darte de baja.
           </p>
           <NewsletterForm />
         </div>

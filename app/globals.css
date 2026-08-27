@@ -12,6 +12,13 @@
   --mute: rgba(245, 245, 245, 0.55);
   --faint: rgba(245, 245, 245, 0.34);
   --accent: #5aa0ff; /* azul eléctrico protagonista */
+  /* El mismo acento, subido de luz, para PALABRAS dentro de un párrafo gris.
+     El acento pleno sirve contra el fondo negro, pero no contra el texto que
+     tiene al lado: el magenta #ea478a mide 1,02:1 contra el gris del cuerpo,
+     o sea que en escala de grises —o para alguien con daltonismo rojo-verde—
+     la palabra destacada desaparece dentro del párrafo. Estas dos suben a
+     1,85:1 (azul) y 1,51:1 (magenta) sin cambiar de tono. */
+  --acento-claro: #8dbdff;
 
   --panel: #0c0c0f;
   --card: #141418;
@@ -88,9 +95,11 @@ input:focus-visible {
 }
 body[data-accent="magenta"] {
   --accent: #ea478a;
+  --acento-claro: #f187b3;
 }
 body[data-accent="blue"] {
   --accent: #5aa0ff;
+  --acento-claro: #8dbdff;
 }
 .cols {
   position: fixed;
@@ -149,56 +158,158 @@ section {
   margin: 0 auto;
   padding: 0 clamp(24px, 5vw, 70px);
 }
+/* La volanta: el «01 · LO QUE DEFENDEMOS» que encabeza cada sección.
+
+   Venía de 0.86rem (13,8px) con 0.2em de espaciado. En una pantalla grande
+   era lo primero que se leía de cada sección y también lo más chico de todo
+   el bloque. Sube a 16,96px en escritorio (+23%) y de peso 500 a 600; el
+   espaciado baja de 0.2 a 0.16em porque a este tamaño tanto aire empieza a
+   separar las palabras en vez de dibujar una etiqueta, y se le da margen
+   abajo para que se despegue del título y se lean como dos cosas distintas.
+
+   El techo es 1.06rem y no más, porque en algunos bloques la volanta no
+   anuncia un título grande sino contenido directo —las preguntas del FAQ de
+   un artículo, la descripción de un episodio—. Arriba de eso la etiqueta
+   dibuja letras más altas que lo que rotula, que es la jerarquía al revés.
+   En celular arranca en 14,7px para no empujar de renglón a las etiquetas
+   largas. */
 .eyebrow {
-  font-size: 0.86rem;
-  letter-spacing: 0.2em;
+  font-size: clamp(0.92rem, 0.38vw + 0.79rem, 1.06rem);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--accent);
-  font-weight: 500;
+  font-weight: 600;
+  margin-bottom: 14px;
   transition: color 1s ease;
+}
+/* La del hero no: ahí es una etiqueta chiquita arriba de un título enorme, y
+   está achicada a propósito para que el logo, el título y el carrusel entren
+   juntos en la primera pantalla. De 900px para arriba ya la pisa la regla del
+   final del archivo; esta la cubre en celular. */
+.hstage .eyebrow {
+  font-size: 0.86rem;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+/* Y en .page-top tampoco: ahí la misma clase no rotula nada, es la miga de
+   pan —«— Agenda / Congreso»—, con links adentro. Al tamaño nuevo la ruta no
+   entra en un renglón en ningún teléfono: se parte al medio, el segundo
+   renglón arranca sin el sangrado del guión, y en /sobre/{quien} quedaba el
+   apellido solo, en azul y grande, justo arriba del h1 que dice el nombre
+   completo. Se queda con los valores de antes. */
+.page-top .eyebrow {
+  font-size: 0.86rem;
+  letter-spacing: 0.2em;
+  font-weight: 500;
 }
 .eyebrow .n {
   color: var(--faint);
-  margin-right: 10px;
+  margin-right: 12px;
   font-variant-numeric: tabular-nums;
 }
 h2 {
   font-family: var(--font-display);
   font-weight: 700;
   text-transform: uppercase;
-  line-height: 0.86;
+  line-height: 0.94;
   letter-spacing: 0.01em;
-  font-size: clamp(2.4rem, 7vw, 5.4rem);
+  /* Bajó de 5.4rem. A 86px sobre un cuerpo de 16px la diferencia era de 5,4
+     veces: el titular gritaba y el texto no se leía. Ahora son unas 2,8.
+
+     El piso se queda en 2.4rem, el mismo de antes: el problema era de
+     escritorio y con clamp(2rem, 4vw, …) el título del celular se achicaba un
+     17% sin que nadie lo pidiera (38,4px → 32px en una pantalla de 390). */
+  font-size: clamp(2.4rem, 3.45vw + 1.19rem, 3.4rem);
 }
 .body {
   font-family: var(--font-body);
   color: var(--mute);
-  line-height: 1.6;
-  max-width: 54ch;
+  /* Antes heredaba los 16px del body: chico para leer un párrafo en una
+     pantalla grande. Y la medida sube de 54 a 62 caracteres, que sigue siendo
+     una columna cómoda y ya no se ve perdida en el ancho. */
+  font-size: clamp(1.02rem, 0.62vw + 0.86rem, 1.2rem);
+  line-height: 1.68;
+  max-width: 62ch;
+}
+/* El reset de arriba pone margin: 0 en todo, así que dos párrafos seguidos
+   quedaban pegados y se leían como un solo bloque de nueve líneas. Solo se
+   separan entre ellos: un .body suelto no cambia nada. */
+.body + .body,
+.lead + .lead {
+  margin-top: 1.1em;
 }
 
-/* revelados */
-.reveal {
+/* Las palabras que importan.
+   
+   Dos niveles y nada más, para no romper el minimalismo: <strong> sube el
+   texto del gris al blanco, y <em> lo pinta con el acento de la sección. El
+   acento cambia solo con el scroll (azul o magenta), así que la palabra
+   destacada siempre queda en el color de donde está. */
+.body strong,
+.lead strong {
+  color: var(--blanco);
+  font-weight: 600;
+}
+.body em,
+.lead em {
+  color: var(--acento-claro);
+  /* El peso va con el color, no en lugar del color. El tono solo no alcanza:
+     hace falta una señal que sobreviva a una captura en blanco y negro. */
+  font-weight: 600;
+  font-style: normal;
+  transition: color 1s ease;
+}
+
+/* Revelados al hacer scroll.
+   
+   Las reglas que esconden viven bajo `html.js`, que la pone el propio Motion
+   apenas arranca. Si el JavaScript no corre —falla, tarda, o alguien lo tiene
+   apagado— nada se esconde y la página se ve entera. Antes el contenido
+   arrancaba en opacity 0 y dependía de que un IntersectionObserver lo
+   encendiera: si eso no pasaba, los 34 bloques de la home quedaban en blanco
+   ocupando su lugar, que es exactamente el hueco enorme que se veía debajo de
+   cada volanta.
+   
+   Y con prefers-reduced-motion no se esconde nada: aparece todo de una.
+
+   El `html.js` va envuelto en `:where()`, que no suma especificidad. Sin eso,
+   `html.js .reveal.in` pesa más que `.card:hover` y le gana: las tarjetas y
+   los botones que además son `.reveal` dejaban de levantarse al pasar el
+   mouse, porque el `transform: none` del revelado pisaba al del hover. Con
+   `:where()` los números vuelven a ser los de antes del cambio. */
+.reveal,
+.clip {
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+:where(html.js) .reveal {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.reveal.in {
-  opacity: 1;
-  transform: none;
-}
-.clip {
+:where(html.js) .clip {
   opacity: 0;
   transform: translateY(14px);
   clip-path: inset(0 0 106% 0);
-  transition: clip-path 1s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.6s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.clip.in {
+:where(html.js) .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+:where(html.js) .clip.in {
   opacity: 1;
   transform: none;
   clip-path: inset(-12% 0 -12% 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(html.js) .reveal,
+  :where(html.js) .clip {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+    transition: none;
+  }
 }
 
 /* ---------- HERO ---------- */
@@ -425,7 +536,7 @@ h1 .l3 {
 
 /* ---------- SECCIONES ---------- */
 .manif {
-  padding: clamp(90px, 16vh, 190px) 0;
+  padding: clamp(72px, 10vh, 132px) 0;
 }
 .manif h2 {
   max-width: 16ch;
@@ -436,9 +547,33 @@ h1 .l3 {
   color: var(--accent);
   transition: color 1s ease;
 }
+/* Dos columnas, solo en pantalla ancha.
+
+   El corte va en 1100px: abajo de eso las dos columnas quedarían de menos de
+   500px cada una y el título de tres palabras por renglón. Arriba, el título
+   se queda a la izquierda y el texto ocupa la mitad que antes estaba vacía;
+   la sección pasa de ~950px de alto a poco más de la mitad.
+
+   El reparto no es mitad y mitad: el texto se lleva más, porque una columna
+   de 46 caracteres se lee peor que una de 57, y el título ya entra cómodo en
+   la angosta. */
+@media (min-width: 1100px) {
+  .manif__cols {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    column-gap: clamp(48px, 5.5vw, 96px);
+    align-items: start;
+  }
+  .manif__izq h2 {
+    margin-bottom: 0;
+  }
+  .manif__der .body {
+    max-width: none;
+  }
+}
 
 .nums {
-  padding: clamp(90px, 16vh, 190px) 0;
+  padding: clamp(72px, 10vh, 132px) 0;
 }
 .nums h2 {
   margin-top: 14px;
@@ -563,7 +698,9 @@ h1 .l3 {
   margin-top: 14px;
 }
 .section-p {
-  padding: 0 0 clamp(80px, 14vh, 160px);
+  /* Bajó de 160px. Con el titular invisible el aire se notaba el doble, pero
+     aun con todo a la vista sobraba espacio entre bloque y bloque. */
+  padding: 0 0 clamp(64px, 9vh, 112px);
 }
 .card {
   background: var(--card);
@@ -595,9 +732,9 @@ h1 .l3 {
 .lead {
   font-family: var(--font-body);
   color: var(--mute);
-  line-height: 1.6;
-  font-size: 1.05rem;
-  max-width: 60ch;
+  line-height: 1.62;
+  font-size: clamp(1.08rem, 0.72vw + 0.92rem, 1.32rem);
+  max-width: 62ch;
   margin-top: 18px;
 }
 
@@ -1054,8 +1191,10 @@ footer.site {
 .ep-desc {
   font-family: var(--font-body);
   color: var(--mute);
-  line-height: 1.6;
-  font-size: 0.96rem;
+  line-height: 1.66;
+  /* Es la descripción del episodio, o sea el contenido que rotula la volanta
+     «Sobre este episodio». A 15,4px quedaba por debajo de su propia etiqueta. */
+  font-size: clamp(1rem, 0.36vw + 0.89rem, 1.12rem);
   white-space: pre-line;
 }
 .ep-desc--long {
@@ -1191,8 +1330,12 @@ footer.site {
 .faq-a {
   font-family: var(--font-body);
   color: var(--mute);
-  line-height: 1.65;
-  max-width: 780px;
+  /* Heredaba los 16px del body, igual que el resto del cuerpo antes. Las
+     respuestas del FAQ son de los textos más leídos del sitio —y los que
+     levanta una IA— así que no tienen por qué ser los más chicos. */
+  font-size: clamp(1.02rem, 0.5vw + 0.9rem, 1.12rem);
+  line-height: 1.68;
+  max-width: 66ch;
 }
 
 /* ---------- PRENSA ---------- */
@@ -1394,13 +1537,19 @@ footer.site {
   font-size: clamp(2.1rem, 5.4vw, 3.5rem);
   line-height: 1.06;
 }
+/* La columna de lectura del artículo.
+
+   Estaba en 760px con el texto en 17px: unos 89 caracteres por renglón. Es
+   mucho: pasados los 75, el ojo pierde el renglón al volver a la izquierda.
+   Y encima era más chico que el cuerpo de la home, que no es una página para
+   leer sino para recorrer. Ahora son ~18,4px en 690px, unos 75 caracteres. */
 .art-col {
-  max-width: 760px;
+  max-width: 690px;
 }
 
 .art-cuerpo {
   font-family: var(--font-body);
-  font-size: 1.06rem;
+  font-size: clamp(1.06rem, 0.42vw + 0.96rem, 1.15rem);
   line-height: 1.78;
   color: rgba(245, 245, 245, 0.86);
 }
@@ -1478,7 +1627,11 @@ footer.site {
 .art-q summary {
   font-family: var(--font-ui);
   font-weight: 500;
-  font-size: 1.02rem;
+  /* Una pregunta frecuente es el título de su respuesta, así que tiene que
+     leerse más grande que la etiqueta «Preguntas frecuentes» que encabeza el
+     bloque —y que el cuerpo del artículo—. Estaba en 16,3px, por debajo de
+     las dos cosas. */
+  font-size: clamp(1.06rem, 0.3vw + 0.98rem, 1.16rem);
   line-height: 1.4;
   color: var(--blanco);
   cursor: pointer;
@@ -1503,7 +1656,9 @@ footer.site {
 }
 .art-q p {
   font-family: var(--font-body);
-  font-size: 1rem;
+  /* Las respuestas del FAQ de cada artículo: son de lo más leído del sitio y
+     lo que levanta una IA cuando cita. No pueden ser el texto más chico. */
+  font-size: clamp(1.02rem, 0.42vw + 0.92rem, 1.12rem);
   line-height: 1.72;
   color: var(--mute);
   margin-top: 14px;
@@ -1890,7 +2045,11 @@ footer.site {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.01em;
-  font-size: 1.4rem;
+  /* Crece con el cuerpo. Rajdhani tiene la mayúscula más baja que Inter, así
+     que a igualdad de píxeles el subtítulo se dibuja más chico que el párrafo
+     que encabeza: si el cuerpo sube y este se queda en 22,4px, el subtítulo
+     deja de leerse como subtítulo. */
+  font-size: clamp(1.5rem, 1vw + 1.2rem, 1.78rem);
   margin: 34px 0 14px;
 }
 .ev-ficha__cuerpo .ev-h2:first-child {
@@ -1899,6 +2058,11 @@ footer.site {
 .ev-parrafo {
   font-family: var(--font-body);
   color: var(--mute);
+  /* Este es el texto que cuenta de qué se trata el evento, en la plantilla por
+     la que entra el 91% del tráfico de búsqueda. Heredaba los 16px del body y
+     se quedó afuera cuando subió el cuerpo del resto del sitio: el renglón de
+     la fecha, que es un dato, terminaba un 32% más grande que el contenido. */
+  font-size: clamp(1.02rem, 0.62vw + 0.86rem, 1.2rem);
   line-height: 1.7;
   margin-bottom: 14px;
   max-width: 68ch;
@@ -2307,8 +2471,10 @@ footer.site {
   flex: 1 1 auto;
   font-family: var(--font-body);
   color: var(--mute);
-  font-size: 0.9rem;
-  line-height: 1.62;
+  /* 0.9rem eran 14,4px: la letra más chica de toda la home después de las
+     volantas. Sube apenas, lo justo para leerse sin achicar la tarjeta. */
+  font-size: 0.95rem;
+  line-height: 1.64;
 }
 .home-art__pie {
   font-size: 0.72rem;
@@ -2659,6 +2825,16 @@ footer.site {
 /* --- Esta semana (/agenda/esta-semana) --- */
 .sem-bloque { margin-bottom: 34px; }
 .sem-bloque .ag-mes { margin-bottom: 14px; }
+/* El dato principal de un bloque de datos. Hoy hay uno solo en todo el sitio:
+   el bimestre más cargado, en /agenda/radiografia. Estaba puesto como .body
+   para que resaltara un poco sobre las .sem-nota de al lado —16 contra 14,7px,
+   un 9%—, pero cuando .body subió a 19,2px ese 9% se volvió un 30% y el
+   párrafo dejó de parecer parte de la misma plantilla. Vuelve a resaltar sin
+   gritar. */
+.sem-bloque .body {
+  font-size: 1.08rem;
+  max-width: 66ch;
+}
 .sem-nota {
   font-family: var(--font-body);
   color: var(--mute);

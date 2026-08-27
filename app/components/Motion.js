@@ -118,6 +118,31 @@ export default function Motion() {
       requestAnimationFrame(step);
     };
 
+    // Lo que ya está a la vista no se esconde nunca.
+    //
+    // Se marca como revelado ANTES de poner html.js y en el mismo bloque
+    // sincrónico: el navegador no puede pintar entre las dos líneas, así que
+    // nunca llega a existir un cuadro con ese contenido apagado. Sin esto, en
+    // una carga en frío la página se pintaba entera —que es lo que queremos—
+    // y al hidratar se atenuaba y bajaba 30px durante 0,8s antes de volver.
+    // El bajón se veía justo cuando el lector empezaba a leer.
+    const altoVentana = window.innerHeight;
+    document.querySelectorAll(".reveal,.clip").forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < altoVentana && r.bottom > 0) {
+        el.classList.add("in");
+        if (el.classList.contains("stat")) el.querySelectorAll(".cnt").forEach(count);
+      }
+    });
+
+    // Recién acá se marca el documento como "con JavaScript".
+    //
+    // Las reglas que esconden el contenido cuelgan de html.js, así que hasta
+    // esta línea la página se ve entera. Si algo de esto falla o tarda, lo
+    // peor que pasa es que no haya animación; nunca que la home quede en
+    // blanco esperando un observador que no llegó.
+    document.documentElement.classList.add("js");
+
     // reveal / clip
     const io = new IntersectionObserver(
       (es) => {
@@ -133,8 +158,11 @@ export default function Motion() {
       },
       { threshold: 0.2 }
     );
+    // Los que ya se marcaron arriba quedan afuera: si se observaran igual, el
+    // observador volvería a llamar a count() y los números de las métricas
+    // arrancarían la cuenta de cero por segunda vez.
     document
-      .querySelectorAll(".reveal,.clip")
+      .querySelectorAll(".reveal:not(.in),.clip:not(.in)")
       .forEach((el) => io.observe(el));
 
     // acento por scroll (azul <-> magenta)
