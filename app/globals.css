@@ -3457,3 +3457,52 @@ footer.site {
   color: var(--mute);
 }
 .home-otros a:hover { color: var(--accent); }
+
+/* Las barras de la radiografía. Se dibujan con CSS y no con una librería:
+   son doce filas y una librería de gráficos costaría más kilobytes que toda
+   la página. Además así se leen igual sin JavaScript, que es como las lee un
+   robot de IA. */
+.radio-barras {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.radio-barra {
+  display: grid;
+  grid-template-columns: minmax(96px, 1fr) 3fr auto;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-ui);
+  font-size: 0.84rem;
+}
+.radio-barra__mes {
+  color: var(--mute);
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.radio-barra__pista {
+  height: 12px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  overflow: hidden;
+}
+.radio-barra__valor {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--celeste), var(--magenta));
+  /* Un mes en cero tiene que verse como cero y no como una barrita mínima. */
+  min-width: 0;
+}
+.radio-barra__n {
+  color: var(--blanco);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.4ch;
+  text-align: right;
+}
+@media (max-width: 560px) {
+  .radio-barra { grid-template-columns: minmax(72px, 1fr) 2fr auto; font-size: 0.78rem; }
+}

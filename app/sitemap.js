@@ -19,6 +19,7 @@ export default async function sitemap() {
     "/agenda/calendario",
     "/agenda/verificado",
     "/agenda/destacado",
+    "/agenda/radiografia",
     "/agenda/sugerir",
     "/imperdibles",
     "/glosario",

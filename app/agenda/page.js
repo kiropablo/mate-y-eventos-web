@@ -126,6 +126,20 @@ export default async function Agenda() {
                 proximos={proximos.map(resumen)}
                 pasados={pasados.map(resumen)}
               />
+              {/* La radiografía va acá y no al pie: es lo único del sitio que
+                  publica datos propios, y el que está mirando la agenda es
+                  exactamente el que los quiere. */}
+              <Link className="ag-semana reveal" href="/agenda/radiografia">
+                <span className="ag-semana__tag">Los números</span>
+                <span className="ag-semana__txt">
+                  Cuántos eventos hay por mes, qué tipos concentran y cuánto
+                  dura cada cosa
+                </span>
+                <span className="ag-semana__flecha" aria-hidden>
+                  →
+                </span>
+              </Link>
+
               {cortes.length > 0 && (
                 <section className="ag-cortes reveal">
                   <h2 className="ag-mes">Explorá la agenda</h2>
