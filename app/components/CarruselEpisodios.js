@@ -17,7 +17,16 @@ import Link from "next/link";
 // horizontal de trackpad —que es intencional y no se confunde con bajar.
 
 const PASO = 26; // grados entre un panel y el siguiente
-const SEPARACION = 48; // px de aire entre panel y panel, medidos sobre el arco
+const SEPARACION = 22; // px de aire entre panel y panel, medidos sobre el arco
+
+// Dónde descansa la cinta al abrir.
+//
+// No en cero. Con la cinta en cero queda un panel exactamente de frente, y un
+// panel de frente no se deforma: las dos mitades se van para atrás por igual y
+// se ve plano. Corrida un tercio de panel aparece de entrada lo que se ve en
+// la referencia — lo de la izquierda cerca de la cara, lo de la derecha
+// yéndose al fondo— sin que haga falta tocar nada.
+const ARRANQUE = 0.34;
 
 // En cuántas tajadas verticales se corta cada miniatura.
 //
@@ -55,8 +64,8 @@ export default function CarruselEpisodios({ episodios = [] }) {
 
   // La posición es continua (2.4 = entre el tercero y el cuarto) para que el
   // movimiento sea fluido; el destino es al que tiende.
-  const pos = useRef(0);
-  const destino = useRef(0);
+  const pos = useRef(ARRANQUE);
+  const destino = useRef(ARRANQUE);
   const cuadro = useRef(0);
   const arrastre = useRef(null);
   const quieto = useRef(null);
@@ -122,7 +131,10 @@ export default function CarruselEpisodios({ episodios = [] }) {
       caja.style.setProperty("--perspectiva", `${Math.round(radio * 0.7)}px`);
       // El 2.3 exagera: con el arco justo la flexión casi no se nota, y lo
       // que se quiere es que se lea.
-      arco = (ancho / radio) * (180 / Math.PI) * 2.3;
+      arco = (ancho / radio) * (180 / Math.PI) * 2.8;
+      // Una perspectiva suave: en la referencia los paneles se acuestan sin
+      // llegar a deformarse. Con 0.7 quedaba demasiado teatral.
+      caja.style.setProperty("--perspectiva", `${Math.round(radio * 0.95)}px`);
     }
 
     // Las tajadas se calculan SIEMPRE. Cuando no se calculaban en la tira,
@@ -199,11 +211,18 @@ export default function CarruselEpisodios({ episodios = [] }) {
     };
   }, [activo, medir, cuantos]);
 
-  // Después de soltar, se acomoda al panel más cercano.
+  // La cinta queda donde se la suelta.
+  //
+  // Antes se acomodaba sola al panel más cercano, y ese imán es justo lo que
+  // arruinaba el efecto: dejaba siempre un panel de frente al centro y la
+  // cinta se leía simétrica, como una calesita. Sin imán, la cinta descansa
+  // en cualquier punto y aparece lo que se ve en la referencia: lo que está a
+  // la izquierda más cerca de la cara y lo de la derecha yéndose al fondo.
+  //
+  // El contador sí redondea, porque un "3,4 / 08" no le dice nada a nadie.
   const acomodar = useCallback(() => {
     clearTimeout(quieto.current);
-    quieto.current = setTimeout(() => irA(Math.round(destino.current)), 130);
-  }, [irA]);
+  }, []);
 
   const alArrastrar = {
     onPointerDown: (e) => {
@@ -224,11 +243,9 @@ export default function CarruselEpisodios({ episodios = [] }) {
       arrastre.current = null;
       // Si arrastró, el click no tiene que abrir el episodio de abajo.
       if (a?.movio) e.preventDefault();
-      acomodar();
     },
     onPointerCancel: () => {
       arrastre.current = null;
-      acomodar();
     },
     // Solo el gesto horizontal. El vertical baja la página, como corresponde.
     onWheel: (e) => {
