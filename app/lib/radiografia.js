@@ -28,6 +28,10 @@ const DIAS_MAXIMO = 31;
 // tres o cuatro eventos anunciados con mucha anticipación y la curva miente.
 const MESES = 12;
 
+// Cuántos casos hacen falta para publicar una mediana. Menos que esto no es
+// una medida, es una anécdota.
+const MINIMO_CASOS = 5;
+
 function contar(lista, obtener) {
   const cuenta = new Map();
   for (const e of lista) {
@@ -48,9 +52,16 @@ function mediana(numeros) {
 }
 
 // Los días que dura un evento, contando el primero y el último.
+// Devuelve null si falta cualquiera de las dos fechas.
+//
+// Antes caía a `ev.fechaFin || ev.fechaInicio`, o sea que un evento sin fecha
+// de cierre contaba como de un día. Con eso la tabla publicaba "Capacitación:
+// 1 día" —una carrera de la Universidad de Palermo entre ellos— cuando los dos
+// únicos casos con las dos fechas duran 15 y 29 días. Y la página decía, al
+// lado, "solo se miden los que tienen las dos fechas cargadas": era falso.
 export function duracionEnDias(ev) {
-  if (!ev.fechaInicio) return null;
-  const fin = ev.fechaFin || ev.fechaInicio;
+  if (!ev.fechaInicio || !ev.fechaFin) return null;
+  const fin = ev.fechaFin;
   if (fin < ev.fechaInicio) return null;
   const a = Date.parse(`${ev.fechaInicio}T00:00:00Z`);
   const b = Date.parse(`${fin}T00:00:00Z`);
@@ -84,6 +95,12 @@ export function radiografia(eventos, { hoy = hoyISO() } = {}) {
     n: conFecha.filter((e) => e.fechaInicio.slice(0, 7) === mes).length,
   }));
   const enLosDoceMeses = porMes.reduce((s, m) => s + m.n, 0);
+  // Los que tienen fecha anunciada y NO entran en el gráfico: los que arrancan
+  // más allá de los doce meses y los que ya empezaron antes de que arranque la
+  // ventana. Si no se dicen, la página muestra 190 arriba y 195 abajo y las
+  // cuentas no cierran para nadie que quiera verificarlas, que es justamente
+  // lo que esta página invita a hacer.
+  const fueraDeLaVentana = conFecha.length - enLosDoceMeses;
   const pico = Math.max(1, ...porMes.map((m) => m.n));
 
   // El bimestre más cargado de los doce meses.
@@ -111,9 +128,17 @@ export function radiografia(eventos, { hoy = hoyISO() } = {}) {
     if (!duraciones.has(e.tipo)) duraciones.set(e.tipo, []);
     duraciones.get(e.tipo).push(d);
   }
+  // Cuántos quedaron afuera de la medición de duración y por qué. Sin esto,
+  // el que baja el CSV para auditar no puede cerrar la cuenta.
+  const sinFechaFin = conFecha.filter((e) => !e.fechaFin).length;
+  const masDeUnMes = conFecha.filter((e) => {
+    const d = duracionEnDias(e);
+    return d !== null && d > DIAS_MAXIMO;
+  }).length;
+
   const porDuracion = [...duraciones.entries()]
     .map(([tipo, dias]) => ({ tipo, n: dias.length, mediana: mediana(dias) }))
-    .filter((d) => d.n >= 5)
+    .filter((d) => d.n >= MINIMO_CASOS)
     .sort((a, b) => b.n - a.n);
 
   const sinFecha = total - conFecha.length;
@@ -135,6 +160,11 @@ export function radiografia(eventos, { hoy = hoyISO() } = {}) {
     hoy,
     total,
     conFecha: conFecha.length,
+    fueraDeLaVentana,
+    sinFechaFin,
+    masDeUnMes,
+    minimoCasos: MINIMO_CASOS,
+    diasMaximo: DIAS_MAXIMO,
     sinFecha,
     confirmadas,
     verificados,
@@ -167,7 +197,11 @@ export function radiografiaCSV(r) {
   }
   filas.push(["resumen", "eventos_por_delante", r.total]);
   filas.push(["resumen", "con_fecha_anunciada", r.conFecha]);
+  filas.push(["resumen", "con_fecha_fuera_de_los_12_meses", r.fueraDeLaVentana]);
   filas.push(["resumen", "sin_fecha_anunciada", r.sinFecha]);
+  filas.push(["resumen", "sin_fecha_de_cierre_no_se_mide_duracion", r.sinFechaFin]);
+  filas.push(["resumen", "duran_mas_de_un_mes_excluidos_de_medianas", r.masDeUnMes]);
+  filas.push(["resumen", "minimo_de_casos_para_publicar_una_mediana", r.minimoCasos]);
   filas.push(["resumen", "fechas_confirmadas", r.confirmadas]);
   filas.push(["resumen", "verificados_por_el_organizador", r.verificados]);
   filas.push(["resumen", "organizadores_distintos", r.organizadores]);
@@ -175,7 +209,11 @@ export function radiografiaCSV(r) {
 
   // Punto y coma: es lo que Excel en español espera, y estos archivos los va a
   // abrir gente del rubro, no gente que sabe importar un CSV.
-  return filas
+  //
+  // Y el BOM del principio por lo mismo: sin él, Excel en castellano abre
+  // "Córdoba" como "CÃ³rdoba". La descarga que la página ofrece como prueba de
+  // que los números son verificables no puede llegar mal escrita.
+  return "\uFEFF" + filas
     .map((f) =>
       f
         .map((c) => {

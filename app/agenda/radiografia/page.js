@@ -124,7 +124,9 @@ export default async function Radiografia() {
         name: `Radiografía de la agenda de eventos · ${SITE.name}`,
         isPartOf: { "@id": `${SITE.url}/#website` },
         mainEntity: { "@id": `${SITE.url}/agenda/radiografia#datos` },
-        datePublished: r.hoy,
+        // Sin datePublished: se recalcula todos los días, así que declararlo
+        // igual a hoy haría que la página dijera cada mañana que se publicó
+        // esa mañana. dateModified sí es cierto: los números son de hoy.
         dateModified: r.hoy,
       },
       migas([
@@ -260,10 +262,14 @@ export default async function Radiografia() {
             <section className="sem-bloque reveal">
               <h2 className="ag-mes">Cuánto dura cada cosa</h2>
               <p className="sem-nota" style={{ marginBottom: "18px" }}>
-                Mediana de días, contando el primero y el último. Solo se miden
-                los que tienen las dos fechas cargadas y duran menos de un mes:
-                arriba de eso ya no es un evento sino una temporada, y correría
-                el promedio de todos los demás.
+                Mediana de días, contando el primero y el último. Solo se
+                miden los que tienen las <strong>dos</strong> fechas cargadas y
+                duran hasta {r.diasMaximo} días: arriba de eso ya no es un
+                evento sino una temporada, y correría el promedio de todos los
+                demás. Quedan afuera {r.sinFechaFin} sin fecha de cierre y{" "}
+                {r.masDeUnMes} que duran más de un mes. Un tipo aparece acá
+                solo si tiene al menos {r.minimoCasos} casos medibles: con
+                menos no es una medida, es una anécdota.
               </p>
               <div className="ag-tabla">
                 {r.porDuracion.map((d) => (

@@ -34,9 +34,15 @@ export default async function Home() {
   // Los que faltan, que es lo que muestra la agenda. Se redondea para abajo a
   // la centena: el número se mueve todos los días y "+300" envejece mucho
   // mejor que una cifra exacta que mañana es otra.
-  const eventosEnAgenda = Math.floor(
-    eventos.filter((e) => !yaPaso(e)).length / 100
-  ) * 100;
+  const vigentes = eventos.filter((e) => !yaPaso(e));
+  const eventosEnAgenda = Math.floor(vigentes.length / 100) * 100;
+  // Cuántas de esas fichas tienen la fecha anunciada. Se dice aparte del total
+  // a propósito: la home afirmaba que las 300+ tenían "fecha, sede y
+  // organizador" mientras la radiografía del mismo sitio publicaba que 113 no
+  // tienen fecha. Dos páginas diciendo cosas incompatibles sobre la misma
+  // base, y encima una de ellas adentro del FAQ, que es el texto que levanta
+  // una IA.
+  const conFechaAnunciada = vigentes.filter((e) => e.fechaInicio).length;
   // Se guarda la lista entera además de los tres que se muestran: el texto
   // de la sección dice cuántos hay publicados, y ese número tiene que salir
   // del contenido y no escrito a mano, para que no envejezca solo.
@@ -81,7 +87,7 @@ export default async function Home() {
     },
     {
       q: "¿Qué es la agenda de Mate y Eventos y quién la mantiene?",
-      a: "Es una agenda pública con más de 300 congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, cada uno con su fecha, sede, organizador y sitio oficial. La mantiene el equipo de Mate y Eventos, y los organizadores pueden confirmar los datos de su propio evento: cuando lo hacen, la ficha lleva el sello Verificado con el mes en que se confirmó.",
+      a: `Es una agenda pública con más de 300 congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, cada uno con su sede, su organizador y su sitio oficial. Hoy ${conFechaAnunciada} tienen además la fecha anunciada por la organización; el resto son eventos que todavía no la publicaron. La mantiene el equipo de Mate y Eventos, y los organizadores pueden confirmar los datos de su propio evento: cuando lo hacen, la ficha lleva el sello Verificado con el mes en que se confirmó.`,
     },
     {
       q: "¿Cómo se sugiere un evento para la agenda?",
@@ -226,10 +232,11 @@ export default async function Home() {
             <strong>Mate y Eventos</strong> es un medio audiovisual argentino
             especializado en la industria de eventos de Latinoamérica. Lo hacen
             Pablo Quiroga y Alexis Vidal, productores con más de 18 años en el
-            rubro. Cada miércoles publican un episodio de unos 20 minutos;
-            además mantienen la agenda de eventos de la región —más de 300
-            fichas con fecha, sede y organizador—, un glosario del oficio y
-            artículos que amplían cada conversación.
+            rubro. Publican un episodio de unos 20 minutos por semana; además
+            mantienen la agenda de eventos de la región —más de 300 fichas con
+            sede y organizador, y {conFechaAnunciada} de ellas ya con la fecha
+            confirmada por la organización—, un glosario del oficio y artículos
+            que amplían cada conversación.
           </p>
           <p className="body reveal" style={{ transitionDelay: ".1s" }}>
             Mate y Eventos nace de años viviendo los eventos desde el backstage,
@@ -259,9 +266,11 @@ export default async function Home() {
             </h2>
             <p className="body reveal" style={{ marginBottom: "26px" }}>
               Congresos, expos, festivales y grandes producciones de Argentina y
-              Latinoamérica, con fecha, sede, organizador y link para comprar
-              entradas. Hoy hay más de 300 eventos cargados, y los organizadores
-              validan su propia ficha.
+              Latinoamérica, con su sede, su organizador y el link al sitio
+              oficial. Hoy hay más de 300 eventos cargados y{" "}
+              {conFechaAnunciada} con la fecha ya anunciada. A los
+              organizadores les escribimos uno por uno para que confirmen los
+              datos de su ficha.
             </p>
             <div className="ag-tabla">
               {proximos.map((ev) => (

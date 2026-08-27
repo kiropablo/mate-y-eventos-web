@@ -107,7 +107,9 @@ const jsonLd = {
       slogan: SITE.tagline,
       email: SITE.email,
       logo: `${SITE.url}/icon.png`,
-      foundingDate: "2026",
+      // El primer episodio salió el 17 de septiembre de 2025. Decía 2026, que
+      // además borraba la Temporada 1 entera de la historia de la marca.
+      foundingDate: "2025",
       // De qué es experta esta marca y dónde opera: son los cuatro ejes
       // editoriales, escritos una sola vez en site.js.
       knowsAbout: [

@@ -1,4 +1,5 @@
 import { nombreConAnio, formatRango, mesLargo } from "./agenda";
+import { llegamosADifundir } from "./semana";
 import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes";
 import { SITE } from "./site";
 import {
@@ -81,6 +82,15 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
 
   const elPedido = hayOtros ? t("otrosEventos") : t("otrosEventosSinLista");
 
+  // La difusión solo se promete si todavía llegamos.
+  //
+  // El bloque dice "esta semana lo publicamos en las redes". Si el evento
+  // arranca pasado mañana, eso es prometer algo que no se va a poder cumplir:
+  // el propio panel imprime "ya no llegamos a difundirlo con tiempo" tres
+  // líneas más abajo del botón que manda este mail.
+  const difundimos = llegamosADifundir(ev);
+  const difusion = difundimos ? t("difusion") : "";
+
   // ---------------------------------------------------------------- texto
   const texto = [
     t("saludo"),
@@ -92,8 +102,7 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
     "",
     t("badge"),
     "",
-    t("difusion"),
-    "",
+    ...(difusion ? [difusion, ""] : []),
     t("cambios"),
     "",
     elPedido,
@@ -107,6 +116,12 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
     t("destacado"),
     "",
     t("firma"),
+    "",
+    "—",
+    // El pie va también acá. Salía solo en la versión con formato, así que
+    // quien lo lee en texto plano —y el filtro de spam, que mira las dos
+    // partes— veía un mail comercial sin ninguna vía de baja.
+    reemplazar(M.pie, { ...marcas, agenda: `${SITE.url}/agenda` }),
   ]
     .join("\n")
     .replace(/\n{3,}/g, "\n\n")
@@ -122,7 +137,7 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
     bloque(boton(ficha, t("boton")), "22px 34px 10px"),
     bloque(
       parrafo(conLinks(esc(t("badge")))) +
-        parrafo(esc(t("difusion"))) +
+        (difusion ? parrafo(esc(difusion)) : "") +
         parrafo(esc(t("cambios"))),
       "14px 34px 4px"
     ),
