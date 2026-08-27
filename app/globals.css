@@ -3140,3 +3140,181 @@ footer.site {
   padding-bottom: 2px;
 }
 .hcarr__todos:hover { color: #fff; border-color: #fff; }
+
+/* ---------- el fondo, bien fuera de foco ---------- */
+/* El mate de neón es atmósfera, no identidad: se desenfoca hasta fundirse con
+   el fondo. El inset se agranda porque el desenfoque come los bordes y si no
+   se ve el marco de la imagen. */
+.hero .photo {
+  inset: -14% -10% -16% -10%;
+  filter: blur(34px) saturate(1.15) brightness(0.92);
+}
+
+/* ---------- la marca nítida, al lado del nombre ---------- */
+.hmarca {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.8vw, 26px);
+}
+.hmarca__logo {
+  flex: none;
+  width: clamp(56px, 7vw, 108px);
+  height: auto;
+  /* Un halo tenue para que se despegue del fondo sin agregarle brillo falso. */
+  filter: drop-shadow(0 0 26px rgba(10, 8, 20, 0.85));
+}
+.hstage--corto .hmarca h1 { margin: 0; }
+
+.hsub span { display: block; }
+.hsub span + span { margin-top: 0.55em; }
+
+@media (max-width: 700px) {
+  .hmarca { gap: 14px; }
+  .hmarca__logo { width: 52px; }
+}
+
+/* ============================================================
+   CINTA CURVA Y PISO
+   ============================================================ */
+
+/* ---------- el piso ---------- */
+.carr__piso {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* El horizonte queda a la altura de la base de los paneles: la grilla nace
+     ahí y se abre hacia adelante, que es lo que da la sensación de suelo. */
+  top: 62%;
+  bottom: -34%;
+  z-index: 0;
+  pointer-events: none;
+  perspective: 340px;
+  perspective-origin: 50% 0%;
+  overflow: hidden;
+}
+.carr__piso > span {
+  position: absolute;
+  left: -80%;
+  right: -80%;
+  top: 0;
+  height: 640%;
+  transform: rotateX(74deg);
+  transform-origin: 50% 0%;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(210, 230, 250, 0.5) 0 1.5px,
+      transparent 1.5px 96px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(210, 230, 250, 0.42) 0 1.5px,
+      transparent 1.5px 96px
+    );
+  /* Se apaga hacia el horizonte, si no la grilla corta a lo bestia arriba. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 7%,
+    #000 30%,
+    transparent 62%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 7%,
+    #000 30%,
+    transparent 62%
+  );
+}
+
+/* ---------- la cinta ---------- */
+/* --tajadas, --paso-tajada y --radio-tajada los escribe el JS al medir el
+   panel; estos son el respaldo por si el 3D no llega a encenderse. */
+.carr { --tajadas: 9; }
+
+/* La imagen entera queda de respaldo: es la que existe en el HTML para los
+   buscadores y la que se ve si el navegador no compone bien las tajadas. */
+.carr__plana { position: absolute; inset: 0; }
+
+.carr__curva {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  /* El centro de la curva queda detrás del panel, para que se doble hacia
+     adentro y acompañe la vuelta del cilindro. */
+  transform: translateZ(calc(var(--radio-tajada, 900px) * -1));
+}
+.carr__tajada {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  width: calc(100% / var(--tajadas) + 0.6px); /* el pelo de más tapa la costura */
+  margin-left: calc(100% / var(--tajadas) / -2);
+  background-image: var(--foto);
+  background-repeat: no-repeat;
+  background-size: calc(var(--tajadas) * 100%) 100%;
+  background-position: calc(var(--k) * 100% / (var(--tajadas) - 1)) center;
+  transform:
+    rotateY(calc((var(--k) - (var(--tajadas) - 1) / 2) * var(--paso-tajada, 2deg)))
+    translateZ(var(--radio-tajada, 900px));
+  backface-visibility: hidden;
+}
+
+/* ---------- el título, en todos ---------- */
+.carr[data-modo="3d"] .carr__tit {
+  opacity: 1;
+  transform: none;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-top: 10px;
+  color: rgba(245, 245, 245, 0.62);
+  transition: color 0.35s ease;
+}
+.carr[data-modo="3d"] .carr__item[data-centro="si"] .carr__tit {
+  font-size: 0.94rem;
+  color: rgba(245, 245, 245, 0.95);
+}
+
+/* La marca deja de estirarse para llenar la pantalla: con el carrusel abajo,
+   ese "flex:1" abría un pozo enorme entre la bajada y los videos. */
+.hstage--corto {
+  flex: none;
+  justify-content: flex-start;
+  padding: clamp(18px, 4vh, 46px) 0 0;
+}
+/* El carrusel se queda con el espacio sobrante y se apoya abajo. */
+.hcarr {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  padding-bottom: clamp(18px, 4vh, 46px);
+}
+
+@media (max-width: 899px) {
+  /* La grilla del piso, más apretada: a 96px en una pantalla angosta se veían
+     dos rayas sueltas y no se leía como un suelo. */
+  .carr__piso > span {
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        rgba(210, 230, 250, 0.5) 0 1.5px,
+        transparent 1.5px 54px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        rgba(210, 230, 250, 0.42) 0 1.5px,
+        transparent 1.5px 54px
+      );
+  }
+  .carr__piso { top: 70%; bottom: -26%; perspective: 260px; }
+
+  /* En una pantalla alta y angosta, apoyar el carrusel abajo dejaba un pozo
+     entre la bajada y los videos. Centrado en el espacio que sobra queda
+     equilibrado y los videos se siguen viendo apenas se abre. */
+  .hcarr { justify-content: center; }
+}

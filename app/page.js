@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
 import { getEpisodes } from "./lib/youtube";
@@ -92,12 +93,24 @@ export default async function Home() {
             >
               Podcast · Industria de eventos · LATAM
             </div>
-            <h1>
-              Mate y<span className="l2">Eventos</span>
-            </h1>
+            {/* El logo nítido, al lado del nombre. El del fondo está fuera de
+                foco a propósito: es atmósfera, no identidad. */}
+            <div className="hmarca">
+              <Image
+                className="hmarca__logo"
+                src="/isotipo.png"
+                alt=""
+                width={132}
+                height={132}
+                priority
+              />
+              <h1>
+                Mate y<span className="l2">Eventos</span>
+              </h1>
+            </div>
             <div className="hsub">
-              El backstage de la industria, en voz alta. Nuevo episodio cada
-              miércoles.
+              <span>El backstage de la industria, en voz alta.</span>
+              <span>Nuevo episodio cada miércoles.</span>
             </div>
           </div>
 

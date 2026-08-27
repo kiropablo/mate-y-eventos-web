@@ -18,6 +18,15 @@ import Link from "next/link";
 
 const PASO = 26; // grados entre un panel y el siguiente
 const SEPARACION = 48; // px de aire entre panel y panel, medidos sobre el arco
+
+// En cuántas tajadas verticales se corta cada miniatura.
+//
+// CSS no sabe doblar una imagen. Para que el panel se flexione como una cinta
+// —y no quede una chapa plana girada, que es lo que se veía— se lo parte en
+// tajadas y cada una se gira un poquito: la suma de las tajadas dibuja la
+// curva. Nueve alcanza para que el ojo lea una superficie continua; con más,
+// se multiplican las capas que tiene que componer el navegador.
+const TAJADAS = 9;
 const SUAVE = 0.11; // cuánto se acerca por cuadro a su destino
 
 // Cuánto se corre la tira de un panel al siguiente. Se mide del DOM y no se
@@ -83,6 +92,11 @@ export default function CarruselEpisodios({ episodios = [] }) {
   // El radio del cilindro sale del ancho real del panel: con paso fijo, si el
   // radio no acompaña al ancho los paneles se encinan o se separan. Se recalcula
   // al cambiar el tamaño de la ventana.
+  // Cuánto se dobla el panel en la tira, donde no hay cilindro del que sacar
+  // el arco. Es una flexión suave: la cinta se nota sin que el video se
+  // deforme al punto de molestar.
+  const ARCO_TIRA = 16;
+
   const medir = useCallback(() => {
     const caja = cajaRef.current;
     const panel = panelRef.current;
@@ -92,13 +106,34 @@ export default function CarruselEpisodios({ episodios = [] }) {
     // rect el radio salía 645px en vez de 1390 y los paneles se encimaban.
     const ancho = panel.offsetWidth;
     if (!ancho) return;
-    // El radio que hace que dos paneles vecinos queden separados por
-    // SEPARACION. Sin el aire quedaban pegados y parecían una tira sola.
-    const radio = (ancho + SEPARACION) / 2 / Math.tan((PASO * Math.PI) / 360);
-    caja.style.setProperty("--radio", `${Math.round(radio)}px`);
-    // Cuanto más cerca está el ojo, más se acuestan los paneles de los
-    // costados. Con 0.85 quedaban casi de frente y no se leía la curva.
-    caja.style.setProperty("--perspectiva", `${Math.round(radio * 0.7)}px`);
+
+    // El arco de la cinta. Con cilindro sale de la propia curva del cilindro,
+    // para que los paneles se lean como una sola tira continua; sin cilindro
+    // —en celular— es una flexión suave y fija.
+    let arco = ARCO_TIRA;
+
+    if (activoRef.current) {
+      // El radio que hace que dos paneles vecinos queden separados por
+      // SEPARACION. Sin el aire quedaban pegados y parecían una tira sola.
+      const radio = (ancho + SEPARACION) / 2 / Math.tan((PASO * Math.PI) / 360);
+      caja.style.setProperty("--radio", `${Math.round(radio)}px`);
+      // Cuanto más cerca está el ojo, más se acuestan los paneles de los
+      // costados. Con 0.85 quedaban casi de frente y no se leía la curva.
+      caja.style.setProperty("--perspectiva", `${Math.round(radio * 0.7)}px`);
+      // El 2.3 exagera: con el arco justo la flexión casi no se nota, y lo
+      // que se quiere es que se lea.
+      arco = (ancho / radio) * (180 / Math.PI) * 2.3;
+    }
+
+    // Las tajadas se calculan SIEMPRE. Cuando no se calculaban en la tira,
+    // quedaban con los valores de respaldo del CSS y el video salía con las
+    // costuras a la vista, partido en nueve pedazos mal pegados.
+    const pasoTajada = arco / TAJADAS;
+    const radioTajada =
+      ancho / TAJADAS / 2 / Math.tan((pasoTajada * Math.PI) / 360);
+    caja.style.setProperty("--tajadas", String(TAJADAS));
+    caja.style.setProperty("--paso-tajada", `${pasoTajada.toFixed(3)}deg`);
+    caja.style.setProperty("--radio-tajada", `${Math.round(radioTajada)}px`);
   }, []);
 
   useEffect(() => {
@@ -116,10 +151,15 @@ export default function CarruselEpisodios({ episodios = [] }) {
     return () => puede.removeEventListener("change", decidir);
   }, [episodios.length]);
 
+  // La medición corre en los dos modos: la cinta se dobla también en celular.
   useEffect(() => {
-    if (!activo) return undefined;
     medir();
     window.addEventListener("resize", medir);
+    return () => window.removeEventListener("resize", medir);
+  }, [medir, activo]);
+
+  useEffect(() => {
+    if (!activo) return undefined;
 
     const dibujar = () => {
       pos.current += (destino.current - pos.current) * SUAVE;
@@ -146,7 +186,6 @@ export default function CarruselEpisodios({ episodios = [] }) {
 
     return () => {
       cancelAnimationFrame(cuadro.current);
-      window.removeEventListener("resize", medir);
       // El bucle escribe transform, opacity y visibility en cada panel. Si el
       // 3D se apaga —al achicar la ventana a celular— esos estilos quedan
       // pegados y la tira sale con los paneles girados y algunos invisibles.
@@ -221,6 +260,12 @@ export default function CarruselEpisodios({ episodios = [] }) {
       aria-roledescription="carrusel"
       aria-label="Últimos episodios"
     >
+      {/* El piso. Es lo que más hace por la sensación de 3D: sin él los
+          paneles flotan en la nada y el giro se lee como un carrusel plano. */}
+      <div className="carr__piso" aria-hidden="true">
+        <span />
+      </div>
+
       <div className="carr__escena" tabIndex={activo ? 0 : -1} {...alArrastrar}>
         <ul
           className="carr__pista"
@@ -270,8 +315,11 @@ export default function CarruselEpisodios({ episodios = [] }) {
                 }}
               >
                 <span className="carr__foto">
+                  {/* La imagen de verdad, para que exista en el HTML y la lean
+                      los buscadores. En pantalla la tapan las tajadas. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
+                    className="carr__plana"
                     src={`https://i.ytimg.com/vi/${ep.id}/maxresdefault.jpg`}
                     alt={`Miniatura del episodio: ${ep.title}`}
                     draggable={false}
@@ -284,8 +332,26 @@ export default function CarruselEpisodios({ episodios = [] }) {
                       if (img.dataset.cayo) return;
                       img.dataset.cayo = "si";
                       img.src = `https://i.ytimg.com/vi/${ep.id}/hqdefault.jpg`;
+                      const curva = img.parentElement?.querySelector(".carr__curva");
+                      if (curva) {
+                        curva.style.setProperty(
+                          "--foto",
+                          `url(https://i.ytimg.com/vi/${ep.id}/hqdefault.jpg)`
+                        );
+                      }
                     }}
                   />
+                  <span
+                    className="carr__curva"
+                    aria-hidden="true"
+                    style={{
+                      "--foto": `url(https://i.ytimg.com/vi/${ep.id}/maxresdefault.jpg)`,
+                    }}
+                  >
+                    {Array.from({ length: TAJADAS }, (_, k) => (
+                      <span className="carr__tajada" key={k} style={{ "--k": k }} />
+                    ))}
+                  </span>
                   <span className="carr__play" aria-hidden="true">
                     <svg viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z" />
