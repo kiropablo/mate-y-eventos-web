@@ -3,7 +3,7 @@ import "./globals.css";
 import Atmosphere from "./components/Atmosphere";
 import Motion from "./components/Motion";
 import Contador from "./components/Contador";
-import { SITE, LINKS } from "./lib/site";
+import { SITE, LINKS, AUTORES, EJES } from "./lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -64,15 +64,53 @@ export const metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
+    // Las dos personas, con identidad propia y estable.
+    //
+    // Se declaran una sola vez acá, en el layout, y el resto del sitio las
+    // referencia por @id. Así el artículo que firma Pablo y el "founder" de la
+    // organización son la MISMA entidad para una máquina, en vez de dos
+    // nombres iguales que casualmente se escriben igual.
+    ...AUTORES.map((a) => ({
+      "@type": "Person",
+      "@id": `${SITE.url}/#${a.id}`,
+      name: a.nombre,
+      jobTitle: a.cargo,
+      description: a.bio,
+      worksFor: { "@id": `${SITE.url}/#organization` },
+      url: `${SITE.url}/sobre`,
+      // El LinkedIn personal de cada uno todavía no está cargado; cuando esté,
+      // entra solo desde site.js. No se pone un link inventado.
+      ...(a.perfil ? { sameAs: [a.perfil] } : {}),
+    })),
     {
       "@type": "Organization",
       "@id": `${SITE.url}/#organization`,
       name: SITE.name,
+      alternateName: "MyE",
       url: SITE.url,
       description: SITE.descripcion,
+      slogan: SITE.tagline,
       email: SITE.email,
       logo: `${SITE.url}/icon.png`,
-      founder: SITE.autores.map((name) => ({ "@type": "Person", name })),
+      foundingDate: "2026",
+      // De qué es experta esta marca y dónde opera: son los cuatro ejes
+      // editoriales, escritos una sola vez en site.js.
+      knowsAbout: [
+        "Industria de eventos",
+        "Producción de eventos",
+        ...EJES.map((e) => e.titulo),
+      ],
+      areaServed: [
+        { "@type": "Country", name: "Argentina" },
+        { "@type": "Place", name: "Latinoamérica" },
+      ],
+      founder: AUTORES.map((a) => ({ "@id": `${SITE.url}/#${a.id}` })),
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "Consultas y prensa",
+        email: SITE.email,
+        availableLanguage: ["es"],
+      },
       sameAs: [
         LINKS.youtube,
         LINKS.spotify,
@@ -82,6 +120,18 @@ const jsonLd = {
         LINKS.linkedin,
       ],
     },
+    // El nodo que faltaba: el sitio como tal, distinto de la organización que
+    // lo publica.
+    {
+      "@type": "WebSite",
+      "@id": `${SITE.url}/#website`,
+      name: SITE.name,
+      alternateName: "MyE",
+      url: SITE.url,
+      description: SITE.descripcionSeo,
+      inLanguage: "es-AR",
+      publisher: { "@id": `${SITE.url}/#organization` },
+    },
     {
       "@type": "PodcastSeries",
       "@id": `${SITE.url}/#podcast`,
@@ -90,7 +140,7 @@ const jsonLd = {
       description: SITE.descripcion,
       inLanguage: "es",
       webFeed: LINKS.rss,
-      author: SITE.autores.map((name) => ({ "@type": "Person", name })),
+      author: AUTORES.map((a) => ({ "@id": `${SITE.url}/#${a.id}` })),
       publisher: { "@id": `${SITE.url}/#organization` },
     },
   ],

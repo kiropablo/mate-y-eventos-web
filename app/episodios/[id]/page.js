@@ -17,6 +17,7 @@ import {
 import { getArticuloDeEpisodio } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
 import { SITE, LINKS } from "../../lib/site";
+import { migas } from "../../lib/migas";
 
 export const revalidate = 3600;
 
@@ -123,7 +124,14 @@ export default async function Episodio({ params }) {
     },
   };
 
-  const jsonLd = [videoObject, podcastEpisode];
+  const jsonLd = [
+    videoObject,
+    podcastEpisode,
+    migas([
+      ["Episodios", "/episodios"],
+      [ep.title, null],
+    ]),
+  ];
 
   return (
     <>

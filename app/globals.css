@@ -3427,3 +3427,33 @@ footer.site {
   .hstage--corto h1 .l2 { padding-left: 0; }
   .hstage--corto .hsub { margin-left: auto; margin-right: auto; }
 }
+
+/* Los tres accesos que la home no tenía: glosario, imperdibles y esta semana.
+   Van después de los artículos, en una tira de tres, chicos: no compiten con
+   las secciones grandes, pero existen. */
+.home-otros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line-2);
+}
+.home-otros a {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--blanco);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.home-otros a span {
+  display: block;
+  margin-top: 5px;
+  font-weight: 400;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--mute);
+}
+.home-otros a:hover { color: var(--accent); }

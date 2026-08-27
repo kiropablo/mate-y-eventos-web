@@ -71,6 +71,10 @@ function parsear(crudo, id) {
     episodio: datos.episodio || "",
     episodioTitulo: datos.episodioTitulo || "",
     fecha: datos.fecha || "",
+    // Estaba en la cabecera de los 40 artículos desde el principio y no se
+    // leía en ningún lado, así que el sitio venía declarando que nada se
+    // había revisado nunca. Es el dato correcto para dateModified.
+    revisado: datos.revisado || datos.fecha || "",
     eje: datos.eje || "",
     etiquetas: Array.isArray(datos.etiquetas) ? datos.etiquetas : [],
     // Las direcciones que este artículo tuvo antes. Se usan para redirigir a

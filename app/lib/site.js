@@ -58,6 +58,49 @@ export const NAV = [
 ];
 
 // Cuatro ejes temáticos del podcast (del brief).
+// Quiénes firman.
+//
+// Hasta ahora los artículos los firmaba la Organización y las únicas personas
+// del sitio eran dos nombres sueltos adentro de "founder": sin cargo, sin
+// descripción y sin identidad propia. Para una máquina, las biografías de
+// /sobre no existían. En temas donde la experiencia decide —cuánto cobrar por
+// un evento, cómo elegir un proveedor— la autoría verificable es de lo que más
+// pesa a la hora de elegir a quién citar.
+//
+// El campo "perfil" queda vacío a propósito: es el link al LinkedIn personal
+// de cada uno y no se inventa. Cuando estén, se completan acá y el schema los
+// declara solo como sameAs.
+export const AUTORES = [
+  {
+    id: "pablo-quiroga",
+    nombre: "Pablo Quiroga",
+    rol: "Co-conductor · Visión editorial",
+    cargo: "Productor de eventos y co-conductor",
+    bio: "Productor con más de 18 años en la industria de eventos. Empezó como productor técnico en shows masivos y hoy trabaja en el sector corporativo. En Mate y Eventos lleva la visión editorial y estratégica.",
+    perfil: "",
+  },
+  {
+    id: "alexis-vidal",
+    nombre: "Alexis Vidal",
+    rol: "Co-conductor · Producción",
+    cargo: "Productor de eventos y co-conductor",
+    bio: "Productor y creativo, especializado en la operación real de los eventos, donde la creatividad y la técnica conviven todo el tiempo. En Mate y Eventos lleva la producción.",
+    perfil: "",
+  },
+];
+
+// Una fecha ISO en castellano: "21 de agosto de 2026". Se usa donde se
+// publica un dato con su corte, que es en todos lados donde se publica un dato.
+export function fechaCorta(iso) {
+  const [a, m, d] = String(iso).split("-").map(Number);
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(a, m - 1, d)));
+}
+
 export const EJES = [
   {
     n: "01",

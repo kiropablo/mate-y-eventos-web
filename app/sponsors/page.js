@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
-import { SITE, STATS } from "../lib/site";
+import { SITE, STATS, fechaCorta } from "../lib/site";
 import { PRECIO_MES, LUGARES } from "../agenda/destacado/page";
 
 const DESCRIPCION =
@@ -58,16 +58,6 @@ const FORMATOS = [
 ];
 
 // "22 de julio de 2026"
-function fechaCorta(iso) {
-  const [a, m, d] = String(iso).split("-").map(Number);
-  return new Intl.DateTimeFormat("es-AR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(a, m - 1, d)));
-}
-
 export default async function Sponsors() {
   // Congelado: antes salía en vivo de la API de YouTube. Ver STATS en
   // lib/site.js.

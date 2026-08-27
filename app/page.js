@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import SiteNav from "./components/SiteNav";
 import Footer from "./components/Footer";
+import NewsletterForm from "./components/NewsletterForm";
 import { getEpisodes } from "./lib/youtube";
 import { getArticulos, formatFecha } from "./lib/articulos";
 import {
@@ -11,7 +12,7 @@ import {
   enCurso,
   yaPaso,
 } from "./lib/agenda";
-import { STATS } from "./lib/site";
+import { STATS, fechaCorta } from "./lib/site";
 import CarruselEpisodios from "./components/CarruselEpisodios";
 
 export const revalidate = 3600;
@@ -22,12 +23,6 @@ export const metadata = {
 
 export default async function Home() {
   const episodes = await getEpisodes();
-  // Vistas en vivo desde YouTube; si la API no contesta, el número
-  // cargado a mano.
-  // Congelado: antes salía en vivo de la API de YouTube. Ver STATS en
-  // lib/site.js.
-  const vistas = STATS.vistasYouTube;
-
   // Lo que se viene y lo último escrito, para que la home mande tráfico a las
   // dos secciones que hoy no linkea desde ningún lado.
   const hoy = hoyISO();
@@ -36,6 +31,12 @@ export default async function Home() {
     .filter((e) => e.fechaInicio && !yaPaso(e))
     .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio))
     .slice(0, 4);
+  // Los que faltan, que es lo que muestra la agenda. Se redondea para abajo a
+  // la centena: el número se mueve todos los días y "+300" envejece mucho
+  // mejor que una cifra exacta que mañana es otra.
+  const eventosEnAgenda = Math.floor(
+    eventos.filter((e) => !yaPaso(e)).length / 100
+  ) * 100;
   // Se guarda la lista entera además de los tres que se muestran: el texto
   // de la sección dice cuántos hay publicados, y ese número tiene que salir
   // del contenido y no escrito a mano, para que no envejezca solo.
@@ -66,6 +67,18 @@ export default async function Home() {
     {
       q: "¿De qué temas habla Mate y Eventos?",
       a: "Cada episodio gira en torno a cuatro ejes: el lado humano de los eventos, estrategia y negocio, técnica y producción, y tendencias y tecnología aplicadas a la industria.",
+    },
+    {
+      q: "¿Quiénes son Pablo Quiroga y Alexis Vidal?",
+      a: "Son los dos productores que hacen Mate y Eventos. Pablo lleva más de 18 años en la industria: empezó como productor técnico en shows masivos y hoy trabaja en el sector corporativo; en el medio lleva la visión editorial. Alexis es productor y creativo, especializado en la operación real de los eventos, donde la técnica y la creatividad conviven todo el tiempo.",
+    },
+    {
+      q: "¿Qué es la agenda de Mate y Eventos y quién la mantiene?",
+      a: "Es una agenda pública con más de 300 congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, cada uno con su fecha, sede, organizador y sitio oficial. La mantiene el equipo de Mate y Eventos, y los organizadores pueden confirmar los datos de su propio evento: cuando lo hacen, la ficha lleva el sello Verificado con el mes en que se confirmó.",
+    },
+    {
+      q: "¿Cómo se sugiere un evento para la agenda?",
+      a: "Desde mateyeventos.com/agenda/sugerir, completando el formulario con el nombre, la fecha y el sitio oficial del evento. No hace falta pagar nada ni ser sponsor: la agenda es gratuita y abierta a cualquier evento de la industria de la región.",
     },
     {
       q: "¿Cómo puedo sponsorear el podcast o ser invitado?",
@@ -322,6 +335,23 @@ export default async function Home() {
                 Ver todos los artículos
               </Link>
             </div>
+
+            {/* Tres secciones hechas para ser encontradas que la home ignoraba:
+                desde acá no se llegaba a ninguna salvo por el menú. */}
+            <div className="home-otros reveal">
+              <Link href="/glosario">
+                Glosario del rubro
+                <span>Qué quiere decir cada palabra del oficio</span>
+              </Link>
+              <Link href="/imperdibles">
+                Los imperdibles del mes
+                <span>Los pocos que elegimos, con el motivo de cada uno</span>
+              </Link>
+              <Link href="/agenda/esta-semana">
+                Esta semana en eventos
+                <span>Qué pasa en la industria en los próximos días</span>
+              </Link>
+            </div>
           </div>
         </section>
       )}
@@ -333,24 +363,35 @@ export default async function Home() {
             <span className="n">02</span>Alcance
           </div>
           <h2 className="clip">Una audiencia que decide.</h2>
+          {/* Las tres cifras cambian de criterio. Antes acá iban las vistas de
+              YouTube: el número de un canal chico, puesto justo en el bloque
+              donde el proyecto se presenta como medio. La agenda y los
+              artículos son propios, no los tiene nadie más en la región y
+              crecen todas las semanas. Las métricas de audiencia siguen
+              teniendo todo el sentido en /sponsors, que es donde las mira
+              quien las tiene que mirar.
+
+              Los dos primeros se cuentan del contenido, así que no envejecen
+              solos; el tercero es de STATS y por eso lleva la fecha de corte
+              abajo. Un número sin fecha es un pasivo: una IA que lo cite lo va
+              a citar viejo y no tiene cómo saber que envejeció. */}
           <div className="grid">
             <div className="stat reveal" style={{ transitionDelay: ".1s" }}>
               <div className="n">
-                <span className="cnt" data-to={vistas}>
-                  {vistas.toLocaleString("es-AR")}
+                +<span className="cnt" data-to={eventosEnAgenda}>
+                  {eventosEnAgenda}
                 </span>
               </div>
-              <div className="l">Vistas en YouTube</div>
+              <div className="l">Eventos en la agenda</div>
               <div className="rule" />
             </div>
             <div className="stat reveal" style={{ transitionDelay: ".2s" }}>
               <div className="n">
-                +<span className="cnt" data-to={STATS.crecimientoMensual}>
-                  {STATS.crecimientoMensual}
+                <span className="cnt" data-to={todosLosArticulos.length}>
+                  {todosLosArticulos.length}
                 </span>
-                <span className="suf">%</span>
               </div>
-              <div className="l">Crecimiento mensual</div>
+              <div className="l">Artículos publicados</div>
               <div className="rule" />
             </div>
             <div className="stat reveal" style={{ transitionDelay: ".3s" }}>
@@ -363,6 +404,10 @@ export default async function Home() {
               <div className="rule" />
             </div>
           </div>
+          <p className="sem-nota" style={{ marginTop: "18px" }}>
+            Eventos y artículos, al día de hoy. Países en la audiencia, dato al{" "}
+            {fechaCorta(STATS.actualizado)}.
+          </p>
         </div>
       </section>
 
@@ -391,12 +436,30 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* El mail es el único canal que no depende de un algoritmo, y la home
+          nunca lo pedía. */}
+      <section className="section-p" data-accent="blue">
+        <div className="wrap">
+          <div className="eyebrow reveal">
+            <span className="n">—</span>Newsletter
+          </div>
+          <h2 className="clip" style={{ margin: "14px 0 18px" }}>
+            Lo de la semana, en tu mail.
+          </h2>
+          <p className="body reveal" style={{ marginBottom: "26px" }}>
+            El episodio nuevo, los artículos y los eventos que se vienen. Sin
+            spam y con un click para darte de baja.
+          </p>
+          <NewsletterForm />
+        </div>
+      </section>
+
       <section className="faq" data-accent="blue">
         <div className="wrap">
           <div className="eyebrow reveal">
             <span className="n">—</span>Preguntas frecuentes
           </div>
-          <h2 className="clip">Lo que solés preguntar.</h2>
+          <h2 className="clip">Preguntas frecuentes sobre Mate y Eventos.</h2>
           <div className="faq-list" style={{ marginTop: "34px" }}>
             {faqItems.map((item, i) => (
               <div className="faq-item reveal" key={i}>

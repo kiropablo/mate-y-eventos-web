@@ -15,6 +15,7 @@ import {
   tituloDeEvento,
 } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
+import { migas } from "../../lib/migas";
 import { todosLosCortes, textosDe } from "../cortes";
 
 export const revalidate = 3600;
@@ -166,6 +167,18 @@ export default async function Evento({ params }) {
   // Cuando el organizador confirmó los datos, lo declaramos también para los
   // buscadores y los asistentes de IA: lastReviewed es la propiedad estándar
   // para "esta página fue revisada para verificar que dice la verdad".
+  // La ruta de la ficha. Sale siempre, incluso cuando el evento no llega a
+  // tener nodo Event por falta de fecha o de lugar: la jerarquía del sitio no
+  // depende de lo completa que esté la ficha.
+  const migasLd = {
+    "@context": "https://schema.org",
+    ...migas([
+      ["Agenda", "/agenda"],
+      ...(corteDelTipo ? [[corteDelTipo.etiqueta, corteDelTipo.url]] : []),
+      [ev.nombre, null],
+    ]),
+  };
+
   const jsonLdPagina = ev.verificado
     ? {
         "@context": "https://schema.org",
@@ -192,6 +205,10 @@ export default async function Evento({ params }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(migasLd) }}
+      />
       {jsonLdPagina && (
         <script
           type="application/ld+json"

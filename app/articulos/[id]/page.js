@@ -9,7 +9,8 @@ import {
   formatFecha,
   relacionados,
 } from "../../lib/articulos";
-import { SITE } from "../../lib/site";
+import { SITE, AUTORES } from "../../lib/site";
+import { migas } from "../../lib/migas";
 import { terminosDelEpisodio } from "../../lib/glosario";
 
 export const revalidate = 3600;
@@ -62,13 +63,18 @@ export default function Articulo({ params }) {
     headline: art.titulo,
     description: art.metaDescripcion,
     datePublished: art.fecha,
-    dateModified: art.fecha,
+    dateModified: art.revisado || art.fecha,
     url,
     inLanguage: "es",
     articleSection: art.eje,
     keywords: art.etiquetas.join(", "),
     image: `${url}/opengraph-image`,
-    author: { "@type": "Organization", name: SITE.name, url: SITE.url },
+    // Firman los dos, por @id, apuntando a los nodos Person del layout. Antes
+    // firmaba la Organización: para una máquina, las biografías de /sobre no
+    // tenían nada que ver con quién escribe. En temas donde la experiencia
+    // decide —cuánto cobrar, cómo elegir un proveedor— la autoría verificable
+    // es de lo que más pesa a la hora de elegir a quién citar.
+    author: AUTORES.map((a) => ({ "@id": `${SITE.url}/#${a.id}` })),
     publisher: { "@id": `${SITE.url}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     isBasedOn: `${SITE.url}/episodios/${art.episodio}`,
@@ -88,7 +94,13 @@ export default function Articulo({ params }) {
       }
     : null;
 
-  const jsonLd = faqLd ? [articleLd, faqLd] : [articleLd];
+  const migasLd = migas([
+    ["Artículos", "/articulos"],
+    [art.titulo, null],
+  ]);
+  const jsonLd = faqLd
+    ? [articleLd, faqLd, migasLd]
+    : [articleLd, migasLd];
 
   return (
     <>
