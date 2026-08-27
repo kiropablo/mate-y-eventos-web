@@ -85,9 +85,9 @@ export default function Glosario() {
             <span className="n">—</span>Glosario
           </div>
           <h1>
-            Las palabras{" "}
+            Glosario de la{" "}
             <br />
-            del rubro.
+            industria de eventos
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             Rider técnico, backline, contra rider, photo opportunity. El vocabulario que en la industria

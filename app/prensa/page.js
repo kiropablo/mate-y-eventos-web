@@ -4,7 +4,7 @@ import { SITE, LINKS } from "../lib/site";
 
 export const metadata = {
   alternates: { canonical: "/prensa" },
-  title: "Prensa",
+  title: "Kit de prensa y material para medios",
   description:
     "Kit de prensa de Mate y Eventos: logos, media kit, fotos y contacto para medios y marcas.",
 };

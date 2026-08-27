@@ -29,7 +29,7 @@ const rajdhani = Rajdhani({
 export const metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Mate y Eventos — Podcast de la industria de eventos",
+    default: "Mate y Eventos · Podcast y agenda de la industria de eventos",
     template: `%s · ${SITE.name}`,
   },
   description: SITE.descripcionSeo,

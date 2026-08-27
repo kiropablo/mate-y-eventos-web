@@ -6,7 +6,7 @@ import { SITE } from "../lib/site";
 
 export const metadata = {
   alternates: { canonical: "/articulos" },
-  title: "Artículos",
+  title: "Artículos sobre producción y negocio de eventos",
   description:
     "Análisis sobre producción, estrategia, tecnología y el lado humano de la industria de eventos. Cada artículo profundiza un episodio de Mate y Eventos.",
 };

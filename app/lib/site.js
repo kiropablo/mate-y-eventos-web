@@ -50,7 +50,7 @@ export const NAV = [
   { href: "/articulos", label: "Artículos" },
   { href: "/agenda", label: "Agenda" },
   { href: "/glosario", label: "Glosario" },
-  { href: "/sobre", label: "Sobre MyE" },
+  { href: "/sobre", label: "Quiénes somos" },
   { href: "/newsletter", label: "Newsletter" },
   { href: "/sponsors", label: "Para marcas" },
   { href: "/prensa", label: "Prensa" },

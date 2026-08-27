@@ -9,7 +9,7 @@ import { LINKS } from "../lib/site";
 
 export const metadata = {
   alternates: { canonical: "/episodios" },
-  title: "Episodios",
+  title: "Todos los episodios del podcast de eventos",
   description:
     "Todos los episodios de Mate y Eventos, el podcast de la industria de eventos en Latinoamérica. Nuevo capítulo cada miércoles.",
 };

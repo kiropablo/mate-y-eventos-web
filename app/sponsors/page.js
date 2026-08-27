@@ -11,7 +11,7 @@ const OG_TITLE = "Llegá a los que deciden en eventos · Mate y Eventos";
 
 export const metadata = {
   alternates: { canonical: "/sponsors" },
-  title: "Para marcas",
+  title: "Sponsoreo y publicidad para marcas de eventos",
   description: DESCRIPCION,
   openGraph: {
     type: "website",

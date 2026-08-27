@@ -5,7 +5,7 @@ import { LINKS } from "../lib/site";
 
 export const metadata = {
   alternates: { canonical: "/newsletter" },
-  title: "Newsletter",
+  title: "Newsletter de la industria de eventos",
   description:
     "El newsletter de Mate y Eventos: ideas, aprendizajes y detrás de escena de la industria de eventos en LATAM, directo a tu mail.",
 };
@@ -23,7 +23,7 @@ export default function Newsletter() {
             <span className="n">—</span>Newsletter
           </div>
           <h1>
-            La comunidad, <br />directo a tu mail.
+            El newsletter de la industria <br />de eventos, directo a tu mail
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             Ideas, aprendizajes y detrás de escena de la industria de eventos.

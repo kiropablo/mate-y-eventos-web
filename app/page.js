@@ -36,7 +36,11 @@ export default async function Home() {
     .filter((e) => e.fechaInicio && !yaPaso(e))
     .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio))
     .slice(0, 4);
-  const ultimosArticulos = getArticulos().slice(0, 3);
+  // Se guarda la lista entera además de los tres que se muestran: el texto
+  // de la sección dice cuántos hay publicados, y ese número tiene que salir
+  // del contenido y no escrito a mano, para que no envejezca solo.
+  const todosLosArticulos = getArticulos();
+  const ultimosArticulos = todosLosArticulos.slice(0, 3);
 
   const latestHref =
     episodes.length > 0 ? `/episodios/${episodes[0].id}` : "/episodios";
@@ -105,13 +109,30 @@ export default async function Home() {
                 height={132}
                 priority
               />
+              {/* El descriptor va ADENTRO del h1, como tercera línea chica.
+                  El h1 es la etiqueta más fuerte de la página y hasta ahora
+                  decía solo el nombre de la marca: el único dato que el que
+                  entra ya tenía, porque está en el logo, en el menú, en la
+                  pestaña y en la URL. El logo gigante queda igual. */}
+              {/* Los espacios entre las líneas son explícitos: el salto de
+                  línea del JSX no aporta ninguno y los <span> son bloques por
+                  CSS, cosa que un extractor de texto no sabe. Sin esto el
+                  textContent del h1 sale "Mate yEventosEl medio de la…", que
+                  es justamente lo que leen Google y los asistentes. */}
               <h1>
-                Mate y<span className="l2">Eventos</span>
+                Mate y{" "}
+                <span className="l2">Eventos</span>{" "}
+                <span className="l3">
+                  &mdash; El medio de la industria de eventos en Latinoamérica
+                </span>
               </h1>
             </div>
             <div className="hsub">
               <span>El backstage de la industria, en voz alta.</span>
-              <span>Nuevo episodio cada miércoles.</span>
+              <span>
+                Un episodio nuevo cada miércoles, la agenda de la región y
+                artículos para aplicar el lunes.
+              </span>
             </div>
           </div>
 
@@ -176,6 +197,20 @@ export default async function Home() {
           <h2 className="clip">
             Un medio hecho <em>desde adentro</em> de la industria.
           </h2>
+          {/* El párrafo que faltaba: qué es esto, en castellano llano y sin
+              depender del resto de la página. Hasta ahora la única definición
+              del sitio estaba en la primera pregunta del FAQ, al pie. Un
+              lector nuevo y un modelo tienen el mismo problema: leen los
+              títulos primero, y los títulos no decían nada. */}
+          <p className="body reveal" style={{ transitionDelay: ".06s" }}>
+            <strong>Mate y Eventos</strong> es un medio audiovisual argentino
+            especializado en la industria de eventos de Latinoamérica. Lo hacen
+            Pablo Quiroga y Alexis Vidal, productores con más de 18 años en el
+            rubro. Cada miércoles publican un episodio de unos 20 minutos;
+            además mantienen la agenda de eventos de la región —más de 300
+            fichas con fecha, sede y organizador—, un glosario del oficio y
+            artículos que amplían cada conversación.
+          </p>
           <p className="body reveal" style={{ transitionDelay: ".1s" }}>
             Mate y Eventos nace de años viviendo los eventos desde el backstage,
             y de entender que gran parte de ese conocimiento nunca se comparte.
@@ -197,11 +232,17 @@ export default async function Home() {
         <section className="section-p" data-accent="blue">
           <div className="wrap">
             <div className="eyebrow reveal">
-              <span className="n">—</span>Próximos eventos
+              <span className="n">—</span>La agenda
             </div>
-            <h2 className="clip" style={{ margin: "14px 0 26px" }}>
-              Lo que se viene.
+            <h2 className="clip" style={{ margin: "14px 0 18px" }}>
+              La agenda de la industria, actualizada todos los días.
             </h2>
+            <p className="body reveal" style={{ marginBottom: "26px" }}>
+              Congresos, expos, festivales y grandes producciones de Argentina y
+              Latinoamérica, con fecha, sede, organizador y link para comprar
+              entradas. Hoy hay más de 300 eventos cargados, y los organizadores
+              validan su propia ficha.
+            </p>
             <div className="ag-tabla">
               {proximos.map((ev) => (
                 <Link
@@ -250,9 +291,15 @@ export default async function Home() {
             <div className="eyebrow reveal">
               <span className="n">—</span>Últimos artículos
             </div>
-            <h2 className="clip" style={{ margin: "14px 0 26px" }}>
-              Para leer.
+            <h2 className="clip" style={{ margin: "14px 0 18px" }}>
+              Artículos que amplían cada episodio.
             </h2>
+            <p className="body reveal" style={{ marginBottom: "26px" }}>
+              Cada conversación del podcast se convierte en un análisis con
+              preguntas frecuentes al final. Ya hay {todosLosArticulos.length}{" "}
+              publicados sobre presupuestos, proveedores, producción, liderazgo
+              y tecnología.
+            </p>
             <div className="home-arts">
               {ultimosArticulos.map((art, i) => (
                 <Link

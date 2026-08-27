@@ -331,6 +331,23 @@ h1 .l2 {
   display: block;
   padding-left: 0.7em;
 }
+/* La tercera línea del h1: dice de qué se trata esto. Va adentro del mismo
+   encabezado a propósito —es lo que leen el buscador y los asistentes— pero
+   en cuerpo chico y sin mayúsculas, para que el logo gigante siga mandando. */
+h1 .l3 {
+  display: block;
+  margin-top: 0.55em;
+  padding-left: 0.06em;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: clamp(0.86rem, 1.9vw, 1.2rem);
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  text-shadow: none;
+  color: rgba(245, 245, 245, 0.72);
+  max-width: 34ch;
+}
 .hsub {
   margin-top: 26px;
   color: rgba(245, 245, 245, 0.66);

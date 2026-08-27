@@ -4,7 +4,11 @@ import { SITE } from "../lib/site";
 
 export const metadata = {
   alternates: { canonical: "/sobre" },
-  title: "Sobre el podcast",
+  // Absoluto: la plantilla del layout agrega " · Mate y Eventos" y acá
+  // quedaría el nombre dos veces en el mismo título.
+  title: {
+    absolute: "Qué es Mate y Eventos: el medio de la industria de eventos",
+  },
   description:
     "Qué es Mate y Eventos, su propósito y las personas detrás: Pablo Quiroga y Alexis Vidal, un medio audiovisual de la industria de eventos en LATAM.",
 };
@@ -31,7 +35,7 @@ export default function Sobre() {
             <span className="n">—</span>Sobre el proyecto
           </div>
           <h1>
-            Un medio hecho <br />desde adentro.
+            Mate y Eventos: un medio <br />hecho desde adentro de la industria
           </h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             {SITE.name} nace de años viviendo los eventos desde el backstage, y

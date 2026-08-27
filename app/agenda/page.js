@@ -15,12 +15,12 @@ import { todosLosCortes, textosDe } from "./cortes";
 
 export const metadata = {
   alternates: { canonical: "/agenda" },
-  title: "Agenda de eventos",
+  title: "Agenda de eventos de Argentina y Latinoamérica",
   description:
     "Agenda de la industria: congresos, expos, festivales, recitales y grandes eventos de Argentina y Latinoamérica, con fechas, contactos y referencias de ediciones anteriores.",
   openGraph: {
     type: "website",
-    title: "Agenda de eventos de la industria · Mate y Eventos",
+    title: "Agenda de eventos de Argentina y Latinoamérica · Mate y Eventos",
     description:
       "Congresos, expos, festivales y grandes producciones de Argentina y la región: fechas, contactos y referencias, en un solo lugar.",
     url: `${SITE.url}/agenda`,
@@ -30,7 +30,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Agenda de eventos de la industria · Mate y Eventos",
+    title: "Agenda de eventos de Argentina y Latinoamérica · Mate y Eventos",
     description:
       "Congresos, expos, festivales y grandes producciones de Argentina y la región, con fechas y contactos.",
     images: ["/og-default.jpg"],
