@@ -1,7 +1,17 @@
 import { haySesion } from "../../../lib/admin";
-import { CAMPOS, getMensaje, armar, leerCrudo } from "../../../lib/mensajes";
+import {
+  MENSAJES,
+  camposDe,
+  getMensaje,
+  armar,
+  leerCrudo,
+} from "../../../lib/mensajes";
 
-// Lee y guarda los textos del mail de primer contacto.
+// Lee y guarda los textos de los mails que salen del panel.
+//
+// Son dos: el de primer contacto, que le pide al organizador que revise su
+// ficha, y el de confirmación, que le avisa que el sello quedó encendido.
+// Cada uno vive en su propio archivo dentro de content/mensajes/.
 //
 // Guarda igual que los artículos y el glosario: escribiendo el archivo en
 // GitHub. Vercel redespliega solo y el mail siguiente ya sale con el texto
@@ -12,8 +22,16 @@ export const dynamic = "force-dynamic";
 
 const REPO = process.env.GITHUB_REPO || "kiropablo/mate-y-eventos-web";
 const RAMA = process.env.GITHUB_BRANCH || "main";
-const RUTA = "content/mensajes/primer-contacto.md";
-const URL_API = `https://api.github.com/repos/${REPO}/contents/${RUTA}`;
+// Cuál de los dos mensajes pidieron. Se valida contra la lista y no se arma
+// la ruta con lo que llegue: si no, un pedido con "../../.env" escribiría
+// donde no debe.
+function cual(valor) {
+  const id = String(valor || "").trim();
+  return MENSAJES[id] ? id : "primer-contacto";
+}
+
+const urlDe = (id) =>
+  `https://api.github.com/repos/${REPO}/contents/content/mensajes/${id}.md`;
 
 function explicar(estado) {
   if (estado === 401)
@@ -33,17 +51,24 @@ function cabeceras(token) {
   };
 }
 
-export async function GET() {
+export async function GET(request) {
   if (!haySesion()) {
     return Response.json({ ok: false, error: "Sin sesión." }, { status: 401 });
   }
+  const id = cual(new URL(request.url).searchParams.get("cual"));
   return Response.json({
     ok: true,
-    campos: CAMPOS,
-    valores: getMensaje(),
+    cual: id,
+    mensajes: Object.entries(MENSAJES).map(([k, m]) => ({
+      id: k,
+      titulo: m.titulo,
+      ayuda: m.ayuda,
+    })),
+    campos: camposDe(id),
+    valores: getMensaje(id),
     // Si el archivo todavía no existe, el panel muestra los textos de fábrica
     // y avisa que nunca se editó.
-    guardadoAlgunaVez: Boolean(leerCrudo().trim()),
+    guardadoAlgunaVez: Boolean(leerCrudo(id).trim()),
   });
 }
 
@@ -60,8 +85,11 @@ export async function POST(request) {
   }
 
   let valores = {};
+  let id = "primer-contacto";
   try {
-    valores = (await request.json())?.valores || {};
+    const body = await request.json();
+    valores = body?.valores || {};
+    id = cual(body?.cual);
   } catch {
     return Response.json({ ok: false, error: "No se entendió el pedido." }, { status: 400 });
   }
@@ -69,17 +97,18 @@ export async function POST(request) {
   // Un campo vacío no se guarda vacío: vuelve al texto de fábrica. Un mail sin
   // pie de baja o sin saludo sale peor que uno sin editar.
   const limpios = {};
-  for (const c of CAMPOS) {
+  for (const c of camposDe(id)) {
     const v = String(valores[c.id] ?? "").trim();
     limpios[c.id] = v || c.porDefecto;
   }
 
-  const contenido = `${armar(limpios)}\n`;
+  const contenido = `${armar(limpios, id)}\n`;
 
   // El sha del archivo, para que GitHub avise si alguien lo cambió mientras
   // tanto en vez de pisarlo. Si no existe, se crea.
   let sha;
-  const actual = await fetch(`${URL_API}?ref=${RAMA}`, { headers: cabeceras(token) });
+  const url = urlDe(id);
+  const actual = await fetch(`${url}?ref=${RAMA}`, { headers: cabeceras(token) });
   if (actual.ok) {
     sha = (await actual.json()).sha;
   } else if (actual.status !== 404) {
@@ -89,11 +118,11 @@ export async function POST(request) {
     );
   }
 
-  const res = await fetch(URL_API, {
+  const res = await fetch(url, {
     method: "PUT",
     headers: cabeceras(token),
     body: JSON.stringify({
-      message: "Editar el mensaje de primer contacto desde el panel",
+      message: `Editar el mensaje "${MENSAJES[id].titulo}" desde el panel`,
       content: Buffer.from(contenido, "utf8").toString("base64"),
       branch: RAMA,
       ...(sha ? { sha } : {}),

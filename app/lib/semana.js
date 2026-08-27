@@ -92,7 +92,9 @@ export function entidadesDe(texto) {
       // Los separadores reales entre entidades, incluidas las frases que usa
       // la base: "y", "con producción de", "en colaboración con", "junto a".
       .split(
-        /\s*[+/;,]\s*|\s+(?:y|e|con|junto\s+a|para)\s+(?:produccion\s+de\s+|colaboracion\s+con\s+)?|\s+bajo\s+(?:el\s+)?\w+\s+de\s+/gi
+        // El guión va CON espacios a los lados a propósito: "ADRHA — Filial
+        // Mar del Plata" son dos cosas, pero "Rally-Raid" es una sola.
+        /\s*[+/;,]\s*|\s+[—–-]\s+|\s+(?:y|e|con|junto\s+a|para)\s+(?:produccion\s+de\s+|colaboracion\s+con\s+)?|\s+bajo\s+(?:el\s+)?\w+\s+de\s+/gi
       )
   );
 
@@ -190,6 +192,31 @@ export function propiosEsaSemana(evento, eventos) {
         mismoOrganizador(e, evento)
     )
     .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio));
+}
+
+// Todos los otros eventos de la agenda que organiza la misma gente.
+//
+// Se usa en el mail de confirmación para poder decirle "veo que también
+// organizan X e Y, ¿los verificamos?". Es el pedido que más rinde del
+// circuito y no cuesta nada: el que acaba de confirmar sus datos es el
+// contacto más tibio que vamos a tener con esa organización.
+//
+// Comparte comparador con propiosEsaSemana, así que reconoce a Messe
+// Frankfurt escrito de las diez formas en que está escrito en la base.
+export function delMismoOrganizador(evento, eventos) {
+  if (!evento || !evento.organizador) return [];
+  const hoy = hoyISO();
+  return eventos
+    .filter(
+      (e) =>
+        e.slug !== evento.slug &&
+        // Uno que ya pasó no se le ofrece verificar.
+        (!e.fechaInicio || (e.fechaFin || e.fechaInicio) >= hoy) &&
+        mismoOrganizador(e, evento)
+    )
+    .sort((a, b) =>
+      String(a.fechaInicio || "9").localeCompare(String(b.fechaInicio || "9"))
+    );
 }
 
 // Cuántos días faltan para que arranque el evento.

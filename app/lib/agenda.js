@@ -85,6 +85,9 @@ function mapear(record) {
     correcciones: (f["Correcciones del organizador"] || "").trim(),
     revisionPendiente: Boolean(f["Revisión pendiente"]),
     fechaContacto: f["Fecha de contacto"] || null,
+    // Cuándo se le avisó que el sello quedó encendido. Va aparte de la fecha
+    // de difusión: entre confirmar y publicar en redes pueden pasar días.
+    fechaConfirmacion: f["Fecha de confirmación"] || null,
     emailOrganizador: (f["Email del organizador"] || "").trim(),
     difundido: Boolean(f["Difundido"]),
     fechaDifusion: f["Fecha de difusión"] || null,

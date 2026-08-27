@@ -1,6 +1,7 @@
 import { formatRango, nombreConAnio } from "./agenda";
 import { DIAS_PARA_DIFUNDIR, llegamosADifundir, lunesDe, MAXIMO_SEMANA } from "./semana";
 import { SITE } from "./site";
+import { esc, bloque, parrafo, tenue, fila, boton, firma, pagina } from "./mail-base";
 import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes";
 
 // El mail que le llega al organizador.
@@ -12,13 +13,6 @@ import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes";
 // Se arma acá y no en la ruta porque el texto plano y el HTML tienen que
 // decir exactamente lo mismo: si se escribieran por separado, tarde o
 // temprano uno de los dos queda viejo.
-
-const esc = (t) =>
-  String(t ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 
 const MES = [
   "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -169,49 +163,12 @@ export function armarInvitacion({ ev, semana = [], propios = [], link, mensaje }
     .replace(/\n{3,}/g, "\n\n");
 
   // ----------------------------------------------------------------- html
-  const bloque = (contenido, extra = "") =>
-    `<tr><td class="pad" style="padding:${extra || "0 34px"};">${contenido}</td></tr>`;
-  const parrafo = (t, m = "0 0 16px") =>
-    `<p class="txt" style="margin:${m};font-size:16px;line-height:1.62;color:#3a3548;">${t}</p>`;
-  const tenue = (t, m = "0 0 20px") =>
-    `<p class="tenue" style="margin:${m};font-size:14.5px;line-height:1.6;color:#6c667e;">${t}</p>`;
-
-  const fila = (rotulo, valor) =>
-    `<tr><td class="tenue" style="padding:2px 14px 2px 0;color:#6c667e;white-space:nowrap;">${rotulo}</td><td class="txt" style="padding:2px 0;color:#3a3548;">${esc(valor)}</td></tr>`;
-
-  const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light only">
-<meta name="supported-color-schemes" content="light only">
-<style>
-  :root { color-scheme: light only; supported-color-schemes: light only; }
-  [data-ogsc] .txt, [data-ogsb] .txt { color:#3a3548 !important; }
-  [data-ogsc] .fuerte, [data-ogsb] .fuerte { color:#14111c !important; }
-  [data-ogsc] .tenue, [data-ogsb] .tenue { color:#6c667e !important; }
-  [data-ogsc] .fondo, [data-ogsb] .fondo { background:#ffffff !important; }
-  [data-ogsc] .caja, [data-ogsb] .caja { background:#f7f7fa !important; }
-  @media only screen and (max-width:620px){
-    .marco{width:100% !important}
-    .pad{padding-left:22px !important;padding-right:22px !important}
-    .h1{font-size:21px !important}
-  }
-</style>
-</head>
-<body style="margin:0;padding:0;background:#eceaf0;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">Así lo publicamos en la agenda. Si algo está mal, se corrige en dos minutos.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eceaf0" style="background:#eceaf0;padding:24px 12px;">
-<tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" class="marco fondo" style="width:600px;max-width:100%;background:#ffffff;border-radius:10px;overflow:hidden;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-
-  <tr><td bgcolor="#010004" class="pad" style="background:#010004;padding:28px 34px 24px;">
-    <div style="font-size:18px;line-height:1.1;font-weight:bold;color:#ffffff;letter-spacing:2px;">MATE&nbsp;Y&nbsp;EVENTOS</div>
-    <div style="font-size:13px;line-height:1.5;color:#93d5f7;padding-top:6px;">${esc(SITE.tagline)}</div>
-  </td></tr>
-  <tr><td bgcolor="#ea478a" style="background:#ea478a;height:4px;line-height:4px;font-size:4px;">&nbsp;</td></tr>
-
+  // ----------------------------------------------------------------- html
+  // El envoltorio (cabecera, modo oscuro de Apple, pie) vive en mail-base.js,
+  // compartido con los otros mails que salen del panel.
+  const html = pagina({
+    adelanto: "Así lo publicamos en la agenda. Si algo está mal, se corrige en dos minutos.",
+    cuerpo: `
   ${bloque(
     `<h1 class="h1 fuerte" style="margin:0 0 18px;font-size:23px;line-height:1.26;color:#14111c;font-weight:bold;">${esc(titular)}</h1>${parrafo(esc(t("saludo")), "0 0 22px")}`,
     "32px 34px 6px"
@@ -317,10 +274,8 @@ export function armarInvitacion({ ev, semana = [], propios = [], link, mensaje }
       <a href="${esc(SITE.url)}" style="font-size:14px;color:#c22e70;text-decoration:none;">mateyeventos.com</a>
     </p>`,
     "8px 34px 30px"
-  )}
-
-  <tr><td bgcolor="#f7f7fa" class="caja pad" style="background:#f7f7fa;border-top:1px solid #e3e1e9;padding:18px 34px 22px;">
-    <p class="tenue" style="margin:0;font-size:12.5px;line-height:1.6;color:#8a8498;">${esc(reemplazar(M.pie, { ...marcas, agenda: "" }))
+  )}`,
+    pie: esc(reemplazar(M.pie, { ...marcas, agenda: "" }))
       // El paréntesis vacío que dejó la marca {agenda} se llena con el link.
       .replace(
         /\(\s*\)/,
@@ -329,12 +284,8 @@ export function armarInvitacion({ ev, semana = [], propios = [], link, mensaje }
       // Lo que va entre comillas se pone en negrita, como estaba antes: es la
       // palabra que tiene que responder para que no le escribamos más, y en un
       // párrafo gris chiquito entre comillas se pierde.
-      .replace(/&quot;([^&]{1,24})&quot;/, "<strong>$1</strong>")}</p>
-  </td></tr>
-</table>
-</td></tr></table>
-</body>
-</html>`;
+      .replace(/&quot;([^&]{1,24})&quot;/, "<strong>$1</strong>"),
+  });
 
   return { asunto, texto, html };
 }

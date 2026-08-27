@@ -1,8 +1,14 @@
 import { haySesion } from "../../../../lib/admin";
-import { CAMPOS } from "../../../../lib/mensajes";
+import { camposDe, MENSAJES } from "../../../../lib/mensajes";
 import { getEventos, yaPaso } from "../../../../lib/agenda";
-import { mismaSemana, propiosEsaSemana, MAXIMO_SEMANA } from "../../../../lib/semana";
+import {
+  mismaSemana,
+  propiosEsaSemana,
+  delMismoOrganizador,
+  MAXIMO_SEMANA,
+} from "../../../../lib/semana";
 import { armarInvitacion } from "../../../../lib/mail-invitacion";
+import { armarConfirmacion } from "../../../../lib/mail-confirmacion";
 
 // Arma el mail con los textos que están en la pantalla, sin guardar nada.
 //
@@ -20,10 +26,12 @@ export async function POST(request) {
 
   let valores = {};
   let slug = "";
+  let cual = "primer-contacto";
   try {
     const body = await request.json();
     valores = body?.valores || {};
     slug = String(body?.slug || "");
+    cual = MENSAJES[String(body?.cual || "")] ? String(body.cual) : cual;
   } catch {
     return Response.json(
       { ok: false, error: "No se entendió el pedido." },
@@ -32,7 +40,7 @@ export async function POST(request) {
   }
 
   const mensaje = {};
-  for (const c of CAMPOS) {
+  for (const c of camposDe(cual)) {
     const v = String(valores[c.id] ?? "").trim();
     mensaje[c.id] = v || c.porDefecto;
   }
@@ -46,7 +54,31 @@ export async function POST(request) {
     );
   }
 
-  const ev = vigentes.find((e) => e.slug === slug) || vigentes[0];
+  // Para la confirmación se prefiere uno que YA tenga el sello: es el único
+  // caso en que ese mail sale de verdad, y con uno sin verificar no se vería
+  // el mes del sello ni los otros eventos del mismo organizador.
+  const candidatos =
+    cual === "confirmacion" && vigentes.some((e) => e.verificado)
+      ? vigentes.filter((e) => e.verificado)
+      : vigentes;
+  const ev = candidatos.find((e) => e.slug === slug) || candidatos[0];
+
+  if (cual === "confirmacion") {
+    const m = armarConfirmacion({
+      ev,
+      otros: delMismoOrganizador(ev, vigentes),
+      mensaje,
+    });
+    return Response.json({
+      ok: true,
+      conQue: ev.nombre,
+      slug: ev.slug,
+      ...m,
+      opciones: candidatos
+        .slice(0, 40)
+        .map((e) => ({ slug: e.slug, nombre: e.nombre })),
+    });
+  }
 
   const { asunto, texto, html } = armarInvitacion({
     ev,

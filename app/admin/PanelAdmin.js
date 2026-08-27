@@ -92,8 +92,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [copiado, setCopiado] = useState("");
   const [difundiendo, setDifundiendo] = useState("");
   const [aprobando, setAprobando] = useState("");
-  // El mensaje de primer contacto: los textos editables, la vista previa y si
-  // hay algo sin guardar. Se carga recién cuando se entra a la pestaña.
+  // Los mensajes editables: cuál se está editando, sus textos, la vista previa
+  // y si hay algo sin guardar. Se cargan recién al entrar a la pestaña.
+  const [cualMsj, setCualMsj] = useState("primer-contacto");
+  const [listaMsj, setListaMsj] = useState([]);
   const [msj, setMsj] = useState(null);
   const [msjOriginal, setMsjOriginal] = useState(null);
   const [previa, setPrevia] = useState(null);
@@ -106,6 +108,14 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   // terminaba le devolvía el botón a TODOS los que estuvieran en curso, y el
   // segundo se podía apretar de nuevo mientras seguía andando.
   const [invitando, setInvitando] = useState(() => new Set());
+  const [confirmando, setConfirmando] = useState(() => new Set());
+  const marcarConfirmando = (slug, activo) =>
+    setConfirmando((previa) => {
+      const copia = new Set(previa);
+      if (activo) copia.add(slug);
+      else copia.delete(slug);
+      return copia;
+    });
   const marcarInvitando = (slug, activo) =>
     setInvitando((previa) => {
       const copia = new Set(previa);
@@ -376,13 +386,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   }
 
   // Manda el mail de invitación. El link firmado lo arma el servidor.
-  async function cargarMensaje() {
+  async function cargarMensaje(cual = cualMsj) {
     setCargandoMsj(true);
     setAvisoMsj("");
+    // La previa es del mensaje anterior: si no se limpia, al cambiar de
+    // mensaje se queda mostrando el mail que no es.
+    setPrevia(null);
     try {
-      const res = await fetch("/api/admin/mensaje");
+      const res = await fetch(`/api/admin/mensaje?cual=${encodeURIComponent(cual)}`);
       const d = await res.json();
       if (!res.ok || !d.ok) throw new Error(d?.error || "No se pudo leer el mensaje.");
+      setCualMsj(d.cual);
+      setListaMsj(d.mensajes || []);
       setMsj(d.campos.map((c) => ({ ...c, valor: d.valores[c.id] ?? c.porDefecto })));
       setMsjOriginal(d.valores);
       if (!d.guardadoAlgunaVez) {
@@ -410,7 +425,11 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       const res = await fetch("/api/admin/mensaje/previsualizar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ valores: valoresDelMensaje(), slug: slug || conQue }),
+        body: JSON.stringify({
+          cual: cualMsj,
+          valores: valoresDelMensaje(),
+          slug: slug || conQue,
+        }),
       });
       const d = await res.json();
       if (!res.ok || !d.ok) throw new Error(d?.error || "No se pudo armar la vista previa.");
@@ -429,7 +448,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       const res = await fetch("/api/admin/mensaje", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ valores: valoresDelMensaje() }),
+        body: JSON.stringify({ cual: cualMsj, valores: valoresDelMensaje() }),
       });
       const d = await res.json();
       if (!res.ok || !d.ok) throw new Error(d?.error || "No se pudo guardar.");
@@ -490,6 +509,61 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     }
   }
 
+  // El segundo mail: "listo, tu ficha quedó verificada".
+  async function confirmar(ev) {
+    const para = (paraQuien[ev.slug] ?? ev.emailSugerido ?? "").trim();
+    if (!para) return alert("Escribí a qué mail se lo mando.");
+    if (
+      !confirm(
+        `¿Le aviso a ${para} que ${ev.nombre} quedó verificado?` +
+          (ev.fechaConfirmacion
+            ? `\n\nOJO: ya se lo avisaste el ${ev.fechaConfirmacion}.`
+            : "")
+      )
+    )
+      return;
+
+    marcarConfirmando(ev.slug, true);
+    try {
+      let res = await mandarConfirmacion(ev.slug, para, false);
+      let data = await res.json().catch(() => ({}));
+
+      if (res.status === 409 && data?.yaConfirmado) {
+        if (
+          !confirm(
+            `Según Airtable ya se le avisó el ${data.yaConfirmado}.\n\n¿Mandarlo igual?`
+          )
+        )
+          return;
+        res = await mandarConfirmacion(ev.slug, para, true);
+        data = await res.json().catch(() => ({}));
+      }
+
+      if (!res.ok) throw new Error(data?.error || "No se pudo enviar.");
+      const hoy = new Date().toLocaleDateString("en-CA");
+      setOrgs((previa) =>
+        previa.map((e) =>
+          e.slug === ev.slug ? { ...e, fechaConfirmacion: hoy, email: para } : e
+        )
+      );
+      if (!data.anotado) {
+        alert("El mail salió, pero no se pudo anotar la fecha en Airtable.");
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      marcarConfirmando(ev.slug, false);
+    }
+  }
+
+  function mandarConfirmacion(slug, para, forzar) {
+    return fetch("/api/admin/confirmacion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, para, forzar }),
+    });
+  }
+
   function mandarInvitacion(slug, para, forzar) {
     return fetch("/api/admin/invitar", {
       method: "POST",
@@ -539,7 +613,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
             ? !e.verificado && !e.revisionPendiente
             : filtro === "paradifundir"
               ? e.verificado && !e.difundido && !e.revisionPendiente
-              : true))
+              : filtro === "paraconfirmar"
+                ? e.verificado && !e.revisionPendiente && !e.fechaConfirmacion
+                : true))
   );
 
   // Los filtros que tienen sentido en cada pestaña.
@@ -551,6 +627,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           ["conmail", "Con mail"],
           ["pendientes", "Esperan tu OK"],
           ["sincontactar", "Sin escribir"],
+          ["paraconfirmar", "Avisarles del sello"],
           ["paradifundir", "Para difundir"],
         ]
       : [
@@ -919,6 +996,34 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
         </div>
       ) : seccion === "mensaje" ? (
         <>
+          {/* Cuál de los dos mails se está editando. Son circuitos distintos:
+              el primero pide que revisen la ficha, el segundo avisa que el
+              sello quedó puesto. */}
+          {listaMsj.length > 1 ? (
+            <div className="adm-filtros">
+              {listaMsj.map((m) => (
+                <button
+                  type="button"
+                  key={m.id}
+                  className="chip"
+                  data-on={cualMsj === m.id ? "si" : "no"}
+                  title={m.ayuda}
+                  onClick={() => {
+                    if (
+                      hayCambios &&
+                      !confirm(
+                        "Hay cambios sin guardar en este mensaje. ¿Cambiar igual y perderlos?"
+                      )
+                    )
+                      return;
+                    cargarMensaje(m.id);
+                  }}
+                >
+                  {m.titulo}
+                </button>
+              ))}
+            </div>
+          ) : null}
           {avisoMsj ? <div className="adm-vacio">{avisoMsj}</div> : null}
           {cargandoMsj || !msj ? (
             <div className="adm-vacio">Cargando el mensaje…</div>
@@ -1239,6 +1344,30 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                             : ev.verificado
                               ? "Sacar el sello"
                               : "Marcar verificado"}
+                        </button>
+                      ) : null}
+
+                      {/* El segundo mail. Va antes del de difusión porque es
+                          antes en el circuito: primero se le avisa que el
+                          sello quedó puesto, y días después que ya salió en
+                          las redes. Sin esto, el que confirma sus datos no
+                          recibe nada hasta que posteamos. */}
+                      {ev.verificado && !ev.revisionPendiente ? (
+                        <button
+                          type="button"
+                          className={
+                            ev.fechaConfirmacion
+                              ? "adm-btn adm-btn--sec"
+                              : "adm-btn"
+                          }
+                          disabled={confirmando.has(ev.slug)}
+                          onClick={() => confirmar(ev)}
+                        >
+                          {confirmando.has(ev.slug)
+                            ? "Mandando…"
+                            : ev.fechaConfirmacion
+                              ? `Avisado el ${ev.fechaConfirmacion}`
+                              : "Avisarle del sello"}
                         </button>
                       ) : null}
 

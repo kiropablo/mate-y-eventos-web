@@ -59,6 +59,7 @@ export async function listarOrganizadoresParaPanel() {
       fechaVerificacion: ev.fechaVerificacion,
       difundido: ev.difundido,
       fechaContacto: ev.fechaContacto || null,
+      fechaConfirmacion: ev.fechaConfirmacion || null,
       email: ev.emailOrganizador || "",
       // Si en Contactos hay mails, se ofrecen como destinatarios para no
       // tener que buscarlos a mano. Se puede cambiar antes de enviar.
