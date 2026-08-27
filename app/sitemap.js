@@ -53,7 +53,10 @@ export default async function sitemap() {
       changeFrequency: "monthly",
       priority: 0.6,
     }));
-  } catch {
+  } catch (e) {
+    // Se avisa en los registros del servidor: sin esto, una lectura que falla
+    // saca URLs del sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "eps": ${e.message}`);
     eps = [];
   }
 
@@ -67,7 +70,10 @@ export default async function sitemap() {
       // de IA: les damos prioridad alta.
       priority: 0.8,
     }));
-  } catch {
+  } catch (e) {
+    // Se avisa en los registros del servidor: sin esto, una lectura que falla
+    // saca URLs del sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "arts": ${e.message}`);
     arts = [];
   }
 
@@ -80,7 +86,10 @@ export default async function sitemap() {
       changeFrequency: "weekly",
       priority: 0.7,
     }));
-  } catch {
+  } catch (e) {
+    // Se avisa en los registros del servidor: sin esto, una lectura que falla
+    // saca URLs del sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "ejes": ${e.message}`);
     ejes = [];
   }
 
@@ -93,7 +102,10 @@ export default async function sitemap() {
       changeFrequency: "weekly",
       priority: 0.7,
     }));
-  } catch {
+  } catch (e) {
+    // Se avisa en los registros del servidor: sin esto, una lectura que falla
+    // saca URLs del sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "evs": ${e.message}`);
     evs = [];
   }
 
@@ -110,7 +122,10 @@ export default async function sitemap() {
       changeFrequency: "monthly",
       priority: 0.7,
     }));
-  } catch {
+  } catch (e) {
+    // Se avisa en los registros del servidor: sin esto, una lectura que falla
+    // saca URLs del sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "imps": ${e.message}`);
     imps = [];
   }
 
@@ -123,7 +138,10 @@ export default async function sitemap() {
       changeFrequency: "monthly",
       priority: 0.6,
     }));
-  } catch {
+  } catch (e) {
+    // Se avisa en los registros del servidor: sin esto, una lectura que falla
+    // saca URLs del sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "glo": ${e.message}`);
     glo = [];
   }
 
@@ -140,7 +158,10 @@ export default async function sitemap() {
       changeFrequency: c.tipo === "mes" ? "daily" : "weekly",
       priority: 0.7,
     }));
-  } catch {
+  } catch (e) {
+    // Se avisa en los registros del servidor: sin esto, una lectura que falla
+    // saca URLs del sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "cortes": ${e.message}`);
     cortes = [];
   }
 
