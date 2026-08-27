@@ -77,11 +77,23 @@ const jsonLd = {
       jobTitle: a.cargo,
       description: a.bio,
       worksFor: { "@id": `${SITE.url}/#organization` },
+      // La productora que dirigen: es lo que respalda el oficio que cuenta la
+      // biografía, y es una empresa distinta del medio.
+      affiliation: { "@id": `${SITE.url}/#av-eventos` },
       url: `${SITE.url}/sobre`,
-      // El LinkedIn personal de cada uno todavía no está cargado; cuando esté,
-      // entra solo desde site.js. No se pone un link inventado.
       ...(a.perfil ? { sameAs: [a.perfil] } : {}),
     })),
+    // AV Eventos entra como nodo propio, no como texto suelto dentro de la
+    // biografía: así "los que hacen Mate y Eventos dirigen una productora de
+    // eventos" es un dato que una máquina puede seguir, y no una frase.
+    {
+      "@type": "Organization",
+      "@id": `${SITE.url}/#av-eventos`,
+      name: "AV Eventos",
+      description:
+        "Productora de eventos dirigida por Pablo Quiroga y Alexis Vidal.",
+      sameAs: [LINKS.linkedinAvEventos],
+    },
     {
       "@type": "Organization",
       "@id": `${SITE.url}/#organization`,

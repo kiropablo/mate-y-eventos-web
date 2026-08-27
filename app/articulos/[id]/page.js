@@ -9,7 +9,7 @@ import {
   formatFecha,
   relacionados,
 } from "../../lib/articulos";
-import { SITE, AUTORES } from "../../lib/site";
+import { SITE } from "../../lib/site";
 import { migas } from "../../lib/migas";
 import { terminosDelEpisodio } from "../../lib/glosario";
 
@@ -69,12 +69,17 @@ export default function Articulo({ params }) {
     articleSection: art.eje,
     keywords: art.etiquetas.join(", "),
     image: `${url}/opengraph-image`,
-    // Firman los dos, por @id, apuntando a los nodos Person del layout. Antes
-    // firmaba la Organización: para una máquina, las biografías de /sobre no
-    // tenían nada que ver con quién escribe. En temas donde la experiencia
-    // decide —cuánto cobrar, cómo elegir un proveedor— la autoría verificable
-    // es de lo que más pesa a la hora de elegir a quién citar.
-    author: AUTORES.map((a) => ({ "@id": `${SITE.url}/#${a.id}` })),
+    // Firma el equipo, no una persona: es la decisión editorial del proyecto
+    // y coincide con cómo se escriben —voz del medio, no de Pablo ni de
+    // Alexis—. Va por @id contra la Organización del layout, no repitiendo
+    // nombre y URL, para que sea la misma entidad y no otra que se llama igual.
+    author: { "@id": `${SITE.url}/#organization` },
+    // Y acá aparece la persona, que es lo que faltaba: quién se hace cargo de
+    // que esto salga. Pablo revisa, corrige y publica cada artículo desde el
+    // panel, así que "editor" es literalmente lo que hace. Con esto el
+    // artículo tiene un humano verificable detrás —con su LinkedIn, su cargo y
+    // su experiencia declarada— sin contradecir que la firma sea del equipo.
+    editor: { "@id": `${SITE.url}/#pablo-quiroga` },
     publisher: { "@id": `${SITE.url}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     isBasedOn: `${SITE.url}/episodios/${art.episodio}`,

@@ -26,6 +26,10 @@ export const LINKS = {
   instagram: "https://instagram.com/mateyeventosok",
   tiktok: "https://www.tiktok.com/@mate.y.eventos",
   linkedin: "https://www.linkedin.com/company/mate-y-eventos/",
+  // La productora que dirigen los dos. No es Mate y Eventos y no se mezcla
+  // con el medio: se declara aparte, como la empresa donde trabajan. Es lo que
+  // respalda los 18 años de oficio que dice la biografía.
+  linkedinAvEventos: "https://www.linkedin.com/company/av-eventos/",
   linkedinNewsletter:
     "https://www.linkedin.com/newsletters/mate-y-eventos-7379142939676917760",
   rss: "https://anchor.fm/s/1085a73c4/podcast/rss",
@@ -67,9 +71,9 @@ export const NAV = [
 // un evento, cómo elegir un proveedor— la autoría verificable es de lo que más
 // pesa a la hora de elegir a quién citar.
 //
-// El campo "perfil" queda vacío a propósito: es el link al LinkedIn personal
-// de cada uno y no se inventa. Cuando estén, se completan acá y el schema los
-// declara solo como sameAs.
+// "perfil" es el LinkedIn personal de cada uno: es lo que hace verificable la
+// autoría, o sea que la persona del schema y una persona real del rubro sean
+// la misma para una máquina y no dos coincidencias de nombre.
 export const AUTORES = [
   {
     id: "pablo-quiroga",
@@ -77,7 +81,7 @@ export const AUTORES = [
     rol: "Co-conductor · Visión editorial",
     cargo: "Productor de eventos y co-conductor",
     bio: "Productor con más de 18 años en la industria de eventos. Empezó como productor técnico en shows masivos y hoy trabaja en el sector corporativo. En Mate y Eventos lleva la visión editorial y estratégica.",
-    perfil: "",
+    perfil: "https://www.linkedin.com/in/pablomquiroga/",
   },
   {
     id: "alexis-vidal",
@@ -85,7 +89,7 @@ export const AUTORES = [
     rol: "Co-conductor · Producción",
     cargo: "Productor de eventos y co-conductor",
     bio: "Productor y creativo, especializado en la operación real de los eventos, donde la creatividad y la técnica conviven todo el tiempo. En Mate y Eventos lleva la producción.",
-    perfil: "",
+    perfil: "https://www.linkedin.com/in/alexis-vidal-av/",
   },
 ];
 
