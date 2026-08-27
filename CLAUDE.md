@@ -31,6 +31,7 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
 - `transcripts.js` — `content/transcripts/{videoId}.txt` y sus subtítulos en `secciones/{videoId}.json`.
 - `mensajes.js` — los textos de los mails a organizadores, editables desde `/admin`. Dos mensajes: `primer-contacto` y `confirmacion`, cada uno en `content/mensajes/{id}.md`.
 - `ejes.js` — agrupa los artículos por eje editorial para las landings de `/articulos/eje/`.
+- `enlaces.js` — qué términos del glosario **nombra** cada artículo, buscando la palabra en el texto. De ahí salen el `about`/`mentions` del artículo, el `subjectOf` del término y el bloque "Dónde se usa" de la ficha del glosario. **No mira los alias**: son otra palabra y la promesa es que se pueda comprobar con Ctrl+F.
 - `redirecciones.js` — las direcciones viejas de los artículos mudados salen del propio contenido.
 
 *La agenda (Airtable)*
@@ -167,6 +168,10 @@ Cosas sabidas y verificadas (no volver a investigar):
 10. **Un número sin fecha de corte es un pasivo.** Una IA que lo cite lo va a citar viejo y no tiene cómo saber que envejeció. Y si un número se puede contar del contenido, se cuenta: no se escribe a mano.
 11. **Lo editorial no se vende ni se regala.** El sello Verificado y los imperdibles no se compran ni se dan a cambio de un favor. El Destacado es pago y **se declara en todos los listados donde aparece**. Es lo que hace que el resto valga.
 
+12. **Que la palabra esté escrita no quiere decir que hable de eso.** El schema apunta a una entidad, no a una cadena de texto. "Retorno" en el glosario es el monitor que el artista escucha en el escenario; en tres artículos de negocio es el retorno de la inversión. Y un alias empeora el problema en vez de arreglarlo: el alias de "Brief" es "pedido", que engancha el verbo —"había pedido"— y así 28 de 112 relaciones quedaban declaradas sobre una palabra que no era el término. Cuando se enlaza automáticamente, el criterio tiene que ser comprobable abriendo la página.
+
+13. **Si el código lo declara, la página lo tiene que mostrar.** El bloque "Dónde se usa" y el `subjectOf` del término salen de la misma lista y con el mismo corte, a propósito. Marcar una relación que el lector no puede ver es justamente por lo que Google penaliza.
+
 ---
 
 ## ESTADO Y PENDIENTES
@@ -174,7 +179,7 @@ Cosas sabidas y verificadas (no volver a investigar):
 Al 28/8/2026, contado sobre el repo y la base:
 
 - **42 transcripciones**, 41 con subtítulos.
-- **41 artículos**, todos publicados.
+- **42 artículos**, todos publicados.
 - **59 términos de glosario publicados** de 89 generados: quedan 30 en borrador.
 - **~308 eventos aprobados** en la agenda y ~50 borradores esperando aprobación en Airtable.
 - **2 eventos verificados** por su organizador. El circuito recién arranca.
@@ -186,7 +191,7 @@ Pendientes:
 2. **8 títulos de episodio abren pregunta sin «¿»** — se corrige en YouTube y la web lo toma solo.
 3. **Newsletter automático semanal** con los artículos nuevos vía beehiiv. Falta verificar si el plan permite crear y enviar campañas por API.
 4. **Contenido que falta**: piezas de comparación ("A o B") y de costos con rangos propios fechados. Son las consultas que más se le hacen a una IA y las que hoy no cubrimos.
-5. **Enlazar artículos y glosario por schema** (`about` / `mentions`), no solo visualmente.
+5. ~~Enlazar artículos y glosario por schema~~ **hecho** (27/8/2026): 31 de los 42 artículos declaran los términos que nombran y 17 fichas del glosario muestran en qué artículos se usa la palabra.
 
 ## MI PEDIDO DE HOY
 
