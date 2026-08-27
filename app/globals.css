@@ -3072,7 +3072,7 @@ footer.site {
 }
 .carr[data-modo="3d"] .carr__escena {
   perspective: var(--perspectiva);
-  height: clamp(270px, 43vh, 470px);
+  height: clamp(250px, 41vh, 430px);
   cursor: grab;
   outline: none;
   /* Los paneles de los costados se van desvaneciendo en vez de cortarse
@@ -3109,8 +3109,10 @@ footer.site {
   position: absolute;
   top: 0;
   left: 50%;
-  width: clamp(340px, 43vw, 760px);
-  margin-left: calc(clamp(340px, 43vw, 760px) / -2);
+  /* El alto del panel sale de su ancho (16:9). Si el ancho se pasa, el panel
+     queda más alto que la escena y la máscara se come el título de abajo. */
+  width: clamp(320px, 38vw, 660px);
+  margin-left: calc(clamp(320px, 38vw, 660px) / -2);
   /* La posicion la escribe el JS en cada cuadro: cada panel se ubica por su
      distancia al centro, para que el anillo no tenga costados vacios. */
 }
@@ -3272,12 +3274,23 @@ footer.site {
   top: 0;
   left: 50%;
   height: 100%;
-  width: calc(100% / var(--tajadas) + 0.6px); /* el pelo de más tapa la costura */
-  margin-left: calc(100% / var(--tajadas) / -2);
+  /* El ancho tiene que ser EXACTO. El fondo de cada tajada se escala a
+     (tajadas × 100%) de ESTE ancho, así que agrandarlo "un pelo" para tapar la
+     costura desalinea el recorte y las letras salen partidas y duplicadas:
+     "TRIABAJAR ASÍ", "SIEN CIONTROLAR".
+
+     Y tapar la costura superponiendo tajadas es peor: la parte superpuesta
+     repite un pedacito de imagen y aparecen letras de más. Con el radio bien
+     calculado los bordes se tocan solos y no hay nada que tapar. */
+  /* 1px de más para que la junta con la vecina no deje una raya de
+     antialiasing. Ese píxel extra muestra el pixel que sigue de la foto —el
+     que le toca a la vecina—, así que empalma en vez de repetir. */
+  width: calc(var(--ancho-tajada, 60px) + 1px);
+  margin-left: calc(var(--ancho-tajada, 60px) / -2);
   background-image: var(--foto);
   background-repeat: no-repeat;
-  background-size: calc(var(--tajadas) * 100%) 100%;
-  background-position: calc(var(--k) * 100% / (var(--tajadas) - 1)) center;
+  background-size: var(--ancho-foto, 540px) 100%;
+  background-position: calc(var(--k) * var(--ancho-tajada, 60px) * -1) center;
   transform:
     rotateY(calc((var(--k) - (var(--tajadas) - 1) / 2) * var(--paso-tajada, 2deg)))
     translateZ(var(--radio-tajada, 900px));
@@ -3313,7 +3326,7 @@ footer.site {
   flex-direction: column;
   justify-content: flex-end;
   min-height: 0;
-  padding-bottom: clamp(18px, 4vh, 46px);
+  padding-bottom: clamp(14px, 2.4vh, 28px);
 }
 
 @media (max-width: 899px) {
@@ -3361,3 +3374,31 @@ footer.site {
 }
 /* El del centro brilla un poco más: acompaña a dónde está mirando el ojo. */
 .carr[data-modo="3d"] .carr__item[data-centro="si"] .carr__glow { opacity: 0.62; }
+
+/* ---------- en escritorio, la marca al centro ----------
+   El logo arriba y el nombre debajo, los dos centrados en la pantalla. En
+   celular se queda como está: al lado del nombre, alineado a la izquierda,
+   porque centrado en una pantalla angosta el bloque queda flotando. */
+@media (min-width: 900px) {
+  .hstage--corto {
+    align-items: center;
+    text-align: center;
+    max-width: none;
+  }
+  .hmarca {
+    flex-direction: column;
+    gap: clamp(12px, 1.4vw, 22px);
+  }
+  /* Apilado, el bloque de marca pasa a medir casi 500px y empujaba el
+     carrusel fuera de la pantalla. Logo y nombre bajan de tamaño para que las
+     dos cosas entren en la primera pantalla, que es de lo que se trata. */
+  .hmarca__logo { width: clamp(56px, 5vw, 84px); }
+  .hstage--corto h1 { font-size: clamp(2.3rem, 5.2vw, 4.6rem); }
+  .hstage--corto .hsub { margin-top: 10px; }
+  .hstage--corto { padding-top: clamp(6px, 1.2vh, 16px); }
+  .hstage--corto .eyebrow { margin-bottom: 8px !important; }
+  /* El escalón de la segunda línea es para un bloque alineado a la izquierda:
+     centrado, ese sangrado deja el nombre corrido de su propio eje. */
+  .hstage--corto h1 .l2 { padding-left: 0; }
+  .hstage--corto .hsub { margin-left: auto; margin-right: auto; }
+}

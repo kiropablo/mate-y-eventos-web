@@ -144,6 +144,13 @@ export default function CarruselEpisodios({ episodios = [] }) {
     const radioTajada =
       ancho / TAJADAS / 2 / Math.tan((pasoTajada * Math.PI) / 360);
     caja.style.setProperty("--tajadas", String(TAJADAS));
+    // El ancho de la foto y de cada tajada, en píxeles. El recorte de cada
+    // tajada se hace con estos y no con porcentajes de su propio ancho: así la
+    // tajada puede ser 1px más ancha —para tapar la junta— sin que eso
+    // desplace el recorte. Con porcentajes, agrandarla movía la imagen y
+    // salían letras duplicadas.
+    caja.style.setProperty("--ancho-foto", `${ancho}px`);
+    caja.style.setProperty("--ancho-tajada", `${ancho / TAJADAS}px`);
     caja.style.setProperty("--paso-tajada", `${pasoTajada.toFixed(3)}deg`);
     caja.style.setProperty("--radio-tajada", `${Math.round(radioTajada)}px`);
   }, []);
@@ -164,10 +171,23 @@ export default function CarruselEpisodios({ episodios = [] }) {
   }, [episodios.length]);
 
   // La medición corre en los dos modos: la cinta se dobla también en celular.
+  //
+  // Y se vigila el panel, no la ventana. El radio de la curva sale del ancho
+  // del panel, así que si el panel cambia de ancho sin que la ventana se
+  // mueva —al cargar las tipografías, al aparecer la barra de scroll, al
+  // rotar el teléfono— el radio queda viejo y las tajadas dejan de tocarse:
+  // aparecen huecos entre ellas y el video se ve partido en franjas. Pasó
+  // exactamente eso y el hueco era de 8px por junta.
   useEffect(() => {
     medir();
-    window.addEventListener("resize", medir);
-    return () => window.removeEventListener("resize", medir);
+    const panel = panelRef.current;
+    if (!panel || typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", medir);
+      return () => window.removeEventListener("resize", medir);
+    }
+    const vigia = new ResizeObserver(() => medir());
+    vigia.observe(panel);
+    return () => vigia.disconnect();
   }, [medir, activo]);
 
   useEffect(() => {
