@@ -70,6 +70,7 @@ export default function CarruselEpisodios({ episodios = [] }) {
   // movimiento sea fluido; el destino es al que tiende.
   const pos = useRef(ARRANQUE);
   const destino = useRef(ARRANQUE);
+  const destinoPrevio = useRef(null);
   const cuadro = useRef(0);
   const arrastre = useRef(null);
   const quieto = useRef(null);
@@ -79,6 +80,16 @@ export default function CarruselEpisodios({ episodios = [] }) {
   const [centro, setCentro] = useState(0);
   const escenaRef = useRef(null);
   const centroRef = useRef(0);
+
+  // En la tira, la lista se repite tres veces y se arranca en la copia del
+  // medio: al llegar al final de una copia ya está la siguiente, y el scroll
+  // se corre una copia hacia atrás sin que se note. Así la tira no hace tope
+  // y sigue de largo, igual que el anillo de escritorio.
+  //
+  // Las copias se agregan RECIÉN al montar, no en el HTML del servidor: si
+  // fueran del servidor, Google vería cuarenta y ocho links a dieciséis
+  // episodios.
+  const [clonar, setClonar] = useState(false);
   const reloj = useRef(0);
   // El mismo dato en un ref, para poder leerlo desde los manejadores sin
   // rearmarlos en cada cambio.
@@ -86,19 +97,25 @@ export default function CarruselEpisodios({ episodios = [] }) {
   activoRef.current = activo;
 
   const cuantos = episodios.length;
+  const COPIAS = 3;
+  const lista = clonar
+    ? Array.from({ length: COPIAS }, () => episodios).flat()
+    : episodios;
 
   const irA = useCallback(
     (n) => {
       destino.current = n;
       const cual = (((Math.round(n) % cuantos) + cuantos) % cuantos) || 0;
       setCentro(cual);
-      // En modo tira no hay cilindro que girar: se corre el scroll horizontal,
-      // que si no las flechas cambiaban el contador y nada más. Se mueve la
-      // pista y no scrollIntoView, que además de la tira empuja la página.
+      // En modo tira no hay cilindro que girar: se corre el scroll horizontal.
+      // Y se corre RELATIVO a donde está, no a un índice fijo: con la lista
+      // repetida, un índice absoluto saltaría a la primera copia.
       if (!activoRef.current && pistaRef.current) {
         const paso = pasoDeLaTira(items.current);
         if (paso) {
-          pistaRef.current.scrollTo({ left: cual * paso, behavior: "smooth" });
+          const cuanto = Math.round(n - (destinoPrevio.current ?? n));
+          destinoPrevio.current = n;
+          pistaRef.current.scrollBy({ left: cuanto * paso, behavior: "smooth" });
         }
       }
     },
@@ -176,6 +193,74 @@ export default function CarruselEpisodios({ episodios = [] }) {
     puede.addEventListener("change", decidir);
     return () => puede.removeEventListener("change", decidir);
   }, [episodios.length]);
+
+  // La tira se repite y se arranca en la copia del medio. Solo en tira: en el
+  // anillo de escritorio no hacen falta copias, el módulo ya da la vuelta.
+  useEffect(() => {
+    if (activo || cuantos === 0) {
+      setClonar(false);
+      return;
+    }
+    setClonar(true);
+  }, [activo, cuantos]);
+
+  useEffect(() => {
+    if (!clonar || !pistaRef.current) return;
+    const paso = pasoDeLaTira(items.current);
+    if (!paso) return;
+    // Sin animación: es la posición de arranque, no un movimiento.
+    pistaRef.current.scrollLeft = cuantos * paso;
+  }, [clonar, cuantos]);
+
+  // El scroll de la tira, escuchado del elemento y no con el onScroll de
+  // React: el evento de scroll no burbujea, y por acá además se puede pedir
+  // passive y no rehacer el manejador en cada render.
+  useEffect(() => {
+    if (activo) return undefined;
+    const pista = pistaRef.current;
+    if (!pista) return undefined;
+
+    let reacomodo;
+    const alScrollear = () => {
+      const paso = pasoDeLaTira(items.current);
+      if (!paso) return;
+      const bruto = Math.round(pista.scrollLeft / paso);
+
+      // El contador cuenta episodios, no posiciones de la tira: con la lista
+      // repetida tres veces, la posición 20 es el episodio 5.
+      const cual = ((bruto % cuantos) + cuantos) % cuantos;
+      if (cual !== centroRef.current) {
+        centroRef.current = cual;
+        setCentro(cual);
+      }
+      // El dedo también manda: si no, la flecha siguiente arrancaba desde
+      // donde había quedado antes de scrollear.
+      destino.current = bruto;
+      destinoPrevio.current = bruto;
+      pos.current = bruto;
+
+      if (!clonar) return;
+      // Se vuelve a la copia del medio, y recién al frenar: corregir mientras
+      // el dedo todavía tiene inercia se siente como un tirón.
+      clearTimeout(reacomodo);
+      reacomodo = setTimeout(() => {
+        // La ventana buena es la copia del medio: de una copia a dos. Fuera
+        // de ahí se trae de vuelta al punto equivalente de esa copia, que es
+        // exactamente el mismo panel en la misma posición: no se ve el salto.
+        const unaCopia = cuantos * paso;
+        const x = pista.scrollLeft;
+        if (x < unaCopia || x >= unaCopia * 2) {
+          pista.scrollLeft = (((x % unaCopia) + unaCopia) % unaCopia) + unaCopia;
+        }
+      }, 150);
+    };
+
+    pista.addEventListener("scroll", alScrollear, { passive: true });
+    return () => {
+      pista.removeEventListener("scroll", alScrollear);
+      clearTimeout(reacomodo);
+    };
+  }, [activo, clonar, cuantos]);
 
   // La medición corre en los dos modos: la cinta se dobla también en celular.
   //
@@ -346,37 +431,21 @@ export default function CarruselEpisodios({ episodios = [] }) {
         tabIndex={activo ? 0 : -1}
         {...alArrastrar}
       >
-        <ul
-          className="carr__pista"
-          ref={pistaRef}
-          onScroll={
-            activo
-              ? undefined
-              : (e) => {
-                  const paso = pasoDeLaTira(items.current) || 1;
-                  const cual = Math.min(
-                    Math.max(Math.round(e.currentTarget.scrollLeft / paso), 0),
-                    cuantos - 1
-                  );
-                  setCentro(cual);
-                  // El dedo también manda: si no, la flecha siguiente
-                  // arrancaba desde donde había quedado antes de scrollear.
-                  destino.current = cual;
-                  pos.current = cual;
-                }
-          }
-        >
-          {episodios.map((ep, i) => (
+        <ul className="carr__pista" ref={pistaRef}>
+          {lista.map((ep, i) => (
             <li
               className="carr__item"
-              key={ep.id}
+              key={`${Math.floor(i / cuantos)}-${ep.id}`}
               ref={(el) => {
                 items.current[i] = el;
                 if (i === 0) panelRef.current = el;
               }}
               data-centro={activo && i === centro ? "si" : "no"}
               aria-hidden={
-                activo && Math.abs(distancia(i, centro, cuantos)) > 3
+                (activo && Math.abs(distancia(i, centro, cuantos)) > 3) ||
+                // De las tres copias, una sola cuenta para los lectores de
+                // pantalla: las otras dos son la misma lista otra vez.
+                (clonar && (i < cuantos || i >= cuantos * 2))
                   ? "true"
                   : undefined
               }
@@ -386,7 +455,10 @@ export default function CarruselEpisodios({ episodios = [] }) {
                 className="carr__panel"
                 draggable={false}
                 tabIndex={
-                  activo && Math.abs(distancia(i, centro, cuantos)) > 3 ? -1 : undefined
+                  (activo && Math.abs(distancia(i, centro, cuantos)) > 3) ||
+                  (clonar && (i < cuantos || i >= cuantos * 2))
+                    ? -1
+                    : undefined
                 }
                 onClick={(e) => {
                   // Un arrastre no es un click.
