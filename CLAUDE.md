@@ -181,13 +181,13 @@ Al 28/8/2026, contado sobre el repo y la base:
 - **42 transcripciones**, 41 con subtítulos.
 - **42 artículos**, todos publicados.
 - **59 términos de glosario publicados** de 89 generados: quedan 30 en borrador.
-- **~308 eventos aprobados** en la agenda y ~50 borradores esperando aprobación en Airtable.
+- **340 eventos aprobados** en la agenda y 88 sin aprobar (borradores IA y archivados) al 27/8/2026.
 - **2 eventos verificados** por su organizador. El circuito recién arranca.
 - Search Console, semana 16–22/8: **54 clics y 4.396 impresiones**, el 91% por fichas de agenda.
 
 Pendientes:
 
-1. **Los datos de Airtable**: ~113 eventos aprobados sin fecha anunciada, 19 sin provincia, y una ficha (`curso-de-produccion-de-espectaculos`) con las fechas al revés. ExpoCehap publica una nota interna de redacción en su descripción.
+1. **Los datos de Airtable** (revisado el 27/8/2026 sobre los 340 aprobados): 110 sin fecha anunciada y 19 sin provincia. Ojo: esos 19 **tampoco tienen ciudad ni sede**, así que no son un dato que falte cargar sino eventos cuya sede todavía no se anunció; completarlos sería inventar. Lo mismo los 110 sin fecha. Las otras dos cosas de esta lista ya están resueltas: las fechas al revés de `curso-de-produccion-de-espectaculos` las detectó y vació el propio robot de verificación, y las notas internas publicadas en ExpoCehap y Expo Wedding se sacaron a mano y ahora el robot no las puede volver a escribir.
 2. **8 títulos de episodio abren pregunta sin «¿»** — se corrige en YouTube y la web lo toma solo.
 3. **Newsletter automático semanal** con los artículos nuevos vía beehiiv. Falta verificar si el plan permite crear y enviar campañas por API.
 4. **Contenido que falta**: piezas de comparación ("A o B") y de costos con rangos propios fechados. Son las consultas que más se le hacen a una IA y las que hoy no cubrimos.
