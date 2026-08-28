@@ -201,7 +201,7 @@ desde la Action **Estado**, todos los días a las 11 (después de toda la cadena
 Contado solo el 28/8/2026. No editar a mano: lo reescribe
 `scripts/contar-estado.mjs` y se pierde.
 
-- **42 transcripciones**, 37 con subtítulos.
+- **42 transcripciones**, 42 con subtítulos.
 - **42 artículos**, todos publicados.
 - **59 términos de glosario publicados** de 88 generados: quedan 29 en borrador.
 - **338 eventos aprobados** en la agenda y 90 sin aprobar (borradores IA y archivados).
