@@ -30,6 +30,7 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
 - `glosario.js` / `glosario-admin.js` — igual, sobre `content/glosario/`.
 - `transcripts.js` — `content/transcripts/{videoId}.txt` y sus subtítulos en `secciones/{videoId}.json`.
 - `mensajes.js` — los textos de los mails a organizadores, editables desde `/admin`. Dos mensajes: `primer-contacto` y `confirmacion`, cada uno en `content/mensajes/{id}.md`.
+- `newsletter.js` — arma el borrador semanal con lo que ya existe. El corte de la semana va en horario de Buenos Aires; si Airtable sale corto, el bloque de agenda no se arma.
 - `ejes.js` — agrupa los artículos por eje editorial para las landings de `/articulos/eje/`.
 - `enlaces.js` — qué términos del glosario **nombra** cada artículo, buscando la palabra en el texto. De ahí salen el `about`/`mentions` del artículo, el `subjectOf` del término y el bloque "Dónde se usa" de la ficha del glosario. **No mira los alias**: son otra palabra y la promesa es que se pueda comprobar con Ctrl+F.
 - `redirecciones.js` — las direcciones viejas de los artículos mudados salen del propio contenido.
@@ -65,6 +66,7 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
 - `/imperdibles` y `/imperdibles/[mes]`
 - `/sobre` y `/sobre/[quien]` (Pablo y Alexis)
 - `/admin` — el panel: artículos, glosario, organizadores y los textos de los mails
+- `/admin/newsletter` — el borrador del newsletter de la semana, listo para copiar y pegar en beehiiv. Página aparte del panel a propósito
 - `/sponsors`, `/newsletter`, `/prensa`, `/contacto`
 
 **`app/api/`**: `subscribe` (beehiiv) · `agenda/[slug]/confirmar` (**la única ruta pública que escribe en Airtable**, con firma y tope de 2 por día) · `agenda/[slug]/badge.svg` · `agenda/ics` y `agenda/[slug]/ics` · `agenda/revalidar` · `agenda/sugerir` · `articulos/[id]/descargar` · y bajo `admin/`: `login`, `guardar`, `glosario`, `agenda`, `verificar`, `invitar`, `confirmacion`, `difundido`, `mensaje` y `mensaje/previsualizar`.
@@ -189,7 +191,7 @@ Pendientes:
 
 1. **Los datos de Airtable** (revisado el 27/8/2026 sobre los 340 aprobados): 110 sin fecha anunciada y 19 sin provincia. Ojo: esos 19 **tampoco tienen ciudad ni sede**, así que no son un dato que falte cargar sino eventos cuya sede todavía no se anunció; completarlos sería inventar. Lo mismo los 110 sin fecha. Las otras dos cosas de esta lista ya están resueltas: las fechas al revés de `curso-de-produccion-de-espectaculos` las detectó y vació el propio robot de verificación, y las notas internas publicadas en ExpoCehap y Expo Wedding se sacaron a mano y ahora el robot no las puede volver a escribir.
 2. **8 títulos de episodio abren pregunta sin «¿»** — se corrige en YouTube y la web lo toma solo.
-3. **Newsletter automático semanal** con los artículos nuevos vía beehiiv. Falta verificar si el plan permite crear y enviar campañas por API.
+3. ~~Newsletter automático semanal~~ **resuelto de otra forma** (27/8/2026). Enviar por la API de beehiiv **pide el plan Max, US$96/mes**, y su RSS-to-Send pide exactamente el mismo plan; Launch y Scale traen la API de suscriptores —la que usa `/api/subscribe`— pero no la de envío. En vez de pagarlo, `/admin/newsletter` arma el borrador solo (artículos de la semana, términos nuevos, eventos de los próximos diez días) y el envío se hace a mano desde beehiiv. **No volver a investigar el plan sin mirar antes esa página.**
 4. **Contenido que falta**: piezas de comparación ("A o B") y de costos con rangos propios fechados. Son las consultas que más se le hacen a una IA y las que hoy no cubrimos.
 5. ~~Enlazar artículos y glosario por schema~~ **hecho** (27/8/2026): 31 de los 42 artículos declaran los términos que nombran y 17 fichas del glosario muestran en qué artículos se usa la palabra.
 
