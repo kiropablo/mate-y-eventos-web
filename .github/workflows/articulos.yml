@@ -9,9 +9,18 @@ on:
     types:
       - completed
 
+# Dos corridas en paralelo se pisarían el push. Las otras Actions ya lo tenían;
+# estas dos no, y son justo las que una vez hicieron perder 24 artículos ya
+# generados por un push rechazado.
+concurrency:
+  group: articulos
+  cancel-in-progress: false
+
 jobs:
   articulos:
     runs-on: ubuntu-latest
+    # Sin tope, una corrida colgada se queda tomada la cola para siempre.
+    timeout-minutes: 60
     permissions:
       contents: write
       issues: write
@@ -21,7 +30,7 @@ jobs:
           ref: main
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
       - name: Escribir artículos nuevos
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

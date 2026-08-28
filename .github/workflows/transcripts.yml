@@ -7,9 +7,18 @@ on:
     # Así un episodio del miércoles tiene su transcripción el jueves.
     - cron: "0 12 * * *"
 
+# Dos corridas en paralelo se pisarían el push. Las otras Actions ya lo tenían;
+# estas dos no, y son justo las que una vez hicieron perder 24 artículos ya
+# generados por un push rechazado.
+concurrency:
+  group: transcripts
+  cancel-in-progress: false
+
 jobs:
   transcripts:
     runs-on: ubuntu-latest
+    # Sin tope, una corrida colgada se queda tomada la cola para siempre.
+    timeout-minutes: 45
     permissions:
       contents: write
     steps:
@@ -18,7 +27,7 @@ jobs:
           ref: main
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
       - name: Bajar transcripciones nuevas
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
