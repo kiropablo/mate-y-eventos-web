@@ -23,7 +23,7 @@ const CSS = `
 .adm-editor{margin-top:22px;padding-top:22px;border-top:1px solid rgba(245,245,245,.1)}
 .adm-campo{margin-bottom:18px}
 .adm-campo label{display:block;font-family:var(--font-ui);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#5aa0ff;margin-bottom:8px}
-.adm-campo input,.adm-campo textarea{width:100%;background:#0c0c0f;border:1px solid rgba(245,245,245,.12);border-radius:10px;padding:13px 15px;color:#f5f5f5;font-family:var(--font-body);font-size:.98rem;line-height:1.6;resize:vertical}
+.adm-campo input,.adm-campo textarea,.adm-campo select{width:100%;background:#0c0c0f;border:1px solid rgba(245,245,245,.12);border-radius:10px;padding:13px 15px;color:#f5f5f5;font-family:var(--font-body);font-size:.98rem;line-height:1.6;resize:vertical}
 .adm-campo textarea{min-height:120px}
 .adm-campo textarea.grande{min-height:460px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;line-height:1.75}
 .adm-ayuda{font-family:var(--font-ui);font-size:.76rem;color:rgba(245,245,245,.34);margin-top:6px;line-height:1.5}
@@ -64,6 +64,15 @@ const CSS = `
 .org-acciones{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;align-items:center}
 .org-acciones .adm-btn{text-decoration:none;display:inline-flex;align-items:center}
 .org-nota{margin-top:11px;color:rgba(245,245,245,.4);font-size:.82rem}
+.org-editor{margin-top:18px;padding-top:20px;border-top:1px solid rgba(245,245,245,.1)}
+.org-aviso{margin-bottom:18px;padding:12px 15px;border-radius:10px;background:rgba(242,193,78,.08);border:1px solid rgba(242,193,78,.3);color:#f2c14e;font-size:.86rem;line-height:1.5}
+.org-propuestas{margin-bottom:24px;padding:16px 18px;background:rgba(234,71,138,.06);border:1px solid rgba(234,71,138,.22);border-radius:12px}
+.org-prop{padding:12px 0;border-top:1px solid rgba(245,245,245,.07)}
+.org-prop:first-of-type{border-top:none;padding-top:2px}
+.org-prop__que{font-family:var(--font-ui);font-weight:700;font-size:.9rem;margin-bottom:5px}
+.org-prop__dice{white-space:pre-wrap;color:rgba(245,245,245,.4);font-size:.84rem;line-height:1.5;text-decoration:line-through}
+.org-prop__nuevo{white-space:pre-wrap;color:#93d5f7;font-size:.9rem;line-height:1.55;margin:3px 0 9px}
+.org-prop .adm-btn{padding:7px 17px;font-size:.8rem}
 .org-invitar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:16px;padding:14px 16px;background:rgba(90,160,255,.06);border:1px solid rgba(90,160,255,.2);border-radius:10px}
 .org-mail{flex:1 1 220px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:10px 18px;font-family:var(--font-ui);font-size:.88rem}
 .org-mail:focus{outline:none;border-color:#5aa0ff}
@@ -97,6 +106,14 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [difundiendo, setDifundiendo] = useState("");
   const [aprobando, setAprobando] = useState("");
   const [sacando, setSacando] = useState("");
+  // El editor de ficha: cuál está abierto, lo que trajo el servidor, lo que hay
+  // escrito ahora en el formulario, y el cartel de resultado.
+  const [fichaAbierta, setFichaAbierta] = useState("");
+  const [ficha, setFicha] = useState(null);
+  const [fichaValores, setFichaValores] = useState({});
+  const [fichaCargando, setFichaCargando] = useState(false);
+  const [fichaGuardando, setFichaGuardando] = useState(false);
+  const [fichaMsj, setFichaMsj] = useState(null);
   // Los mensajes editables: cuál se está editando, sus textos, la vista previa
   // y si hay algo sin guardar. Se cargan recién al entrar a la pestaña.
   const [cualMsj, setCualMsj] = useState("primer-contacto");
@@ -249,6 +266,79 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       alert(e.message);
     } finally {
       setSacando("");
+    }
+  }
+
+  // Abrir y cerrar el editor de una ficha. Los datos se piden recién acá y no
+  // vienen con la lista: son quince campos por evento y la pestaña trae más de
+  // cien. Traerlos todos por si acaso haría lenta la pantalla que se usa
+  // siempre, para una que se usa de a una ficha por vez.
+  async function abrirFicha(ev) {
+    if (fichaAbierta === ev.slug) {
+      setFichaAbierta("");
+      setFicha(null);
+      setFichaMsj(null);
+      return;
+    }
+    setFichaAbierta(ev.slug);
+    setFicha(null);
+    setFichaMsj(null);
+    setFichaCargando(true);
+    try {
+      const res = await fetch(
+        `/api/admin/ficha?slug=${encodeURIComponent(ev.slug)}`
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok)
+        throw new Error(data?.error || "No se pudo leer la ficha.");
+      setFicha(data);
+      setFichaValores(data.valores);
+    } catch (e) {
+      setFichaMsj({ ok: false, texto: e.message });
+    } finally {
+      setFichaCargando(false);
+    }
+  }
+
+  // "Aplicar" no guarda: mete lo que propuso el organizador en el campo, para
+  // poder leerlo y corregirlo antes. Muchas correcciones vienen escritas como
+  // se las dice por teléfono ("es en el Konex, no en Costa Salguero") y no como
+  // tienen que quedar en la ficha.
+  function aplicarPropuesta(destino, valor) {
+    setFichaValores((previos) => ({ ...previos, [destino]: valor }));
+    setFichaMsj(null);
+  }
+
+  async function guardarFicha(ev) {
+    setFichaGuardando(true);
+    setFichaMsj(null);
+    try {
+      const res = await fetch("/api/admin/ficha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: ev.slug, valores: fichaValores }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok)
+        throw new Error(data?.error || "No se pudo guardar.");
+      setFichaMsj({ ok: true, texto: data.mensaje });
+      // El encabezado de la tarjeta muestra estos dos: si no se actualizan,
+      // queda diciendo el nombre viejo abajo del cartel de "guardado".
+      setOrgs((previa) =>
+        previa.map((e) =>
+          e.slug === ev.slug
+            ? {
+                ...e,
+                nombre: fichaValores.nombre || e.nombre,
+                organizador: fichaValores.organizador ?? e.organizador,
+              }
+            : e
+        )
+      );
+    } catch (e) {
+      setFichaMsj({ ok: false, texto: e.message });
+    } finally {
+      setFichaGuardando(false);
     }
   }
 
@@ -1435,6 +1525,22 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         </button>
                       ) : null}
 
+                      {/* Editar los datos sin salir del panel. Antes de esto,
+                          aplicar lo que pedía el organizador era ir a Airtable,
+                          buscar el registro y traducir a mano su respuesta a
+                          los campos de la base. */}
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn--sec"
+                        onClick={() => abrirFicha(ev)}
+                      >
+                        {fichaAbierta === ev.slug
+                          ? "Cerrar los datos"
+                          : ev.correcciones
+                            ? "Editar los datos ✏️"
+                            : "Editar los datos"}
+                      </button>
+
                       <a
                         className="adm-btn adm-btn--sec"
                         href={ev.ficha}
@@ -1455,6 +1561,152 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         {sacando === ev.slug ? "Sacando…" : "Sacar de la agenda"}
                       </button>
                     </div>
+
+                    {fichaAbierta === ev.slug ? (
+                      <div className="org-editor">
+                        {fichaCargando ? (
+                          <p className="org-nota">Trayendo los datos…</p>
+                        ) : !ficha ? (
+                          <p className="adm-msg adm-msg--mal">
+                            {fichaMsj?.texto || "No se pudo abrir la ficha."}
+                          </p>
+                        ) : (
+                          <>
+                            {ficha.verificado ? (
+                              <p className="org-aviso">
+                                Ojo: esta ficha ya tiene el sello. Si cambiás
+                                algo que el organizador no pidió, el sello queda
+                                diciendo que confirmó un dato que nunca vio.
+                              </p>
+                            ) : null}
+
+                            {ficha.propuestas?.length ? (
+                              <div className="org-propuestas">
+                                <span className="org-rotulo">
+                                  Lo que pidió corregir
+                                  {ficha.fecha ? ` · ${ficha.fecha}` : ""}
+                                </span>
+                                {ficha.propuestas.map((p, i) => (
+                                  <div className="org-prop" key={`${p.rotulo}-${i}`}>
+                                    <div className="org-prop__que">{p.rotulo}</div>
+                                    {p.dice ? (
+                                      <div className="org-prop__dice">{p.dice}</div>
+                                    ) : null}
+                                    <div className="org-prop__nuevo">{p.propuesto}</div>
+                                    {p.destino ? (
+                                      <button
+                                        type="button"
+                                        className="adm-btn adm-btn--sec"
+                                        onClick={() =>
+                                          aplicarPropuesta(p.destino, p.propuesto)
+                                        }
+                                      >
+                                        Aplicar
+                                      </button>
+                                    ) : (
+                                      <span className="org-nota">
+                                        Este no se puede aplicar solo: cargalo a
+                                        mano en los campos de abajo.
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                                {ficha.confirmados?.length ? (
+                                  <p className="org-nota">
+                                    Confirmó que están bien:{" "}
+                                    {ficha.confirmados.join(", ")}.
+                                  </p>
+                                ) : null}
+                              </div>
+                            ) : ficha.correccionesTexto ? (
+                              // Si el formato no se pudo leer, se muestra crudo:
+                              // es lo que se veía antes y no se pierde nada.
+                              <div className="org-correcciones">
+                                <strong>Respondió esto:</strong>{" "}
+                                {ficha.correccionesTexto}
+                              </div>
+                            ) : null}
+
+                            {ficha.campos.map((c) => {
+                              const id = `f-${ev.slug}-${c.clave}`;
+                              const valor = fichaValores[c.clave] ?? "";
+                              return (
+                                <div className="adm-campo" key={c.clave}>
+                                  <label htmlFor={id}>{c.rotulo}</label>
+                                  {c.tipo === "select" ? (
+                                    <select
+                                      id={id}
+                                      value={valor}
+                                      onChange={(e) =>
+                                        aplicarPropuesta(c.clave, e.target.value)
+                                      }
+                                    >
+                                      <option value="">— sin cargar —</option>
+                                      {c.opciones.map((o) => (
+                                        <option key={o} value={o}>
+                                          {o}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  ) : c.tipo === "area" ? (
+                                    <textarea
+                                      id={id}
+                                      value={valor}
+                                      onChange={(e) =>
+                                        aplicarPropuesta(c.clave, e.target.value)
+                                      }
+                                    />
+                                  ) : (
+                                    <input
+                                      id={id}
+                                      type={c.tipo === "fecha" ? "date" : "text"}
+                                      value={valor}
+                                      onChange={(e) =>
+                                        aplicarPropuesta(c.clave, e.target.value)
+                                      }
+                                    />
+                                  )}
+                                  {c.ayuda ? (
+                                    <p className="adm-ayuda">{c.ayuda}</p>
+                                  ) : null}
+                                </div>
+                              );
+                            })}
+
+                            <div className="adm-acciones">
+                              <button
+                                type="button"
+                                className="adm-btn adm-btn--pub"
+                                disabled={fichaGuardando}
+                                onClick={() => guardarFicha(ev)}
+                              >
+                                {fichaGuardando
+                                  ? "Guardando…"
+                                  : "Guardar los cambios"}
+                              </button>
+                              <button
+                                type="button"
+                                className="adm-btn adm-btn--sec"
+                                onClick={() => abrirFicha(ev)}
+                              >
+                                Cerrar
+                              </button>
+                              {fichaMsj ? (
+                                <span
+                                  className={`adm-msg ${fichaMsj.ok ? "adm-msg--ok" : "adm-msg--mal"}`}
+                                >
+                                  {fichaMsj.texto}
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="adm-ayuda">
+                              El logo no se edita acá: es una imagen y va cargada
+                              en Airtable.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ) : null}
 
                     {ev.verificado && !ev.aTiempo && !ev.difundido ? (
                       <div className="org-nota">
