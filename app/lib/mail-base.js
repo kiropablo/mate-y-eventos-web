@@ -81,6 +81,28 @@ export const firma = (texto) =>
 // El "adelanto" es el texto que muestran Gmail y Apple al lado del asunto en
 // la bandeja. Va en un div escondido: si no se pone, muestran las primeras
 // palabras del mail, que suelen ser "Hola:".
+// El pie legal, armado igual para los dos mails.
+//
+// Es el mismo texto —"respondé este mail con la palabra «baja»"— y hasta ahora
+// cada mail lo armaba por su cuenta: la invitación le ponía la negrita a la
+// palabra y la confirmación no. En un párrafo gris y chiquito, entre comillas,
+// la palabra que alguien tiene que responder para que dejemos de escribirle se
+// pierde. Y es justo la que no se puede perder.
+//
+// Recibe el texto YA escapado. Hace dos cosas: llena el paréntesis vacío que
+// dejó la marca {agenda} con el link, y pone en negrita lo que va entre
+// comillas.
+export function pieLegal(textoEscapado, urlSitio) {
+  return String(textoEscapado)
+    .replace(
+      /\(\s*\)/,
+      `(<a href="${esc(urlSitio)}/agenda" style="color:#8a8498;">${esc(
+        String(urlSitio).replace(/^https?:\/\//, "")
+      )}/agenda</a>)`
+    )
+    .replace(/&quot;([^&]{1,24})&quot;/, "<strong>$1</strong>");
+}
+
 export function pagina({ adelanto, cuerpo, pie }) {
   return `<!DOCTYPE html>
 <html lang="es">

@@ -217,7 +217,13 @@ export function radiografiaCSV(r) {
     .map((f) =>
       f
         .map((c) => {
-          const t = String(c);
+          // Coma decimal. Las medianas pueden dar 2,5 —el promedio de los dos
+          // del medio cuando hay un número par de casos— y escrito "2.5" Excel
+          // en español no lo lee como número: lo toma como texto, o peor, lo
+          // convierte en una fecha. Es el mismo motivo del punto y coma y del
+          // BOM: el archivo tiene que abrirse bien en la máquina de alguien
+          // del rubro, no en la de un programador.
+          const t = typeof c === "number" ? String(c).replace(".", ",") : String(c);
           return /[;"\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
         })
         .join(";")

@@ -7,9 +7,19 @@ import { cortesDeEje } from "../lib/ejes";
 
 export const metadata = {
   alternates: { canonical: "/articulos" },
-  title: "Artículos sobre producción y negocio de eventos",
+  // El título nombra la colección, no un tema.
+  //
+  // Decía "Artículos sobre producción y negocio de eventos", que le robaba las
+  // palabras a dos de sus propias landings: /articulos/eje/tecnico-produccion
+  // se titula "Artículos sobre producción técnica de eventos" y
+  // /articulos/eje/estrategia-negocio, "Artículos sobre estrategia y negocio
+  // de eventos". Las tres páginas competían por la misma búsqueda y ninguna
+  // quedaba como la principal. Ahora el índice es el índice y cada eje es su
+  // tema; los cuatro ejes siguen nombrados en la descripción, que es donde
+  // corresponde decir qué hay adentro.
+  title: "Todos los artículos de la industria de eventos",
   description:
-    "Análisis sobre producción, estrategia, tecnología y el lado humano de la industria de eventos. Cada artículo profundiza un episodio de Mate y Eventos.",
+    "El archivo completo: producción, estrategia y negocio, liderazgo y equipos, tecnología y tendencias. Cada artículo amplía un episodio de Mate y Eventos.",
 };
 
 export const revalidate = 3600;

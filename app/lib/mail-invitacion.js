@@ -1,7 +1,17 @@
 import { formatRango, nombreConAnio } from "./agenda";
 import { DIAS_PARA_DIFUNDIR, llegamosADifundir, lunesDe, MAXIMO_SEMANA } from "./semana";
 import { SITE } from "./site";
-import { esc, bloque, parrafo, tenue, fila, boton, firma, pagina } from "./mail-base";
+import {
+  esc,
+  bloque,
+  parrafo,
+  tenue,
+  fila,
+  boton,
+  firma,
+  pagina,
+  pieLegal,
+} from "./mail-base";
 import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes";
 
 // El mail que le llega al organizador.
@@ -293,16 +303,7 @@ export function armarInvitacion({
     </p>`,
     "8px 34px 30px"
   )}`,
-    pie: esc(reemplazar(M.pie, { ...marcas, agenda: "" }))
-      // El paréntesis vacío que dejó la marca {agenda} se llena con el link.
-      .replace(
-        /\(\s*\)/,
-        `(<a href="${esc(SITE.url)}/agenda" style="color:#8a8498;">${esc(SITE.url.replace(/^https?:\/\//, ""))}/agenda</a>)`
-      )
-      // Lo que va entre comillas se pone en negrita, como estaba antes: es la
-      // palabra que tiene que responder para que no le escribamos más, y en un
-      // párrafo gris chiquito entre comillas se pierde.
-      .replace(/&quot;([^&]{1,24})&quot;/, "<strong>$1</strong>"),
+    pie: pieLegal(esc(reemplazar(M.pie, { ...marcas, agenda: "" })), SITE.url),
   });
 
   return { asunto, texto, html };

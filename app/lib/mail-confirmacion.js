@@ -11,6 +11,7 @@ import {
   conLinks,
   firma,
   pagina,
+  pieLegal,
 } from "./mail-base";
 
 // El mail que sale cuando el sello ya quedó encendido.
@@ -66,7 +67,11 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
     destacado: `${SITE.url}/agenda/destacado`,
     otros:
       resto > 0
-        ? `${nombresOtros.join(", ")} y ${resto} más`
+        ? // "y 1 más" suena a error de plantilla. Con uno solo se lo nombra,
+          // que además es más cálido: son cuatro eventos, no tres y un número.
+          resto === 1
+          ? enumerar(otros.slice(0, 4).map((e) => e.nombre))
+          : `${nombresOtros.join(", ")} y ${resto} más`
         : enumerar(nombresOtros),
   };
 
@@ -161,10 +166,7 @@ export function armarConfirmacion({ ev, otros = [], mensaje }) {
   const html = pagina({
     adelanto: `El sello quedó encendido en la ficha de ${nombre}.`,
     cuerpo,
-    pie: esc(reemplazar(M.pie, { ...marcas, agenda: "" })).replace(
-      /\(\s*\)/,
-      `(<a href="${esc(SITE.url)}/agenda" style="color:#8a8498;">${esc(SITE.url.replace(/^https?:\/\//, ""))}/agenda</a>)`
-    ),
+    pie: pieLegal(esc(reemplazar(M.pie, { ...marcas, agenda: "" })), SITE.url),
   });
 
   return { asunto: t("asunto"), texto, html };
