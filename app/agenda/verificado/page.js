@@ -74,14 +74,13 @@ export default async function Verificado() {
           "Qué significa el sello Verificado en la agenda de eventos de Mate y Eventos y qué se chequea antes de darlo.",
         isPartOf: { "@id": `${SITE.url}/#website` },
       },
-      {
-        "@type": "FAQPage",
-        mainEntity: CHEQUEOS.map((c) => ({
-          "@type": "Question",
-          name: c.q,
-          acceptedAnswer: { "@type": "Answer", text: c.a },
-        })),
-      },
+      // Sin FAQPage. Los cuatro CHEQUEOS son lo que el sello garantiza —"Que
+      // las fechas sean las que el organizador confirma"— y no preguntas
+      // frecuentes: ninguno abre con "¿". Marcar los bullets de una promesa
+      // como Question es exactamente el uso por el que Google dejó de mostrar
+      // resultados enriquecidos de FAQ y, si se insiste, penaliza. Es el mismo
+      // error que se sacó de /agenda/destacado. El contenido no cambia: sigue
+      // escrito y visible en la página, que es donde importa.
       {
         "@type": "BreadcrumbList",
         itemListElement: [
