@@ -60,6 +60,10 @@ function parsear(crudo, slug) {
     eje: datos.eje || "",
     relacionados: Array.isArray(datos.relacionados) ? datos.relacionados : [],
     publicado: datos.publicado === true,
+    // Cuándo una persona lo aprobó desde el panel, que es cuándo salió a la
+    // web. Estaba en la cabecera de todos los términos y no se leía en ningún
+    // lado; lo usa el borrador del newsletter para saber qué es nuevo.
+    revisado: datos.revisado || datos.generado || "",
     cuerpo: crudo.slice(m[0].length).trim(),
   };
 }
