@@ -204,7 +204,9 @@ Contado solo el 28/8/2026. No editar a mano: lo reescribe
 - **42 transcripciones**, 37 con subtítulos.
 - **42 artículos**, todos publicados.
 - **59 términos de glosario publicados** de 88 generados: quedan 29 en borrador.
-- _La agenda no se pudo contar en esta corrida (sin `AIRTABLE_API_KEY` o Airtable no contestó)._
+- **338 eventos aprobados** en la agenda y 90 sin aprobar (borradores IA y archivados).
+- **10 eventos verificados** por su organizador.
+- De los aprobados: 110 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
 <!-- CONTADO:FIN -->
 
 Lo que no se puede contar desde acá y sigue a mano:
