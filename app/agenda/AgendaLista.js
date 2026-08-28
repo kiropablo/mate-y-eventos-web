@@ -469,7 +469,7 @@ function ListaCompacta({ eventos, pasado = false }) {
                     {!pasado ? (
                       <Destaque destacado={ev.destacado} pago={ev.destacadoPago} />
                     ) : null}
-                    {ev.nombre}
+                    <span className="ag-fila__txt">{ev.nombre}</span>
                     {ev.verificado ? (
                       <span
                         className="sello-mini"

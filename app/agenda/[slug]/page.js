@@ -130,12 +130,23 @@ export default async function Evento({ params }) {
         // dominio, mide 1200×630 y no vence.
         image: [`${SITE.url}/agenda/${ev.slug}/opengraph-image`],
         ...(ev.web ? { sameAs: ev.web } : {}),
+        // El organizador va con su nombre y nada más.
+        //
+        // Antes llevaba url: ev.web, que es la web del EVENTO, no la del
+        // organizador. O sea que el sitio afirmaba que allaccess.com.ar —una
+        // ticketera— es el sitio de DF Entertainment, y lo mismo en otras
+        // siete fichas; y en otras 135 atribuía al organizador la web del
+        // evento que produce, que tampoco es suya. La web del evento ya está
+        // declarada arriba en sameAs, que es donde corresponde.
+        //
+        // Si alguna vez hace falta la web real del organizador, está en la
+        // tabla Organizadores de Airtable, que es otro dato y hay que traerlo
+        // de ahí.
         ...(ev.organizador
           ? {
               organizer: {
                 "@type": "Organization",
                 name: ev.organizador,
-                ...(ev.web ? { url: ev.web } : {}),
               },
             }
           : {}),

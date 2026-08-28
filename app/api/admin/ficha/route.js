@@ -95,11 +95,15 @@ export async function POST(request) {
   let id = "";
   let slug = "";
   let entran = {};
+  let originales = null;
   try {
     const body = await request.json();
     id = String(body?.id || "");
     slug = String(body?.slug || "");
     entran = body?.valores || {};
+    // Cómo estaba la ficha cuando se abrió el editor. Si no viene, no se
+    // puede chequear nada y se guarda como antes.
+    originales = body?.originales || null;
   } catch {
     return Response.json({ ok: false, error: "No se entendió el pedido." }, { status: 400 });
   }
@@ -180,6 +184,40 @@ export async function POST(request) {
     fields[c.campo] =
       c.tipo === "fecha" && !nuevos[c.clave] ? null : nuevos[c.clave];
     cambiados.push(c.rotulo);
+  }
+
+  // --- ¿Alguien tocó la ficha mientras el editor estaba abierto?
+  //
+  // El editor manda TODOS los campos con el valor que tenían al abrirlo, no
+  // solo los que se escribieron. Sin este chequeo, si el robot de la agenda
+  // completaba una fecha a las 8 de la mañana y el editor estaba abierto desde
+  // las 7, guardar cualquier otro campo revertía esa fecha al valor viejo, sin
+  // que nada lo dijera.
+  //
+  // Se compara la foto de cuando se abrió contra lo que hay guardado AHORA. Si
+  // difieren en algún campo que este guardado iba a pisar, se frena entero y
+  // se dice cuál: guardar la mitad deja la ficha en un estado que nadie pidió,
+  // igual que con las validaciones de arriba.
+  if (originales && cambiados.length) {
+    const pisados = [];
+    for (const c of CAMPOS_EDITABLES) {
+      if (!(c.campo in fields)) continue;
+      if (!(c.clave in originales)) continue;
+      const cuandoAbrio = String(originales[c.clave] ?? "").trim();
+      const guardadoAhora = ahora[c.clave] || "";
+      if (cuandoAbrio !== guardadoAhora) pisados.push(c.rotulo);
+    }
+    if (pisados.length) {
+      return Response.json(
+        {
+          ok: false,
+          error: `Mientras tenías el editor abierto cambió ${
+            pisados.length === 1 ? "este campo" : "estos campos"
+          }: ${pisados.join(", ")}. Cerrá el editor y volvé a abrirlo para ver lo que hay ahora; si guardás igual, pisás ese cambio.`,
+        },
+        { status: 409 }
+      );
+    }
   }
 
   if (!cambiados.length) {

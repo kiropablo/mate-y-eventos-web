@@ -346,7 +346,15 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       const res = await fetch("/api/admin/ficha", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: ev.id, slug: ev.slug, valores: fichaValores }),
+        body: JSON.stringify({
+          id: ev.id,
+          slug: ev.slug,
+          valores: fichaValores,
+          // La foto de cómo estaba la ficha cuando se abrió el editor. El
+          // servidor la usa para darse cuenta si alguien más tocó un campo
+          // mientras estaba abierto.
+          originales: ficha?.valores || null,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok)

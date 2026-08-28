@@ -2313,9 +2313,26 @@ footer.site {
   color: var(--hueso);
   font-weight: 600;
   font-size: 15px;
-  white-space: nowrap;
+  /* El renglón entero era nowrap + overflow:hidden, así que en un nombre largo
+     el ✓ del sello quedaba FUERA del recorte y no se veía: medido en un
+     teléfono de 390, el sello terminaba en x=556 dentro de un contenedor que
+     cierra en 328. Justo el evento cuyos datos confirmó su organizador perdía
+     la marca que lo dice. Ahora se recorta solo el nombre y lo de al lado —el
+     punto de color, la estrella de destacado y el sello— no se achica. */
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+/* Lo único que se recorta. */
+.ag-fila__txt {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ag-fila__nombre > .dot,
+.ag-fila__nombre .sello-mini {
+  flex: 0 0 auto;
 }
 .ag-fila__meta {
   color: var(--gris);

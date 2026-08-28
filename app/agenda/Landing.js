@@ -59,7 +59,7 @@ export default function Landing({ corte, otros = [], recíproco = null }) {
                       style={{ background: TIPO_COLOR[ev.tipo] || "#9aa3b2" }}
                     />
                     <Destaque destacado={ev.destacado} pago={ev.destacadoPago} />
-                    {ev.nombre}
+                    <span className="ag-fila__txt">{ev.nombre}</span>
                     {ev.verificado ? (
                       <span
                         className="sello-mini"
