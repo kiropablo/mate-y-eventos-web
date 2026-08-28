@@ -174,6 +174,12 @@ Cosas sabidas y verificadas (no volver a investigar):
 
 13. **Si el código lo declara, la página lo tiene que mostrar.** El bloque "Dónde se usa" y el `subjectOf` del término salen de la misma lista y con el mismo corte, a propósito. Marcar una relación que el lector no puede ver es justamente por lo que Google penaliza.
 
+14. **Un JSON-LD sin `@context` parsea igual y no existe para nadie.** Sin él, un parser no resuelve `BreadcrumbList` contra schema.org: lo toma como término relativo a la URL y el nodo queda vacío, con un tipo inventado. El JSON se ve perfecto a simple vista, que es por lo que 84 páginas estuvieron sin migas de pan sin que nadie lo notara. **Cada objeto de un array de JSON-LD necesita el suyo: no se hereda del vecino.** Y ojo con las asimetrías: la ficha de agenda lo tenía y las otras dos plantillas no, y esa diferencia era la única pista.
+
+15. **El slug de un evento no es único.** El robot lo arma del nombre, así que un duplicado archivado y su gemelo publicado comparten slug. Todo lo que escriba tiene que identificar por el **id del registro de Airtable**. Mientras el panel mostraba solo los aprobados no se notaba; al mostrar los tres estados, apretar un botón en la fila del archivado le pegaba al evento publicado.
+
+16. **Lo que se ve y lo que se declara no siempre coinciden, y hay que mirar las dos.** `organizer.url` publicaba la web del evento como si fuera la del organizador: en ocho fichas eso decía que una ticketera es el sitio de la productora. Nada de eso se ve en la página; solo en el schema.
+
 ---
 
 ## ESTADO Y PENDIENTES
