@@ -209,10 +209,13 @@ Contado solo el 28/8/2026. No editar a mano: lo reescribe
 - De los aprobados: 110 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
 <!-- CONTADO:FIN -->
 
-Lo que no se puede contar desde acá y sigue a mano:
+Los de Search Console y YouTube salen del **panel** (`datos.mateyeventos.com/api/data`,
+que es público): ese proyecto ya guarda su propio histórico en Neon y lo actualiza cada hora.
 
-- Search Console, semana 16–22/8/2026: **54 clics y 4.396 impresiones**, el 91% por fichas de agenda. (No hay API conectada; sale de mirar el panel de Google.)
-- Los `STATS` de `app/lib/site.js` —las visitas de YouTube, el crecimiento y los países— siguen escritos a mano y llevan su fecha de corte al pie. Las visitas se podrían automatizar con la API de YouTube; los países piden YouTube Analytics, que necesita OAuth y no alcanza con la clave que ya tenemos.
+Lo único que sigue a mano son los `STATS` de `app/lib/site.js` —las visitas de YouTube, el
+crecimiento y los países—, que son **los números que se publican en la web**, con su fecha de
+corte al pie. Las visitas se podrían tomar del panel igual que las de arriba; el crecimiento y
+los países piden YouTube Analytics, que necesita OAuth y no alcanza con la clave que ya tenemos.
 
 Pendientes:
 

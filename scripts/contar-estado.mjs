@@ -146,6 +146,53 @@ async function contarAgenda() {
 }
 
 // --------------------------------------------------------------------------
+// Lo que ya mide el panel (datos.mateyeventos.com)
+//
+// El panel es otro proyecto, con su propia base en Neon, y ahi adentro estan
+// las dos cosas que en este repo estaban escritas a mano: las visitas de
+// YouTube y los numeros de Search Console. Su API es publica, asi que se leen
+// de ahi en vez de copiarlas cada tanto.
+//
+// Durante un tiempo este archivo afirmo que Search Console no tenia API
+// conectada. Era falso: el 54 clics / 4.396 impresiones que estaba anotado a
+// mano coincide exacto con lo que la base tiene para esa semana. O sea que el
+// dato ya salia de aca y igual envejecio, que es el caso de la regla 10.
+//
+// Si el panel no contesta no se inventa nada: esas lineas no se escriben.
+const PANEL = "https://datos.mateyeventos.com/api/data";
+
+async function leerPanel() {
+  try {
+    const res = await fetch(PANEL, { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error(`el panel respondió ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.error(`[estado] no se pudo leer el panel: ${e.message}`);
+    return null;
+  }
+}
+
+// La ultima semana COMPLETA que tenga datos. Search Console publica con
+// dos o tres dias de atraso, asi que tomar "los ultimos 7 dias" da siempre
+// una semana coja y el numero sale mas chico de lo que fue.
+function semanaSEO(panel) {
+  const dias = panel?.seo?.dias;
+  if (!Array.isArray(dias) || dias.length < 7) return null;
+  const ult = dias.slice(-7);
+  return {
+    desde: ult[0].dia,
+    hasta: ult[6].dia,
+    clicks: ult.reduce((a, d) => a + (d.clicks || 0), 0),
+    impresiones: ult.reduce((a, d) => a + (d.impresiones || 0), 0),
+  };
+}
+
+function fechaCorta(iso) {
+  const [a, m, d] = String(iso).split("-").map(Number);
+  return `${d}/${m}/${a}`;
+}
+
+// --------------------------------------------------------------------------
 
 function hoyBuenosAires() {
   return new Date().toLocaleDateString("es-AR", {
@@ -156,7 +203,7 @@ function hoyBuenosAires() {
   });
 }
 
-function armarBloque({ trans, arts, glo, agenda }) {
+function armarBloque({ trans, arts, glo, agenda, panel }) {
   const l = [];
   l.push(`Contado solo el ${hoyBuenosAires()}. No editar a mano: lo reescribe`);
   l.push(`\`scripts/contar-estado.mjs\` y se pierde.`);
@@ -193,6 +240,24 @@ function armarBloque({ trans, arts, glo, agenda }) {
     );
   }
 
+  const seo = semanaSEO(panel);
+  if (seo) {
+    l.push(
+      `- Search Console, semana del ${fechaCorta(seo.desde)} al ${fechaCorta(seo.hasta)}: **${seo.clicks} clics y ${seo.impresiones.toLocaleString("es-AR")} impresiones**. El grueso sigue entrando por fichas de agenda.`
+    );
+  }
+  const vistas = panel?.youtube?.actual?.vistas;
+  if (vistas) {
+    l.push(
+      `- YouTube: **${vistas.toLocaleString("es-AR")} visitas** y ${panel.youtube.actual.seguidores} suscriptores. Ojo: \`STATS.vistasYouTube\` en \`app/lib/site.js\` es un número aparte, escrito a mano, y es el que se publica en la web.`
+    );
+  }
+  if (!seo && !vistas) {
+    l.push(
+      `- _El panel (datos.mateyeventos.com) no contestó en esta corrida: faltan los números de Search Console y YouTube._`
+    );
+  }
+
   return l.join("\n");
 }
 
@@ -204,6 +269,7 @@ async function main() {
     arts: contarCarpeta("articulos"),
     glo: contarCarpeta("glosario"),
     agenda: await contarAgenda(),
+    panel: await leerPanel(),
   };
 
   const bloque = armarBloque(datos);
