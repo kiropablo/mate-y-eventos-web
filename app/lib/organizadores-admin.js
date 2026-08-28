@@ -20,6 +20,39 @@ const MESES_ADELANTE = 4;
 // entra en la tarjeta. El completo lo trae el editor cuando se abre.
 const CORRECCIONES_EN_LISTA = 600;
 
+// El final del historial de correcciones, no el principio.
+//
+// La ruta de confirmación agrega cada respuesta nueva ABAJO de las anteriores,
+// así que lo último que dijo el organizador está al final. Cortando desde el
+// principio, la tarjeta mostraba la corrección MÁS VIEJA y escondía la que
+// acababa de llegar, que es justo la que hay que leer para decidir. Y sin
+// decir que había más.
+function ultimasCorrecciones(texto) {
+  const t = String(texto || "").trim();
+  if (!t) return { texto: "", recortado: false };
+  if (t.length <= CORRECCIONES_EN_LISTA) return { texto: t, recortado: false };
+
+  // Se arma de atrás para adelante y por entradas enteras: cortar por
+  // cantidad de caracteres deja la tarjeta empezando a mitad de una oración.
+  // Cada respuesta del organizador va separada por un renglón en blanco.
+  const entradas = t.split(/\n{2,}/);
+  const elegidas = [];
+  let largo = 0;
+  for (let i = entradas.length - 1; i >= 0; i--) {
+    const e = entradas[i];
+    if (elegidas.length && largo + e.length + 2 > CORRECCIONES_EN_LISTA) break;
+    elegidas.unshift(e);
+    largo += e.length + 2;
+  }
+  // Si una sola entrada ya no entra, se muestra su final, que es donde está
+  // lo que el organizador escribió último.
+  const salida =
+    elegidas.length === 1 && elegidas[0].length > CORRECCIONES_EN_LISTA
+      ? elegidas[0].slice(-CORRECCIONES_EN_LISTA)
+      : elegidas.join("\n\n");
+  return { texto: salida, recortado: elegidas.length < entradas.length || salida !== t };
+}
+
 // Todos los mails que aparezcan en el campo Contactos, que es texto libre.
 //
 // Se devuelven todos y no el primero porque el primero muchas veces no es el
@@ -104,7 +137,10 @@ export async function listarOrganizadoresParaPanel() {
       // El campo entero, para ver de dónde sale cada mail: no es lo mismo el
       // de prensa que el de venta de entradas.
       contactos: (ev.contactos || []).join(" · ").slice(0, 300),
-      correcciones: (ev.correcciones || "").slice(0, CORRECCIONES_EN_LISTA),
+      correcciones: ultimasCorrecciones(ev.correcciones).texto,
+      // Que la tarjeta pueda decir que hay más arriba, en vez de mostrar un
+      // recorte como si fuera todo.
+      correccionesRecortadas: ultimasCorrecciones(ev.correcciones).recortado,
       tieneCorrecciones: Boolean((ev.correcciones || "").trim()),
       aTiempo: llegamosADifundir(ev),
       ficha: `${SITE.url}/agenda/${ev.slug}`,

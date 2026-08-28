@@ -220,6 +220,17 @@ export async function POST(request) {
     }
   }
 
+  // Si cambia el nombre, se congela la URL.
+  //
+  // El slug sale del campo Slug y solo se deriva del nombre cuando ese campo
+  // está vacío. Hoy las 338 fichas aprobadas lo tienen cargado, así que
+  // renombrar no mueve nada. Pero si alguna vez entra una sin él —creada a
+  // mano, o por un camino nuevo— cambiarle el nombre le cambiaría la
+  // dirección pública en silencio, y con ella se rompería el link firmado que
+  // ya se le mandó al organizador: la firma es sobre el slug. Escribirlo acá
+  // es gratis —para las 338 es el mismo valor que ya tienen— y cierra eso.
+  if ("Nombre" in fields) fields["Slug"] = ev.slug;
+
   if (!cambiados.length) {
     return Response.json({ ok: true, cambiados: [], mensaje: "No había nada para cambiar." });
   }

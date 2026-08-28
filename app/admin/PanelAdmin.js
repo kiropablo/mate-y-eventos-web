@@ -73,6 +73,7 @@ const CSS = `
 .org-prop__dice{white-space:pre-wrap;color:rgba(245,245,245,.4);font-size:.84rem;line-height:1.5;text-decoration:line-through}
 .org-prop__nuevo{white-space:pre-wrap;color:#93d5f7;font-size:.9rem;line-height:1.55;margin:3px 0 9px}
 .org-prop .adm-btn{padding:7px 17px;font-size:.8rem}
+.org-mas{color:rgba(245,245,245,.4);font-style:italic}
 .org-invitar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:16px;padding:14px 16px;background:rgba(90,160,255,.06);border:1px solid rgba(90,160,255,.2);border-radius:10px}
 .org-mail{flex:1 1 220px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:10px 18px;font-family:var(--font-ui);font-size:.88rem}
 .org-mail:focus{outline:none;border-color:#5aa0ff}
@@ -1481,8 +1482,15 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                           ) : null}
                           {ev.fechas}
                           {ev.organizador ? ` · ${ev.organizador}` : ""}
+                          {/* La cuenta regresiva sabe contar para atrás.
+                              Decía "en -12 días" desde que el panel muestra
+                              también los eventos que ya pasaron. */}
                           {typeof ev.dias === "number"
-                            ? ` · en ${ev.dias} día${ev.dias === 1 ? "" : "s"}`
+                            ? ev.dias > 0
+                              ? ` · en ${ev.dias} día${ev.dias === 1 ? "" : "s"}`
+                              : ev.dias === 0
+                                ? " · es hoy"
+                                : ` · hace ${-ev.dias} día${ev.dias === -1 ? "" : "s"}`
                             : ""}
                         </div>
                       </div>
@@ -1499,7 +1507,19 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
 
                     {ev.correcciones ? (
                       <div className="org-correcciones">
-                        <strong>Pidió corregir:</strong> {ev.correcciones}
+                        <strong>
+                          {ev.correccionesRecortadas
+                            ? "Lo último que pidió corregir:"
+                            : "Pidió corregir:"}
+                        </strong>{" "}
+                        {ev.correcciones}
+                        {ev.correccionesRecortadas ? (
+                          <span className="org-mas">
+                            {" "}
+                            Hay respuestas anteriores; el historial completo
+                            está en el editor.
+                          </span>
+                        ) : null}
                       </div>
                     ) : null}
 
