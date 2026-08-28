@@ -31,6 +31,10 @@ const CSS = `
 .adm-btn{border:none;border-radius:999px;padding:13px 26px;font-family:var(--font-ui);font-weight:700;font-size:.9rem;cursor:pointer}
 .adm-btn--pub{background:#ea478a;color:#fff}
 .adm-btn--sec{background:transparent;color:#f5f5f5;border:1px solid rgba(245,245,245,.22)}
+/* El único que saca algo de la web. Va apagado hasta que le pasás el mouse:
+   tiene que verse distinto, pero no invitar a apretarlo. */
+.adm-btn--peligro{background:transparent;color:rgba(255,138,138,.75);border:1px solid rgba(255,138,138,.28)}
+.adm-btn--peligro:hover{background:rgba(255,138,138,.1);color:#ff8a8a;border-color:rgba(255,138,138,.55)}
 .adm-btn:disabled{opacity:.45;cursor:default}
 .adm-msg{font-family:var(--font-ui);font-size:.86rem;line-height:1.5}
 .adm-msg--ok{color:#93d5f7}
@@ -92,6 +96,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [copiado, setCopiado] = useState("");
   const [difundiendo, setDifundiendo] = useState("");
   const [aprobando, setAprobando] = useState("");
+  const [sacando, setSacando] = useState("");
   // Los mensajes editables: cuál se está editando, sus textos, la vista previa
   // y si hay algo sin guardar. Se cargan recién al entrar a la pestaña.
   const [cualMsj, setCualMsj] = useState("primer-contacto");
@@ -202,6 +207,48 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       alert(e.message);
     } finally {
       setDifundiendo("");
+    }
+  }
+
+  // Sacar un evento de la agenda. No lo borra: lo manda a "Archivado", que es
+  // de donde se lo puede traer de vuelta. Se pide un motivo porque la nota que
+  // queda en Airtable es lo único que va a explicar, dentro de seis meses, por
+  // qué ese evento no está.
+  async function sacarDeLaAgenda(ev) {
+    if (
+      !confirm(
+        `¿Sacar "${ev.nombre}" de la agenda?\n\n` +
+          "Deja de publicarse en el sitio ahora mismo. NO se borra: queda " +
+          "archivado en Airtable con todos sus datos, y se puede volver a " +
+          "poner cuando quieras."
+      )
+    )
+      return;
+    const motivo = prompt(
+      "¿Por qué lo sacás? (opcional, queda anotado en Airtable)\n\n" +
+        "Por ejemplo: duplicado, se canceló, no es de la industria.",
+      ""
+    );
+    // Cancelar el segundo cartel cancela todo: si alguien llegó hasta acá y se
+    // arrepintió, lo esperable es que no pase nada.
+    if (motivo === null) return;
+
+    setSacando(ev.slug);
+    try {
+      const res = await fetch("/api/admin/descartar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: ev.slug, motivo }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo guardar.");
+      // Se va de la lista: la pestaña muestra solo lo que está publicado, así
+      // que dejarlo ahí diría que sigue en la agenda cuando ya no está.
+      setOrgs((previa) => previa.filter((e) => e.slug !== ev.slug));
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setSacando("");
     }
   }
 
@@ -1316,13 +1363,17 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                           >
                             {aprobando === ev.slug ? "Guardando…" : "Dar el OK"}
                           </button>
+                          {/* Saca el "espera tu OK" sin encender el sello: ya
+                              lo miramos y no hay nada que aplicar. Se llamaba
+                              "Descartar", que se confundía con sacar el evento
+                              de la agenda, que es otra cosa y está más abajo. */}
                           <button
                             type="button"
                             className="adm-btn adm-btn--sec"
                             disabled={aprobando === ev.slug}
                             onClick={() => aprobar(ev, false)}
                           >
-                            Descartar
+                            Marcar como visto
                           </button>
                         </>
                       ) : null}
@@ -1392,6 +1443,17 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                       >
                         Ver la ficha
                       </a>
+
+                      {/* Va último y en rojo porque es el único botón de esta
+                          tarjeta que saca algo de la web. No borra: archiva. */}
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn--peligro"
+                        disabled={sacando === ev.slug}
+                        onClick={() => sacarDeLaAgenda(ev)}
+                      >
+                        {sacando === ev.slug ? "Sacando…" : "Sacar de la agenda"}
+                      </button>
                     </div>
 
                     {ev.verificado && !ev.aTiempo && !ev.difundido ? (
