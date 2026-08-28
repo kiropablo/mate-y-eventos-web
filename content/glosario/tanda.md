@@ -3,7 +3,7 @@ termino: "Tanda"
 alias: ["tanda temática"]
 definicionCorta: "La tanda es cada bloque o segmento de música que arma el DJ dentro de un evento, con una duración y un estilo pensados para un momento específico de la fiesta."
 episodio: "uzXUhBIjF2Y"
-episodioTitulo: "T02E16 | Un DJ solo pone música? | Tommy Muñoz"
+episodioTitulo: "T02E16 | ¿Un DJ solo pone música? | Tommy Muñoz"
 minuto: ""
 eje: "Técnico & Producción"
 relacionados: []

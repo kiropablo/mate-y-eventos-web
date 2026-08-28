@@ -3,7 +3,7 @@ titulo: "ROI de eventos corporativos: ¿gasto o inversión?"
 bajada: "Un evento sin objetivo claro ni métricas siempre termina siendo un gasto. Te mostramos cómo pensarlo como canal de negocio y defenderlo frente a cualquier CFO."
 metaDescripcion: "Descubrí cómo convertir un evento en inversión con KPIs claros y un reporte post evento que lo justifique."
 episodio: "puJJ_sI3nX8"
-episodioTitulo: "T02E02 | Los eventos generan plata o son un gasto?"
+episodioTitulo: "T02E02 | ¿Los eventos generan plata o son un gasto?"
 fecha: "2026-01-21"
 eje: "Estrategia & Negocio"
 etiquetas: ["presupuesto de eventos", "kpis", "roi", "marketing de eventos", "gestión estratégica"]

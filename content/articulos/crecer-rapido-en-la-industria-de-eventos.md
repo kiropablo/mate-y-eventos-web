@@ -3,7 +3,7 @@ titulo: "Cuando crecer rápido casi te sale caro: la lección de Wen I Wish"
 bajada: "Anto Vicari, fundadora de Wen I Wish, cuenta cómo un boom de demanda post pandemia expuso los límites de su estructura y qué aprendió sobre escalar sin perder calidad."
 metaDescripcion: "Cómo escalar una empresa de eventos infantiles sin perder calidad: el caso de Wen I Wish y sus aprendizajes."
 episodio: "OSiFr7cvUUg"
-episodioTitulo: "T02E18 | Cómo se crea un evento que un niño nunca olvida? | Anto Vicari"
+episodioTitulo: "T02E18 | ¿Cómo se crea un evento que un niño nunca olvida? | Anto Vicari"
 fecha: "2026-05-27"
 eje: "Estrategia & Negocio"
 etiquetas: ["eventos infantiles", "escalabilidad", "cultura organizacional", "branding", "gestión de equipos"]

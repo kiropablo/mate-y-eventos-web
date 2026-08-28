@@ -3,7 +3,7 @@ termino: "Huella de carbono"
 alias: ["huella de carbono del evento"]
 definicionCorta: "El indicador que mide la cantidad de gases de efecto invernadero (principalmente dióxido de carbono) que generan las actividades de un evento, desde la logística hasta los residuos. Sirve para saber cuánto impacta ambientalmente una producción y poder trabajar sobre eso."
 episodio: "axR3Ow-V3sI"
-episodioTitulo: "T02E09 | Un evento sustentable cuesta más? | Ariela Giacco"
+episodioTitulo: "T02E09 | ¿Un evento sustentable cuesta más? | Ariela Giacco"
 minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []

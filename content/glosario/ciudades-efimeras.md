@@ -3,7 +3,7 @@ termino: "Ciudades efímeras"
 alias: ["ciudad efímera"]
 definicionCorta: "La analogía que compara a un festival o evento masivo con una ciudad temporal: reúne en 24 o 48 horas una cantidad de gente comparable (o mayor) a la población de una ciudad real, genera el mismo tipo de impactos (residuos, consumo, logística) y después desaparece."
 episodio: "axR3Ow-V3sI"
-episodioTitulo: "T02E09 | Un evento sustentable cuesta más? | Ariela Giacco"
+episodioTitulo: "T02E09 | ¿Un evento sustentable cuesta más? | Ariela Giacco"
 minuto: ""
 eje: "Humano"
 relacionados: []

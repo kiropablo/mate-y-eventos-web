@@ -3,7 +3,7 @@ termino: "Marcación en vivo"
 alias: ["hacer marcaciones"]
 definicionCorta: "La indicación silenciosa y discreta que un director o responsable de producción le da a un actor o performer durante la función misma, en tiempo real, para corregir algo sin que el público lo note."
 episodio: "GVQOqNnF5qs"
-episodioTitulo: "T02E11 | Y si te quitáramos la vista durante un evento? | Teatro Ciego"
+episodioTitulo: "T02E11 | ¿Y si te quitáramos la vista durante un evento? | Teatro Ciego"
 minuto: ""
 eje: "Técnico & Producción"
 relacionados: []

@@ -3,7 +3,7 @@ titulo: "Inteligencia artificial en eventos: lo que no reemplaza al productor"
 bajada: "Un DJ con 32 años de trayectoria explica por qué la inteligencia artificial puede armar un playlist perfecto pero no puede sentir lo que siente una pista a las 3 de la mañana."
 metaDescripcion: "Por qué la inteligencia artificial no reemplaza la experiencia en vivo en eventos, según un DJ con 32 años de trayectoria."
 episodio: "hcIMJOiQvVQ"
-episodioTitulo: "T02E15 | La inteligencia artificial cambiará los eventos? | Tommy Muñoz"
+episodioTitulo: "T02E15 | ¿La inteligencia artificial cambiará los eventos? | Tommy Muñoz"
 fecha: "2026-05-06"
 eje: "Tendencias & Tecnología"
 etiquetas: ["inteligencia artificial", "eventos sociales", "marca personal", "dj", "experiencias en vivo"]

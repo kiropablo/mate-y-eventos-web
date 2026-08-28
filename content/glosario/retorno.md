@@ -3,7 +3,7 @@ termino: "Retorno"
 alias: ["monitor de retorno", "sistema de retorno"]
 definicionCorta: "El sonido que el artista escucha desde el escenario mientras está actuando, generalmente a través de parlantes o monitores ubicados a sus pies o auriculares in-ear, y que le permite seguir el ritmo, la pista o su propia voz."
 episodio: "vfdeXVw89-k"
-episodioTitulo: "T02E22 | Qué hace que un show funcione? Dozer y la experiencia detrás de cada evento"
+episodioTitulo: "T02E22 | ¿Qué hace que un show funcione? Dozer y la experiencia detrás de cada evento"
 minuto: ""
 eje: "Técnico & Producción"
 relacionados: []

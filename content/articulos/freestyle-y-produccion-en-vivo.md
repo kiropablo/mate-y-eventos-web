@@ -3,7 +3,7 @@ titulo: "Lo que el freestyle le enseña a la producción de eventos en vivo"
 bajada: "Una charla con el freestyler Dozer deja pistas concretas sobre por qué lo imprevisto vende, cómo se sostiene un show cuando falla el sonido y qué separa a la persona del personaje."
 metaDescripcion: "Claves de producción de eventos en vivo que surgen del freestyle y las batallas de improvisación."
 episodio: "vfdeXVw89-k"
-episodioTitulo: "T02E22 | Qué hace que un show funcione? Dozer y la experiencia detrás de cada evento"
+episodioTitulo: "T02E22 | ¿Qué hace que un show funcione? Dozer y la experiencia detrás de cada evento"
 fecha: "2026-07-22"
 eje: "Humano"
 etiquetas: ["freestyle", "eventos en vivo", "experiencia del público", "producción técnica", "artistas"]

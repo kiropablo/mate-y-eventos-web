@@ -3,7 +3,7 @@ termino: "Fundraising (evento de)"
 alias: ["Fun Rising", "evento de recaudación de fondos"]
 definicionCorta: "Un evento de fundraising es aquel cuyo objetivo principal es recaudar dinero para una causa, típicamente organizado por una ONG o fundación, donde el KPI central es cuánto se levantó en relación a lo invertido."
 episodio: "puJJ_sI3nX8"
-episodioTitulo: "T02E02 | Los eventos generan plata o son un gasto?"
+episodioTitulo: "T02E02 | ¿Los eventos generan plata o son un gasto?"
 minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []

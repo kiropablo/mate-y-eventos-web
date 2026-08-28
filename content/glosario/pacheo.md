@@ -3,7 +3,7 @@ termino: "Pacheo"
 alias: ["pachear", "patchear"]
 definicionCorta: "El pacheo es la acción de conectar físicamente los cables de entrada y salida en una consola de sonido o de luces, siguiendo el listado de inputs y outputs del evento."
 episodio: "7vd9-PdsC-Y"
-episodioTitulo: "T02E25 | BURNOUT: por qué nos llevamos al límite?"
+episodioTitulo: "T02E25 | BURNOUT: ¿por qué nos llevamos al límite?"
 minuto: ""
 eje: "Técnico & Producción"
 relacionados: []

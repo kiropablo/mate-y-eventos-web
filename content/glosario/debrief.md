@@ -3,7 +3,7 @@ termino: "Debrief"
 alias: ["debriefing", "reunión de cierre post evento"]
 definicionCorta: "El debrief es una reunión corta, de unos 15 minutos, que se hace al terminar el evento (o al cierre de cada jornada de armado) para revisar qué salió bien, qué salió mal, qué se puede repetir y qué hay que cambiar."
 episodio: "7vd9-PdsC-Y"
-episodioTitulo: "T02E25 | BURNOUT: por qué nos llevamos al límite?"
+episodioTitulo: "T02E25 | BURNOUT: ¿por qué nos llevamos al límite?"
 minuto: ""
 eje: "Humano"
 relacionados: []

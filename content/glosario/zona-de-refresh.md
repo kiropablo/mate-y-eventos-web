@@ -3,7 +3,7 @@ termino: "Zona de refresh"
 alias: ["refresh point"]
 definicionCorta: "Un espacio dentro de un evento pensado para que el público descanse y se refresque (por ejemplo, sentarse, tomar agua), que además puede usarse como punto de contacto para relevar datos o necesidades del asistente."
 episodio: "axR3Ow-V3sI"
-episodioTitulo: "T02E09 | Un evento sustentable cuesta más? | Ariela Giacco"
+episodioTitulo: "T02E09 | ¿Un evento sustentable cuesta más? | Ariela Giacco"
 minuto: ""
 eje: "Humano"
 relacionados: []

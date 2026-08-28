@@ -3,7 +3,7 @@ termino: "Reporte post evento"
 alias: ["informe post evento"]
 definicionCorta: "El documento que se entrega al cliente, al CFO o a quien tomó la decisión de invertir, una vez terminado el evento, mostrando con métricas concretas si se cumplieron los objetivos planteados."
 episodio: "puJJ_sI3nX8"
-episodioTitulo: "T02E02 | Los eventos generan plata o son un gasto?"
+episodioTitulo: "T02E02 | ¿Los eventos generan plata o son un gasto?"
 minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []

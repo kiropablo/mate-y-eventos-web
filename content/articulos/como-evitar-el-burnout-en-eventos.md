@@ -3,7 +3,7 @@ titulo: "El burnout no es cansancio: es una falla de diseño del evento"
 bajada: "Un equipo quemado ejecuta peor aunque el evento esté impecable en el papel. Cómo detectar el desgaste a tiempo, distribuir cargas críticas y proteger la comunicación en vivo."
 metaDescripcion: "Cómo detectar y prevenir el burnout en equipos de producción de eventos: señales de alerta, distribución de tareas, comunicación y debrief post evento."
 episodio: "7vd9-PdsC-Y"
-episodioTitulo: "T02E25 | BURNOUT: por qué nos llevamos al límite?"
+episodioTitulo: "T02E25 | BURNOUT: ¿por qué nos llevamos al límite?"
 fecha: "2026-08-19"
 eje: "Humano"
 etiquetas: ["burnout", "liderazgo", "equipos de trabajo", "comunicación en eventos", "producción"]

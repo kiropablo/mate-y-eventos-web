@@ -3,7 +3,7 @@ titulo: "El DJ no pone música: administra la energía de la sala"
 bajada: "Un repaso al verdadero oficio detrás de la consola: leer el público, planificar meses antes y armar equipos que sostengan un estilo en el tiempo."
 metaDescripcion: "Qué hace realmente un DJ de eventos: leer la pista, planificar el timing y liderar equipos, más allá de poner música."
 episodio: "uzXUhBIjF2Y"
-episodioTitulo: "T02E16 | Un DJ solo pone música? | Tommy Muñoz"
+episodioTitulo: "T02E16 | ¿Un DJ solo pone música? | Tommy Muñoz"
 fecha: "2026-05-13"
 eje: "Técnico & Producción"
 etiquetas: ["djs", "eventos sociales", "entretenimiento", "liderazgo de equipos", "producción de fiestas"]

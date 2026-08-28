@@ -3,7 +3,7 @@ termino: "Recuperación de alimentos"
 alias: ["rescate de alimentos"]
 definicionCorta: "La práctica de recolectar y redistribuir la comida sobrante de un evento que todavía es apta para consumo, coordinando tiempos y logística para que llegue a destino (comedores, fundaciones) antes de que se eche a perder."
 episodio: "axR3Ow-V3sI"
-episodioTitulo: "T02E09 | Un evento sustentable cuesta más? | Ariela Giacco"
+episodioTitulo: "T02E09 | ¿Un evento sustentable cuesta más? | Ariela Giacco"
 minuto: ""
 eje: "Técnico & Producción"
 relacionados: []

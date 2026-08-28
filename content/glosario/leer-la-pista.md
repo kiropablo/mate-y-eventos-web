@@ -3,7 +3,7 @@ termino: "Leer la pista"
 alias: ["lectura de la pista"]
 definicionCorta: "Leer la pista es la capacidad del DJ de interpretar en tiempo real cómo está reaccionando el público a la música y ajustar su set en base a eso, en lugar de seguir un plan cerrado de antemano."
 episodio: "uzXUhBIjF2Y"
-episodioTitulo: "T02E16 | Un DJ solo pone música? | Tommy Muñoz"
+episodioTitulo: "T02E16 | ¿Un DJ solo pone música? | Tommy Muñoz"
 minuto: ""
 eje: "Humano"
 relacionados: []

@@ -3,7 +3,7 @@ titulo: "Sostenibilidad en eventos: la clave no es hacer todo, es elegir bien"
 bajada: "Medir la huella de carbono, elegir una sola batalla ambiental y diseñar la experiencia del público son las claves para que la sostenibilidad no sea un costo extra."
 metaDescripcion: "Sostenibilidad en eventos: cómo medir la huella de carbono y aplicar acciones reales sin disparar costos."
 episodio: "axR3Ow-V3sI"
-episodioTitulo: "T02E09 | Un evento sustentable cuesta más? | Ariela Giacco"
+episodioTitulo: "T02E09 | ¿Un evento sustentable cuesta más? | Ariela Giacco"
 fecha: "2026-03-11"
 eje: "Estrategia & Negocio"
 etiquetas: ["sostenibilidad", "huella de carbono", "festivales", "green washing", "gestión de eventos"]

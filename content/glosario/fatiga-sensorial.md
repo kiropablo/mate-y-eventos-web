@@ -3,7 +3,7 @@ termino: "Fatiga sensorial"
 alias: ["sobrecarga sensorial"]
 definicionCorta: "El agotamiento o saturación que sufre un espectador cuando una experiencia lo bombardea con demasiados estímulos (sonido, aromas, texturas) al mismo tiempo, al punto de que deja de percibirlos con atención y la experiencia pierde impacto."
 episodio: "GVQOqNnF5qs"
-episodioTitulo: "T02E11 | Y si te quitáramos la vista durante un evento? | Teatro Ciego"
+episodioTitulo: "T02E11 | ¿Y si te quitáramos la vista durante un evento? | Teatro Ciego"
 minuto: ""
 eje: "Técnico & Producción"
 relacionados: []

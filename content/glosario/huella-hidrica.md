@@ -3,7 +3,7 @@ termino: "Huella hídrica"
 alias: ["huella de agua"]
 definicionCorta: "La medición del impacto que genera un evento en el uso y manejo del agua, incluyendo aguas grises, descarte de hielo y consumo general de agua durante la producción."
 episodio: "axR3Ow-V3sI"
-episodioTitulo: "T02E09 | Un evento sustentable cuesta más? | Ariela Giacco"
+episodioTitulo: "T02E09 | ¿Un evento sustentable cuesta más? | Ariela Giacco"
 minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
