@@ -207,6 +207,8 @@ Contado solo el 28/8/2026. No editar a mano: lo reescribe
 - **338 eventos aprobados** en la agenda y 90 sin aprobar (borradores IA y archivados).
 - **10 eventos verificados** por su organizador.
 - De los aprobados: 110 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
+- Search Console, semana del 20/8/2026 al 26/8/2026: **145 clics y 12.741 impresiones**. El grueso sigue entrando por fichas de agenda.
+- YouTube: **47.591 visitas** y 289 suscriptores. Ojo: `STATS.vistasYouTube` en `app/lib/site.js` es un número aparte, escrito a mano, y es el que se publica en la web.
 <!-- CONTADO:FIN -->
 
 Los de Search Console y YouTube salen del **panel** (`datos.mateyeventos.com/api/data`,
