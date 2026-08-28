@@ -693,6 +693,13 @@ h1 .l3 {
   animation: none;
   opacity: 1;
   font-size: clamp(2.6rem, 7vw, 5rem);
+  /* "Congreso/Conferencia" es una sola palabra para el navegador: la barra no
+     es un punto de corte. A 390px entra 41,6px de Rajdhani y la palabra mide
+     más que la pantalla, así que se salía y el body la tapaba con su
+     overflow-x: hidden. Se lee "CONGRESO/CONFEREN" y el resto no está. Con
+     esto corta donde haga falta, pero solo cuando no queda otra. */
+  overflow-wrap: break-word;
+  word-break: break-word;
   text-shadow: 0 0 12px rgba(245, 245, 245, 0.14),
     0 2px 40px rgba(60, 120, 255, 0.18);
   margin-top: 14px;
@@ -1948,6 +1955,12 @@ footer.site {
   flex-wrap: wrap;
 }
 .ag-select {
+  /* Sin esto el select toma el ancho de su opción más larga —los nombres de
+     evento pasan los 500px— y en un teléfono de 390 la página entera medía
+     623px de ancho. El desborde ni siquiera se podía scrollear, porque el
+     body tiene overflow-x: hidden: la mitad del control quedaba fuera de la
+     pantalla y sin forma de llegar. */
+  max-width: 100%;
   background: var(--panel);
   border: 1px solid var(--line-2);
   color: var(--blanco);

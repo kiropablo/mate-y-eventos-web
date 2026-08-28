@@ -87,7 +87,7 @@ export default async function Home() {
     },
     {
       q: "¿Qué es la agenda de Mate y Eventos y quién la mantiene?",
-      a: `Es una agenda pública con más de 300 congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, cada uno con su sede, su organizador y su sitio oficial. Hoy ${conFechaAnunciada} tienen además la fecha anunciada por la organización; el resto son eventos que todavía no la publicaron. La mantiene el equipo de Mate y Eventos, y los organizadores pueden confirmar los datos de su propio evento: cuando lo hacen, la ficha lleva el sello Verificado con el mes en que se confirmó.`,
+      a: `Es una agenda pública con más de 300 congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, con su sede, su organizador y el link al sitio oficial cuando están anunciados. Hoy ${conFechaAnunciada} tienen además la fecha anunciada por la organización; el resto son eventos que todavía no la publicaron. La mantiene el equipo de Mate y Eventos, y los organizadores pueden confirmar los datos de su propio evento: cuando lo hacen, la ficha lleva el sello Verificado con el mes en que se confirmó.`,
     },
     {
       q: "¿Cómo se sugiere un evento para la agenda?",
@@ -277,7 +277,7 @@ export default async function Home() {
             <p className="body reveal" style={{ marginBottom: "26px" }}>
               <em>Congresos, expos, festivales</em> y grandes producciones de
               Argentina y Latinoamérica, con su sede, su organizador y el link
-              al sitio oficial. Hoy hay{" "}
+              al sitio oficial cuando están anunciados. Hoy hay{" "}
               <strong>más de 300 eventos cargados</strong> y{" "}
               <strong>{conFechaAnunciada}</strong> con la fecha ya anunciada. A
               los organizadores les escribimos uno por uno para que confirmen

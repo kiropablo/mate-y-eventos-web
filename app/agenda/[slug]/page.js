@@ -174,14 +174,13 @@ export default async function Evento({ params }) {
   // La ruta de la ficha. Sale siempre, incluso cuando el evento no llega a
   // tener nodo Event por falta de fecha o de lugar: la jerarquía del sitio no
   // depende de lo completa que esté la ficha.
-  const migasLd = {
-    "@context": "https://schema.org",
-    ...migas([
-      ["Agenda", "/agenda"],
-      ...(corteDelTipo ? [[corteDelTipo.etiqueta, corteDelTipo.url]] : []),
-      [ev.nombre, null],
-    ]),
-  };
+  // El @context ya lo pone migas(); antes se agregaba acá a mano y esa
+  // asimetría era la que dejaba a artículos y episodios sin breadcrumb válido.
+  const migasLd = migas([
+    ["Agenda", "/agenda"],
+    ...(corteDelTipo ? [[corteDelTipo.etiqueta, corteDelTipo.url]] : []),
+    [ev.nombre, null],
+  ]);
 
   const jsonLdPagina = ev.verificado
     ? {

@@ -105,6 +105,16 @@ export default function BorradorNewsletter({ borrador: b, html, texto }) {
           Lo publicado entre el {fechaCorta(b.desde)} y el {fechaCorta(b.hasta)}.
         </p>
 
+        {/* El aviso va afuera de las dos ramas: si la agenda no se pudo leer,
+            hay que decirlo tanto cuando hay contenido como cuando no. */}
+        {!b.agendaCompleta && (
+          <div className="nl__aviso" style={{ marginTop: "26px" }}>
+            No se pudo leer la agenda de Airtable, así que el bloque de
+            eventos queda afuera y no sabemos qué se viene. Recargá en un
+            rato antes de decidir si esta semana hay newsletter.
+          </div>
+        )}
+
         {b.vacio ? (
           <div className="nl__vacio" style={{ marginTop: "26px" }}>
             Esta semana no se publicó ningún artículo, ningún término nuevo, y
@@ -140,15 +150,6 @@ export default function BorradorNewsletter({ borrador: b, html, texto }) {
               <span>Asunto sugerido</span>
               <p>{b.asunto}</p>
             </div>
-
-            {!b.agendaCompleta && (
-              <div className="nl__aviso">
-                No se pudo leer la agenda entera de Airtable, así que el bloque
-                de eventos queda afuera. Recargá en un rato: es preferible un
-                newsletter sin agenda que uno que anuncie tres eventos cuando
-                en realidad hay nueve.
-              </div>
-            )}
 
             {b.articulos.length > 0 && (
               <section className="nl__bloque">

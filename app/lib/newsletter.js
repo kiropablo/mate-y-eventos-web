@@ -151,7 +151,12 @@ export async function borradorNewsletter({ hoy = new Date() } = {}) {
     // Si la agenda no se pudo leer entera, la pantalla lo dice en vez de
     // mostrar un bloque incompleto sin avisar.
     agendaCompleta: completa,
-    vacio: !articulos.length && !terminos.length && !eventos.length,
+    // "Vacío" solo si de verdad se pudo mirar todo. Si Airtable no contestó,
+    // eventos viene en [] por el try/catch de agenda.js, y contar ese vacío
+    // como "no hay" es afirmar sobre datos que no se leyeron: la pantalla
+    // decía "no hay eventos en los próximos días" con veinte en la agenda.
+    // Es la regla 8 del CLAUDE.md — una fuga silenciosa— asomando por acá.
+    vacio: completa && !articulos.length && !terminos.length && !eventos.length,
   };
 }
 
