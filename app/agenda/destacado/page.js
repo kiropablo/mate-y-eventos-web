@@ -2,7 +2,7 @@ import Link from "next/link";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import { getEventos, yaPaso } from "../../lib/agenda";
-import { SITE, STATS } from "../../lib/site";
+import { SITE, STATS, fechaCorta } from "../../lib/site";
 
 export const metadata = {
   alternates: { canonical: "/agenda/destacado" },
@@ -241,9 +241,15 @@ export default async function Destacado() {
               evento por su nombre. Es el 91% del tráfico de búsqueda del sitio.
             </p>
             <p className="sem-nota">
+              {/* El número va con su fecha de corte. Estaba suelto, y encima
+                  dos líneas arriba de decir que los números "se actualizan
+                  solos": el de Search Console sí lleva su semana, este no, y
+                  el que lo leyera se llevaba la idea de que era de hoy. Es la
+                  regla 10 del proyecto, en la única página del sitio donde hay
+                  un precio publicado. */}
               Del otro lado del proyecto: {STATS.vistasYouTube.toLocaleString("es-AR")}{" "}
-              visitas en YouTube y un capítulo nuevo por semana. Los números del
-              sitio están{" "}
+              visitas en YouTube al {fechaCorta(STATS.actualizado)}, y un
+              capítulo nuevo por semana. Los números del sitio están{" "}
               <a
                 href="https://datos.mateyeventos.com"
                 target="_blank"

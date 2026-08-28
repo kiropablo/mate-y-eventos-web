@@ -143,11 +143,17 @@ export default async function Sponsors() {
             <span className="tag">
               {`Datos al ${fechaCorta(STATS.actualizado)}`}
             </span>
+            {/* Decía "métricas de nuestras plataformas: Instagram, YouTube y
+                TikTok" arriba de tres números que salen los tres de YouTube.
+                En una página donde se vende, nombrar plataformas cuyos
+                números no se muestran es prometer un alcance que no está
+                publicado. Instagram y TikTok existen, y sus números se pasan
+                si los piden; acá no están. */}
             <p>
-              Métricas reales de nuestras plataformas: Instagram, YouTube y
-              TikTok. Los números están a la vista y actualizados a la fecha
-              de arriba; si querés el detalle de una campaña puntual, pedilo y
-              te lo pasamos.
+              Los tres números de arriba son de YouTube, medidos a la fecha del
+              cartel. También publicamos en Instagram, TikTok y LinkedIn: si
+              querés esos números, o el detalle de una campaña puntual, pedilo
+              y te lo pasamos.
             </p>
             {/* Acá iba el botón al panel de métricas. Se saca mientras el
                 panel muestre todo en cero: mandar a un anunciante a un tablero

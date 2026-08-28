@@ -42,7 +42,16 @@ export default async function Home() {
   // tienen fecha. Dos páginas diciendo cosas incompatibles sobre la misma
   // base, y encima una de ellas adentro del FAQ, que es el texto que levanta
   // una IA.
-  const conFechaAnunciada = vigentes.filter((e) => e.fechaInicio).length;
+  // Con fecha, sí; "confirmada por la organización", no siempre. La agenda
+  // distingue Confirmadas de Estimadas, y la home contaba las dos juntas y las
+  // llamaba confirmadas: hoy 9 de 219 no lo están. Es poco, pero es una
+  // afirmación sobre el evento de un tercero, y va adentro del FAQ, que es el
+  // texto que levanta una IA para citarnos.
+  const conFecha = vigentes.filter((e) => e.fechaInicio);
+  const conFechaConfirmada = conFecha.filter(
+    (e) => e.estadoFechas === "Confirmadas"
+  ).length;
+  const conFechaEstimada = conFecha.length - conFechaConfirmada;
   // Se guarda la lista entera además de los tres que se muestran: el texto
   // de la sección dice cuántos hay publicados, y ese número tiene que salir
   // del contenido y no escrito a mano, para que no envejezca solo.
@@ -87,7 +96,7 @@ export default async function Home() {
     },
     {
       q: "¿Qué es la agenda de Mate y Eventos y quién la mantiene?",
-      a: `Es una agenda pública con más de 300 congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, con su sede, su organizador y el link al sitio oficial cuando están anunciados. Hoy ${conFechaAnunciada} tienen además la fecha anunciada por la organización; el resto son eventos que todavía no la publicaron. La mantiene el equipo de Mate y Eventos, y los organizadores pueden confirmar los datos de su propio evento: cuando lo hacen, la ficha lleva el sello Verificado con el mes en que se confirmó.`,
+      a: `Es una agenda pública con más de 300 congresos, expos, festivales y grandes producciones de Argentina y Latinoamérica, con su sede, su organizador y el link al sitio oficial cuando están anunciados. Hoy ${conFechaConfirmada} tienen la fecha confirmada por la organización y ${conFechaEstimada} una fecha estimada que todavía no confirmaron; el resto son eventos que todavía no publicaron ninguna. La mantiene el equipo de Mate y Eventos, y los organizadores pueden confirmar los datos de su propio evento: cuando lo hacen, la ficha lleva el sello Verificado con el mes en que se confirmó.`,
     },
     {
       q: "¿Cómo se sugiere un evento para la agenda?",
@@ -243,7 +252,7 @@ export default async function Home() {
             con más de 18 años en el rubro. Publican un episodio de unos 20
             minutos por semana; además mantienen la agenda de eventos de la
             región —<strong>más de 300 fichas</strong> con sede y organizador, y{" "}
-            {conFechaAnunciada} de ellas ya con la fecha confirmada por la
+            {conFechaConfirmada} de ellas ya con la fecha confirmada por la
             organización—, un glosario del oficio y artículos que amplían cada
             conversación.
           </p>
@@ -279,7 +288,8 @@ export default async function Home() {
               Argentina y Latinoamérica, con su sede, su organizador y el link
               al sitio oficial cuando están anunciados. Hoy hay{" "}
               <strong>más de 300 eventos cargados</strong> y{" "}
-              <strong>{conFechaAnunciada}</strong> con la fecha ya anunciada. A
+              <strong>{conFechaConfirmada}</strong> con la fecha confirmada por
+              la organización. A
               los organizadores les escribimos uno por uno para que confirmen
               los datos de su ficha.
             </p>
