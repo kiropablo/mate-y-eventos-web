@@ -74,6 +74,7 @@ const CSS = `
 .org-prop__nuevo{white-space:pre-wrap;color:#93d5f7;font-size:.9rem;line-height:1.55;margin:3px 0 9px}
 .org-prop .adm-btn{padding:7px 17px;font-size:.8rem}
 .org-mas{color:rgba(245,245,245,.4);font-style:italic}
+.adm-btn[data-inerte="si"]{opacity:.45;cursor:default;pointer-events:none}
 .org-invitar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:16px;padding:14px 16px;background:rgba(90,160,255,.06);border:1px solid rgba(90,160,255,.2);border-radius:10px}
 .org-mail{flex:1 1 220px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:10px 18px;font-family:var(--font-ui);font-size:.88rem}
 .org-mail:focus{outline:none;border-color:#5aa0ff}
@@ -1738,14 +1739,23 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                             : "Editar los datos"}
                       </button>
 
-                      <a
-                        className="adm-btn adm-btn--sec"
-                        href={ev.ficha}
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        Ver la ficha
-                      </a>
+                      {/* La ficha pública existe recién cuando el evento
+                          está aprobado. En un borrador o un archivado el botón
+                          llevaba a un 404. */}
+                      {ev.ficha ? (
+                        <a
+                          className="adm-btn adm-btn--sec"
+                          href={ev.ficha}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          Ver la ficha
+                        </a>
+                      ) : (
+                        <span className="adm-btn adm-btn--sec" data-inerte="si">
+                          Sin ficha pública ({ev.estado || "sin estado"})
+                        </span>
+                      )}
 
                       {/* Va último y en rojo porque es el único botón de esta
                           tarjeta que saca algo de la web. No borra: archiva. */}

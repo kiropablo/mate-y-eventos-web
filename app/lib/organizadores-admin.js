@@ -143,7 +143,10 @@ export async function listarOrganizadoresParaPanel() {
       correccionesRecortadas: ultimasCorrecciones(ev.correcciones).recortado,
       tieneCorrecciones: Boolean((ev.correcciones || "").trim()),
       aTiempo: llegamosADifundir(ev),
-      ficha: `${SITE.url}/agenda/${ev.slug}`,
+      // Solo los aprobados tienen ficha pública. Desde que el panel muestra
+      // borradores y archivados, "Ver la ficha" llevaba a un 404 en todas esas
+      // filas: la página existe recién cuando el evento se publica.
+      ficha: ev.estado === "Aprobado" ? `${SITE.url}/agenda/${ev.slug}` : "",
       // Sin la clave cargada no se puede armar el link. Se avisa en el panel
       // en vez de mostrar uno roto.
       // Sin clave no se puede armar, y a un archivado o a uno que ya pasó no se
