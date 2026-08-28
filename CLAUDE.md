@@ -194,22 +194,32 @@ Cosas sabidas y verificadas (no volver a investigar):
 
 ## ESTADO Y PENDIENTES
 
-Al 28/8/2026, contado sobre el repo y la base:
+Todo lo que se puede contar, se cuenta solo: lo escribe `scripts/contar-estado.mjs`
+desde la Action **Estado**, todos los días a las 11 (después de toda la cadena de contenido). Lo de abajo no se toca a mano.
 
-- **42 transcripciones**, 41 con subtítulos.
+<!-- CONTADO:INICIO -->
+Contado solo el 28/8/2026. No editar a mano: lo reescribe
+`scripts/contar-estado.mjs` y se pierde.
+
+- **42 transcripciones**, 37 con subtítulos.
 - **42 artículos**, todos publicados.
-- **59 términos de glosario publicados** de 89 generados: quedan 30 en borrador.
-- **340 eventos aprobados** en la agenda y 88 sin aprobar (borradores IA y archivados) al 27/8/2026.
-- **2 eventos verificados** por su organizador. El circuito recién arranca.
-- Search Console, semana 16–22/8: **54 clics y 4.396 impresiones**, el 91% por fichas de agenda.
+- **59 términos de glosario publicados** de 88 generados: quedan 29 en borrador.
+- _La agenda no se pudo contar en esta corrida (sin `AIRTABLE_API_KEY` o Airtable no contestó)._
+<!-- CONTADO:FIN -->
+
+Lo que no se puede contar desde acá y sigue a mano:
+
+- Search Console, semana 16–22/8/2026: **54 clics y 4.396 impresiones**, el 91% por fichas de agenda. (No hay API conectada; sale de mirar el panel de Google.)
+- Los `STATS` de `app/lib/site.js` —las visitas de YouTube, el crecimiento y los países— siguen escritos a mano y llevan su fecha de corte al pie. Las visitas se podrían automatizar con la API de YouTube; los países piden YouTube Analytics, que necesita OAuth y no alcanza con la clave que ya tenemos.
 
 Pendientes:
 
-1. **Los datos de Airtable** (revisado el 27/8/2026 sobre los 340 aprobados): 110 sin fecha anunciada y 19 sin provincia. Ojo: esos 19 **tampoco tienen ciudad ni sede**, así que no son un dato que falte cargar sino eventos cuya sede todavía no se anunció; completarlos sería inventar. Lo mismo los 110 sin fecha. Las otras dos cosas de esta lista ya están resueltas: las fechas al revés de `curso-de-produccion-de-espectaculos` las detectó y vació el propio robot de verificación, y las notas internas publicadas en ExpoCehap y Expo Wedding se sacaron a mano y ahora el robot no las puede volver a escribir.
-2. **8 títulos de episodio abren pregunta sin «¿»** — se corrige en YouTube y la web lo toma solo.
+1. ~~Los datos de Airtable~~ **no es un pendiente, es el estado real de esos eventos**. Los que no tienen fecha ni provincia son eventos cuya fecha o sede todavía no se anunció: completarlos sería inventar. El número exacto está arriba y se cuenta solo. Las fechas al revés de `curso-de-produccion-de-espectaculos` las detectó y vació el propio robot de verificación, y las notas internas publicadas en ExpoCehap y Expo Wedding se sacaron a mano y ahora el robot no las puede volver a escribir.
+2. ~~8 títulos de episodio abren pregunta sin «¿»~~ **hecho** (28/8/2026): se corrigieron en YouTube y no queda ninguno.
 3. ~~Newsletter automático semanal~~ **resuelto de otra forma** (27/8/2026). Enviar por la API de beehiiv **pide el plan Max, US$96/mes**, y su RSS-to-Send pide exactamente el mismo plan; Launch y Scale traen la API de suscriptores —la que usa `/api/subscribe`— pero no la de envío. En vez de pagarlo, `/admin/newsletter` arma el borrador solo (artículos de la semana, términos nuevos, eventos de los próximos diez días) y el envío se hace a mano desde beehiiv. **No volver a investigar el plan sin mirar antes esa página.**
 4. **Contenido que falta**: piezas de comparación ("A o B") y de costos con rangos propios fechados. Son las consultas que más se le hacen a una IA y las que hoy no cubrimos.
 5. ~~Enlazar artículos y glosario por schema~~ **hecho** (27/8/2026): 31 de los 42 artículos declaran los términos que nombran y 17 fichas del glosario muestran en qué artículos se usa la palabra.
+6. **Los términos del glosario no se enlazan entre sí.** El bloque "Términos relacionados" está programado en la ficha desde siempre, pero `generar-glosario.mjs` escribe `relacionados: []` fijo en los 89 y nadie lo llenó nunca: el bloque no apareció jamás en ninguna ficha. O se llena con un criterio comprobable —la misma idea de `enlaces.js`— o se saca el código.
 
 ## MI PEDIDO DE HOY
 

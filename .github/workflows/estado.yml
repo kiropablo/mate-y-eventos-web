@@ -1,0 +1,65 @@
+name: Estado
+
+# Reescribe los números de la sección "ESTADO Y PENDIENTES" del CLAUDE.md.
+#
+# Existe porque esos números estaban a mano y envejecían sin avisar: el
+# 28/8/2026 el archivo decía "2 eventos verificados" cuando eran 10, con la
+# fecha de ese mismo día pegada al lado. Es la regla 10 del CLAUDE.md, aplicada
+# al CLAUDE.md.
+#
+# No toca nada más: escribe solo entre las marcas CONTADO:INICIO y CONTADO:FIN.
+# Si las marcas no están, no escribe y se cae, que es lo que corresponde.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 11 de Argentina (14 UTC). Va última a propósito: la Agenda corre a las 8
+    # y la cadena Transcripciones → Artículos → Glosario → Secciones arranca a
+    # las 9, así que a esta hora ya está todo el contenido del día adentro y
+    # los números lo incluyen. Si alguna se demoró y el push choca, el bucle de
+    # abajo reintenta.
+    - cron: "0 14 * * *"
+
+concurrency:
+  group: estado
+  cancel-in-progress: false
+
+jobs:
+  estado:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Contar
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+        run: node scripts/contar-estado.mjs
+      - name: Guardar cambios
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add CLAUDE.md
+          if git diff --staged --quiet; then
+            echo "El estado no cambió."
+            exit 0
+          fi
+          git commit -m "Los numeros del CLAUDE.md, contados hoy"
+          # Mismo cuidado que en las otras Actions: si el repo cambió mientras
+          # corría, traemos lo nuevo antes de subir. Hasta 3 intentos.
+          for intento in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "Guardado en el intento $intento."
+              exit 0
+            fi
+            echo "El repo cambió mientras tanto. Reintento $intento..."
+            sleep 8
+          done
+          echo "No se pudo guardar después de 3 intentos."
+          exit 1
