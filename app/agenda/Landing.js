@@ -18,7 +18,13 @@ export default function Landing({ corte, otros = [], recíproco = null }) {
             <span className="n">—</span>
             <Link href="/agenda">Agenda</Link> / {t.etiqueta}
           </div>
-          <h1>{t.h1}</h1>
+          {/* Un punto de corte invisible después de cada barra.
+              "Congreso/Conferencia" es una sola palabra para el navegador, y a
+              41,6px no entra en un teléfono de 390: sin esto el título se
+              partía al medio y quedaba "CONGRESO/CONFER · ENCIA". El carácter
+              no se ve, no se copia como espacio y no cambia el texto: solo le
+              dice al navegador que ahí puede cortar si no le queda otra. */}
+          <h1>{t.h1.replace(/\//g, "/\u200B")}</h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
             {n} {n === 1 ? "evento" : "eventos"} en la agenda, con fecha, sede y
             el link a la ficha de cada uno.
