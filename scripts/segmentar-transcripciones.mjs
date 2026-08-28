@@ -233,6 +233,43 @@ export function titulosQueQuedan(transcripcion, cortes) {
     .filter(Boolean);
 }
 
+// El registro de los que no se pudieron cortar.
+//
+// Un archivo "[]" quiere decir dos cosas muy distintas: "se revisó y no hace
+// falta cortarlo" (la transcripción es corta) y "se intentó y no salió". Con
+// las dos escritas igual, y con la lista de pendientes filtrando por "ya
+// existe el archivo", un episodio que fallaba quedaba sin subtítulos para
+// siempre y sin que nadie se enterara. Pasó con cinco de 42.
+//
+// Ahora el fallo se anota acá, con el motivo y cuántas veces se intentó, y el
+// episodio vuelve a la cola. Después de TOPE_INTENTOS se deja de gastar
+// llamadas: queda escrito para que se mire a mano.
+const ARCHIVO_FALLIDOS = path.join(DIR_SECCIONES, "sin-cortes.json");
+const TOPE_INTENTOS = 3;
+
+function leerFallidos() {
+  try {
+    const d = JSON.parse(fs.readFileSync(ARCHIVO_FALLIDOS, "utf8"));
+    return d && typeof d === "object" ? d : {};
+  } catch {
+    return {};
+  }
+}
+
+function anotarFallo(fallidos, id, motivo) {
+  const previo = fallidos[id] || { intentos: 0 };
+  fallidos[id] = {
+    intentos: previo.intentos + 1,
+    ultimoIntento: new Date().toISOString().slice(0, 10),
+    motivo,
+  };
+  fs.writeFileSync(
+    ARCHIVO_FALLIDOS,
+    JSON.stringify(fallidos, null, 1) + "\n",
+    "utf8"
+  );
+}
+
 // --------------------------------------------------------------------------
 
 async function main() {
@@ -243,9 +280,23 @@ async function main() {
     .filter((f) => f.endsWith(".txt") && f !== "README.txt")
     .map((f) => f.replace(/\.txt$/, ""));
 
-  const pendientes = transcripciones.filter(
-    (id) => !fs.existsSync(path.join(DIR_SECCIONES, `${id}.json`))
-  );
+  const fallidos = leerFallidos();
+  const rendidos = [];
+  const pendientes = transcripciones.filter((id) => {
+    if (fs.existsSync(path.join(DIR_SECCIONES, `${id}.json`))) return false;
+    if ((fallidos[id]?.intentos || 0) >= TOPE_INTENTOS) {
+      rendidos.push(id);
+      return false;
+    }
+    return true;
+  });
+
+  if (rendidos.length) {
+    console.log(
+      `Sin cortes tras ${TOPE_INTENTOS} intentos (hay que mirarlos a mano): ` +
+        rendidos.join(", ")
+    );
+  }
 
   console.log(
     `Transcripciones: ${transcripciones.length} · ya segmentadas: ` +
@@ -282,8 +333,16 @@ async function main() {
       const cortes = ubicarCortes(respuesta, transcripcion);
 
       if (cortes.length < 2) {
-        console.log(`  · ${id} — no salieron cortes usables (${cortes.length})`);
-        fs.writeFileSync(path.join(DIR_SECCIONES, `${id}.json`), "[]\n", "utf8");
+        // NO se escribe "[]": eso significaría "revisado, no hace falta
+        // cortarlo" y lo sacaría de la cola para siempre. Se anota el fallo y
+        // el episodio vuelve a intentarse mañana.
+        const intentos = (fallidos[id]?.intentos || 0) + 1;
+        anotarFallo(fallidos, id, `solo ${cortes.length} cortes usables`);
+        console.log(
+          `  · ${id} — no salieron cortes usables (${cortes.length}). ` +
+            `Intento ${intentos} de ${TOPE_INTENTOS}.`
+        );
+        fallados++;
         continue;
       }
 
@@ -297,12 +356,24 @@ async function main() {
         "utf8"
       );
       hechos++;
+      if (fallidos[id]) {
+        delete fallidos[id];
+        fs.writeFileSync(
+          ARCHIVO_FALLIDOS,
+          JSON.stringify(fallidos, null, 1) + "\n",
+          "utf8"
+        );
+      }
       const visibles = titulosQueQuedan(transcripcion, cortes);
       console.log(`  ✓ ${id} — ${visibles.length} secciones`);
       visibles.forEach((t) => console.log(`      · ${t}`));
     } catch (e) {
       fallados++;
-      console.log(`  ✗ ${id} (${e.message})`);
+      const intentos = (fallidos[id]?.intentos || 0) + 1;
+      anotarFallo(fallidos, id, e.message);
+      console.log(
+        `  ✗ ${id} (${e.message}). Intento ${intentos} de ${TOPE_INTENTOS}.`
+      );
     }
 
     await new Promise((r) => setTimeout(r, 1500));
