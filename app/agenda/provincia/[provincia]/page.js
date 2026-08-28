@@ -3,7 +3,7 @@ import SiteNav from "../../../components/SiteNav";
 import Footer from "../../../components/Footer";
 import Landing from "../../Landing";
 import {
-  buscarCorte,
+  corteDeLanding,
   cortesDe,
   cortesDeMes,
   metaDeCorte,
@@ -21,14 +21,13 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const corte = buscarCorte("provincia", params.provincia, await getEventos());
+  const { corte } = await corteDeLanding("provincia", params.provincia);
   if (!corte) return { title: "Agenda" };
   return metaDeCorte(corte);
 }
 
 export default async function Corte({ params }) {
-  const eventos = await getEventos();
-  const corte = buscarCorte("provincia", params.provincia, eventos);
+  const { corte, eventos } = await corteDeLanding("provincia", params.provincia);
   if (!corte) notFound();
 
   // Los demás cortes del mismo tipo, para enlazarlos entre sí.

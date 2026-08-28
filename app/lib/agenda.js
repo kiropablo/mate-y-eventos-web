@@ -206,6 +206,44 @@ export async function getEventoDelPanel({ id = "", slug = "" } = {}) {
   );
 }
 
+// Un pedido a Airtable, con reintentos.
+//
+// Airtable corta a las 5 consultas por segundo por base. Un build que
+// prerrenderiza 338 fichas y cada una relee la agenda pasa ese techo sin
+// despeinarse, y ahí contesta 429. Antes eso se tomaba como "no hay más
+// datos": la lectura se cortaba a mitad, devolvía la lista incompleta, y la
+// ficha que faltaba concluía que el evento no existía. Reintentar es la
+// diferencia entre un tropiezo de un segundo y una página caída una hora.
+//
+// Se reintenta solo lo que puede salir bien la próxima: 429 (frenó) y los 5xx
+// (se cayó del otro lado). Un 401 o un 404 se reintentan en vano.
+const ESPERAS = [1000, 3000, 9000];
+
+async function traerPagina(url, opciones) {
+  let ultimo = null;
+
+  for (let intento = 0; intento <= ESPERAS.length; intento++) {
+    if (intento > 0) {
+      await new Promise((r) => setTimeout(r, ESPERAS[intento - 1]));
+    }
+    try {
+      const res = await fetch(url, opciones);
+      if (res.ok) return { res };
+      ultimo = `Airtable respondió ${res.status}`;
+      if (res.status !== 429 && res.status < 500) return { error: ultimo };
+    } catch (error) {
+      ultimo = error?.message || String(error);
+    }
+    if (intento < ESPERAS.length) {
+      console.warn(
+        `[agenda] ${ultimo}. Reintento ${intento + 1} de ${ESPERAS.length}.`
+      );
+    }
+  }
+
+  return { error: ultimo };
+}
+
 // Igual que getEventos, pero además dice si la lectura salió entera.
 //
 // Hace falta para no mentir: el hub muestra "actualizada al {fecha}", y si
@@ -236,7 +274,7 @@ export async function getEventosConEstado({
       if (!todosLosEstados) params.set("filterByFormula", '{Estado}="Aprobado"');
       if (offset) params.set("offset", offset);
 
-      const res = await fetch(
+      const { res, error } = await traerPagina(
         `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}?${params}`,
         {
           headers: { Authorization: `Bearer ${key}` },
@@ -254,10 +292,9 @@ export async function getEventosConEstado({
               }),
         }
       );
-      if (!res.ok) {
-        if (estricto)
-          throw new Error(`Agenda: Airtable respondió ${res.status}`);
-        return { eventos: ordenados(eventos), completa: false };
+      if (!res) {
+        if (estricto) throw new Error(`Agenda: ${error}`);
+        return corta(eventos, error);
       }
 
       const data = await res.json();
@@ -269,10 +306,22 @@ export async function getEventosConEstado({
     } while (offset);
   } catch (error) {
     if (estricto) throw error;
-    return { eventos: ordenados(eventos), completa: false };
+    return corta(eventos, error?.message || String(error));
   }
 
   return { eventos: ordenados(eventos), completa: true };
+}
+
+// La salida degradada, en un solo lugar y con el motivo escrito.
+//
+// Regla 8 del CLAUDE.md: si algo puede quedar vacío, tiene que quedar en los
+// registros. Antes esto devolvía la lista a medias en silencio y el que la
+// recibía no tenía forma de saber que le faltaban eventos.
+function corta(eventos, motivo) {
+  console.warn(
+    `[agenda] LECTURA INCOMPLETA: ${motivo}. Se devuelven ${eventos.length} eventos de los que haya.`
+  );
+  return { eventos: ordenados(eventos), completa: false };
 }
 
 // Orden: primero los que tienen fecha (más cercana arriba), después los
@@ -291,9 +340,31 @@ function ordenados(eventos) {
   });
 }
 
+// La ficha de un evento.
+//
+// Devuelve null SOLO cuando de verdad no está. Si la lectura vino corta,
+// tira error en vez de contestar null, y esa distinción es todo el asunto.
+//
+// Lo que pasaba: Airtable contestaba a medias, la lista llegaba incompleta,
+// esta función no encontraba el evento y devolvía null, y la página de arriba
+// leía ese null como "no existe" y llamaba a notFound(). Ese 404 se guardaba
+// una hora. El 28/8/2026 había 18 fichas así —de 338, todas Aprobadas en
+// Airtable y todas publicadas en el sitemap—, o sea que Google estaba
+// entrando a la puerta cerrada. Se veía en que /agenda/fit daba 404 y
+// /api/agenda/fit/ics, que lee exactamente lo mismo, daba 200: cada ruta se
+// había quedado con la foto que le tocó.
+//
+// Un error, en cambio, no se cachea: Next sigue sirviendo la última versión
+// buena de la página y deja el motivo escrito en los registros.
 export async function getEvento(slug) {
-  const eventos = await getEventos();
-  return eventos.find((e) => e.slug === slug) || null;
+  const { eventos, completa } = await getEventosConEstado();
+  const ev = eventos.find((e) => e.slug === slug) || null;
+  if (!ev && !completa) {
+    throw new Error(
+      `Agenda: la lectura vino incompleta, así que no se puede afirmar que "${slug}" no existe. No se cachea un 404 sobre una lista a medias.`
+    );
+  }
+  return ev;
 }
 
 // Compara sin distinguir mayúsculas, acentos ni espacios de más. Un

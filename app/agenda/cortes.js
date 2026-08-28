@@ -1,4 +1,11 @@
-import { pelado, hoyISO, yaPaso, mesLargo, MESES_LARGO } from "../lib/agenda";
+import {
+  pelado,
+  hoyISO,
+  yaPaso,
+  mesLargo,
+  MESES_LARGO,
+  getEventosConEstado,
+} from "../lib/agenda";
 import { SITE } from "../lib/site";
 
 // Las landings de la agenda: una página propia por país, por tipo, por
@@ -173,6 +180,27 @@ export function buscarCorte(tipo, slug, eventos) {
   const lista =
     tipo === "mes" ? cortesDeMes(vigentes) : cortesDe(tipo, vigentes);
   return lista.find((c) => c.slug === String(slug)) || null;
+}
+
+// Lo mismo, pero leyendo la agenda y sin confundir "esta landing no existe"
+// con "no pude leer la agenda".
+//
+// Es el mismo cuidado que getEvento y por el mismo motivo: una landing sale
+// de agrupar los eventos, así que una lectura corta puede dejar un corte por
+// debajo del mínimo y hacerlo desaparecer. Si eso termina en notFound(), el
+// 404 queda cacheado una hora sobre una página que sí existe.
+//
+// Devuelve también la lista, que las cuatro páginas necesitan igual para
+// armar los cortes hermanos: así se lee una sola vez.
+export async function corteDeLanding(tipo, slug) {
+  const { eventos, completa } = await getEventosConEstado();
+  const corte = buscarCorte(tipo, slug, eventos);
+  if (!corte && !completa) {
+    throw new Error(
+      `Agenda: la lectura vino incompleta, así que no se puede afirmar que la landing ${tipo}/${slug} no existe.`
+    );
+  }
+  return { corte, eventos };
 }
 
 // Los textos de cada landing, en un solo lugar para que la página, el

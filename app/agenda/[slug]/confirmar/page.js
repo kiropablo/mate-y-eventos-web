@@ -24,7 +24,45 @@ export const metadata = {
 export default async function ConfirmarFicha({ params, searchParams }) {
   const slug = String(params?.slug || "");
   const firma = String(searchParams?.f || "");
-  const ev = firmaValida(slug, firma) ? await getEvento(slug) : null;
+  // Acá del otro lado hay una persona a la que le escribimos nosotros, así que
+  // las dos formas de no tener la ficha no se pueden contestar igual. "Este
+  // link no sirve" sobre una lectura que falló es decirle al organizador que
+  // su evento ya no está en la agenda cuando sí está, y es justo el circuito
+  // del que depende el sello.
+  let ev = null;
+  let seCayoLaLectura = false;
+  if (firmaValida(slug, firma)) {
+    try {
+      ev = await getEvento(slug);
+    } catch {
+      seCayoLaLectura = true;
+    }
+  }
+
+  if (seCayoLaLectura) {
+    return (
+      <>
+        <div className="wrap">
+          <SiteNav />
+        </div>
+        <section className="section-p">
+          <div className="wrap">
+            <h1>No pudimos abrir tu ficha</h1>
+            <p className="lead">
+              Es un problema nuestro, no del link: no logramos leer la agenda en
+              este momento. Probá de nuevo en unos minutos con el mismo link,
+              que sigue siendo válido. Si sigue igual, escribinos a{" "}
+              <a href={`mailto:${SITE.email}`}>{SITE.email}</a> y lo resolvemos.
+            </p>
+            <Link className="btn btn--ghost" href="/agenda">
+              Ver la agenda
+            </Link>
+          </div>
+        </section>
+        <Footer />
+      </>
+    );
+  }
 
   if (!ev) {
     return (
