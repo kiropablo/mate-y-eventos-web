@@ -179,7 +179,15 @@ function sinFrasesDeProceso(texto) {
   const sacado = [];
   const parrafos = texto.split(/\n{2,}/).map((parrafo) => {
     // Se corta por oracion para no tirar el parrafo entero por una frase.
-    const oraciones = parrafo.match(/[^.!?]+[.!?]*/g) || [parrafo];
+    //
+    // El salto de linea cierra unidad igual que el punto. Sin eso, un bloque
+    // de viñetas sin punto final es UNA sola "oracion" para el regex, y una
+    // viñeta mala se lleva las cuatro: probado, "- Fecha: 12 de octubre\n-
+    // Sede: La Rural\n- Falta confirmar el horario\n- Entrada libre" quedaba
+    // en nada y el log decia "1 frase de proceso" cuando se habian ido las
+    // cuatro. Que el daño dependiera de si el modelo puso punto o no ese dia
+    // es exactamente lo que no puede pasar.
+    const oraciones = parrafo.match(/[^.!?\n]+[.!?]*\n?/g) || [parrafo];
     const quedan = [];
     for (const o of oraciones) {
       if (!FRASES_DE_PROCESO.some((re) => re.test(o))) {
@@ -199,7 +207,13 @@ function sinFrasesDeProceso(texto) {
       }
       sacado.push(o.trim());
     }
-    return quedan.join("").replace(/\s{2,}/g, " ").trim();
+    return quedan
+      .join("")
+      .replace(/[ \t]{2,}/g, " ")
+      // Si lo que se saco dejo una coma o un punto y coma colgando al final,
+      // se cierra la oracion en vez de publicarla a medias.
+      .replace(/[,;]\s*$/, ".")
+      .trim();
   });
   // Una oracion puede haber sido la unica del parrafo: ese parrafo desaparece.
   const limpio = parrafos.filter(Boolean).join("\n\n").trim();
@@ -306,15 +320,40 @@ async function limpiarTextos(registros) {
       if (typeof v !== "string" || !/<\/?cite/i.test(v)) continue;
       campos[c] = sinCitas(v);
     }
+    const recortes = [];
     for (const c of PUBLICOS) {
       const v = campos[c] ?? r.fields[c];
       if (typeof v !== "string" || !v.trim()) continue;
       const { limpio, sacado } = sinFrasesDeProceso(v);
-      // Si al sacarlas no queda nada, se deja como estaba: un campo vaciado
-      // en silencio es peor que el defecto que se venia a arreglar.
-      if (!sacado.length || !limpio) continue;
+      if (!sacado.length) continue;
+      if (!limpio) {
+        // No se vacia un campo publicado —quedaria una ficha muda— pero
+        // tampoco se calla: antes esta rama compartia el continue con la de
+        // arriba y no imprimia nada, asi que una ficha cuya descripcion
+        // entera es una frase de proceso no se delataba nunca. Era el unico
+        // modo capaz de detectarla y era el que decidia callarse.
+        recortes.push(`${c}: es toda frase de proceso, quedó sin tocar`);
+        console.log(`  ✗ ${r.fields["Nombre"]} · ${c}: es toda frase de proceso, hay que reescribirla a mano`);
+        continue;
+      }
       campos[c] = limpio;
+      recortes.push(`${c}: ${sacado.join(" · ")}`);
       console.log(`  ⚠ ${r.fields["Nombre"]} · ${c}: ${sacado.join(" · ")}`);
+    }
+    // Lo que se saca de un texto ya publicado queda escrito donde sobreviva.
+    // El log de la Action caduca a los noventa dias y no lo lee nadie; esto lo
+    // hacen los otros dos caminos del archivo y este era el unico que
+    // recortaba sin dejar rastro.
+    if (recortes.length) {
+      const previas = campos["Notas internas"] ?? r.fields["Notas internas"] ?? "";
+      const detalle = recortes.join(" · ");
+      // El modo limpiar es manual y se corre varias veces. Sin este guarda, el
+      // caso "es toda frase de proceso" —que no se arregla solo— sumaria la
+      // misma linea en cada corrida.
+      if (!previas.includes(detalle)) {
+        const aviso = `[${hoy}] Frases de proceso en el texto público: ${detalle}`;
+        campos["Notas internas"] = previas ? `${previas}\n${aviso}` : aviso;
+      }
     }
     if (Object.keys(campos).length) {
       arreglos.push({ id: r.id, fields: campos });

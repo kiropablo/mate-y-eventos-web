@@ -75,6 +75,7 @@ const CSS = `
 .org-prop .adm-btn{padding:7px 17px;font-size:.8rem}
 .org-mas{color:rgba(245,245,245,.4);font-style:italic}
 .adm-btn[data-inerte="si"]{opacity:.45;cursor:default;pointer-events:none}
+.adm-tab--link{text-decoration:none;display:inline-flex;align-items:center}
 .org-invitar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:16px;padding:14px 16px;background:rgba(90,160,255,.06);border:1px solid rgba(90,160,255,.2);border-radius:10px}
 .org-mail{flex:1 1 220px;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:999px;padding:10px 18px;font-family:var(--font-ui);font-size:.88rem}
 .org-mail:focus{outline:none;border-color:#5aa0ff}
@@ -966,6 +967,12 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           Mensaje
           {hayCambios ? <span>sin guardar</span> : null}
         </button>
+        {/* El newsletter es una pagina aparte y no una pestaña: no comparte
+            nada con estas y este archivo se toca seguido. Pero tenia que
+            poder llegarse desde acá, que es donde uno está los miércoles. */}
+        <a className="adm-tab adm-tab--link" href="/admin/newsletter">
+          Newsletter<span>de la semana</span>
+        </a>
       </div>
 
       {/* El link para el equipo. Va arriba de todo en esta pestaña porque es

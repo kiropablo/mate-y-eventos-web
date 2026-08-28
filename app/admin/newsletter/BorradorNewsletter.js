@@ -210,9 +210,9 @@ export default function BorradorNewsletter({ borrador: b, html, texto }) {
                       <p>
                         Y {b.terminosDeMas}{" "}
                         {b.terminosDeMas === 1 ? "palabra más" : "palabras más"},
-                        con el link al glosario. Entran las primeras cuatro: una
-                        semana de publicar en tanda deja diecinueve, y eso ya no
-                        es un newsletter.
+                        con el link al glosario. Entran las cuatro que más
+                        nombran los artículos publicados: una semana de aprobar
+                        en tanda deja diecinueve, y eso ya no es un newsletter.
                       </p>
                     </div>
                   )}

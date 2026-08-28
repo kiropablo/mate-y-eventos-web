@@ -1614,8 +1614,14 @@ footer.site {
 }
 .art-check li {
   margin-bottom: 12px;
-  font-size: 1rem;
-  line-height: 1.6;
+  /* Sin font-size propio: hereda el del cuerpo del artículo. Estaba clavado
+     en 1rem y el cuerpo subió hoy a 18,4px, así que el bloque práctico —el
+     que está en los 42 artículos— quedó 13% más chico que el párrafo de al
+     lado, y más apretado. Antes la diferencia era del 6% y no se notaba; el
+     cambio de hoy la duplicó. El interlineado queda un poco más compacto que
+     el del cuerpo (1,68 contra 1,78), que es lo razonable adentro de una
+     caja. */
+  line-height: 1.68;
 }
 .art-check li:last-child {
   margin-bottom: 0;

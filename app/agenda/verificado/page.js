@@ -2,7 +2,7 @@ import Link from "next/link";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import ArmarSnippet from "./ArmarSnippet";
-import { getEventos, formatRango } from "../../lib/agenda";
+import { getEventos, formatRango, mesLargo } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
 
 export const metadata = {
@@ -61,6 +61,18 @@ export default async function Verificado() {
     slug: e.slug,
     nombre: e.nombre,
   }));
+
+  // El mes del sello de muestra sale del último evento verificado, no de un
+  // texto a mano. Decía "agosto de 2026" fijo: hoy coincide de casualidad
+  // porque los nueve verificados son de este mes, pero apenas se verifique uno
+  // en septiembre la muestra va a decir agosto mientras las fichas que dice
+  // ilustrar dicen otra cosa. Y justo en la página que explica que la fecha
+  // está a propósito.
+  const ultimaVerificacion = verificados
+    .map((e) => e.fechaVerificacion)
+    .filter(Boolean)
+    .sort()
+    .pop();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -138,7 +150,10 @@ export default async function Verificado() {
               <span className="sello__tilde" aria-hidden>
                 ✓
               </span>
-              <span>Datos verificados por el organizador · agosto de 2026</span>
+              <span>
+                Datos verificados por el organizador
+                {ultimaVerificacion ? ` · ${mesLargo(ultimaVerificacion)}` : ""}
+              </span>
             </span>
             <p className="sem-nota" style={{ marginTop: "14px" }}>
               Así se ve en la ficha del evento, con el mes en que se confirmó.

@@ -47,7 +47,16 @@ export default async function EdicionDelMes({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(
-            schemaEdicion(edicion, { canonical: `/imperdibles/${edicion.mes}` })
+            schemaEdicion(edicion, {
+              // La misma URL que el canonical. Si esta edición es la vigente,
+              // la página canónica es /imperdibles: declarar acá un @id propio
+              // era marcar como entidad una dirección que la propia cabecera
+              // acababa de descartar, y dejaba la misma edición declarada como
+              // dos entidades distintas con contenido idéntico.
+              canonical: esLaVigente
+                ? "/imperdibles"
+                : `/imperdibles/${edicion.mes}`,
+            })
           ),
         }}
       />

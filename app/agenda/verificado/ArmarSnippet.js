@@ -6,6 +6,22 @@ import { SITE } from "../../lib/site";
 // Generador del código para incrustar el sello. El organizador elige su
 // evento y el color que le va a su web, ve cómo queda y se lo lleva copiado.
 
+// Esto se pega en el HTML de otro. Un nombre con comillas rompe el atributo y
+// deja basura en la web del organizador, que es el único lugar del sitio donde
+// el markup sale de nuestras manos. Y hay nombres así en la agenda: uno de los
+// eventos se llama, textual, Six Sex — "ULTRA" en el Estadio Malvinas
+// Argentinas. Hoy ninguno de los verificados tiene comillas, o sea que es
+// latente, pero el circuito de verificación está creciendo.
+//
+// Va a nivel de módulo y no adentro del componente para no tener que sumarlo a
+// las dependencias del useMemo.
+const esc = (t) =>
+  String(t ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
 export default function ArmarSnippet({ eventos }) {
   const [slug, setSlug] = useState(eventos[0]?.slug || "");
   const [tema, setTema] = useState("oscuro");
@@ -18,9 +34,9 @@ export default function ArmarSnippet({ eventos }) {
   // otro sitio. La previsualización de acá abajo, en cambio, apunta a la ruta
   // relativa: así se ve siempre, incluso apenas se enciende el sello y la
   // versión publicada todavía no se enteró.
-  const src = `${SITE.url}${ruta}`;
-  const href = `${SITE.url}/agenda/${ev.slug}`;
-  const alt = `${ev.nombre}: evento verificado en Mate y Eventos`;
+  const src = esc(`${SITE.url}${ruta}`);
+  const href = esc(`${SITE.url}/agenda/${ev.slug}`);
+  const alt = esc(`${ev.nombre}: evento verificado en Mate y Eventos`);
 
   const codigo = useMemo(
     () =>

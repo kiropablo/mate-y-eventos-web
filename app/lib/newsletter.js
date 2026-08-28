@@ -1,6 +1,7 @@
 import { getArticulos } from "./articulos";
 import { getTerminos } from "./glosario";
 import { getEventosConEstado, yaPaso, formatRango, nombreConAnio } from "./agenda";
+import { terminosMencionados } from "./enlaces";
 import { SITE } from "./site";
 
 // El borrador del newsletter de la semana.
@@ -30,9 +31,9 @@ const DIAS_ADELANTE = 10;
 
 // Cuántos términos del glosario entran. Hay semanas de publicar de a tandas:
 // el 21/8/2026 se aprobaron 18 de una sentada, y un newsletter con 19
-// definiciones no lo lee nadie. Se muestran los primeros y se dice cuántos
-// quedaron afuera, con el link al glosario. Un corte que no se declara es lo
-// mismo que un dato escondido.
+// definiciones no lo lee nadie. Entran los que más usa el propio sitio (ver
+// abajo cómo se eligen) y se dice cuántos quedaron afuera, con el link al
+// glosario. Un corte que no se declara es lo mismo que un dato escondido.
 const MAXIMO_TERMINOS = 4;
 
 function aFecha(iso) {
@@ -104,15 +105,54 @@ export async function borradorNewsletter({ hoy = new Date() } = {}) {
 
   // Términos que se publicaron en la misma ventana. El campo "revisado" es
   // cuándo una persona lo aprobó, que es la fecha en que salió a la web.
-  const terminosDeLaSemana = getTerminos()
-    .filter((t) => t.revisado && t.revisado > desde && t.revisado <= hasta)
+  const crudos = getTerminos().filter(
+    (t) => t.revisado && t.revisado > desde && t.revisado <= hasta
+  );
+
+  // Cuál de estas palabras usa de verdad el medio.
+  //
+  // getTerminos() los devuelve alfabéticos, y cortar ahí los cuatro primeros
+  // no es un criterio: es el orden en que venían. Con el corte en cuatro,
+  // ningún término de la T a la Z entraría nunca, ninguna semana. La semana
+  // del 21/8 eso dejaba afuera a "Timing", que según el propio enlaces.js es
+  // la palabra más nombrada del sitio —13 de los 42 artículos— y metía dos
+  // veces la misma: "Cabina de streaming" y "Cabina técnica".
+  //
+  // Se pesa con el mismo criterio comprobable que usa el resto del sitio: la
+  // palabra está escrita en el artículo. Primero los que nombra algo de este
+  // número, después los que más artículos publicados nombran, y el abecedario
+  // queda solo como desempate para que el resultado sea siempre el mismo.
+  //
+  // Ordenar por fecha de revisión no serviría: es por día, y una tanda de
+  // dieciocho aprobados el mismo día empata entera.
+  const peso = new Map(crudos.map((t) => [t.slug, { enElNumero: 0, enTodos: 0 }]));
+  for (const a of getArticulos()) {
+    const deEstaSemana = a.fecha && a.fecha > desde && a.fecha <= hasta;
+    for (const t of terminosMencionados(a, crudos)) {
+      const p = peso.get(t.slug);
+      if (!p) continue;
+      p.enTodos += 1;
+      if (deEstaSemana) p.enElNumero += 1;
+    }
+  }
+
+  const terminos = [...crudos]
+    .sort((a, b) => {
+      const pa = peso.get(a.slug);
+      const pb = peso.get(b.slug);
+      return (
+        (pb.enElNumero > 0) - (pa.enElNumero > 0) ||
+        pb.enTodos - pa.enTodos ||
+        a.termino.localeCompare(b.termino, "es")
+      );
+    })
+    .slice(0, MAXIMO_TERMINOS)
     .map((t) => ({
       termino: t.termino,
       definicionCorta: t.definicionCorta,
       url: `${SITE.url}/glosario/${t.slug}`,
     }));
-  const terminos = terminosDeLaSemana.slice(0, MAXIMO_TERMINOS);
-  const terminosDeMas = terminosDeLaSemana.length - terminos.length;
+  const terminosDeMas = crudos.length - terminos.length;
 
   // La agenda. Si la lectura de Airtable sale corta, el bloque no se arma:
   // un newsletter que anuncia "3 eventos" cuando en realidad hay nueve es
@@ -167,11 +207,16 @@ export async function borradorNewsletter({ hoy = new Date() } = {}) {
 // pierde o, peor, entra a medias. Lo que tiene que sobrevivir es la
 // estructura y los links.
 export function borradorHTML(b) {
+  // Escapa también las comillas: se usa dentro de href="…" y el slug sale de
+  // Airtable tal cual. Hoy no es explotable —a ese campo solo llegan el robot
+  // y el panel, los dos con el slug ya saneado— pero un escapador que no
+  // escapa comillas es una trampa cargada para el próximo que lo reuse.
   const esc = (t) =>
     String(t == null ? "" : t)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
 
   const partes = [];
 
