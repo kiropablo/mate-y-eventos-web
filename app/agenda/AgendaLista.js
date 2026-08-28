@@ -350,10 +350,16 @@ export default function AgendaLista({ proximos, pasados }) {
         </section>
       ) : null}
 
+      {/* Dice "próximos" y no solo "eventos". Abajo, el sello de frescura
+          publica el total de la base —que incluye los que están sucediendo
+          ahora y los que ya pasaron— y los dos números aparecían con la misma
+          palabra a treinta píxeles de distancia: 337 acá y 339 allá. No era
+          una cuenta mal hecha, era el mismo rótulo para dos cosas distintas,
+          en una página que promete que sus números son medidos. */}
       <p className="ag-cuenta">
         {proximosVisibles.length === 0
           ? "Ningún evento con estos filtros"
-          : `${proximosVisibles.length} ${proximosVisibles.length === 1 ? "evento" : "eventos"}${hayFiltros ? " · filtrado" : ""}`}
+          : `${proximosVisibles.length} ${proximosVisibles.length === 1 ? "evento próximo" : "eventos próximos"}${hayFiltros ? " · filtrado" : ""}`}
       </p>
 
       {vista === "calendario" ? (

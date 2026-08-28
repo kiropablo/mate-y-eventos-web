@@ -84,6 +84,25 @@ export async function POST(request) {
     );
   }
 
+  // Y no se le escribe por un evento que ya pasó.
+  //
+  // El mail dice "Publicamos {evento} en nuestra agenda. ¿Están bien estos
+  // datos?" y le pide que los repase. Sobre una edición terminada eso no le
+  // sirve a nadie: el organizador no puede corregir nada que importe, y del
+  // otro lado queda un medio escribiéndole por algo de la semana pasada.
+  // Se puede forzar igual —a veces conviene, para dejar la ficha lista para
+  // la edición que viene— pero tiene que ser a propósito.
+  if (yaPaso(ev) && !forzar) {
+    return Response.json(
+      {
+        ok: false,
+        yaPaso: true,
+        error: `Ese evento ya pasó (${ev.fechaFin || ev.fechaInicio}). El mail le pide al organizador que revise datos que ya no puede cambiar. Si igual querés mandarlo, volvé a apretar.`,
+      },
+      { status: 409 }
+    );
+  }
+
   // Si ya se le escribió, no se manda de nuevo salvo que se pida a propósito.
   // Sin esto, cualquier reintento —se cortó internet, el botón se apretó dos
   // veces, la pestaña se recargó— le mandaba el mismo mail dos veces al mismo

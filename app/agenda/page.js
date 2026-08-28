@@ -175,7 +175,7 @@ export default async function Agenda() {
                   algo que se rompió, y eso queda cacheado una hora. */}
               {completa ? (
                 <p className="ag-frescura reveal">
-                  {eventos.length} eventos · actualizada al{" "}
+                  {eventos.length} eventos en total · actualizada al{" "}
                   <time dateTime={hoy}>{fechaLarga(hoy)}</time>. La agenda se
                   revisa todos los días de forma automática.
                 </p>

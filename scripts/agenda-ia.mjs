@@ -206,6 +206,24 @@ function sinFrasesDeProceso(texto) {
   return { limpio, sacado };
 }
 
+// Deja las dos descripciones como se van a publicar, y devuelve lo que sacó.
+//
+// Corre ANTES del control de completitud, y ese orden es el punto: si se
+// limpiara después, un evento cuya descripción entera fuera una frase de
+// proceso pasaría el control mirando un texto que después no se escribe, y
+// entraría a la agenda sin descripción mientras el log lo cuenta como listo.
+function limpiarDescripciones(e) {
+  const sacado = [];
+  for (const campo of ["descCorta", "descLarga"]) {
+    if (!e[campo]) continue;
+    const r = sinFrasesDeProceso(e[campo]);
+    if (!r.sacado.length) continue;
+    e[campo] = r.limpio;
+    sacado.push(...r.sacado);
+  }
+  return sacado;
+}
+
 function sinAcentos(t) {
   return String(t)
     .normalize("NFD")
@@ -577,6 +595,12 @@ Devolvé hasta ${MAX_POR_RUBRO} eventos en JSON, sin texto alrededor y sin backt
   let completados = 0;
 
   for (const e of nuevos) {
+    // Primero se limpia el texto público y recién después se controla si la
+    // ficha está completa: lo que se controla tiene que ser lo que se publica.
+    e.recortes = limpiarDescripciones(e);
+    if (e.recortes.length) {
+      console.log(`    ⚠ ${e.nombre}: ${e.recortes.length} frase(s) de proceso fuera del texto público`);
+    }
     let huecos = huecosDe(e);
     if (huecos.length) {
       try {
@@ -666,26 +690,17 @@ function aCampos(e) {
   }
   if (e.ciudad) f["Ciudad"] = e.ciudad;
   if (e.venue) f["Venue"] = e.venue;
-  // Las dos descripciones son texto publico: se les sacan las frases que
-  // hablan de lo que nos falta hacer a nosotros en vez de hablar del evento.
-  // Lo sacado no se tira, se anota abajo en Notas internas.
-  const recortes = [];
-  if (e.descCorta) {
-    const { limpio, sacado } = sinFrasesDeProceso(e.descCorta);
-    if (limpio) f["Descripción corta"] = limpio;
-    recortes.push(...sacado);
-  }
-  if (e.descLarga) {
-    const { limpio, sacado } = sinFrasesDeProceso(e.descLarga);
-    if (limpio) f["Descripción larga"] = limpio;
-    recortes.push(...sacado);
-  }
+  // Las descripciones ya vienen limpias de limpiarDescripciones(), que corre
+  // antes del control de completitud. Acá solo se escriben y se deja anotado
+  // en Notas internas lo que se saco.
+  if (e.descCorta) f["Descripción corta"] = e.descCorta;
+  if (e.descLarga) f["Descripción larga"] = e.descLarga;
+  const recortes = e.recortes || [];
   if (recortes.length) {
     const aviso = `[${hoy}] Frases de proceso sacadas del texto público: ${recortes.join(" · ")}`;
     f["Notas internas"] = f["Notas internas"]
       ? `${f["Notas internas"]}\n${aviso}`
       : aviso;
-    console.log(`  ⚠ ${e.nombre || "(sin nombre)"}: ${recortes.length} frase(s) de proceso fuera del texto público`);
   }
   if (e.web) f["Web oficial"] = e.web;
   if (e.contactos) f["Contactos"] = e.contactos;

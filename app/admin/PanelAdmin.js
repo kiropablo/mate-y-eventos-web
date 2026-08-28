@@ -656,13 +656,13 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       let res = await mandarInvitacion(ev, para, false);
       let data = await res.json().catch(() => ({}));
 
-      if (res.status === 409 && data?.yaContactado) {
-        if (
-          !confirm(
-            `Según Airtable ya se le escribió el ${data.yaContactado}.\n\n¿Mandarlo igual?`
-          )
-        )
-          return;
+      // El servidor frena por dos motivos y los dos se preguntan igual: se
+      // avisa qué pasa y se deja decidir.
+      if (res.status === 409 && (data?.yaContactado || data?.yaPaso)) {
+        const pregunta = data.yaPaso
+          ? `${data.error}\n\n¿Mandarlo igual?`
+          : `Según Airtable ya se le escribió el ${data.yaContactado}.\n\n¿Mandarlo igual?`;
+        if (!confirm(pregunta)) return;
         res = await mandarInvitacion(ev, para, true);
         data = await res.json().catch(() => ({}));
       }
