@@ -1,10 +1,7 @@
 import { haySesion } from "../../lib/admin";
 import LoginAdmin from "../LoginAdmin";
-import {
-  borradorNewsletter,
-  borradorHTML,
-  borradorTexto,
-} from "../../lib/newsletter";
+import { borradorNewsletter } from "../../lib/newsletter";
+import { contarSuscriptores } from "../../lib/beehiiv";
 import BorradorNewsletter from "./BorradorNewsletter";
 
 // Página interna: no se cachea y no se indexa.
@@ -21,13 +18,14 @@ export const metadata = {
 export default async function NewsletterAdmin() {
   if (!haySesion()) return <LoginAdmin />;
 
-  const b = await borradorNewsletter();
+  // El borrador y el padrón se piden a la vez: son dos servicios distintos y
+  // no tiene sentido esperar uno para pedir el otro.
+  const [b, suscriptores] = await Promise.all([
+    borradorNewsletter(),
+    contarSuscriptores(),
+  ]);
 
-  return (
-    <BorradorNewsletter
-      borrador={b}
-      html={borradorHTML(b)}
-      texto={borradorTexto(b)}
-    />
-  );
+  // El HTML y el texto ya no se arman acá: los arma la pantalla, que es la
+  // que sabe qué bloques dejó prendidos.
+  return <BorradorNewsletter borrador={b} suscriptores={suscriptores} />;
 }

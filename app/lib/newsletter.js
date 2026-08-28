@@ -2,6 +2,7 @@ import { getArticulos } from "./articulos";
 import { getTerminos } from "./glosario";
 import { getEventosConEstado, yaPaso, formatRango, nombreConAnio } from "./agenda";
 import { terminosMencionados } from "./enlaces";
+import { getEpisodes } from "./youtube";
 import { SITE } from "./site";
 
 // El borrador del newsletter de la semana.
@@ -71,10 +72,22 @@ export function miercolesAnterior(hoy = new Date()) {
 // títulos del sitio usan dos puntos para separar gancho y explicación— más
 // cuántos eventos se vienen. Si no hay artículo, el asunto habla de la
 // agenda, que es lo que sí hay.
-function armarAsunto(articulos, eventos) {
+function armarAsunto(articulos, eventos, episodio) {
   const n = eventos.length;
   const cola =
     n === 0 ? "" : n === 1 ? ", y un evento que se viene" : `, y ${n} eventos que se vienen`;
+
+  // Si esta semana salió episodio, el gancho es el episodio: es lo más nuevo
+  // que tenemos y es de lo que la gente se suscribió a enterarse. El artículo
+  // pasa a segundo lugar, no desaparece.
+  if (episodio) {
+    const t = String(episodio.titulo)
+      // Los títulos vienen como "T02E14 - Tema del episodio": el código de
+      // temporada no le dice nada a nadie en la bandeja de entrada.
+      .replace(/^\s*T\d+\s*E\d+\s*[-–—:]\s*/i, "")
+      .trim();
+    return `${t}${cola}`;
+  }
 
   if (!articulos.length) {
     if (!n) return `Lo que pasa esta semana en la industria de eventos`;
@@ -180,10 +193,55 @@ export async function borradorNewsletter({ hoy = new Date() } = {}) {
         }))
     : [];
 
+  // El episodio de la semana, con su miniatura.
+  //
+  // Es lo primero que va en el mail: el newsletter de un podcast que no habla
+  // del episodio nuevo es raro. Se busca el más nuevo publicado dentro de la
+  // misma ventana de miércoles a miércoles; si esa semana no salió ninguno,
+  // el bloque no existe, igual que los otros.
+  //
+  // El texto que lo acompaña sale del artículo de ese episodio si ya está
+  // publicado —esa bajada la escribimos nosotros y está revisada— y recién si
+  // no hay, del principio de la descripción de YouTube. Nunca se inventa.
+  let episodio = null;
+  try {
+    const eps = await getEpisodes();
+    const dentro = (eps || []).filter((e) => {
+      const dia = String(e.published || "").slice(0, 10);
+      return dia && dia > desde && dia <= hasta;
+    });
+    const ep = dentro[0] || null;
+    if (ep) {
+      const suArticulo = getArticulos().find((a) => a.episodio === ep.id);
+      const deYoutube = String(ep.description || "")
+        .split(/\n\s*\n/)[0]
+        .trim()
+        .slice(0, 300);
+      episodio = {
+        id: ep.id,
+        titulo: ep.title,
+        // hqdefault es la miniatura de YouTube: 480×360, sirve en un mail.
+        miniatura: ep.thumb,
+        url: `${SITE.url}/episodios/${ep.id}`,
+        youtube: `https://www.youtube.com/watch?v=${ep.id}`,
+        // Lo que se cuenta del episodio. La bajada del artículo primero.
+        resumen: suArticulo?.bajada || deYoutube || "",
+        resumenDe: suArticulo ? "el artículo" : deYoutube ? "YouTube" : "",
+        articuloUrl: suArticulo ? `${SITE.url}/articulos/${suArticulo.id}` : "",
+      };
+    }
+  } catch (e) {
+    // Igual que la agenda: si no se pudo leer, queda escrito y el bloque no
+    // se arma. Un newsletter sin episodio se nota; uno con el episodio
+    // equivocado, no.
+    console.warn(`[newsletter] no se pudieron leer los episodios: ${e.message}`);
+  }
+
   return {
     desde,
     hasta,
-    asunto: armarAsunto(articulos, eventos),
+    episodio,
+    asunto: armarAsunto(articulos, eventos, episodio),
     articulos,
     terminos,
     terminosDeMas,
@@ -196,105 +254,16 @@ export async function borradorNewsletter({ hoy = new Date() } = {}) {
     // como "no hay" es afirmar sobre datos que no se leyeron: la pantalla
     // decía "no hay eventos en los próximos días" con veinte en la agenda.
     // Es la regla 8 del CLAUDE.md — una fuga silenciosa— asomando por acá.
-    vacio: completa && !articulos.length && !terminos.length && !eventos.length,
+    vacio:
+      completa &&
+      !episodio &&
+      !articulos.length &&
+      !terminos.length &&
+      !eventos.length,
   };
 }
 
-// El mismo borrador, en el HTML que se pega en el editor de beehiiv.
-//
-// Es HTML pobre a propósito —encabezados, párrafos y enlaces— porque el
-// editor de beehiiv reconstruye el suyo al pegar y cualquier estilo propio se
-// pierde o, peor, entra a medias. Lo que tiene que sobrevivir es la
-// estructura y los links.
-export function borradorHTML(b) {
-  // Escapa también las comillas: se usa dentro de href="…" y el slug sale de
-  // Airtable tal cual. Hoy no es explotable —a ese campo solo llegan el robot
-  // y el panel, los dos con el slug ya saneado— pero un escapador que no
-  // escapa comillas es una trampa cargada para el próximo que lo reuse.
-  const esc = (t) =>
-    String(t == null ? "" : t)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-
-  const partes = [];
-
-  if (b.articulos.length) {
-    partes.push("<h2>Para leer</h2>");
-    for (const a of b.articulos) {
-      partes.push(
-        `<p><strong><a href="${esc(a.url)}">${esc(a.titulo)}</a></strong><br>${esc(a.bajada)}</p>`
-      );
-    }
-  }
-
-  if (b.eventos.length) {
-    partes.push("<h2>La agenda de los próximos días</h2>");
-    for (const e of b.eventos) {
-      const sello = e.verificado ? " · datos confirmados por el organizador" : "";
-      partes.push(
-        `<p><strong><a href="${esc(e.url)}">${esc(e.nombre)}</a></strong><br>${esc(e.cuando)}${
-          e.donde ? ` · ${esc(e.donde)}` : ""
-        }${esc(sello)}</p>`
-      );
-    }
-    partes.push(
-      `<p><a href="${esc(SITE.url)}/agenda">Ver la agenda completa</a></p>`
-    );
-  }
-
-  if (b.terminos.length) {
-    partes.push("<h2>Nuevo en el glosario</h2>");
-    for (const t of b.terminos) {
-      partes.push(
-        `<p><strong><a href="${esc(t.url)}">${esc(t.termino)}</a></strong>: ${esc(t.definicionCorta)}</p>`
-      );
-    }
-    if (b.terminosDeMas > 0) {
-      partes.push(
-        `<p><a href="${esc(SITE.url)}/glosario">Y ${b.terminosDeMas} ${
-          b.terminosDeMas === 1 ? "palabra más" : "palabras más"
-        } en el glosario</a></p>`
-      );
-    }
-  }
-
-  return partes.join("\n");
-}
-
-// Y en texto pelado, para quien prefiera pegarlo así.
-export function borradorTexto(b) {
-  const partes = [];
-  if (b.articulos.length) {
-    partes.push("PARA LEER", "");
-    for (const a of b.articulos) {
-      partes.push(a.titulo, a.bajada, a.url, "");
-    }
-  }
-  if (b.eventos.length) {
-    partes.push("LA AGENDA DE LOS PRÓXIMOS DÍAS", "");
-    for (const e of b.eventos) {
-      partes.push(
-        e.nombre,
-        [e.cuando, e.donde].filter(Boolean).join(" · "),
-        e.url,
-        ""
-      );
-    }
-    partes.push(`Ver la agenda completa: ${SITE.url}/agenda`, "");
-  }
-  if (b.terminos.length) {
-    partes.push("NUEVO EN EL GLOSARIO", "");
-    for (const t of b.terminos) {
-      partes.push(`${t.termino}: ${t.definicionCorta}`, t.url, "");
-    }
-    if (b.terminosDeMas > 0) {
-      partes.push(
-        `Y ${b.terminosDeMas} ${b.terminosDeMas === 1 ? "palabra más" : "palabras más"}: ${SITE.url}/glosario`,
-        ""
-      );
-    }
-  }
-  return partes.join("\n").replace(/\n{3,}/g, "\n\n").trim();
-}
+// Los armadores viven en newsletter-armar.js, que no lee nada del servidor y
+// por eso lo puede usar también la pantalla. Se re-exportan desde acá para
+// que quien ya importaba de este archivo no tenga que cambiar nada.
+export { borradorHTML, borradorTexto, BLOQUES, cuanto } from "./newsletter-armar";
