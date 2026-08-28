@@ -143,6 +143,69 @@ function sinCitas(texto) {
     .trim();
 }
 
+// Saca del texto PUBLICO las frases que hablan de nuestro trabajo y no del
+// evento.
+//
+// El robot a veces escribe en la descripcion cosas como "Ficha pendiente de
+// completar: falta confirmar el rubro exacto, las fechas y la sede", que es
+// una nota para nosotros y termino publicada en mateyeventos.com/agenda/
+// expocehap. Paso dos veces: ahi y en Expo Wedding ("queda por verificar
+// cuanto componente B2B real tiene").
+//
+// El corte es por SUJETO, no por palabra: "las fechas estan a confirmar"
+// habla del evento y se queda; "falta confirmar las fechas" habla de lo que
+// nos falta hacer a nosotros y se va. Por eso los patrones estan anclados a
+// verbos de tarea pendiente (falta/queda por/pendiente de) y a la palabra
+// "ficha", que es como llamamos al registro.
+//
+// Nada se pierde: lo sacado se devuelve aparte para anotarlo en Notas
+// internas y para que quede en el log de la corrida. Un texto que se recorta
+// en silencio es la misma fuga que un try/catch vacio.
+const FRASES_DE_PROCESO = [
+  /\bfalta(n)? (confirmar|verificar|chequear|completar|cargar|datos)\b/i,
+  /\bqueda(n)? por (confirmar|verificar|chequear|completar|definir)\b/i,
+  /\bpendiente de (completar|confirmar|verificar|carga)\b/i,
+  /\bficha (pendiente|incompleta|sin)\b/i,
+  /\bno (se )?pudo (verificarse|verificar|confirmarse|confirmar)\b/i,
+  /\bhay que (verificar|chequear|confirmar|revisar)\b/i,
+  /\b(revisar|chequear|completar) (con el organizador|mas adelante|luego)\b/i,
+  /\bdato (sin confirmar|no verificado)\b/i,
+];
+
+function sinFrasesDeProceso(texto) {
+  if (typeof texto !== "string" || !texto.trim()) {
+    return { limpio: texto, sacado: [] };
+  }
+  const sacado = [];
+  const parrafos = texto.split(/\n{2,}/).map((parrafo) => {
+    // Se corta por oracion para no tirar el parrafo entero por una frase.
+    const oraciones = parrafo.match(/[^.!?]+[.!?]*/g) || [parrafo];
+    const quedan = [];
+    for (const o of oraciones) {
+      if (!FRASES_DE_PROCESO.some((re) => re.test(o))) {
+        quedan.push(o);
+        continue;
+      }
+      // La frase mala puede ser una subordinada colgada de una principal que
+      // sí dice algo: "...proveedores que buscan exhibición, aunque queda por
+      // verificar cuánto B2B tiene". Tirar la oración entera se lleva puesta
+      // la mitad buena, así que primero se prueba cortar por el nexo.
+      const corte = o.match(/^(.*?),\s*(?:aunque|si bien|pero|though)\s/i);
+      if (corte && corte[1].trim() && !FRASES_DE_PROCESO.some((re) => re.test(corte[1]))) {
+        const principal = corte[1].trim().replace(/[,;]$/, "");
+        quedan.push(principal.endsWith(".") ? `${principal} ` : `${principal}. `);
+        sacado.push(o.slice(corte[1].length).replace(/^,\s*/, "").trim());
+        continue;
+      }
+      sacado.push(o.trim());
+    }
+    return quedan.join("").replace(/\s{2,}/g, " ").trim();
+  });
+  // Una oracion puede haber sido la unica del parrafo: ese parrafo desaparece.
+  const limpio = parrafos.filter(Boolean).join("\n\n").trim();
+  return { limpio, sacado };
+}
+
 function sinAcentos(t) {
   return String(t)
     .normalize("NFD")
@@ -202,13 +265,20 @@ async function main() {
   }
 }
 
-// Saca las marcas de citación que quedaron guardadas en fichas ya publicadas.
+// Pasada de trapo sobre el texto de las fichas ya publicadas: saca las marcas
+// de citación que quedaron guardadas, y de los dos campos que se publican
+// saca además las frases que hablan de nuestro trabajo en vez del evento.
 async function limpiarTextos(registros) {
   const CAMPOS = [
     "Descripción corta", "Descripción larga", "Ediciones anteriores",
     "Contactos", "Redes", "Fuentes", "Organizador", "Venue",
     "Edición/Frecuencia", "Hallazgos IA", "Notas internas",
   ];
+
+  // Solo estos dos son texto publico. Notas internas y Hallazgos IA estan en
+  // CAMPOS para sacarles las marcas de citacion, pero ahi las frases de
+  // proceso son justamente lo que tienen que decir: no se tocan.
+  const PUBLICOS = ["Descripción corta", "Descripción larga"];
 
   const arreglos = [];
   for (const r of registros) {
@@ -217,6 +287,16 @@ async function limpiarTextos(registros) {
       const v = r.fields[c];
       if (typeof v !== "string" || !/<\/?cite/i.test(v)) continue;
       campos[c] = sinCitas(v);
+    }
+    for (const c of PUBLICOS) {
+      const v = campos[c] ?? r.fields[c];
+      if (typeof v !== "string" || !v.trim()) continue;
+      const { limpio, sacado } = sinFrasesDeProceso(v);
+      // Si al sacarlas no queda nada, se deja como estaba: un campo vaciado
+      // en silencio es peor que el defecto que se venia a arreglar.
+      if (!sacado.length || !limpio) continue;
+      campos[c] = limpio;
+      console.log(`  ⚠ ${r.fields["Nombre"]} · ${c}: ${sacado.join(" · ")}`);
     }
     if (Object.keys(campos).length) {
       arreglos.push({ id: r.id, fields: campos });
@@ -586,8 +666,27 @@ function aCampos(e) {
   }
   if (e.ciudad) f["Ciudad"] = e.ciudad;
   if (e.venue) f["Venue"] = e.venue;
-  if (e.descCorta) f["Descripción corta"] = e.descCorta;
-  if (e.descLarga) f["Descripción larga"] = e.descLarga;
+  // Las dos descripciones son texto publico: se les sacan las frases que
+  // hablan de lo que nos falta hacer a nosotros en vez de hablar del evento.
+  // Lo sacado no se tira, se anota abajo en Notas internas.
+  const recortes = [];
+  if (e.descCorta) {
+    const { limpio, sacado } = sinFrasesDeProceso(e.descCorta);
+    if (limpio) f["Descripción corta"] = limpio;
+    recortes.push(...sacado);
+  }
+  if (e.descLarga) {
+    const { limpio, sacado } = sinFrasesDeProceso(e.descLarga);
+    if (limpio) f["Descripción larga"] = limpio;
+    recortes.push(...sacado);
+  }
+  if (recortes.length) {
+    const aviso = `[${hoy}] Frases de proceso sacadas del texto público: ${recortes.join(" · ")}`;
+    f["Notas internas"] = f["Notas internas"]
+      ? `${f["Notas internas"]}\n${aviso}`
+      : aviso;
+    console.log(`  ⚠ ${e.nombre || "(sin nombre)"}: ${recortes.length} frase(s) de proceso fuera del texto público`);
+  }
   if (e.web) f["Web oficial"] = e.web;
   if (e.contactos) f["Contactos"] = e.contactos;
   if (e.redes) f["Redes"] = e.redes;
