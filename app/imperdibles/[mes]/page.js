@@ -38,7 +38,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function EdicionDelMes({ params }) {
-  const { edicion, otras } = await buscar(params.mes);
+  const { edicion, otras, esLaVigente } = await buscar(params.mes);
   if (!edicion) notFound();
 
   return (

@@ -180,6 +180,16 @@ Cosas sabidas y verificadas (no volver a investigar):
 
 16. **Lo que se ve y lo que se declara no siempre coinciden, y hay que mirar las dos.** `organizer.url` publicaba la web del evento como si fuera la del organizador: en ocho fichas eso decía que una ticketera es el sitio de la productora. Nada de eso se ve en la página; solo en el schema.
 
+17. **El build local no prueba las páginas de la agenda: en esta máquina no hay claves.** Sin `AIRTABLE_API_KEY`, `getEventos()` devuelve vacío, `generateStaticParams()` devuelve cero rutas y el componente de esa página **no llega a ejecutarse ni una vez**. El build termina en verde habiendo salteado todo lo que depende de Airtable, que es la mitad del sitio. Así se fue a producción un `esLaVigente` que estaba declarado en `generateMetadata` y usado en el componente: acá compiló, y en Vercel —donde sí hay datos— reventó al prerenderizar el primer mes. Es la regla 9 pero peor: no es que el build en verde no prueba nada, es que **prueba menos de lo que parece y no dice cuánto**. Cuando el cambio toca una página con datos, mirar en el resumen del build si esa ruta listó rutas hijas: si dice `● /imperdibles/[mes]` y abajo no hay ninguna, no se probó.
+
+18. **Si el deploy no aparece, no es demora: preguntale a GitHub.** Estuve refrescando el CSS de producción quince veces esperando que propagara, y el deploy ya había fallado. GitHub anota cada deploy de Vercel con su estado, y se lee sin credenciales de Vercel:
+
+    ```bash
+    gh api repos/kiropablo/mate-y-eventos-web/deployments --jq '.[0].id'
+    ```
+
+    y con ese id, `gh api repos/kiropablo/mate-y-eventos-web/deployments/<id>/statuses --jq '.[].state'`. Dice `success` o `failure` en un segundo. **Es el chequeo que va después de cada push**, antes de ponerse a verificar nada en la web.
+
 ---
 
 ## ESTADO Y PENDIENTES
