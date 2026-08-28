@@ -117,6 +117,13 @@ export function radiografia(eventos, { hoy = hoyISO() } = {}) {
 
   const argentinos = vigentes.filter((e) => e.pais === "Argentina");
   const porProvincia = contar(argentinos, (e) => e.provincia);
+  // Los argentinos a los que no se les sabe la provincia. contar() saltea los
+  // vacíos, así que sin esto el corte sumaba 245 sobre 255 y los otros diez
+  // desaparecían sin dejar rastro: el CSV que la página ofrece como prueba de
+  // que sus números se verifican no cerraba. Lo que no se sabe se cuenta
+  // aparte y se publica, que es la regla de toda esta página.
+  const argentinosSinProvincia =
+    argentinos.length - porProvincia.reduce((s, p) => s + p.n, 0);
 
   // Duración por tipo. Solo entran los que tienen las dos fechas y duran menos
   // de un mes; se publica el n de cada corte para que se vea sobre cuántos
@@ -177,6 +184,7 @@ export function radiografia(eventos, { hoy = hoyISO() } = {}) {
     porPais,
     porProvincia,
     argentinos: argentinos.length,
+    argentinosSinProvincia,
     porDuracion,
   };
 }
@@ -195,6 +203,11 @@ export function radiografiaCSV(r) {
     filas.push(["duracion_mediana_dias", d.tipo, d.mediana]);
     filas.push(["duracion_casos_medidos", d.tipo, d.n]);
   }
+  filas.push([
+    "provincia_argentina",
+    "(sin provincia anunciada)",
+    r.argentinosSinProvincia,
+  ]);
   filas.push(["resumen", "eventos_por_delante", r.total]);
   filas.push(["resumen", "con_fecha_anunciada", r.conFecha]);
   filas.push(["resumen", "con_fecha_fuera_de_los_12_meses", r.fueraDeLaVentana]);

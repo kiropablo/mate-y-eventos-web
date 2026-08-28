@@ -260,7 +260,11 @@ export default async function Radiografia() {
               <>
                 <p className="sem-nota" style={{ margin: "24px 0 12px" }}>
                   Y dentro de Argentina, sobre los {r.argentinos} que se hacen
-                  acá:
+                  acá
+                  {r.porProvincia.length > 10
+                    ? `, las diez provincias con más eventos de las ${r.porProvincia.length} que aparecen`
+                    : ""}
+                  :
                 </p>
                 <div className="ag-chips">
                   {r.porProvincia.slice(0, 10).map((p) => (
@@ -269,6 +273,18 @@ export default async function Radiografia() {
                     </span>
                   ))}
                 </div>
+                {/* Los que no entran en ninguna provincia. Sin esta línea el
+                    corte sumaba menos que el total de Argentina y no había
+                    forma de saber por qué. */}
+                {r.argentinosSinProvincia > 0 ? (
+                  <p className="sem-nota" style={{ marginTop: "12px" }}>
+                    {r.argentinosSinProvincia === 1
+                      ? "Queda uno sin provincia anunciada"
+                      : `Quedan ${r.argentinosSinProvincia} sin provincia anunciada`}
+                    : son eventos cuya sede todavía no se publicó. Están en el
+                    total y en el CSV, en su propia fila.
+                  </p>
+                ) : null}
               </>
             ) : null}
           </section>
