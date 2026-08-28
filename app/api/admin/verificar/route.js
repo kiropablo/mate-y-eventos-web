@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEventoFresco } from "../../../lib/agenda";
+import { getEventoDelPanel } from "../../../lib/agenda";
 
 // "Le doy el OK": el sello se enciende acá, con una persona del otro lado.
 //
@@ -24,6 +24,7 @@ export async function POST(request) {
     return Response.json({ ok: false, error: "Sin configurar." }, { status: 500 });
   }
 
+  let id = "";
   let slug = "";
   let aprueba = true;
   // "quitar" apaga el sello. Existe para que un click de más se arregle en el
@@ -31,17 +32,19 @@ export async function POST(request) {
   let quitar = false;
   try {
     const body = await request.json();
+    id = String(body?.id || "");
     slug = String(body?.slug || "");
     aprueba = body?.aprueba !== false;
     quitar = body?.quitar === true;
   } catch {
+    id = "";
     slug = "";
   }
-  if (!slug) {
+  if (!id && !slug) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
 
-  const ev = await getEventoFresco(slug);
+  const ev = await getEventoDelPanel({ id, slug });
   if (!ev) {
     return Response.json({ ok: false, error: "No existe ese evento." }, { status: 404 });
   }

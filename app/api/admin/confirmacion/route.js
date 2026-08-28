@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEventos, yaPaso } from "../../../lib/agenda";
+import { getEventos, getEventoDelPanel, yaPaso } from "../../../lib/agenda";
 import { delMismoOrganizador } from "../../../lib/semana";
 import { armarConfirmacion } from "../../../lib/mail-confirmacion";
 import { mandarCorreo, hayCorreo } from "../../../lib/correo";
@@ -28,28 +28,45 @@ export async function POST(request) {
     );
   }
 
+  let id = "";
   let slug = "";
   let para = "";
   let forzar = false;
   try {
     const body = await request.json();
+    id = String(body?.id || "");
     slug = String(body?.slug || "");
     para = String(body?.para || "").trim();
     forzar = Boolean(body?.forzar);
   } catch {
+    id = "";
     slug = "";
   }
 
-  if (!slug) {
+  if (!id && !slug) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
 
   // Una sola lectura sin caché, igual que en la invitación: la ficha y los
   // otros eventos del mismo organizador tienen que salir del mismo momento.
   const todos = await getEventos({ fresco: true });
-  const ev = todos.find((e) => e.slug === slug);
+  // Por el id del registro: el slug se repite entre un archivado y su gemelo
+  // publicado, y acá se le manda un mail a una persona real.
+  const ev = await getEventoDelPanel({ id, slug });
   if (!ev) {
     return Response.json({ ok: false, error: "No existe ese evento." }, { status: 404 });
+  }
+  // Y tiene que estar publicado. El mail le dice al organizador que revise su
+  // ficha "tal como está publicada": sobre un borrador o un archivado esa
+  // frase es falsa, porque la ficha no existe para nadie más que nosotros.
+  if (ev.estado !== "Aprobado") {
+    return Response.json(
+      {
+        ok: false,
+        error: `Ese evento está en "${ev.estado || "sin estado"}". Aprobalo antes de mandar la confirmación.`,
+      },
+      { status: 409 }
+    );
   }
 
   // El mail dice "el sello quedó encendido". Si no lo está, sería mentira.

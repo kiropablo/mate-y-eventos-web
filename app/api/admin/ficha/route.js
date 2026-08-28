@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEventoFresco } from "../../../lib/agenda";
+import { getEventoDelPanel } from "../../../lib/agenda";
 import {
   CAMPOS_EDITABLES,
   valoresEditables,
@@ -44,8 +44,12 @@ export async function GET(request) {
   if (!haySesion()) {
     return Response.json({ ok: false, error: "Sin sesión." }, { status: 401 });
   }
-  const slug = String(new URL(request.url).searchParams.get("slug") || "");
-  if (!slug) {
+  // El id del registro identifica la ficha; el slug se repite entre un
+  // archivado y su gemelo publicado.
+  const params = new URL(request.url).searchParams;
+  const id = String(params.get("id") || "");
+  const slug = String(params.get("slug") || "");
+  if (!id && !slug) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
 
@@ -53,7 +57,7 @@ export async function GET(request) {
   // cargó la lista y se abre el editor pueden haber pasado horas, y lo que se
   // está por hacer es pisar campos. Editar sobre una foto vieja es la forma
   // más fácil de deshacer sin querer un cambio de esta mañana.
-  const ev = await getEventoFresco(slug);
+  const ev = await getEventoDelPanel({ id, slug });
   if (!ev) {
     return Response.json(
       { ok: false, error: "No existe ese evento, o está fuera de la agenda." },
@@ -88,20 +92,22 @@ export async function POST(request) {
     );
   }
 
+  let id = "";
   let slug = "";
   let entran = {};
   try {
     const body = await request.json();
+    id = String(body?.id || "");
     slug = String(body?.slug || "");
     entran = body?.valores || {};
   } catch {
     return Response.json({ ok: false, error: "No se entendió el pedido." }, { status: 400 });
   }
-  if (!slug) {
+  if (!id && !slug) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
 
-  const ev = await getEventoFresco(slug);
+  const ev = await getEventoDelPanel({ id, slug });
   if (!ev) {
     return Response.json(
       { ok: false, error: "No existe ese evento, o está fuera de la agenda." },

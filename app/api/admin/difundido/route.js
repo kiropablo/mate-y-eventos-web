@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEventoFresco, formatRango } from "../../../lib/agenda";
+import { getEventoDelPanel, formatRango } from "../../../lib/agenda";
 import { mandarCorreo } from "../../../lib/correo";
 import { LINKS, SITE } from "../../../lib/site";
 
@@ -26,17 +26,21 @@ export async function POST(request) {
     return Response.json({ ok: false, error: "Sin configurar." }, { status: 500 });
   }
 
+  let id = "";
   let slug = "";
   try {
-    slug = String((await request.json())?.slug || "");
+    const body = await request.json();
+    id = String(body?.id || "");
+    slug = String(body?.slug || "");
   } catch {
+    id = "";
     slug = "";
   }
-  if (!slug) {
+  if (!id && !slug) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
 
-  const ev = await getEventoFresco(slug);
+  const ev = await getEventoDelPanel({ id, slug });
   if (!ev) {
     return Response.json({ ok: false, error: "No existe ese evento." }, { status: 404 });
   }

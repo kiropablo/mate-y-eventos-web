@@ -58,6 +58,10 @@ function mapear(record) {
     id: record.id,
     nombre,
     slug,
+    // En qué estado está el registro: "Aprobado", "Borrador IA" o "Archivado".
+    // El sitio lee solo los aprobados y por eso nunca lo necesitó. Lo usa el
+    // panel, que sí muestra los tres para poder revisarlos y descartarlos.
+    estado: f["Estado"] || "",
     tipo: f["Tipo"] || "",
     interes: f["Interés MyE"] || [],
     // El destacado del mes es un espacio pago y vence solo.
@@ -168,13 +172,55 @@ export async function getEventoFresco(slug) {
   return eventos.find((e) => e.slug === slug) || null;
 }
 
+// El evento que está mirando el panel, buscado por el id del registro.
+//
+// El slug NO es único y nunca lo fue: el robot lo arma del nombre
+// (scripts/agenda-ia.mjs) y cuando archiva un duplicado deja dos registros con
+// el mismo nombre y el mismo slug, uno Aprobado y otro Archivado. Mientras el
+// panel mostraba solo los aprobados eso no se notaba. Al empezar a mostrar los
+// tres estados, buscar por slug significa que apretar un botón en la fila del
+// archivado le pega al que está publicado.
+//
+// Busca en los tres estados a propósito: el panel tiene que poder trabajar
+// sobre un borrador para aprobarlo y sobre un archivado para traerlo de
+// vuelta. Eso no publica nada: lo que protege al sitio es el filtro de las
+// páginas públicas, no este.
+//
+// Cae al slug solo si no le pasan id, para no romper nada que todavía lo mande
+// así, y en ese caso se queda con el aprobado si hay más de uno.
+//
+// getEventoFresco queda como estaba, con su búsqueda entre aprobados: la usa
+// app/api/agenda/[slug]/confirmar, que es la única ruta PÚBLICA que escribe en
+// Airtable. Abrirla dejaría que alguien con un link firmado confirme un
+// borrador que nadie miró, o reviva un archivado.
+export async function getEventoDelPanel({ id = "", slug = "" } = {}) {
+  if (!id && !slug) return null;
+  const { eventos } = await getEventosConEstado({
+    fresco: true,
+    todosLosEstados: true,
+  });
+  if (id) return eventos.find((e) => e.id === id) || null;
+  const conEseSlug = eventos.filter((e) => e.slug === slug);
+  return (
+    conEseSlug.find((e) => e.estado === "Aprobado") || conEseSlug[0] || null
+  );
+}
+
 // Igual que getEventos, pero además dice si la lectura salió entera.
 //
 // Hace falta para no mentir: el hub muestra "actualizada al {fecha}", y si
 // Airtable cortó a mitad del paginado esa leyenda estaría afirmando frescura
 // sobre una lista incompleta. Con "completa" en false, la página muestra los
 // eventos que pudo traer pero se guarda el sello.
-export async function getEventosConEstado({ estricto = false, fresco = false } = {}) {
+export async function getEventosConEstado({
+  estricto = false,
+  fresco = false,
+  // Solo para el panel. El sitio publica únicamente los aprobados, y esa línea
+  // no se toca: es lo que impide que un borrador que nadie miró salga a la web.
+  // Pero el panel tiene que poder ver los borradores para aprobarlos y los
+  // archivados para traerlos de vuelta.
+  todosLosEstados = false,
+} = {}) {
   const key = process.env.AIRTABLE_API_KEY;
   if (!key) {
     if (estricto) throw new Error("Agenda: falta AIRTABLE_API_KEY");
@@ -186,10 +232,8 @@ export async function getEventosConEstado({ estricto = false, fresco = false } =
 
   try {
     do {
-      const params = new URLSearchParams({
-        pageSize: "100",
-        filterByFormula: '{Estado}="Aprobado"',
-      });
+      const params = new URLSearchParams({ pageSize: "100" });
+      if (!todosLosEstados) params.set("filterByFormula", '{Estado}="Aprobado"');
       if (offset) params.set("offset", offset);
 
       const res = await fetch(

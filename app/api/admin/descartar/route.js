@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEventoFresco } from "../../../lib/agenda";
+import { getEventoDelPanel } from "../../../lib/agenda";
 
 // "Sacar de la agenda": el evento deja de publicarse, pero NO se borra.
 //
@@ -48,22 +48,27 @@ export async function POST(request) {
     );
   }
 
+  // El id del registro es lo que identifica al evento: el slug se repite
+  // entre un archivado y su gemelo publicado.
+  let id = "";
   let slug = "";
   let motivo = "";
   try {
     const body = await request.json();
+    id = String(body?.id || "");
     slug = String(body?.slug || "");
     // Opcional: por qué se saca. Queda escrito en la nota, que es lo que va a
     // leer el que dentro de seis meses se pregunte por qué no está.
     motivo = String(body?.motivo || "").trim().slice(0, 200);
   } catch {
+    id = "";
     slug = "";
   }
-  if (!slug) {
+  if (!id && !slug) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
 
-  const ev = await getEventoFresco(slug);
+  const ev = await getEventoDelPanel({ id, slug });
   if (!ev) {
     return Response.json(
       { ok: false, error: "No existe ese evento, o ya está fuera de la agenda." },

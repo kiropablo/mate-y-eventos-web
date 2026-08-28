@@ -93,9 +93,21 @@ const CSS = `
 .adm-filtros{display:flex;gap:6px;flex-wrap:wrap}
 .adm-filtro{background:none;border:1px solid rgba(245,245,245,.12);color:rgba(245,245,245,.5);border-radius:999px;padding:7px 15px;font-family:var(--font-ui);font-size:.78rem;cursor:pointer}
 .adm-filtro[data-on="si"]{border-color:#ea478a;color:#f5f5f5}
+.adm-cols{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px;padding:14px 16px;background:rgba(245,245,245,.03);border:1px solid rgba(245,245,245,.08);border-radius:12px}
+.adm-col{display:flex;flex-direction:column;gap:5px;min-width:132px}
+.adm-col span{font-family:var(--font-ui);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(245,245,245,.42)}
+.adm-col select{background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:9px;padding:9px 11px;font-family:var(--font-ui);font-size:.84rem}
+.adm-col select:focus{outline:none;border-color:#5aa0ff}
+.adm-cols .adm-btn{padding:9px 18px;font-size:.8rem}
+.adm-conteo{font-family:var(--font-ui);font-size:.82rem;color:rgba(245,245,245,.45);margin-bottom:14px}
+.org-badge{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;font-family:var(--font-ui);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:#ffb35a;border:1px solid rgba(255,179,90,.42)}
 .adm-chip--falta{color:#ffb35a;border:1px solid rgba(255,179,90,.45)}
 .adm-aviso{background:rgba(255,179,90,.08);border:1px solid rgba(255,179,90,.3);border-radius:10px;padding:12px 15px;font-family:var(--font-body);font-size:.86rem;line-height:1.55;color:rgba(245,245,245,.75);margin-bottom:18px}
 `;
+
+// Cuántas tarjetas se dibujan de una. Con la base entera son más de
+// cuatrocientas, y cada una trae botones, mails y el bloque de correcciones.
+const POR_TANDA = 60;
 
 export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [seccion, setSeccion] = useState("articulos");
@@ -148,6 +160,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [paraQuien, setParaQuien] = useState({});
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState("todos");
+  // Los filtros de la pestaña de eventos, uno por columna, como en Airtable.
+  // Vacío quiere decir "cualquiera". "cuando" arranca en próximos porque la
+  // pestaña se usa sobre todo para saber a quién escribirle, y los que ya
+  // pasaron son la mitad de la base.
+  const [fEstado, setFEstado] = useState("");
+  const [fTipo, setFTipo] = useState("");
+  const [fPais, setFPais] = useState("");
+  const [fProvincia, setFProvincia] = useState("");
+  const [fFechas, setFFechas] = useState("");
+  const [fCuando, setFCuando] = useState("proximos");
+  const [orden, setOrden] = useState("fecha");
+  const [tope, setTope] = useState(POR_TANDA);
   const [lista, setLista] = useState(articulos);
   const [glo, setGlo] = useState(glosario || []);
   const [abiertoGlo, setAbiertoGlo] = useState(null);
@@ -170,14 +194,20 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const borradoresGlo = glo.filter((t) => !t.publicado).length;
 
   // Dónde está cada evento del circuito.
-  const sinContactar = orgs.filter((e) => !e.verificado).length;
+  // Los tres contadores de arriba son del circuito con organizadores, así que
+  // se cuentan sobre los que se pueden escribir: publicados y por delante. La
+  // lista ahora trae también borradores, archivados y los que ya pasaron, y
+  // contar sobre todo eso daría un "listos para escribir" que incluye eventos
+  // de 2024 y fichas que nadie aprobó.
+  const escribibles = orgs.filter((e) => e.estado === "Aprobado" && !e.paso);
+  const sinContactar = escribibles.filter((e) => !e.verificado).length;
   // Los que se pueden escribir hoy: con mail y con tiempo.
-  const listos = orgs.filter(
+  const listos = escribibles.filter(
     (e) => !e.fechaContacto && !e.verificado && e.emailSugerido && e.aTiempo
   ).length;
   // Mismo criterio que el filtro «Para difundir»: si el contador dijera 0 y
   // el filtro mostrara uno, no se sabría a cuál creerle.
-  const paraDifundir = orgs.filter(
+  const paraDifundir = escribibles.filter(
     (e) => e.verificado && !e.difundido && !e.revisionPendiente
   ).length;
 
@@ -203,18 +233,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       )
     )
       return;
-    setDifundiendo(ev.slug);
+    setDifundiendo(ev.id || ev.slug);
     try {
       const res = await fetch("/api/admin/difundido", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: ev.slug }),
+        body: JSON.stringify({ id: ev.id, slug: ev.slug }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || "No se pudo guardar.");
       setOrgs((previa) =>
         previa.map((e) =>
-          e.slug === ev.slug ? { ...e, difundido: true } : e
+          (e.id || e.slug) === (ev.id || ev.slug) ? { ...e, difundido: true } : e
         )
       );
       if (data.aviso && data.aviso.startsWith("falló")) {
@@ -250,18 +280,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     // arrepintió, lo esperable es que no pase nada.
     if (motivo === null) return;
 
-    setSacando(ev.slug);
+    setSacando(ev.id || ev.slug);
     try {
       const res = await fetch("/api/admin/descartar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: ev.slug, motivo }),
+        body: JSON.stringify({ id: ev.id, slug: ev.slug, motivo }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo guardar.");
       // Se va de la lista: la pestaña muestra solo lo que está publicado, así
       // que dejarlo ahí diría que sigue en la agenda cuando ya no está.
-      setOrgs((previa) => previa.filter((e) => e.slug !== ev.slug));
+      setOrgs((previa) => previa.filter((e) => (e.id || e.slug) !== (ev.id || ev.slug)));
     } catch (e) {
       alert(e.message);
     } finally {
@@ -274,19 +304,19 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   // cien. Traerlos todos por si acaso haría lenta la pantalla que se usa
   // siempre, para una que se usa de a una ficha por vez.
   async function abrirFicha(ev) {
-    if (fichaAbierta === ev.slug) {
+    if (fichaAbierta === (ev.id || ev.slug)) {
       setFichaAbierta("");
       setFicha(null);
       setFichaMsj(null);
       return;
     }
-    setFichaAbierta(ev.slug);
+    setFichaAbierta(ev.id || ev.slug);
     setFicha(null);
     setFichaMsj(null);
     setFichaCargando(true);
     try {
       const res = await fetch(
-        `/api/admin/ficha?slug=${encodeURIComponent(ev.slug)}`
+        `/api/admin/ficha?id=${encodeURIComponent(ev.id)}&slug=${encodeURIComponent(ev.slug)}`
       );
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok)
@@ -316,7 +346,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       const res = await fetch("/api/admin/ficha", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: ev.slug, valores: fichaValores }),
+        body: JSON.stringify({ id: ev.id, slug: ev.slug, valores: fichaValores }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok)
@@ -326,7 +356,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       // queda diciendo el nombre viejo abajo del cartel de "guardado".
       setOrgs((previa) =>
         previa.map((e) =>
-          e.slug === ev.slug
+          (e.id || e.slug) === (ev.id || ev.slug)
             ? {
                 ...e,
                 nombre: fichaValores.nombre || e.nombre,
@@ -468,18 +498,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       )
     )
       return;
-    setAprobando(ev.slug);
+    setAprobando(ev.id || ev.slug);
     try {
       const res = await fetch("/api/admin/verificar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: ev.slug, quitar: !encender }),
+        body: JSON.stringify({ id: ev.id, slug: ev.slug, quitar: !encender }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || "No se pudo guardar.");
       setOrgs((previa) =>
         previa.map((e) =>
-          e.slug === ev.slug ? { ...e, verificado: encender } : e
+          (e.id || e.slug) === (ev.id || ev.slug) ? { ...e, verificado: encender } : e
         )
       );
     } catch (e) {
@@ -499,18 +529,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       )
     )
       return;
-    setAprobando(ev.slug);
+    setAprobando(ev.id || ev.slug);
     try {
       const res = await fetch("/api/admin/verificar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: ev.slug, aprueba: si }),
+        body: JSON.stringify({ id: ev.id, slug: ev.slug, aprueba: si }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || "No se pudo guardar.");
       setOrgs((previa) =>
         previa.map((e) =>
-          e.slug === ev.slug
+          (e.id || e.slug) === (ev.id || ev.slug)
             ? { ...e, revisionPendiente: false, verificado: si ? true : e.verificado }
             : e
         )
@@ -599,7 +629,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   }
 
   async function invitar(ev) {
-    const para = (paraQuien[ev.slug] ?? ev.emailSugerido ?? "").trim();
+    const para = (paraQuien[ev.id || ev.slug] ?? ev.emailSugerido ?? "").trim();
     if (!para) return alert("Escribí a qué mail se lo mando.");
     if (
       !confirm(
@@ -611,11 +641,11 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     )
       return;
 
-    marcarInvitando(ev.slug, true);
+    marcarInvitando(ev.id || ev.slug, true);
     try {
       // El servidor corta el reenvío por su cuenta y devuelve 409: la fecha
       // que ve el panel puede tener una hora de atraso, la de él no.
-      let res = await mandarInvitacion(ev.slug, para, false);
+      let res = await mandarInvitacion(ev, para, false);
       let data = await res.json().catch(() => ({}));
 
       if (res.status === 409 && data?.yaContactado) {
@@ -625,7 +655,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           )
         )
           return;
-        res = await mandarInvitacion(ev.slug, para, true);
+        res = await mandarInvitacion(ev, para, true);
         data = await res.json().catch(() => ({}));
       }
 
@@ -633,7 +663,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       const hoy = new Date().toLocaleDateString("en-CA");
       setOrgs((previa) =>
         previa.map((e) =>
-          e.slug === ev.slug ? { ...e, fechaContacto: hoy, email: para } : e
+          (e.id || e.slug) === (ev.id || ev.slug) ? { ...e, fechaContacto: hoy, email: para } : e
         )
       );
       if (!data.anotado) {
@@ -642,13 +672,13 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     } catch (e) {
       alert(e.message);
     } finally {
-      marcarInvitando(ev.slug, false);
+      marcarInvitando(ev.id || ev.slug, false);
     }
   }
 
   // El segundo mail: "listo, tu ficha quedó verificada".
   async function confirmar(ev) {
-    const para = (paraQuien[ev.slug] ?? ev.emailSugerido ?? "").trim();
+    const para = (paraQuien[ev.id || ev.slug] ?? ev.emailSugerido ?? "").trim();
     if (!para) return alert("Escribí a qué mail se lo mando.");
     if (
       !confirm(
@@ -660,9 +690,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     )
       return;
 
-    marcarConfirmando(ev.slug, true);
+    marcarConfirmando(ev.id || ev.slug, true);
     try {
-      let res = await mandarConfirmacion(ev.slug, para, false);
+      let res = await mandarConfirmacion(ev, para, false);
       let data = await res.json().catch(() => ({}));
 
       if (res.status === 409 && data?.yaConfirmado) {
@@ -672,7 +702,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           )
         )
           return;
-        res = await mandarConfirmacion(ev.slug, para, true);
+        res = await mandarConfirmacion(ev, para, true);
         data = await res.json().catch(() => ({}));
       }
 
@@ -680,7 +710,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       const hoy = new Date().toLocaleDateString("en-CA");
       setOrgs((previa) =>
         previa.map((e) =>
-          e.slug === ev.slug ? { ...e, fechaConfirmacion: hoy, email: para } : e
+          (e.id || e.slug) === (ev.id || ev.slug) ? { ...e, fechaConfirmacion: hoy, email: para } : e
         )
       );
       if (!data.anotado) {
@@ -689,23 +719,25 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     } catch (e) {
       alert(e.message);
     } finally {
-      marcarConfirmando(ev.slug, false);
+      marcarConfirmando(ev.id || ev.slug, false);
     }
   }
 
-  function mandarConfirmacion(slug, para, forzar) {
+  // Reciben el evento entero y no el slug: el id del registro es lo único que
+  // distingue un archivado de su gemelo publicado, y acá se manda un mail.
+  function mandarConfirmacion(ev, para, forzar) {
     return fetch("/api/admin/confirmacion", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug, para, forzar }),
+      body: JSON.stringify({ id: ev.id, slug: ev.slug, para, forzar }),
     });
   }
 
-  function mandarInvitacion(slug, para, forzar) {
+  function mandarInvitacion(ev, para, forzar) {
     return fetch("/api/admin/invitar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug, para, forzar }),
+      body: JSON.stringify({ id: ev.id, slug: ev.slug, para, forzar }),
     });
   }
 
@@ -731,9 +763,32 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       (filtro === "todos" ||
         (filtro === "borradores" ? !t.publicado : t.publicado))
   );
+  // Los desplegables se arman con lo que hay de verdad en la base, no con una
+  // lista escrita a mano: si mañana entra un evento de Ecuador, el país aparece
+  // solo. Una lista fija se desactualiza y nadie se entera hasta que un filtro
+  // deja de encontrar algo que sí está.
+  const opcionesDe = (campo) =>
+    [...new Set(orgs.map((e) => e[campo]).filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b, "es")
+    );
+
   const orgsFiltrados = orgs.filter(
     (e) =>
-      coincide(e.nombre, e.organizador, e.email) &&
+      coincide(
+        e.nombre,
+        e.organizador,
+        e.email,
+        e.ciudad,
+        e.venue,
+        e.provincia
+      ) &&
+      (fEstado === "" || e.estado === fEstado) &&
+      (fTipo === "" || e.tipo === fTipo) &&
+      (fPais === "" || e.pais === fPais) &&
+      (fProvincia === "" || e.provincia === fProvincia) &&
+      (fFechas === "" || e.estadoFechas === fFechas) &&
+      (fCuando === "todos" ||
+        (fCuando === "proximos" ? !e.paso : e.paso)) &&
       (filtro === "todos" ||
         (filtro === "conmail"
           ? Boolean(e.emailSugerido)
@@ -754,6 +809,33 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                 ? e.verificado && !e.revisionPendiente && !e.fechaConfirmacion
                 : true))
   );
+
+  // El orden. "fecha" es el de siempre y sigue siendo el de arranque: la
+  // pestaña se usa para saber a quién hay que escribirle antes.
+  const orgsOrdenados = [...orgsFiltrados].sort((a, b) => {
+    const texto = (x, y) => String(x || "").localeCompare(String(y || ""), "es");
+    // Los que no tienen fecha van al final en los órdenes por fecha: son los
+    // que hay que completar, no los más urgentes.
+    const porFecha = (x, y) =>
+      x.fechaInicio && y.fechaInicio
+        ? x.fechaInicio.localeCompare(y.fechaInicio)
+        : x.fechaInicio
+          ? -1
+          : y.fechaInicio
+            ? 1
+            : texto(x.nombre, y.nombre);
+    if (orden === "fecha-desc") return porFecha(b, a);
+    if (orden === "nombre") return texto(a.nombre, b.nombre);
+    if (orden === "organizador") return texto(a.organizador, b.organizador);
+    if (orden === "pais") return texto(a.pais, b.pais) || porFecha(a, b);
+    if (orden === "estado") return texto(a.estado, b.estado) || porFecha(a, b);
+    return porFecha(a, b);
+  });
+
+  // No se dibujan los cuatrocientos de una. Cada tarjeta trae botones, mails y
+  // el bloque de correcciones; con la base entera la pantalla tarda en abrir y
+  // el buscador se pone lento al tipear.
+  const orgsVisibles = orgsOrdenados.slice(0, tope);
 
   // Los filtros que tienen sentido en cada pestaña.
   const filtros =
@@ -833,7 +915,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
             ? `${glo.length} términos · ${borradoresGlo} sin revisar`
             : seccion === "mensaje"
               ? "El mail que sale la primera vez que le escribimos a un organizador"
-              : `${orgs.length} eventos próximos · ${listos} con mail listos para escribir · ${sinContactar} sin verificar`}
+              : `${orgs.length} eventos en la base · ${listos} con mail listos para escribir · ${sinContactar} sin verificar`}
       </div>
 
       <div className="adm-tabs">
@@ -1280,15 +1362,95 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
               pueden armar los links de confirmación.
             </div>
           ) : null}
-          {orgsFiltrados.length === 0 ? (
+          <div className="adm-cols">
+            {[
+              ["Cuándo", fCuando, setFCuando, [
+                ["proximos", "Próximos"],
+                ["pasados", "Ya pasaron"],
+                ["todos", "Todos"],
+              ], false],
+              ["Estado", fEstado, setFEstado, opcionesDe("estado"), true],
+              ["Tipo", fTipo, setFTipo, opcionesDe("tipo"), true],
+              ["País", fPais, setFPais, opcionesDe("pais"), true],
+              ["Provincia", fProvincia, setFProvincia, opcionesDe("provincia"), true],
+              ["Fechas", fFechas, setFFechas, opcionesDe("estadoFechas"), true],
+            ].map(([rotulo, valor, poner, opciones, conTodos]) => (
+              <label className="adm-col" key={rotulo}>
+                <span>{rotulo}</span>
+                <select
+                  value={valor}
+                  onChange={(e) => {
+                    poner(e.target.value);
+                    // Al cambiar un filtro se vuelve al principio: si no, se
+                    // queda mostrando "60 de 3" y parece que faltan.
+                    setTope(POR_TANDA);
+                  }}
+                >
+                  {conTodos ? <option value="">Todos</option> : null}
+                  {opciones.map((o) =>
+                    Array.isArray(o) ? (
+                      <option key={o[0]} value={o[0]}>
+                        {o[1]}
+                      </option>
+                    ) : (
+                      <option key={o} value={o}>
+                        {o}
+                      </option>
+                    )
+                  )}
+                </select>
+              </label>
+            ))}
+            <label className="adm-col">
+              <span>Ordenar por</span>
+              <select value={orden} onChange={(e) => setOrden(e.target.value)}>
+                <option value="fecha">Fecha, la más cercana arriba</option>
+                <option value="fecha-desc">Fecha, la más lejana arriba</option>
+                <option value="nombre">Nombre</option>
+                <option value="organizador">Organizador</option>
+                <option value="pais">País</option>
+                <option value="estado">Estado</option>
+              </select>
+            </label>
+            {fEstado || fTipo || fPais || fProvincia || fFechas || fCuando !== "proximos" || filtro !== "todos" || busca ? (
+              <button
+                type="button"
+                className="adm-btn adm-btn--sec"
+                onClick={() => {
+                  setFEstado("");
+                  setFTipo("");
+                  setFPais("");
+                  setFProvincia("");
+                  setFFechas("");
+                  setFCuando("proximos");
+                  setFiltro("todos");
+                  setBusca("");
+                  setTope(POR_TANDA);
+                }}
+              >
+                Limpiar filtros
+              </button>
+            ) : null}
+          </div>
+
+          <p className="adm-conteo">
+            {orgsOrdenados.length === orgs.length
+              ? `${orgs.length} eventos`
+              : `${orgsOrdenados.length} de ${orgs.length} eventos`}
+            {orgsVisibles.length < orgsOrdenados.length
+              ? ` · mostrando los primeros ${orgsVisibles.length}`
+              : ""}
+          </p>
+
+          {orgsOrdenados.length === 0 ? (
             <div className="adm-vacio">
               {orgs.length === 0
-                ? "No hay eventos próximos en la agenda. Si Airtable no responde, probá «Actualizar desde Airtable» acá arriba."
-                : "Ningún evento coincide con lo que buscás."}
+                ? "No hay eventos en la agenda. Si Airtable no responde, probá «Actualizar desde Airtable» acá arriba."
+                : "Ningún evento coincide con los filtros. Probá «Limpiar filtros»."}
             </div>
           ) : (
             <div className="adm-lista">
-              {orgsFiltrados.map((ev) => {
+              {orgsVisibles.map((ev) => {
                 const estado = ev.revisionPendiente
                   ? "espera"
                   : ev.difundido
@@ -1297,11 +1459,18 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                       ? "verificado"
                       : "pendiente";
                 return (
-                  <article className="adm-item org" key={ev.slug}>
+                  <article className="adm-item org" key={ev.id || ev.slug}>
                     <div className="org-cab">
                       <div>
                         <h3>{ev.nombre}</h3>
                         <div className="org-meta">
+                          {/* El estado solo se nombra cuando NO es el normal:
+                              con la base entera a la vista hay que poder
+                              distinguir de un vistazo un borrador que nadie
+                              miró de un evento publicado. */}
+                          {ev.estado && ev.estado !== "Aprobado" ? (
+                            <span className="org-badge">{ev.estado}</span>
+                          ) : null}
                           {ev.fechas}
                           {ev.organizador ? ` · ${ev.organizador}` : ""}
                           {typeof ev.dias === "number"
@@ -1351,11 +1520,11 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                                     `- ${o.nombre}${o.fechas ? ` — ${o.fechas}` : ""}${o.ciudad ? `, ${o.ciudad}` : ""}`
                                 )
                                 .join("\n"),
-                              `semana-${ev.slug}`
+                              `semana-${ev.id || ev.slug}`
                             )
                           }
                         >
-                          {copiado === `semana-${ev.slug}`
+                          {copiado === `semana-${ev.id || ev.slug}`
                             ? "Copiado"
                             : "Copiar la lista"}
                         </button>
@@ -1370,19 +1539,19 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         <input
                           type="email"
                           className="org-mail"
-                          value={paraQuien[ev.slug] ?? ev.emailSugerido ?? ""}
+                          value={paraQuien[ev.id || ev.slug] ?? ev.emailSugerido ?? ""}
                           onChange={(e) =>
-                            setParaQuien((p) => ({ ...p, [ev.slug]: e.target.value }))
+                            setParaQuien((p) => ({ ...p, [ev.id || ev.slug]: e.target.value }))
                           }
                           placeholder="mail del organizador"
                         />
                         <button
                           type="button"
                           className="adm-btn"
-                          disabled={invitando.has(ev.slug)}
+                          disabled={invitando.has(ev.id || ev.slug)}
                           onClick={() => invitar(ev)}
                         >
-                          {invitando.has(ev.slug)
+                          {invitando.has(ev.id || ev.slug)
                             ? "Enviando…"
                             : ev.fechaContacto
                               ? "Volver a enviar"
@@ -1408,12 +1577,12 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                                 type="button"
                                 className="org-chip"
                                 data-on={
-                                  (paraQuien[ev.slug] ?? ev.emailSugerido) === m
+                                  (paraQuien[ev.id || ev.slug] ?? ev.emailSugerido) === m
                                     ? "si"
                                     : "no"
                                 }
                                 onClick={() =>
-                                  setParaQuien((p) => ({ ...p, [ev.slug]: m }))
+                                  setParaQuien((p) => ({ ...p, [ev.id || ev.slug]: m }))
                                 }
                               >
                                 {m}
@@ -1435,9 +1604,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         <button
                           type="button"
                           className="adm-btn adm-btn--sec"
-                          onClick={() => copiar(ev.link, `link-${ev.slug}`)}
+                          onClick={() => copiar(ev.link, `link-${ev.id || ev.slug}`)}
                         >
-                          {copiado === `link-${ev.slug}`
+                          {copiado === `link-${ev.id || ev.slug}`
                             ? "Copiado"
                             : "Copiar link de confirmación"}
                         </button>
@@ -1448,10 +1617,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                           <button
                             type="button"
                             className="adm-btn"
-                            disabled={aprobando === ev.slug}
+                            disabled={aprobando === (ev.id || ev.slug)}
                             onClick={() => aprobar(ev, true)}
                           >
-                            {aprobando === ev.slug ? "Guardando…" : "Dar el OK"}
+                            {aprobando === (ev.id || ev.slug) ? "Guardando…" : "Dar el OK"}
                           </button>
                           {/* Saca el "espera tu OK" sin encender el sello: ya
                               lo miramos y no hay nada que aplicar. Se llamaba
@@ -1460,7 +1629,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                           <button
                             type="button"
                             className="adm-btn adm-btn--sec"
-                            disabled={aprobando === ev.slug}
+                            disabled={aprobando === (ev.id || ev.slug)}
                             onClick={() => aprobar(ev, false)}
                           >
                             Marcar como visto
@@ -1477,10 +1646,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         <button
                           type="button"
                           className={ev.verificado ? "adm-btn adm-btn--sec" : "adm-btn"}
-                          disabled={aprobando === ev.slug}
+                          disabled={aprobando === (ev.id || ev.slug)}
                           onClick={() => marcarVerificado(ev, !ev.verificado)}
                         >
-                          {aprobando === ev.slug
+                          {aprobando === (ev.id || ev.slug)
                             ? "Guardando…"
                             : ev.verificado
                               ? "Sacar el sello"
@@ -1501,10 +1670,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                               ? "adm-btn adm-btn--sec"
                               : "adm-btn"
                           }
-                          disabled={confirmando.has(ev.slug)}
+                          disabled={confirmando.has(ev.id || ev.slug)}
                           onClick={() => confirmar(ev)}
                         >
-                          {confirmando.has(ev.slug)
+                          {confirmando.has(ev.id || ev.slug)
                             ? "Mandando…"
                             : ev.fechaConfirmacion
                               ? `Avisado el ${ev.fechaConfirmacion}`
@@ -1516,10 +1685,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         <button
                           type="button"
                           className="adm-btn adm-btn--sec"
-                          disabled={difundiendo === ev.slug}
+                          disabled={difundiendo === (ev.id || ev.slug)}
                           onClick={() => marcarDifundido(ev)}
                         >
-                          {difundiendo === ev.slug
+                          {difundiendo === (ev.id || ev.slug)
                             ? "Guardando…"
                             : "Ya lo difundimos"}
                         </button>
@@ -1534,7 +1703,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         className="adm-btn adm-btn--sec"
                         onClick={() => abrirFicha(ev)}
                       >
-                        {fichaAbierta === ev.slug
+                        {fichaAbierta === (ev.id || ev.slug)
                           ? "Cerrar los datos"
                           : ev.correcciones
                             ? "Editar los datos ✏️"
@@ -1555,14 +1724,14 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                       <button
                         type="button"
                         className="adm-btn adm-btn--peligro"
-                        disabled={sacando === ev.slug}
+                        disabled={sacando === (ev.id || ev.slug)}
                         onClick={() => sacarDeLaAgenda(ev)}
                       >
-                        {sacando === ev.slug ? "Sacando…" : "Sacar de la agenda"}
+                        {sacando === (ev.id || ev.slug) ? "Sacando…" : "Sacar de la agenda"}
                       </button>
                     </div>
 
-                    {fichaAbierta === ev.slug ? (
+                    {fichaAbierta === (ev.id || ev.slug) ? (
                       <div className="org-editor">
                         {fichaCargando ? (
                           <p className="org-nota">Trayendo los datos…</p>
@@ -1628,7 +1797,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                             ) : null}
 
                             {ficha.campos.map((c) => {
-                              const id = `f-${ev.slug}-${c.clave}`;
+                              const id = `f-${ev.id || ev.slug}-${c.clave}`;
                               const valor = fichaValores[c.clave] ?? "";
                               return (
                                 <div className="adm-campo" key={c.clave}>
@@ -1720,6 +1889,16 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                   </article>
                 );
               })}
+              {orgsVisibles.length < orgsOrdenados.length ? (
+                <button
+                  type="button"
+                  className="adm-btn adm-btn--sec"
+                  onClick={() => setTope((t) => t + POR_TANDA)}
+                >
+                  Ver {Math.min(POR_TANDA, orgsOrdenados.length - orgsVisibles.length)} más
+                  {" "}(quedan {orgsOrdenados.length - orgsVisibles.length})
+                </button>
+              ) : null}
             </div>
           )}
         </>

@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
-import { getEventos, yaPaso } from "../../../lib/agenda";
+import { getEventos, getEventoDelPanel, yaPaso } from "../../../lib/agenda";
 import { mismaSemana, propiosEsaSemana, MAXIMO_SEMANA } from "../../../lib/semana";
 import { linkDeConfirmacion, hayClave } from "../../../lib/firma";
 import { armarInvitacion } from "../../../lib/mail-invitacion";
@@ -35,19 +35,22 @@ export async function POST(request) {
     );
   }
 
+  let id = "";
   let slug = "";
   let para = "";
   let forzar = false;
   try {
     const body = await request.json();
+    id = String(body?.id || "");
     slug = String(body?.slug || "");
     para = String(body?.para || "").trim();
     forzar = Boolean(body?.forzar);
   } catch {
+    id = "";
     slug = "";
   }
 
-  if (!slug) {
+  if (!id && !slug) {
     return Response.json({ ok: false, error: "Falta el evento." }, { status: 400 });
   }
   if (!esEmail(para)) {
@@ -62,9 +65,23 @@ export async function POST(request) {
   // el mail podía listar eventos distintos de los que el panel mostraba —o un
   // evento recién borrado— sin que nada lo delatara.
   const todos = await getEventos({ fresco: true });
-  const ev = todos.find((e) => e.slug === slug);
+  // Por el id del registro: el slug se repite entre un archivado y su gemelo
+  // publicado, y acá se le manda un mail a una persona real.
+  const ev = await getEventoDelPanel({ id, slug });
   if (!ev) {
     return Response.json({ ok: false, error: "No existe ese evento." }, { status: 404 });
+  }
+  // Y tiene que estar publicado. El mail le dice al organizador que revise su
+  // ficha "tal como está publicada": sobre un borrador o un archivado esa
+  // frase es falsa, porque la ficha no existe para nadie más que nosotros.
+  if (ev.estado !== "Aprobado") {
+    return Response.json(
+      {
+        ok: false,
+        error: `Ese evento está en "${ev.estado || "sin estado"}". Aprobalo antes de mandar la invitación.`,
+      },
+      { status: 409 }
+    );
   }
 
   // Si ya se le escribió, no se manda de nuevo salvo que se pida a propósito.
