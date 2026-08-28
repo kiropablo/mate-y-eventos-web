@@ -5,7 +5,10 @@ import Footer from "../../components/Footer";
 import ArticuloCuerpo from "../../components/ArticuloCuerpo";
 import { getTermino, getTerminos } from "../../lib/glosario";
 import { getArticuloDeEpisodio, getArticulos } from "../../lib/articulos";
-import { articulosQueMencionan } from "../../lib/enlaces";
+import {
+  articulosQueMencionan,
+  terminosRelacionados,
+} from "../../lib/enlaces";
 import { SITE } from "../../lib/site";
 
 export const revalidate = 3600;
@@ -50,11 +53,11 @@ export default function Termino({ params }) {
 
   const articulo = getArticuloDeEpisodio(t.episodio);
 
-  // Los relacionados que existen y están publicados.
+  // Los otros términos que esta definición nombra con todas las letras.
+  // getTerminos() ya devuelve solo los publicados, así que no puede colarse
+  // un borrador.
   const todos = getTerminos();
-  const relacionados = (t.relacionados || [])
-    .map((slug) => todos.find((x) => x.slug === slug))
-    .filter(Boolean);
+  const relacionados = terminosRelacionados(t, todos);
 
   // Los artículos donde esta palabra está efectivamente escrita. Es distinto
   // del artículo del mismo episodio, que es de dónde salió la definición:

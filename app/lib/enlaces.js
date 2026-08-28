@@ -159,3 +159,48 @@ export function articulosQueMencionan(termino, articulos) {
     .filter((a) => terminosMencionados(a, [termino]).length > 0)
     .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
 }
+
+// Los términos que este término nombra en su propia definición.
+//
+// El bloque "Términos relacionados" de la ficha existe desde siempre en el
+// código, pero nunca apareció en ninguna de las 59 fichas: generar-glosario.mjs
+// escribe `relacionados: []` fijo en los 89 archivos y nadie lo llenó jamás.
+// Era código muerto esperando una carga a mano que no iba a pasar.
+//
+// Se llena con el mismo criterio que todo lo demás y por la misma razón: el
+// otro término está escrito, con todas las letras, en el texto que el lector
+// tiene delante. La definición de "Rider técnico" nombra "Backline" y "Tour
+// manager", y se puede comprobar con Ctrl+F sin salir de la página.
+//
+// Es a propósito una relación en un solo sentido: dice "esta definición nombra
+// a esa", no "estas dos se parecen". Que "Guion técnico" nombre a "Timing" no
+// obliga a que Timing nombre a Guion técnico, y marcar la vuelta sería
+// declarar algo que en la ficha de Timing no se ve.
+//
+// Al 28/8/2026 son 26 relaciones sobre 22 de los 59 términos publicados. Los
+// otros 37 no muestran el bloque, que es lo correcto: no hay nada que mostrar.
+//
+// Si la ficha trae `relacionados` cargados a mano en su cabecera, esos van
+// primero: es la puerta para agregar una relación que el texto no nombra pero
+// que vale. Hoy no hay ninguna.
+export function terminosRelacionados(termino, todos) {
+  if (!termino || !Array.isArray(todos)) return [];
+
+  const otros = todos.filter((t) => t.slug !== termino.slug);
+  const aMano = (termino.relacionados || [])
+    .map((slug) => otros.find((t) => t.slug === slug))
+    .filter(Boolean);
+
+  const texto = normalizar([termino.cuerpo, termino.definicionCorta].join(" "));
+  const escritos = otros
+    .filter((t) => !AMBIGUAS.has(t.slug) || t.episodio === termino.episodio)
+    .filter((t) => terminoAparece(texto, t))
+    .sort((a, b) => a.termino.localeCompare(b.termino, "es"));
+
+  const vistos = new Set();
+  return [...aMano, ...escritos].filter((t) => {
+    if (vistos.has(t.slug)) return false;
+    vistos.add(t.slug);
+    return true;
+  });
+}
