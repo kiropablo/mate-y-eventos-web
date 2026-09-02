@@ -204,9 +204,17 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   // de 2024 y fichas que nadie aprobó.
   const escribibles = orgs.filter((e) => e.estado === "Aprobado" && !e.paso);
   const sinContactar = escribibles.filter((e) => !e.verificado).length;
-  // Los que se pueden escribir hoy: con mail y con tiempo.
+  // Los que se pueden escribir hoy: tienen un mail al que escribirle y nadie
+  // les escribió todavía.
+  //
+  // Ojo con lo que se saco de acá: antes pedia ademas "aTiempo", que es falso
+  // cuando el evento no tiene fecha anunciada. Y son 110 de 338. O sea que el
+  // contador escondia justo los eventos donde escribirle al organizador es
+  // MAS util, porque es el unico que puede decirnos cuando es. "No llegamos a
+  // difundir" es una advertencia sobre la difusion, no un motivo para no
+  // pedirle que confirme sus datos; se muestra en la fila, no se filtra.
   const listos = escribibles.filter(
-    (e) => !e.fechaContacto && !e.verificado && e.emailSugerido && e.aTiempo
+    (e) => !e.fechaContacto && !e.verificado && e.emailSugerido
   ).length;
   // Mismo criterio que el filtro «Para difundir»: si el contador dijera 0 y
   // el filtro mostrara uno, no se sabría a cuál creerle.
@@ -805,9 +813,10 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           ? Boolean(e.emailSugerido)
           : filtro === "listos"
           ? // Los que se pueden escribir hoy mismo: nadie les escribió, no
-            // están verificados, les sacamos un mail del campo Contactos y
-            // todavía da el tiempo para ofrecerles la difusión.
-            !e.fechaContacto && !e.verificado && e.emailSugerido && e.aTiempo
+            // están verificados y les sacamos un mail (del campo del
+            // organizador o del de Contactos). Que no lleguemos a difundir a
+            // tiempo NO los saca de acá: eso se avisa en la fila.
+            !e.fechaContacto && !e.verificado && e.emailSugerido
           : filtro === "sincontactar"
           ? !e.fechaContacto && !e.verificado
           : filtro === "pendientes"
@@ -1002,7 +1011,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       {seccion === "organizadores" && listos > 0 ? (
         <div className="adm-exportar">
           <span>
-            {listos} evento{listos === 1 ? "" : "s"} con mail y con tiempo.
+            {listos} evento{listos === 1 ? "" : "s"} con mail y sin escribir.
           </span>
           <button
             type="button"
@@ -1012,11 +1021,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                 JSON.stringify(
                   orgs
                     .filter(
-                      (e) =>
-                        !e.fechaContacto &&
-                        !e.verificado &&
-                        e.emailSugerido &&
-                        e.aTiempo
+                      // Mismo criterio que el contador y que el filtro: si
+                      // los tres no coinciden, no se sabe a cuál creerle.
+                      (e) => !e.fechaContacto && !e.verificado && e.emailSugerido
                     )
                     .map((e) => ({
                       nombre: e.nombre,
