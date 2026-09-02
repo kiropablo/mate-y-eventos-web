@@ -110,7 +110,9 @@ Fondo negro `#010004`, magenta `#EA478A`, celeste `#93D5F7`, acento azul `#5aa0f
 
 ### SEO / AI-SEO
 
-`robots.txt` habilita a los bots de IA (GPTBot, ClaudeBot, PerplexityBot…) y bloquea `/admin` y `/api/`. Sitemap dinámico (~500 URLs), canonicals por página, `llms.txt`.
+`robots.txt` habilita a los bots de IA (GPTBot, ChatGPT-User, **OAI-SearchBot**, ClaudeBot, anthropic-ai, PerplexityBot, Google-Extended) y bloquea `/admin` y `/api/`. Sitemap dinámico (~530 URLs), canonicals por página, `llms.txt`.
+
+**IndexNow** (`app/lib/indexnow.js`): cada ruta que escribe en Airtable le avisa a los buscadores que esa ficha cambió, y el refresco diario avisa los hubs. Nunca las 338 juntas: mandar todo todos los días es lo que el protocolo pide no hacer. Google no lo usa, pero Bing sí, y Bing es el que alimenta a ChatGPT y Copilot. **La clave vive en `public/` a propósito**: el protocolo exige que esté publicada en la raíz del dominio para comprobar que somos los dueños. No es un secreto y no va en una variable de entorno.
 
 **El grafo de entidades** (en `app/layout.js`, una sola vez, y el resto lo referencia por `@id`): `Organization` con `knowsAbout` y `areaServed` · `WebSite` · los dos `Person` con su cargo, su LinkedIn y su página propia · `AV Eventos` como la productora que dirigen. Los artículos los **firma el equipo** (`author` = la organización) y llevan `editor` apuntando a Pablo, que es quien revisa y publica.
 
