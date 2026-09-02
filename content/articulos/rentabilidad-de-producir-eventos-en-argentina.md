@@ -1,5 +1,6 @@
 ---
 titulo: "Producir eventos en Argentina: el margen como estrategia, no como lujo"
+tituloSeo: "Rentabilidad de producir eventos en Argentina"
 bajada: "Cómo planificar, contratar y negociar con proveedores cuando la inflación cambia las reglas cada semana, según la experiencia real de productores argentinos."
 metaDescripcion: "Producir eventos en Argentina con inflación: estrategias de margen, contratos y alianzas con proveedores."
 episodio: "5yDXWMoN0jk"

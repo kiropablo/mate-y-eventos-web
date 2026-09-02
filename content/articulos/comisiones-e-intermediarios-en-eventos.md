@@ -1,5 +1,6 @@
 ---
 titulo: "La bomba de tiempo: marca fuerte, comisiones y el arte de decir que sí"
+tituloSeo: "Comisiones e intermediarios en eventos"
 bajada: "Cómo un colectivo de percusión que improvisa hace 20 años terminó dando una clase de estrategia comercial, liderazgo en vivo y medición real de impacto en un evento."
 metaDescripcion: "Marca fuerte, comisiones e improvisación: qué enseña la Bomba de Tiempo sobre negocios en la industria de eventos."
 episodio: "lAeikc5gbSc"

@@ -1,5 +1,6 @@
 ---
 titulo: "El público infantil no perdona: lecciones de diseño emocional"
+tituloSeo: "Eventos para público infantil: qué tener en cuenta"
 bajada: "Diseñar para chicos exige más rigor que cualquier evento corporativo. Anto Vicari explica por qué el detalle, la honestidad y la gestión emocional definen el resultado."
 metaDescripcion: "Cómo diseñar experiencias infantiles en eventos: detalle, emoción y gestión de expectativas de padres."
 episodio: "oHtdo_8RCpc"

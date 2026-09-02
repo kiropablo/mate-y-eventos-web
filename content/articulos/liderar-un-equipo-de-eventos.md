@@ -1,5 +1,6 @@
 ---
 titulo: "Liderar sin ser jefe: lo que enseña una productora de eventos"
+tituloSeo: "Cómo liderar un equipo de eventos"
 bajada: "Pamela Sánchez plantea que el liderazgo en eventos no se mide por autoridad sino por responsabilidad. Un repaso por las ideas que sostienen esa forma de trabajar."
 metaDescripcion: "Liderazgo en eventos: por qué hacerse cargo frente al cliente importa más que dar órdenes al equipo."
 episodio: "Nxgf0RwvQI4"

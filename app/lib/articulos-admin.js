@@ -41,6 +41,7 @@ export function listarParaPanel() {
       items.push({
         id: archivo.replace(/\.md$/, ""),
         titulo: datos.titulo || "(sin título)",
+        tituloSeo: datos.tituloSeo || "",
         bajada: datos.bajada || "",
         fecha: datos.fecha || "",
         eje: datos.eje || "",

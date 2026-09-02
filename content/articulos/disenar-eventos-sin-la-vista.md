@@ -1,5 +1,6 @@
 ---
 titulo: "Diseñar sin la vista: lo que enseña el Teatro Ciego a los eventos"
+tituloSeo: "Diseñar eventos sin la vista: accesibilidad real"
 bajada: "Sofía Martín y Facundo Borgarín explican cómo se construye una experiencia cuando el sentido dominante desaparece, y qué de eso aplica a cualquier evento con público."
 metaDescripcion: "Qué enseña el Teatro Ciego sobre diseño de experiencias sensoriales para aplicar en eventos corporativos."
 episodio: "GVQOqNnF5qs"

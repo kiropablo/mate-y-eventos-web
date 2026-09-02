@@ -1,5 +1,6 @@
 ---
 titulo: "Vender la idea: por qué el cliente elige confianza, no diseño"
+tituloSeo: "Cómo vender una idea de evento a un cliente"
 bajada: "Antes de convencer con un render hay que diagnosticar, dar opciones y anticipar objeciones. Así se arma una presentación que cierra un sí."
 metaDescripcion: "Cómo venderle una idea a un cliente de eventos: diagnóstico, opciones y manejo de objeciones."
 episodio: "6CQYIU04D7c"

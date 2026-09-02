@@ -1,5 +1,6 @@
 ---
 titulo: "El evento manda: la lógica que ordena las decisiones del catering"
+tituloSeo: "Cómo elegir el catering de un evento"
 bajada: "Un error de hace 14 años y una frase repetida en el rubro explican cómo se toman las decisiones correctas cuando hay 200 paladares distintos en la misma sala."
 metaDescripcion: "Cómo el catering profesional decide qué servir: la lógica de \"el evento manda\" y el rol real de la degustación."
 episodio: "gNbnmeCtvPg"

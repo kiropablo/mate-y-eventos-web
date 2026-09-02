@@ -1,5 +1,6 @@
 ---
 titulo: "El burnout no es cansancio: es una falla de diseño del evento"
+tituloSeo: "Cómo evitar el burnout en eventos"
 bajada: "Un equipo quemado ejecuta peor aunque el evento esté impecable en el papel. Cómo detectar el desgaste a tiempo, distribuir cargas críticas y proteger la comunicación en vivo."
 metaDescripcion: "Cómo detectar y prevenir el burnout en equipos de producción de eventos: señales de alerta, distribución de tareas, comunicación y debrief post evento."
 episodio: "7vd9-PdsC-Y"

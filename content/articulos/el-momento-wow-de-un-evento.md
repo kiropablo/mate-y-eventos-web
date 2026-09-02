@@ -1,5 +1,6 @@
 ---
 titulo: "El momento wow no es magia: es una decisión de diseño"
+tituloSeo: "El momento wow de un evento: cómo se diseña"
 bajada: "Por qué ese instante que la gente filma y comparte nunca es casualidad, sino el resultado de pensar timing, sorpresa y narrativa como una sola pieza."
 metaDescripcion: "Qué es el momento wow en eventos y cómo diseñarlo: timing, sorpresa, narrativa y cómo medir su impacto real."
 episodio: "KMGBj91hgso"

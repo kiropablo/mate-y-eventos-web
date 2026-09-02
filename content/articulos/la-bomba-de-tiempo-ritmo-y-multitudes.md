@@ -1,5 +1,6 @@
 ---
 titulo: "El ritmo que activa multitudes: lecciones de La Bomba de Tiempo"
+tituloSeo: "La Bomba de Tiempo: el ritmo que activa multitudes"
 bajada: "Luciano Larocca explica por qué la percusión conecta cuerpos en cualquier idioma y qué errores cometen los productores al meter un show en vivo dentro de un evento."
 metaDescripcion: "Qué enseña La Bomba de Tiempo sobre percusión en eventos, energía colectiva y cómo integrar shows en vivo sin aislarlos del resto."
 episodio: "pQ0Jia4J9t0"

@@ -1,5 +1,6 @@
 ---
 titulo: "La tecnología no reemplaza al productor: le saca el freno de mano"
+tituloSeo: "Tecnología en la producción de eventos: qué cambia"
 bajada: "Del Excel que se rompe a la IA como colega temporal y el escaneo láser que evita errores de 50 centímetros: cómo la tecnología redefine el trabajo en eventos."
 metaDescripcion: "Tecnología en eventos: herramientas de gestión, IA y diseño 3D que ya son norma en la industria."
 episodio: "TrZZp2oBWHc"

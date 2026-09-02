@@ -1,5 +1,6 @@
 ---
 titulo: "El minuto cero no es el inicio: es donde se decide todo"
+tituloSeo: "El minuto cero de un evento: qué es y por qué decide"
 bajada: "El arranque de un evento no es un instante, es un sistema de tres capas que hay que diseñar. Acá te contamos cómo se arma y por qué casi nadie lo hace bien."
 metaDescripcion: "Qué es el minuto cero en producción de eventos y cómo prepararlo para evitar errores en vivo."
 episodio: "AxdHNzcnw1o"

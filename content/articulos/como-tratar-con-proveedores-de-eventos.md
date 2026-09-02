@@ -1,5 +1,6 @@
 ---
 titulo: "Liderar sin gritar: el idioma secreto de cada proveedor"
+tituloSeo: "Cómo tratar con los proveedores de un evento"
 bajada: "Un evento reúne oficios que no hablan el mismo idioma. El verdadero trabajo del líder es traducir, contener y sostener la calma cuando todo se acelera."
 metaDescripcion: "Cómo liderar equipos mixtos en eventos: comunicación, manejo de errores y liderazgo bajo presión real."
 episodio: "BtX2HbTBrS8"

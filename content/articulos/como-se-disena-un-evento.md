@@ -1,5 +1,6 @@
 ---
 titulo: "Por qué separar el \"qué\" del \"cómo\" salva un evento"
+tituloSeo: "Cómo se diseña un evento, paso por paso"
 bajada: "Antes de cotizar proveedores o armar planos técnicos, hay una etapa invisible que decide si un evento va a ser memorable o simplemente correcto."
 metaDescripcion: "Cómo se diseña un evento: el método para pasar de la idea al boceto y del boceto al montaje sin que el presupuesto recorte la idea."
 episodio: "Y9o-SqmIIlQ"

@@ -1,5 +1,6 @@
 ---
 titulo: "Cuando crecer rápido casi te sale caro: la lección de Wen I Wish"
+tituloSeo: "Crecer rápido en la industria de eventos"
 bajada: "Anto Vicari, fundadora de Wen I Wish, cuenta cómo un boom de demanda post pandemia expuso los límites de su estructura y qué aprendió sobre escalar sin perder calidad."
 metaDescripcion: "Cómo escalar una empresa de eventos infantiles sin perder calidad: el caso de Wen I Wish y sus aprendizajes."
 episodio: "OSiFr7cvUUg"

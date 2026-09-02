@@ -1,5 +1,6 @@
 ---
 titulo: "El DJ no pone música: administra la energía de la sala"
+tituloSeo: "El DJ en un evento: qué hace y cómo se elige"
 bajada: "Un repaso al verdadero oficio detrás de la consola: leer el público, planificar meses antes y armar equipos que sostengan un estilo en el tiempo."
 metaDescripcion: "Qué hace realmente un DJ de eventos: leer la pista, planificar el timing y liderar equipos, más allá de poner música."
 episodio: "uzXUhBIjF2Y"

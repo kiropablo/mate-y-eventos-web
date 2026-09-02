@@ -1,5 +1,6 @@
 ---
 titulo: "El coordinador de área no es una cámara de seguridad"
+tituloSeo: "Qué hace un coordinador de área en un evento"
 bajada: "Delegar un área de un evento sin formar a quien la lidera es poner a alguien a mirar, no a resolver. Así se construye un coordinador que realmente sostiene el evento."
 metaDescripcion: "Qué hace un coordinador de área en eventos, cómo formarlo y qué errores evitar en la coordinación operativa."
 episodio: "ChPp5ty6F18"

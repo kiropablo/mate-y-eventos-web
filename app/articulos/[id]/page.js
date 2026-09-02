@@ -23,15 +23,21 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const art = getArticulo(params.id);
   if (!art) return { title: "Artículo" };
+  // El título que ve Google puede ser distinto del que se lee arriba: el
+  // titular tiene voz, y la frase que la gente escribe en el buscador es otra.
+  // Ver la explicación entera en lib/articulos.js. Si no hay uno propio, se
+  // usa el titular, que es lo que pasa con los que ya arrancan por el tema.
+  const paraGoogle = art.tituloSeo || art.titulo;
+
   return {
     // Misma escalera que en los episodios: si el título ya ocupa lo que
     // Google muestra, sumarle la marca solo consigue que el corte se lleve el
     // final del título en vez de la marca.
     title: {
       absolute:
-        `${art.titulo} · ${SITE.name}`.length <= 70
-          ? `${art.titulo} · ${SITE.name}`
-          : art.titulo,
+        `${paraGoogle} · ${SITE.name}`.length <= 70
+          ? `${paraGoogle} · ${SITE.name}`
+          : paraGoogle,
     },
     description: art.metaDescripcion,
     alternates: { canonical: `/articulos/${art.id}` },

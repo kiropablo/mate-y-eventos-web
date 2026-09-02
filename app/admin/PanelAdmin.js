@@ -187,7 +187,12 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   const [guardandoGlo, setGuardandoGlo] = useState(false);
   const [msgGlo, setMsgGlo] = useState(null);
   const [abierto, setAbierto] = useState(null);
-  const [campos, setCampos] = useState({ titulo: "", bajada: "", cuerpo: "" });
+  const [campos, setCampos] = useState({
+    titulo: "",
+    tituloSeo: "",
+    bajada: "",
+    cuerpo: "",
+  });
   const [guardando, setGuardando] = useState(false);
   const [msg, setMsg] = useState(null);
   const [agenda, setAgenda] = useState(null);
@@ -454,7 +459,12 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
 
   function abrir(art) {
     setAbierto(art.id);
-    setCampos({ titulo: art.titulo, bajada: art.bajada, cuerpo: art.cuerpo });
+    setCampos({
+      titulo: art.titulo,
+      tituloSeo: art.tituloSeo || "",
+      bajada: art.bajada,
+      cuerpo: art.cuerpo,
+    });
     setMsg(null);
   }
 
@@ -468,6 +478,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
         body: JSON.stringify({
           id: art.id,
           titulo: campos.titulo,
+          tituloSeo: campos.tituloSeo,
           bajada: campos.bajada,
           cuerpo: campos.cuerpo,
           publicado: publicar,
@@ -482,7 +493,8 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
               ? {
                   ...a,
                   titulo: campos.titulo,
-                  bajada: campos.bajada,
+                  tituloSeo: campos.tituloSeo,
+          bajada: campos.bajada,
                   cuerpo: campos.cuerpo,
                   publicado: publicar,
                 }
@@ -1160,6 +1172,27 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         value={campos.titulo}
                         onChange={(e) =>
                           setCampos({ ...campos, titulo: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    {/* El título con el que se lo busca, que casi nunca es el
+                        titular. El H1 y el schema siguen usando el de arriba:
+                        esto solo cambia lo que se ve en Google. Vacío quiere
+                        decir que el titular sirve para las dos cosas. */}
+                    <div className="adm-campo">
+                      <label>
+                        Título para Google{" "}
+                        <span style={{ color: "rgba(245,245,245,.4)", fontWeight: 400 }}>
+                          — opcional, con las palabras que se buscan
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        value={campos.tituloSeo}
+                        placeholder={campos.titulo}
+                        onChange={(e) =>
+                          setCampos({ ...campos, tituloSeo: e.target.value })
                         }
                       />
                     </div>

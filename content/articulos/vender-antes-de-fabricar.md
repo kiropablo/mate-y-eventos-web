@@ -1,5 +1,6 @@
 ---
 titulo: "Vender antes de fabricar: la lección de la cabina que no existía"
+tituloSeo: "Vender antes de fabricar: validar una idea de evento"
 bajada: "Cielo Carazatorre construyó un micronicho rentable validando la idea antes de tener el producto. Cómo aplicar esa lógica sin quemar la reputación en el intento."
 metaDescripcion: "Cómo validar un micronicho rentable en eventos antes de invertir: la estrategia de Cielo Ambientaciones explicada."
 episodio: "M9-bsaOsP0E"

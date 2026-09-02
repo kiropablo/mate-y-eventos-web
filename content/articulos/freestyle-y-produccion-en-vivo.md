@@ -1,5 +1,6 @@
 ---
 titulo: "Lo que el freestyle le enseña a la producción de eventos en vivo"
+tituloSeo: "Producción en vivo: lo que enseña el freestyle"
 bajada: "Una charla con el freestyler Dozer deja pistas concretas sobre por qué lo imprevisto vende, cómo se sostiene un show cuando falla el sonido y qué separa a la persona del personaje."
 metaDescripcion: "Claves de producción de eventos en vivo que surgen del freestyle y las batallas de improvisación."
 episodio: "vfdeXVw89-k"

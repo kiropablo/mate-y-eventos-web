@@ -1,5 +1,6 @@
 ---
 titulo: "El cliente recién existe cuando te vuelve a elegir"
+tituloSeo: "Cómo fidelizar clientes en eventos"
 bajada: "Del presupuesto a la fidelización, tres ideas de Cielo Ambientaciones para separar el negocio de eventos que factura una vez del que factura siempre."
 metaDescripcion: "Estrategias de venta y fidelización en eventos: presupuesto, B2B, B2C y retargeting explicados en profundidad."
 episodio: "vwwHytGG140"

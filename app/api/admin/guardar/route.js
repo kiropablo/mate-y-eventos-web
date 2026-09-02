@@ -71,6 +71,9 @@ function reconstruir(original, datos) {
 
   let cabecera = m[1];
   cabecera = ponerCampo(cabecera, "titulo", comillas(datos.titulo));
+  // Vacío se escribe vacío a propósito: es como se dice "el titular ya
+  // sirve para las dos cosas" y la página vuelve a usarlo.
+  cabecera = ponerCampo(cabecera, "tituloSeo", comillas(datos.tituloSeo || ""));
   cabecera = ponerCampo(cabecera, "bajada", comillas(datos.bajada));
   cabecera = ponerCampo(cabecera, "publicado", datos.publicado ? "true" : "false");
   cabecera = ponerCampo(cabecera, "revisado", comillas(new Date().toISOString().slice(0, 10)));

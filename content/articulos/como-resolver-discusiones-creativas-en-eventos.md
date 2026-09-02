@@ -1,5 +1,6 @@
 ---
 titulo: "El evento manda: la regla que resuelve toda discusión creativa"
+tituloSeo: "Cómo resolver una discusión creativa en un evento"
 bajada: "Cuatro ideas que rara vez se explican en un curso de eventos: por qué el evento decide, cuándo el cliente se equivoca y cómo convivir con egos y errores sin que arruinen el resultado."
 metaDescripcion: "Cómo resolver discusiones creativas en la producción de un evento: por qué \"el evento manda\" es el criterio que ordena cualquier decisión."
 episodio: "uJZ8OfGWa4I"

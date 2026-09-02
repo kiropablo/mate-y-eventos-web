@@ -1,5 +1,6 @@
 ---
 titulo: "La maquinaria invisible que hace que un evento funcione"
+tituloSeo: "Cómo se organiza un evento por dentro"
 bajada: "Un evento impecable no se nota por lo que tiene, sino por el trabajo previo que nadie ve. Por qué el rol del productor define el resultado final."
 metaDescripcion: "Qué hace un productor de eventos y por qué su ausencia se nota en cada detalle del evento final."
 episodio: "PEMDs92gVeo"

@@ -1,5 +1,6 @@
 ---
 titulo: "La marca por encima del fundador: la lección de Godino Sciencie"
+tituloSeo: "La marca por encima del fundador"
 bajada: "Daniel Godino lleva 30 años alquilando mobiliario para eventos y construyó una empresa que funciona sin depender de él. Cómo lo hizo y qué se puede copiar."
 metaDescripcion: "Cómo construir una empresa de eventos que no dependa del fundador, según Daniel Godino de Godino Sciencie."
 episodio: "YCc0wTmovjg"

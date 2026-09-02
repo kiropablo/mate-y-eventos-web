@@ -1,5 +1,6 @@
 ---
 titulo: "Stands que no venden: el diseño que falta entre el folleto y el lead"
+tituloSeo: "Diseño de stands que venden en una feria"
 bajada: "Un stand bien pensado no se mide por el tamaño ni el presupuesto, sino por una secuencia clara: gancho, interacción, dato y seguimiento."
 metaDescripcion: "Cómo diseñar un stand de eventos que capture leads reales, más allá del presupuesto disponible en la industria."
 episodio: "AAxeME91qJk"

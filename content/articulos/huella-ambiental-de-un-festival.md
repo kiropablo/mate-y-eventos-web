@@ -1,5 +1,6 @@
 ---
 titulo: "La huella real de un festival está fuera del predio, no adentro"
+tituloSeo: "La huella ambiental de un festival: cómo se mide"
 bajada: "Un festival de 40 mil personas es una ciudad efímera que se arma y desarma en días. La mayor parte de su impacto ambiental ocurre antes de que empiece."
 metaDescripcion: "Sostenibilidad en festivales: por qué el mayor impacto ambiental ocurre antes del evento y cómo medirlo bien."
 episodio: "3aPh6wbebDk"

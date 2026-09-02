@@ -1,5 +1,6 @@
 ---
 titulo: "Diseñar sin pantallas: la lógica sensorial de Teatro Ciego"
+tituloSeo: "Diseño sensorial en eventos, sin pantallas"
 bajada: "Cuando se elimina la vista, el sonido, el aroma y el tacto necesitan un guion propio. Así se construye una experiencia que se recuerda por lo que hace sentir."
 metaDescripcion: "Diseño sensorial en eventos: cómo Teatro Ciego construye experiencias sin depender de la vista."
 episodio: "wjdmnMkYCT4"

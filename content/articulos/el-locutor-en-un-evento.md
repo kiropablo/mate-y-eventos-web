@@ -1,5 +1,6 @@
 ---
 titulo: "El locutor no repite un guion: gobierna el clima del evento"
+tituloSeo: "El locutor en un evento: qué hace y cuándo hace falta"
 bajada: "Por qué la conducción profesional no es leer bien un texto, sino leer una sala, sostener la energía y saber ponerle precio a ese oficio invisible."
 metaDescripcion: "Conducción de eventos: cómo un locutor profesional lee la sala, maneja imprevistos y arma su presupuesto de trabajo."
 episodio: "D8SD_ASAmqs"

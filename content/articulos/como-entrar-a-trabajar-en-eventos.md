@@ -1,5 +1,6 @@
 ---
 titulo: "Actitud, no currículum: la verdadera llave de entrada a eventos"
+tituloSeo: "Cómo entrar a trabajar en eventos"
 bajada: "Por qué la industria de eventos contrata por actitud antes que por experiencia, y qué caminos reales existen para insertarse y crecer sin contactos previos."
 metaDescripcion: "Cómo insertarse en la industria de eventos: actitud, roles de entrada y freelance vs agencia explicados."
 episodio: "0VMLRXE3cbU"

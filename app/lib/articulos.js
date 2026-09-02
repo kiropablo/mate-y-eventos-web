@@ -62,6 +62,22 @@ function parsear(crudo, id) {
   return {
     id,
     titulo: datos.titulo || "",
+    // El título que ve Google, cuando es distinto del que se lee en la página.
+    //
+    // Existe porque son dos trabajos distintos. El titular de arriba tiene voz
+    // —"La maquinaria invisible que hace que un evento funcione"— y así tiene
+    // que quedar: es el medio hablando. Pero nadie escribe eso en un buscador.
+    // El nombre del archivo, en cambio, YA es la frase que se busca
+    // ("como-se-organiza-un-evento-por-dentro"), porque es la URL.
+    //
+    // Entonces: el H1 y el schema siguen con el titular; solo el <title> usa
+    // este. No es un truco ni una página distinta para el robot: las dos
+    // frases describen el mismo artículo, una con voz y la otra con las
+    // palabras con las que se lo busca.
+    //
+    // Vacío quiere decir "el titular sirve para las dos cosas", que es el caso
+    // de los que ya arrancan por el tema ("Rider técnico: qué es y cómo…").
+    tituloSeo: datos.tituloSeo || "",
     bajada: datos.bajada || "",
     metaDescripcion: datos.metaDescripcion || datos.bajada || "",
     // La clave de unión con el episodio de YouTube. Sin respaldo a propósito:
