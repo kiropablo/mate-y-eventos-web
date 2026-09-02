@@ -91,6 +91,7 @@ Las Actions tienen un **bucle de 3 reintentos con `git pull --rebase`** antes de
 
 ### El circuito con los organizadores
 
+0. **El organizador puede pedirlo él.** Al pie de cada ficha todavía sin sello hay un renglón: "¿Organizás este evento? Revisá los datos y pedí el sello". El pedido queda anotado en las notas internas, carga el email del organizador si estaba vacío y llega un mail al equipo. **No verifica nada**: solo destraba el paso 1. Existe porque el organizador ya entra a su propia ficha —busca su evento en Google y aparecemos entre los primeros— y hasta septiembre de 2026 la página no le decía que podía reclamarla; por eso había 10 verificados sobre 338.
 1. En el panel, pestaña **Organizadores**, se elige un evento y se manda la **invitación**: un mail con su ficha tal como está publicada, los otros eventos de esa semana —sin los suyos— y un link firmado.
 2. El organizador entra al link y **confirma o corrige campo por campo**. Eso deja la ficha en "revisión pendiente".
 3. Pablo da el OK desde el panel y **se enciende el sello Verificado**, con el mes.
