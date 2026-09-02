@@ -866,8 +866,48 @@ Devolvé JSON sin texto alrededor y sin backticks:
   await escribir("PATCH", [{ id: r.id, fields: campos }]);
 }
 
+// Un correo institucional publicado por la organización, y nada más.
+//
+// Por qué acotado: 241 de los 338 eventos aprobados no tienen a quién
+// escribirle, y ese es el cuello de botella del sello Verificado —Pablo
+// contactó al 100% de los que sí tenían—. El robot ya entra al sitio oficial
+// de cada evento para verificar los datos, así que preguntar por el correo de
+// contacto no cuesta una visita más.
+//
+// El límite es a propósito y no se afloja: solo direcciones institucionales
+// publicadas para que las escriban (info@, prensa@, contacto@, eventos@). No
+// se buscan ni se guardan correos de personas con nombre y apellido, ni
+// direcciones que no estén publicadas por la propia organización. Es
+// exactamente lo mismo que hace una persona abriendo la pestaña de contacto
+// del sitio, que es como se cargaron los 97 que ya tenemos.
+function esInstitucional(mail) {
+  const m = String(mail || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m)) return false;
+  const usuario = m.split("@")[0];
+  // Un punto en el usuario suele ser nombre.apellido. Y los genéricos de una
+  // sola palabra que usan las organizaciones son un puñado conocido.
+  if (usuario.includes(".")) return false;
+  return /^(info|contacto|contato|prensa|press|comunicacion|comunicaciones|eventos|events|hola|hello|administracion|secretaria|institucional|marketing|comercial|ventas|expositores|inscripciones|informes|consultas|atencion|mail|correo|office|oficina|todos|general|contact|equipo|team|soporte|support|recepcion)/.test(
+    usuario
+  );
+}
+
 async function verificarVigente(r) {
   const f = r.fields;
+  const faltaMail = !String(f["Email del organizador"] || "").trim();
+  const pedidoDeMail = faltaMail
+    ? `
+BUSCÁ TAMBIÉN EL CORREO DE CONTACTO
+La organización publica en su sitio una dirección para que la escriban.
+Traela si —y solo si— cumple las tres cosas:
+  1. está publicada por la propia organización del evento (no un directorio,
+     no una nota de prensa de un tercero),
+  2. es institucional: info@, contacto@, prensa@, eventos@ y parecidas,
+  3. NO es la dirección personal de una persona con nombre y apellido.
+Si no encontrás una que cumpla las tres, devolvé el campo vacío. Nunca la
+compongas ni la deduzcas del dominio.`
+    : "";
+
   const prompt = `Verificá contra las fuentes oficiales si cambió algo de este evento
 de la agenda de Mate y Eventos. Hoy es ${hoy}. Buscá en la web el sitio oficial
 y las comunicaciones de la organización.
@@ -895,6 +935,7 @@ REGLAS
 - Solo devolvé fechas POSTERIORES a ${hoy}. Una fecha ya pasada va en el resumen,
   nunca en el campo de fechas.
 - No repitas lo que ya dice la ficha: solo lo que cambió o se confirmó.
+${pedidoDeMail}
 
 Devolvé JSON sin texto alrededor y sin backticks:
 {"cambio": true|false,
@@ -902,13 +943,39 @@ Devolvé JSON sin texto alrededor y sin backticks:
  "fechaInicio":"YYYY-MM-DD o vacío",
  "fechaFin":"YYYY-MM-DD o vacío",
  "estadoFechas":"Confirmadas | Estimadas | Por anunciar | vacío",
+ "emailContacto":"la dirección institucional, o vacío",
+ "dondeEstaElMail":"la url de la página donde figura, o vacío",
  "fuente":"url"}`;
 
   const d = await preguntarleAClaude(prompt, 3000);
   const campos = { "Última verificación": hoy };
 
+  // El correo se guarda aparte de "cambio": que no haya novedades del evento
+  // no quiere decir que no hayamos encontrado a quién escribirle.
+  //
+  // Se escribe SOLO si el campo estaba vacío y si pasa el filtro de
+  // institucional. El modelo puede traer cualquier cosa; el que decide qué
+  // entra es este código, no el prompt.
+  if (faltaMail && esInstitucional(d.emailContacto)) {
+    const mail = String(d.emailContacto).trim().toLowerCase();
+    campos["Email del organizador"] = mail;
+    campos["Revisar"] = true;
+    const de = d.dondeEstaElMail ? ` (de ${sinCitas(d.dondeEstaElMail)})` : "";
+    campos["Hallazgos IA"] =
+      `[${hoy}] Correo de contacto encontrado: ${mail}${de}. Se puede mandar la invitación del sello.`;
+    console.log(`  ${f["Nombre"]}: correo encontrado → ${mail}`);
+  } else if (faltaMail && d.emailContacto) {
+    // Queda en el log para poder ajustar el filtro si descarta de más.
+    console.log(`  ${f["Nombre"]}: correo descartado por no institucional (${d.emailContacto})`);
+  }
+
   if (d.cambio && d.resumen) {
-    campos["Hallazgos IA"] = `[${hoy}] ${sinCitas(d.resumen)}${d.fuente ? `\nFuente: ${sinCitas(d.fuente)}` : ""}`;
+    // Se apila sobre el hallazgo del correo si lo hubo: pisarlo perdería el
+    // dato que más falta hace.
+    const nuevo = `[${hoy}] ${sinCitas(d.resumen)}${d.fuente ? `\nFuente: ${sinCitas(d.fuente)}` : ""}`;
+    campos["Hallazgos IA"] = campos["Hallazgos IA"]
+      ? `${campos["Hallazgos IA"]}\n${nuevo}`
+      : nuevo;
     campos["Revisar"] = true;
 
     // Completar fechas solo cuando antes NO estaban firmes. Si ya figuraban
