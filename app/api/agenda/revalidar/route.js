@@ -1,4 +1,5 @@
 import { revalidatePath, revalidateTag } from "next/cache";
+import { avisarIndexNow, urlDeFicha } from "../../../lib/indexnow";
 
 // Refresco manual de la agenda: visitar
 //   /api/agenda/revalidar?token=TU_CLAVE
@@ -6,6 +7,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 //
 // Sirve para no esperar la hora de refresco automático después de tocar
 // algo en Airtable.
+
+const SITIO = "https://www.mateyeventos.com";
 
 export async function GET(req) {
   const token = new URL(req.url).searchParams.get("token");
@@ -32,9 +35,40 @@ export async function GET(req) {
   revalidatePath("/agenda/[slug]", "page");
   revalidatePath("/api/agenda/[slug]/ics", "route");
 
+  // Y le avisamos a los buscadores (IndexNow) qué cambió.
+  //
+  // Acotado a propósito. Quien llama puede pasar ?slugs=uno,dos,tres y se
+  // avisan esas fichas; el robot de la agenda sabe cuáles tocó y es el que
+  // debería pasarlas. Sin esa lista se avisan SOLO los hubs, que cambian
+  // seguro cada vez que la agenda se movió.
+  //
+  // Lo que no se hace nunca es mandar las 338 fichas todos los días: es
+  // justamente lo que el protocolo pide no hacer, y lo que hace que un sitio
+  // deje de ser tenido en cuenta.
+  const HOY = new Date().toISOString().slice(0, 7);
+  const siguiente = (() => {
+    const [a, m] = HOY.split("-").map(Number);
+    return m === 12 ? `${a + 1}-01` : `${a}-${String(m + 1).padStart(2, "0")}`;
+  })();
+
+  const slugs = (new URL(req.url).searchParams.get("slugs") || "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const aAvisar = [
+    `${SITIO}/agenda`,
+    `${SITIO}/agenda/esta-semana`,
+    `${SITIO}/agenda/mes/${HOY}`,
+    `${SITIO}/agenda/mes/${siguiente}`,
+    ...slugs.map(urlDeFicha),
+  ];
+  const indexnow = await avisarIndexNow(aAvisar);
+
   return Response.json({
     ok: true,
     mensaje: "Agenda actualizada. Los cambios de Airtable ya están en la web.",
     refrescado: [...rutas, "/agenda/[slug]", "/api/agenda/[slug]/ics"],
+    indexnow,
   });
 }

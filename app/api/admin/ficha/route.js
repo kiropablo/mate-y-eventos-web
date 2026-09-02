@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
 import { getEventoDelPanel } from "../../../lib/agenda";
+import { avisarIndexNow, urlDeFicha } from "../../../lib/indexnow";
 import {
   CAMPOS_EDITABLES,
   valoresEditables,
@@ -249,6 +250,10 @@ export async function POST(request) {
     console.warn(`[ficha] Airtable ${res.status}: ${detalle.slice(0, 200)}`);
     return Response.json({ ok: false, error: explicar(res.status) }, { status: 502 });
   }
+
+  // Le avisamos a los buscadores que esta ficha cambió. No se espera la
+  // respuesta ni se corta nada si falla: es un aviso, no una operación.
+  avisarIndexNow([urlDeFicha(ev.slug)]);
 
   // La ficha pública tiene que mostrar lo corregido ya: si el organizador entra
   // a mirar después de que le avisamos, no puede seguir viendo el dato viejo.

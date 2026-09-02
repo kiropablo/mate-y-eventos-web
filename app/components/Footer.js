@@ -48,6 +48,18 @@ export default function Footer() {
                 LinkedIn
               </a>
             </div>
+            {/* Leer y escuchar va antes que Proyecto porque es el contenido:
+                hasta ahora el pie no linkeaba a ninguna pieza. Aparece en las
+                ~500 páginas del sitio, y la agenda —que es por donde entra el
+                91% del tráfico de búsqueda— no tenía una sola salida al
+                podcast, a los artículos ni al glosario. Agenda que devolvía a
+                la agenda. */}
+            <div className="foot-col">
+              <h4>Leer y escuchar</h4>
+              <Link href="/episodios">Todos los episodios</Link>
+              <Link href="/articulos">Artículos</Link>
+              <Link href="/glosario">Glosario de la industria</Link>
+            </div>
             <div className="foot-col">
               <h4>Proyecto</h4>
               <Link href="/imperdibles">Los imperdibles del mes</Link>

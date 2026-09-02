@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { haySesion } from "../../../lib/admin";
 import { getEventoDelPanel } from "../../../lib/agenda";
+import { avisarIndexNow, urlDeFicha } from "../../../lib/indexnow";
 
 // "Le doy el OK": el sello se enciende acá, con una persona del otro lado.
 //
@@ -82,6 +83,10 @@ export async function POST(request) {
     console.warn(`[verificar] Airtable ${res.status}: ${detalle.slice(0, 200)}`);
     return Response.json({ ok: false, error: "No se pudo guardar." }, { status: 502 });
   }
+
+  // Le avisamos a los buscadores que esta ficha cambió. No se espera la
+  // respuesta ni se corta nada si falla: es un aviso, no una operación.
+  avisarIndexNow([urlDeFicha(ev.slug)]);
 
   try {
     revalidateTag("agenda");

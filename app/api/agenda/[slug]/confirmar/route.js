@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { getEventoFresco, formatRango } from "../../../../lib/agenda";
 import { firmaValida } from "../../../../lib/firma";
+import { avisarIndexNow, urlDeFicha } from "../../../../lib/indexnow";
 import { mandarCorreo, correoInterno } from "../../../../lib/correo";
 import { SITE } from "../../../../lib/site";
 import { resumirRespuesta, CAMPOS } from "../../../../lib/campos-ficha";
@@ -149,6 +150,10 @@ export async function POST(req, { params }) {
     console.warn(`[confirmar] Airtable ${res.status}: ${detalle.slice(0, 200)}`);
     return Response.json({ error: "No se pudo guardar." }, { status: 502 });
   }
+
+  // Le avisamos a los buscadores que esta ficha cambió. No se espera la
+  // respuesta ni se corta nada si falla: es un aviso, no una operación.
+  avisarIndexNow([urlDeFicha(ev.slug)]);
 
   // La ficha tiene que mostrar el sello ya mismo, no dentro de una hora.
   try {

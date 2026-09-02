@@ -35,11 +35,28 @@ export async function generateMetadata({ params }) {
   // si no, la ficha se comparte sin decir de qué edición es.
   const conAnio = nombreConAnio(ev);
 
+  // El resumen que se ve en Google arranca por la fecha y el lugar.
+  //
+  // Antes era `ev.descCorta || «…fechas, información oficial…»`, o sea que el
+  // evento CON descripción editorial —que son casi todos— nunca mostraba una
+  // fecha, y el que no la tenía sí. Estaba al revés: alguien que busca
+  // «abastur 2026» quiere saber cuándo es, y el título le prometía «fechas»
+  // mientras el resumen le explicaba qué es la feria. Abastur tenía 627
+  // impresiones semanales y un 0,64% de clics.
+  //
+  // Google reescribe el resumen cuando quiere, así que esto no garantiza
+  // nada; lo que sí hace es dejar de esconderle el dato que vino a buscar.
+  const cuando = formatRango(ev);
+  const encabezado = [cuando, lugar].filter(Boolean).join(" · ");
+  const descripcion = [encabezado, ev.descCorta]
+    .filter(Boolean)
+    .join(". ")
+    .slice(0, 300) ||
+    `${conAnio}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos, en la agenda de ${SITE.name}.`;
+
   return {
     title: tituloDeEvento(ev),
-    description:
-      ev.descCorta ||
-      `${conAnio}${lugar ? `, ${lugar}` : ""}. Fechas, información oficial y contactos, en la agenda de ${SITE.name}.`,
+    description: descripcion,
     alternates: { canonical: `/agenda/${ev.slug}` },
     openGraph: {
       type: "article",
