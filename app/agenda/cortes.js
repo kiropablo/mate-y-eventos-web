@@ -197,6 +197,109 @@ export function cortesDeMes(eventos) {
 }
 
 // Todos los cortes que existen hoy, para el sitemap y el bloque de /agenda.
+// Los cruces: un tipo de evento dentro de un lugar.
+//
+// "Ferias en Argentina" y "Congresos en Ciudad de Buenos Aires" son búsquedas
+// que existen y que hoy no contesta ninguna página: /agenda/tipo/expo-feria
+// mezcla los siete países y /agenda/pais/argentina mezcla los ocho tipos.
+//
+// El inventario está contado, no supuesto. Al 2/9/2026, cruzando los 338
+// eventos aprobados, solo 30 combinaciones llegan al mínimo. Es una mejora
+// acotada y de una sola vez: no hay 200 páginas escondidas acá, y quien
+// prometa lo contrario no contó la base.
+const MINIMO_CRUCE = 6;
+
+// Si el cruce se lleva casi todos los eventos de alguno de sus dos padres, no
+// es una página distinta: es una copia con otro título. "Capacitación en
+// Argentina" con 10 de los 10 eventos de capacitación es la misma lista que
+// /agenda/tipo/capacitacion. Mismo criterio que TOPE_PROVINCIA.
+const TOPE_CRUCE = 0.85;
+
+export function cortesCruzados(eventos) {
+  const salida = [];
+
+  // Cuántos eventos hay en cada lugar, para medir el cruce contra ese padre.
+  const totalPorLugar = { pais: new Map(), provincia: new Map() };
+  for (const e of eventos) {
+    for (const donde of ["pais", "provincia"]) {
+      const clave = pelado(String(e[donde] || ""));
+      if (clave) {
+        totalPorLugar[donde].set(clave, (totalPorLugar[donde].get(clave) || 0) + 1);
+      }
+    }
+  }
+
+  for (const ct of cortesDe("tipo", eventos)) {
+    for (const donde of ["pais", "provincia"]) {
+      const grupos = new Map();
+      for (const e of ct.eventos) {
+        const valor = String(e[donde] || "").trim();
+        if (!valor) continue;
+        const clave = pelado(valor);
+        if (!grupos.has(clave)) grupos.set(clave, { valor, eventos: [] });
+        grupos.get(clave).eventos.push(e);
+      }
+
+      for (const g of grupos.values()) {
+        if (g.eventos.length < MINIMO_CRUCE) continue;
+        // Contra el padre "tipo" y contra el padre "lugar": basta con parecerse
+        // demasiado a uno de los dos para no merecer página propia.
+        const delTipo = g.eventos.length / ct.eventos.length;
+        const totalLugar = totalPorLugar[donde].get(pelado(g.valor)) || 0;
+        const delLugar = totalLugar > 0 ? g.eventos.length / totalLugar : 0;
+        if (delTipo >= TOPE_CRUCE || delLugar >= TOPE_CRUCE) continue;
+
+        const slugLugar = aSlug(g.valor);
+        if (!slugLugar) continue;
+        salida.push({
+          tipo: "cruce",
+          // Los dos valores viajan enteros porque los textos y las migas los
+          // necesitan por separado: "Expo/Feria" y "Argentina", no un string
+          // pegado que después haya que volver a partir.
+          valor: `${ct.valor} en ${g.valor}`,
+          valorTipo: ct.valor,
+          valorLugar: g.valor,
+          donde,
+          slugTipo: ct.slug,
+          slug: slugLugar,
+          url: `/agenda/tipo/${ct.slug}/${donde}/${slugLugar}`,
+          // El padre, para las migas de pan y para el link de vuelta.
+          urlTipo: ct.url,
+          eventos: ordenar(g.eventos),
+        });
+      }
+    }
+  }
+
+  return salida.sort((a, b) => b.eventos.length - a.eventos.length);
+}
+
+// Un cruce puntual, por sus tres partes.
+export function buscarCruce(slugTipo, donde, slugLugar, eventos) {
+  const vigentes = eventos.filter((e) => !yaPaso(e));
+  return (
+    cortesCruzados(vigentes).find(
+      (c) =>
+        c.slugTipo === String(slugTipo) &&
+        c.donde === String(donde) &&
+        c.slug === String(slugLugar)
+    ) || null
+  );
+}
+
+// Lo mismo, leyendo la agenda y sin confundir "no existe" con "no pude leer".
+// Misma razón que corteDeLanding y que getEvento.
+export async function cruceDeLanding(slugTipo, donde, slugLugar) {
+  const { eventos, completa } = await getEventosConEstado();
+  const corte = buscarCruce(slugTipo, donde, slugLugar, eventos);
+  if (!corte && !completa) {
+    throw new Error(
+      `Agenda: la lectura vino incompleta, así que no se puede afirmar que el cruce ${slugTipo}/${donde}/${slugLugar} no existe.`
+    );
+  }
+  return { corte, eventos };
+}
+
 export function todosLosCortes(eventos) {
   const vigentes = eventos.filter((e) => !yaPaso(e));
   return [
@@ -204,6 +307,7 @@ export function todosLosCortes(eventos) {
     ...cortesDe("tipo", vigentes),
     ...cortesDe("provincia", vigentes),
     ...cortesDeMes(vigentes),
+    ...cortesCruzados(vigentes),
   ];
 }
 
@@ -240,6 +344,28 @@ export async function corteDeLanding(tipo, slug) {
 // metadata y el schema digan siempre lo mismo.
 export function textosDe(corte) {
   const n = corte.eventos.length;
+
+  // El cruce: un tipo dentro de un lugar. El nombre del tipo va adelante
+  // porque es lo que la persona escribe primero —"ferias en Argentina", no
+  // "Argentina ferias"— y porque distingue la página de sus dos padres.
+  if (corte.tipo === "cruce") {
+    const donde = corte.valorLugar;
+    const que = corte.valorTipo;
+    return {
+      titulo:
+        n >= PISO_PARA_MOSTRAR
+          ? `${que} en ${donde}: ${n} eventos en la agenda`
+          : `${que} en ${donde} — agenda de la industria`,
+      // El nombre del tipo NO se pasa a minúscula: es "Expo/Feria", con la
+      // barra y las mayúsculas, y "los 65 eventos de expo/feria" se lee mal.
+      h1:
+        n >= PISO_PARA_MOSTRAR
+          ? `${que} en ${donde}: los ${n} eventos de la agenda`
+          : `${que} en ${donde}`,
+      meta: `Los ${n} eventos del tipo ${que.toLowerCase()} que se hacen en ${donde}, con fechas, sedes, organizadores y el link al sitio oficial de cada uno.`,
+      etiqueta: `${que} en ${donde}`,
+    };
+  }
 
   if (corte.tipo === "mes") {
     const largo = mesLargo(corte.valor);
