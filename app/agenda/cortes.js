@@ -46,29 +46,62 @@ export function aSlug(texto) {
     .replace(/^-+|-+$/g, "");
 }
 
+// A partir de cuántos eventos el número entra en el título y en el H1.
+//
+// Que el título diga "256 eventos en Argentina" en vez de "Eventos en
+// Argentina" es lo único que hace distinto un competidor que sí aparece en las
+// búsquedas genéricas: la página promete una cantidad concreta y la cumple.
+// El número ya estaba en la descripción; en el título, que es lo que se ve
+// primero, no estaba.
+//
+// Pero por debajo de este piso el número juega en contra: "4 eventos en
+// España" le está avisando a la persona que la página es flaca antes de que
+// entre. Ahí se mantiene el título de siempre. Hoy quedan afuera España (4),
+// Chile (6), Estados Unidos (7) y enero de 2027 (6).
+const PISO_PARA_MOSTRAR = 8;
+
 // La definición de cada corte, en un solo lugar.
 const CORTES = {
   pais: {
     campo: (e) => e.pais,
     minimo: MINIMO,
-    titulo: (v) => `Eventos en ${v} — agenda de la industria`,
-    h1: (v) => `Eventos de la industria en ${v}`,
+    titulo: (v, n) =>
+      n >= PISO_PARA_MOSTRAR
+        ? `${n} eventos en ${v} — agenda de la industria`
+        : `Eventos en ${v} — agenda de la industria`,
+    h1: (v, n) =>
+      n >= PISO_PARA_MOSTRAR
+        ? `Los ${n} eventos de la industria en ${v}`
+        : `Eventos de la industria en ${v}`,
     meta: (v, n) =>
       `Los ${n} congresos, expos, festivales y grandes eventos de la industria en ${v} que están en la agenda de ${SITE.name}, con fechas, sedes y organizadores.`,
   },
   tipo: {
     campo: (e) => e.tipo,
     minimo: MINIMO,
-    titulo: (v) => `${v} en Argentina y Latinoamérica — agenda`,
-    h1: (v) => `${v}: la agenda completa`,
+    // Acá el número no va adelante: el valor es una categoría con barra
+    // —"Expo/Feria", "Congreso/Conferencia"— y "102 Expo/Feria en Argentina"
+    // no es castellano. Va después de los dos puntos, que sí lo es.
+    titulo: (v, n) =>
+      n >= PISO_PARA_MOSTRAR
+        ? `${v}: ${n} eventos en Argentina y Latinoamérica`
+        : `${v} en Argentina y Latinoamérica — agenda`,
+    h1: (v, n) =>
+      n >= PISO_PARA_MOSTRAR ? `${v}: ${n} eventos en la agenda` : `${v}: la agenda completa`,
     meta: (v, n) =>
       `${n} eventos del tipo ${v.toLowerCase()} en Argentina y Latinoamérica, con fechas, sedes, organizadores y contactos.`,
   },
   provincia: {
     campo: (e) => e.provincia,
     minimo: MINIMO_PROVINCIA,
-    titulo: (v) => `Eventos en ${v} — agenda de la industria`,
-    h1: (v) => `Eventos de la industria en ${v}`,
+    titulo: (v, n) =>
+      n >= PISO_PARA_MOSTRAR
+        ? `${n} eventos en ${v} — agenda de la industria`
+        : `Eventos en ${v} — agenda de la industria`,
+    h1: (v, n) =>
+      n >= PISO_PARA_MOSTRAR
+        ? `Los ${n} eventos de la industria en ${v}`
+        : `Eventos de la industria en ${v}`,
     meta: (v, n) =>
       `Los ${n} eventos de la industria que se hacen en ${v}: congresos, expos, festivales y grandes producciones, con fechas y sedes.`,
   },
@@ -216,8 +249,14 @@ export function textosDe(corte) {
       // del mes. La curaduría con voz propia y pocos elegidos vive en
       // /imperdibles, y las dos se linkean entre sí para que no compitan por
       // la misma búsqueda.
-      titulo: `Eventos en ${largo}: agenda completa`,
-      h1: `Todos los eventos de ${MESES_LARGO[m - 1].toLowerCase()}`,
+      titulo:
+        n >= PISO_PARA_MOSTRAR
+          ? `${n} eventos en ${largo}: agenda completa`
+          : `Eventos en ${largo}: agenda completa`,
+      h1:
+        n >= PISO_PARA_MOSTRAR
+          ? `Los ${n} eventos de ${MESES_LARGO[m - 1].toLowerCase()}`
+          : `Todos los eventos de ${MESES_LARGO[m - 1].toLowerCase()}`,
       meta: `Los ${n} eventos de la industria que se hacen en ${largo} en Argentina y Latinoamérica, con fechas, sedes y organizadores.`,
       etiqueta: largo,
     };
@@ -225,8 +264,8 @@ export function textosDe(corte) {
 
   const def = CORTES[corte.tipo];
   return {
-    titulo: def.titulo(corte.valor),
-    h1: def.h1(corte.valor),
+    titulo: def.titulo(corte.valor, n),
+    h1: def.h1(corte.valor, n),
     meta: def.meta(corte.valor, n),
     etiqueta: corte.valor,
   };
