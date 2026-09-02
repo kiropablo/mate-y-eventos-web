@@ -3759,3 +3759,101 @@ footer.site {
   vertical-align: middle;
   white-space: nowrap;
 }
+
+
+/* El pedido de verificación al pie de la ficha.
+   Discreto a propósito: el que no organiza el evento no tiene por qué
+   toparse con esto, y el que sí lo organiza lo está buscando. */
+.org-pedido {
+  margin-top: 40px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--mute);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+.org-pedido--ok {
+  border-color: rgba(95, 211, 154, 0.34);
+  background: rgba(95, 211, 154, 0.06);
+}
+.org-pedido__chico {
+  margin-top: 8px;
+  font-size: 0.86rem;
+  color: var(--faint);
+}
+.org-pedido__intro {
+  margin-bottom: 16px;
+}
+.org-pedido__intro strong,
+.org-pedido strong {
+  color: var(--blanco);
+  font-weight: 600;
+}
+.org-pedido__link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.org-pedido__link:hover {
+  color: var(--blanco);
+}
+.org-pedido__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.org-pedido__campos {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+.org-pedido label {
+  display: block;
+}
+.org-pedido__ancho {
+  margin-top: 12px;
+}
+.org-pedido label span {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 6px;
+}
+.org-pedido input,
+.org-pedido textarea {
+  width: 100%;
+  background: var(--tinta);
+  border: 1px solid var(--line-2);
+  border-radius: 9px;
+  padding: 10px 13px;
+  color: var(--blanco);
+  font-family: inherit;
+  font-size: 0.94rem;
+}
+.org-pedido input:focus,
+.org-pedido textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.org-pedido__error {
+  margin-top: 12px;
+  color: #f2c14e;
+  font-size: 0.9rem;
+}
+.org-pedido__botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  margin-top: 16px;
+}

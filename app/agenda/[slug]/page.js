@@ -17,6 +17,7 @@ import {
 import { SITE } from "../../lib/site";
 import { migas } from "../../lib/migas";
 import { todosLosCortes, textosDe } from "../cortes";
+import SoyOrganizador from "./SoyOrganizador";
 
 export const revalidate = 3600;
 
@@ -459,6 +460,13 @@ export default async function Evento({ params }) {
               </div>
             </section>
           ) : null}
+
+          {/* El pedido de verificación, al pie y solo si el sello todavía no
+              está encendido. Al organizador de un evento ya verificado no se
+              le ofrece verificarlo otra vez. */}
+          {!ev.verificado && (
+            <SoyOrganizador slug={ev.slug} nombre={nombreConAnio(ev)} />
+          )}
 
           <div style={{ marginTop: "40px" }}>
             <Link className="btn" href="/agenda">
