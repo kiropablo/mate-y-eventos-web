@@ -269,6 +269,12 @@ export async function getEventosConEstado({
   // Pero el panel tiene que poder ver los borradores para aprobarlos y los
   // archivados para traerlos de vuelta.
   todosLosEstados = false,
+  // Cuánto vale la copia guardada, en segundos. Por defecto una hora, que es
+  // lo que usa todo el sitio. Sirve para pedir una copia más corta desde un
+  // camino puntual sin saltear la caché del todo: una página con revalidate
+  // NO puede hacer una lectura sin caché —Next la corta con "Page changed
+  // from static to dynamic at runtime"— y eso devuelve un 500.
+  segundos = 3600,
 } = {}) {
   const key = process.env.AIRTABLE_API_KEY;
   if (!key) {
@@ -299,7 +305,7 @@ export async function getEventosConEstado({
                 // La etiqueta permite refrescar de un saque todo lo que lee
                 // la agenda —páginas, fichas y los .ics— desde
                 // /api/agenda/revalidar.
-                next: { revalidate: 3600, tags: ["agenda"] },
+                next: { revalidate: segundos, tags: ["agenda"] },
               }),
         }
       );
@@ -387,18 +393,18 @@ export async function getEvento(slug) {
 export async function getEventoPorSlugViejo(slug) {
   const s = String(slug || "").trim();
   if (!s) return null;
-  // Se lee FRESCO, sin la copia guardada.
+  // Con una copia corta, de un minuto.
   //
-  // Dos motivos. Uno: la copia de Airtable sobrevive a los deploys, así que
-  // una dirección vieja recién cargada tardaba hasta una hora en redirigir
-  // —pasó al estrenar esto—. Dos: acá se llega solo cuando el evento NO
-  // apareció, o sea una vez cada tanto, y a esa altura ya vale una consulta
-  // de verdad antes de mandar a alguien a una pantalla de error.
+  // NO sin copia: esta función la llama la ficha, que tiene revalidate, y una
+  // página con revalidate no puede hacer una lectura sin caché. Next la corta
+  // con "Page changed from static to dynamic at runtime" y devuelve un 500.
+  // Lo probé en producción y eso fue exactamente lo que pasó.
   //
-  // El costo está acotado: son las 404 del día, unas decenas. Si algún día un
-  // robot se pone a probar direcciones al voleo, lo que corresponde es el
-  // límite de peticiones del cortafuegos, no dejar de redirigir a las personas.
-  const { eventos } = await getEventosConEstado({ fresco: true });
+  // Un minuto alcanza para lo que hace falta: la copia de una hora sobrevive a
+  // los deploys, así que una dirección vieja recién cargada tardaba hasta una
+  // hora en empezar a redirigir. Y el costo está acotado, porque acá se llega
+  // solo cuando el evento NO apareció.
+  const { eventos } = await getEventosConEstado({ segundos: 60 });
   const candidatos = eventos.filter(
     (e) => e.slug !== s && e.slugsAnteriores.includes(s)
   );
