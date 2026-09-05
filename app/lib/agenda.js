@@ -387,7 +387,18 @@ export async function getEvento(slug) {
 export async function getEventoPorSlugViejo(slug) {
   const s = String(slug || "").trim();
   if (!s) return null;
-  const { eventos } = await getEventosConEstado();
+  // Se lee FRESCO, sin la copia guardada.
+  //
+  // Dos motivos. Uno: la copia de Airtable sobrevive a los deploys, así que
+  // una dirección vieja recién cargada tardaba hasta una hora en redirigir
+  // —pasó al estrenar esto—. Dos: acá se llega solo cuando el evento NO
+  // apareció, o sea una vez cada tanto, y a esa altura ya vale una consulta
+  // de verdad antes de mandar a alguien a una pantalla de error.
+  //
+  // El costo está acotado: son las 404 del día, unas decenas. Si algún día un
+  // robot se pone a probar direcciones al voleo, lo que corresponde es el
+  // límite de peticiones del cortafuegos, no dejar de redirigir a las personas.
+  const { eventos } = await getEventosConEstado({ fresco: true });
   const candidatos = eventos.filter(
     (e) => e.slug !== s && e.slugsAnteriores.includes(s)
   );
