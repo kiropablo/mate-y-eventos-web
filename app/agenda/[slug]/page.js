@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import {
@@ -96,7 +96,10 @@ export default async function Evento({ params }) {
   // cuando el evento no apareció, que es una vez cada tanto.
   if (!ev) {
     const mudado = await getEventoPorSlugViejo(params.slug);
-    if (mudado) redirect(`/agenda/${mudado.slug}`);
+    // PERMANENTE (308), no temporal. Es lo que hace que la dirección nueva
+    // herede el posicionamiento de la vieja; un 307 le dice a Google que siga
+    // indexando la vieja, que es lo contrario de lo que queremos.
+    if (mudado) permanentRedirect(`/agenda/${mudado.slug}`);
     notFound();
   }
 
