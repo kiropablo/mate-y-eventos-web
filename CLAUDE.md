@@ -203,7 +203,7 @@ Todo lo que se puede contar, se cuenta solo: lo escribe `scripts/contar-estado.m
 desde la Action **Estado**, todos los días a las 11 (después de toda la cadena de contenido). Lo de abajo no se toca a mano.
 
 <!-- CONTADO:INICIO -->
-Contado solo el 4/9/2026. No editar a mano: lo reescribe
+Contado solo el 5/9/2026. No editar a mano: lo reescribe
 `scripts/contar-estado.mjs` y se pierde.
 
 - **42 transcripciones**, 42 con subtítulos.
@@ -212,8 +212,8 @@ Contado solo el 4/9/2026. No editar a mano: lo reescribe
 - **338 eventos aprobados** en la agenda y 107 sin aprobar (borradores IA y archivados).
 - **10 eventos verificados** por su organizador.
 - De los aprobados: 119 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
-- Search Console, semana del 27/8/2026 al 2/9/2026: **144 clics y 14.911 impresiones**. El grueso sigue entrando por fichas de agenda.
-- YouTube: **48.112 visitas** y 296 suscriptores. Ojo: `STATS.vistasYouTube` en `app/lib/site.js` es un número aparte, escrito a mano, y es el que se publica en la web.
+- Search Console, semana del 28/8/2026 al 3/9/2026: **140 clics y 15.378 impresiones**. El grueso sigue entrando por fichas de agenda.
+- YouTube: **48.185 visitas** y 297 suscriptores. Ojo: `STATS.vistasYouTube` en `app/lib/site.js` es un número aparte, escrito a mano, y es el que se publica en la web.
 <!-- CONTADO:FIN -->
 
 Los de Search Console y YouTube salen del **panel** (`datos.mateyeventos.com/api/data`,
