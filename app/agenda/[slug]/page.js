@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import {
   getEvento,
   getEventos,
+  getEventoPorSlugViejo,
   formatRango,
   yaPaso,
   youtubeId,
@@ -85,7 +86,19 @@ export async function generateMetadata({ params }) {
 
 export default async function Evento({ params }) {
   const ev = await getEvento(params.slug);
-  if (!ev) notFound();
+
+  // Antes de rendirse: ¿esta dirección era de un evento al que le cambiaron el
+  // nombre? Si es así se redirige, y de forma permanente, que es lo que le
+  // pasa a la dirección nueva el posicionamiento que había ganado la vieja.
+  //
+  // Va acá y no en el middleware a propósito: el middleware corre en CADA
+  // pedido del sitio y esto haría que todos leyeran Airtable. Acá solo corre
+  // cuando el evento no apareció, que es una vez cada tanto.
+  if (!ev) {
+    const mudado = await getEventoPorSlugViejo(params.slug);
+    if (mudado) redirect(`/agenda/${mudado.slug}`);
+    notFound();
+  }
 
   // Los cortes a los que pertenece este evento: su país, su tipo, su
   // provincia, su mes.

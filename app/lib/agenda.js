@@ -84,6 +84,17 @@ function mapear(record) {
     // la escribe el robot en cada pasada y la tienen todos los eventos.
     verificado: Boolean(f["Verificado por el organizador"]),
     fechaVerificacion: f["Fecha de verificación"] || null,
+    // Las direcciones que este evento supo tener.
+    //
+    // El slug sale del nombre, así que renombrar un evento le cambia la
+    // dirección y deja la vieja en la nada, sin ningún aviso. Los artículos ya
+    // tenían esto resuelto (regla 6 del CLAUDE.md) y la agenda no: los
+    // registros de Vercel mostraron tres direcciones muertas comiéndose ~15
+    // visitas por día.
+    slugsAnteriores: String(f["Slugs anteriores"] || "")
+      .split(/[\n,]/)
+      .map((x) => x.trim())
+      .filter(Boolean),
     // El circuito de difusión: lo que el organizador pidió corregir, y si ya
     // lo publicamos en las redes.
     correcciones: (f["Correcciones del organizador"] || "").trim(),
@@ -365,6 +376,22 @@ export async function getEvento(slug) {
     );
   }
   return ev;
+}
+
+// El evento que TENÍA esta dirección antes de que le cambiaran el nombre.
+//
+// Se usa solo cuando la búsqueda por slug actual no encontró nada, para
+// redirigir en vez de mostrar un "no existe". Si dos eventos reclamaran la
+// misma dirección vieja no se redirige a ninguno: adivinar cuál es peor que
+// no redirigir.
+export async function getEventoPorSlugViejo(slug) {
+  const s = String(slug || "").trim();
+  if (!s) return null;
+  const { eventos } = await getEventosConEstado();
+  const candidatos = eventos.filter(
+    (e) => e.slug !== s && e.slugsAnteriores.includes(s)
+  );
+  return candidatos.length === 1 ? candidatos[0] : null;
 }
 
 // Compara sin distinguir mayúsculas, acentos ni espacios de más. Un
