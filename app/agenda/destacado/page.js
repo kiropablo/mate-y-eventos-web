@@ -3,6 +3,7 @@ import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import { getEventos, yaPaso } from "../../lib/agenda";
 import { SITE, STATS, fechaCorta } from "../../lib/site";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const metadata = {
   alternates: { canonical: "/agenda/destacado" },
@@ -151,7 +152,7 @@ export default async function Destacado() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

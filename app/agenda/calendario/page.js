@@ -4,6 +4,7 @@ import Footer from "../../components/Footer";
 import SuscribirCalendario from "./SuscribirCalendario";
 import { getEventos, yaPaso } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const metadata = {
   alternates: { canonical: "/agenda/calendario" },
@@ -112,7 +113,7 @@ export default async function Calendario() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

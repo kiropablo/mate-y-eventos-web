@@ -93,8 +93,21 @@ export async function POST(req, { params }) {
   // alguien con el link puede llenarnos la casilla, quemarnos la cuota de
   // correo y hacer que Airtable nos corte la agenda entera, que sale de la
   // misma base. Dos respuestas por día alcanzan para cualquier uso normal.
-  const yaHoy = (ev.correcciones.match(new RegExp(`\\[${hoy}\\]`, "g")) || [])
-    .length;
+  // OJO: se cuentan solo las líneas que escribió EL SERVIDOR.
+  //
+  // Antes se contaba cualquier aparición de `[fecha]` dentro del campo. Pero
+  // ese mismo campo se llena con el texto libre que manda el organizador, así
+  // que el contador y el dato del usuario compartían cajón. Escribiendo
+  // "[2029-01-01]" en una corrección, el contador quedaba envenenado y el
+  // evento no aceptaba una respuesta más durante años, sin que nadie se
+  // enterara.
+  //
+  // La marca `^[fecha] Respuesta del organizador` no se puede falsificar:
+  // resumirRespuesta() la pone siempre al principio de renglón, y el texto del
+  // organizador nunca puede empezar un renglón —su primera línea va detrás de
+  // "debería decir: " y las que siguen las sangra sangrar() con espacios.
+  const marca = new RegExp(`^\\[${hoy}\\] Respuesta del organizador`, "gm");
+  const yaHoy = (ev.correcciones.match(marca) || []).length;
   if (yaHoy >= MAXIMO_POR_DIA) {
     return Response.json(
       {

@@ -63,22 +63,27 @@ export async function POST(req, { params }) {
     return Response.json({ ok: true, yaTieneFecha: true });
   }
 
-  // Repetido: se contesta que sí sin escribir de nuevo. Recargar la página y
-  // volver a mandar no puede terminar en dos correos idénticos.
-  if (await yaPidio(ev.id, email)) {
-    return Response.json({ ok: true, repetido: true });
-  }
+  // Repetido: no se escribe de nuevo. Recargar la página y volver a mandar no
+  // puede terminar en dos correos idénticos.
+  //
+  // Pero la respuesta es LA MISMA que la de un alta nueva, a propósito. Antes
+  // contestaba `repetido: true`, y eso convertía la ruta en un oráculo:
+  // probando direcciones cualquiera podía averiguar quién se había anotado a
+  // qué evento. Es dato de otra persona y no tiene por qué salir de acá.
+  const repetido = await yaPidio(ev.id, email);
 
-  const r = await anotarAviso({
-    idEvento: ev.id,
-    nombreEvento: ev.nombre,
-    email,
-  });
-  if (!r.ok) {
-    return Response.json(
-      { error: "No pudimos anotarlo. Probá de nuevo en un rato." },
-      { status: 502 }
-    );
+  if (!repetido) {
+    const r = await anotarAviso({
+      idEvento: ev.id,
+      nombreEvento: ev.nombre,
+      email,
+    });
+    if (!r.ok) {
+      return Response.json(
+        { error: "No pudimos anotarlo. Probá de nuevo en un rato." },
+        { status: 502 }
+      );
+    }
   }
 
   return Response.json({ ok: true });

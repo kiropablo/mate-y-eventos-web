@@ -18,6 +18,7 @@ import { getArticuloDeEpisodio } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
 import { SITE, LINKS, AUTORES } from "../../lib/site";
 import { migas } from "../../lib/migas";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -146,7 +147,7 @@ export default async function Episodio({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <div className="wrap">
         <SiteNav />

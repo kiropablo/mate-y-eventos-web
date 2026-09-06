@@ -5,6 +5,7 @@ import Edicion from "./Edicion";
 import { metaEdicion, schemaEdicion } from "./comun";
 import { getEventos, edicionesImperdibles, mesLargo } from "../lib/agenda";
 import { SITE } from "../lib/site";
+import { jsonLdSeguro } from "../lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -31,7 +32,7 @@ export default async function Imperdibles() {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(
+            __html: jsonLdSeguro(
               schemaEdicion(ultima, { canonical: "/imperdibles" })
             ),
           }}

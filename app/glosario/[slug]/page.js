@@ -10,6 +10,7 @@ import {
   terminosRelacionados,
 } from "../../lib/enlaces";
 import { SITE } from "../../lib/site";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -131,7 +132,7 @@ export default function Termino({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import Edicion from "../Edicion";
 import { metaEdicion, schemaEdicion } from "../comun";
 import { getEventos, edicionesImperdibles, mesLargo } from "../../lib/agenda";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -46,7 +47,7 @@ export default async function EdicionDelMes({ params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdSeguro(
             schemaEdicion(edicion, {
               // La misma URL que el canonical. Si esta edición es la vigente,
               // la página canónica es /imperdibles: declarar acá un @id propio

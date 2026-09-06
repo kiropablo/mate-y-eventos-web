@@ -4,6 +4,7 @@ import Atmosphere from "./components/Atmosphere";
 import Motion from "./components/Motion";
 import Contador from "./components/Contador";
 import { SITE, LINKS, AUTORES, EJES } from "./lib/site";
+import { jsonLdSeguro } from "./lib/jsonld";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -172,7 +173,7 @@ export default function RootLayout({ children }) {
       <body data-accent="blue">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
         />
         <Atmosphere />
         <Contador />

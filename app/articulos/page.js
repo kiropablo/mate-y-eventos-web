@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import { getArticulos, formatFecha } from "../lib/articulos";
 import { SITE } from "../lib/site";
 import { cortesDeEje } from "../lib/ejes";
+import { jsonLdSeguro } from "../lib/jsonld";
 
 export const metadata = {
   alternates: { canonical: "/articulos" },
@@ -42,7 +43,7 @@ export default function Articulos() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

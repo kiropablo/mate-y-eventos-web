@@ -5,6 +5,7 @@ import { getEventosConEstado } from "../../lib/agenda";
 import { radiografia } from "../../lib/radiografia";
 import { migas } from "../../lib/migas";
 import { SITE, fechaCorta } from "../../lib/site";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 // Los números de la agenda, publicados.
 //
@@ -151,7 +152,7 @@ export default async function Radiografia() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

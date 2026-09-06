@@ -20,6 +20,7 @@ import { migas } from "../../lib/migas";
 import { todosLosCortes, textosDe } from "../cortes";
 import SoyOrganizador from "./SoyOrganizador";
 import AvisameDeLaFecha from "./AvisameDeLaFecha";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -251,17 +252,17 @@ export default async function Evento({ params }) {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
         />
       )}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(migasLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(migasLd) }}
       />
       {jsonLdPagina && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdPagina) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLdPagina) }}
         />
       )}
 

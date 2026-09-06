@@ -9,6 +9,7 @@ import {
   schemaDeCorte,
 } from "../../../../cortes";
 import { getEventos, yaPaso } from "../../../../../lib/agenda";
+import { jsonLdSeguro } from "../../../../../lib/jsonld";
 
 // Un tipo de evento dentro de una provincia: "Congresos en Ciudad de Buenos Aires".
 //
@@ -52,7 +53,7 @@ export default async function Cruce({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaDeCorte(corte)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(schemaDeCorte(corte)) }}
       />
       <div className="wrap">
         <SiteNav />

@@ -12,6 +12,7 @@ import {
 } from "../lib/agenda";
 import { SITE } from "../lib/site";
 import { todosLosCortes, textosDe } from "./cortes";
+import { jsonLdSeguro } from "../lib/jsonld";
 
 export const metadata = {
   alternates: { canonical: "/agenda" },
@@ -73,7 +74,7 @@ export default async function Agenda() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

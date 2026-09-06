@@ -14,6 +14,7 @@ import {
 } from "./lib/agenda";
 import { STATS, fechaCorta } from "./lib/site";
 import CarruselEpisodios from "./components/CarruselEpisodios";
+import { jsonLdSeguro } from "./lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -511,7 +512,7 @@ export default async function Home() {
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(faqSchema) }}
       />
 
       <Footer />

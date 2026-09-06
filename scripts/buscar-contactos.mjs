@@ -435,8 +435,12 @@ async function main() {
     const mejor = r.lista?.[0] || null;
     const etiqueta = `[${hechos}/${porDominio.size}] ${dominio}`;
     if (mejor) {
-      const sello = mejor.institucional ? "" : mejor.personal ? " (personal)" : "";
-      console.log(`  ${etiqueta} → ${mejor.mail}${sello}`);
+      // El registro dice QUE se encontró, no CUÁL. El repo es público y sus
+      // registros también: una dirección impresa acá queda a la vista de
+      // cualquiera para siempre. El dato completo va al informe local, que no
+      // sale de la máquina donde corre.
+      const sello = mejor.institucional ? "institucional" : mejor.personal ? "personal" : "sin clasificar";
+      console.log(`  ${etiqueta} → 1 mail (${sello})`);
     } else {
       console.log(`  ${etiqueta} → nada${r.error ? ` (${r.error})` : ""}`);
     }

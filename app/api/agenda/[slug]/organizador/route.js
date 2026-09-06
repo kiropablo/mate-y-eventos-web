@@ -118,10 +118,20 @@ export async function POST(req, { params }) {
   if (notasPrevias !== null) {
     fields["Notas internas"] = [notasPrevias, nota].filter(Boolean).join("\n");
   }
-  // El email solo se completa si estaba vacío. Si ya hay uno cargado —que lo
-  // puso el equipo o una verificación anterior— no lo pisa un formulario
-  // público: eso sería dejar que un tercero redirija a dónde le escribimos.
-  if (!ev.emailOrganizador) fields["Email del organizador"] = email;
+  // ACÁ NO SE ESCRIBE EL EMAIL. Se sacó el 6/9/2026.
+  //
+  // Antes se completaba "Email del organizador" cuando el campo estaba vacío.
+  // El razonamiento era bueno —no pisar un dato del equipo— pero se quedaba
+  // corto: 241 de los 338 eventos NO tienen mail cargado, así que en la
+  // enorme mayoría de las fichas cualquiera podía ponerlo.
+  //
+  // Y ese campo es el que después usa el panel para mandar la invitación con
+  // el link firmado. O sea que alguien de afuera elegía a dónde va nuestro
+  // link de verificación, sin que nadie volviera a mirar la dirección.
+  //
+  // No se pierde nada: la dirección viaja igual en la nota interna de arriba y
+  // en el correo al equipo. Que se copie a mano después de mirarla es
+  // exactamente el paso que hace que el sello valga algo.
 
   // Puede quedar vacío: notas que no se pudieron leer y un email ya cargado.
   // En ese caso no se toca Airtable y el pedido viaja solo por correo, que es

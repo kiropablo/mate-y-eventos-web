@@ -963,10 +963,15 @@ Devolvé JSON sin texto alrededor y sin backticks:
     const de = d.dondeEstaElMail ? ` (de ${sinCitas(d.dondeEstaElMail)})` : "";
     campos["Hallazgos IA"] =
       `[${hoy}] Correo de contacto encontrado: ${mail}${de}. Se puede mandar la invitación del sello.`;
-    console.log(`  ${f["Nombre"]}: correo encontrado → ${mail}`);
+    // Solo el dominio: este repo es público y sus registros también. La
+    // dirección entera queda en Airtable, que es donde tiene que estar.
+    console.log(`  ${f["Nombre"]}: correo encontrado → @${mail.split("@")[1] || "?"}`);
   } else if (faltaMail && d.emailContacto) {
-    // Queda en el log para poder ajustar el filtro si descarta de más.
-    console.log(`  ${f["Nombre"]}: correo descartado por no institucional (${d.emailContacto})`);
+    // Queda en el log para poder ajustar el filtro si descarta de más, pero
+    // otra vez sin la dirección: para ajustar el filtro alcanza con la forma.
+    const [usuario, dominio] = String(d.emailContacto).split("@");
+    const forma = usuario ? `${usuario.includes(".") ? "nombre.apellido" : "usuario"}@${dominio || "?"}` : "sin forma de mail";
+    console.log(`  ${f["Nombre"]}: correo descartado por no institucional (${forma})`);
   }
 
   if (d.cambio && d.resumen) {

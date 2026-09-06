@@ -10,6 +10,7 @@ import {
   schemaDeCorte,
 } from "../../cortes";
 import { getEventos, yaPaso, edicionesImperdibles, mesLargo } from "../../../lib/agenda";
+import { jsonLdSeguro } from "../../../lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -45,7 +46,7 @@ export default async function Corte({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaDeCorte(corte)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(schemaDeCorte(corte)) }}
       />
       <div className="wrap">
         <SiteNav />

@@ -2,8 +2,32 @@
 // en Airtable como "Borrador IA" + Origen "Sugerido web".
 // Nunca se publica nada sin aprobación manual.
 
+import { PAISES, TIPOS } from "../../../lib/ficha-editable";
+
 const BASE = "app6q7METE3ofZz1S";
 const TABLA = "tblaLHf2VSyyyeN2s";
+
+// Tope de sugerencias por día para TODO el sitio.
+//
+// Es la única ruta pública que CREA registros, y no tenía ningún freno: el
+// mismo pedido en un bucle llenaba la agenda de basura. El tope es global y no
+// por IP porque rotar IPs es gratis y rotar el día no.
+//
+// Honestidad sobre lo que esto vale: el contador vive en la memoria del
+// proceso, y en Vercel cada instancia tiene la suya. Frena al bot de una sola
+// conexión, no al decidido. El freno de verdad, si algún día hace falta, es una
+// regla del firewall de Vercel sobre esta ruta.
+const TOPE_POR_DIA = 40;
+let cuenta = { dia: "", n: 0 };
+
+function pasaElTope() {
+  const hoy = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
+  if (cuenta.dia !== hoy) cuenta = { dia: hoy, n: 0 };
+  cuenta.n += 1;
+  return cuenta.n <= TOPE_POR_DIA;
+}
 
 export async function POST(req) {
   const key = process.env.AIRTABLE_API_KEY;
@@ -31,6 +55,16 @@ export async function POST(req) {
     return Response.json({ error: "Faltan datos" }, { status: 400 });
   }
 
+  // El tope se cuenta DESPUÉS de validar: un pedido mal armado no le tiene que
+  // gastar el cupo del día a una persona que sí quiere sugerir algo.
+  if (!pasaElTope()) {
+    console.warn(`[sugerir] tope diario alcanzado (${TOPE_POR_DIA})`);
+    return Response.json(
+      { error: "Recibimos muchas sugerencias hoy. Probá mañana o escribinos." },
+      { status: 429 }
+    );
+  }
+
   const fields = {
     Nombre: nombreEvento,
     Estado: "Borrador IA",
@@ -40,10 +74,21 @@ export async function POST(req) {
     "Notas internas": `Sugerido desde la web el ${new Date().toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}.`,
   };
 
+  // Tipo y País se validan contra las listas, igual que en el panel
+  // (app/api/admin/ficha/route.js). NO es una formalidad: esta ruta escribe con
+  // typecast, y con typecast Airtable no rechaza un valor que no está en el
+  // desplegable — lo CREA, para siempre. Borrar después el registro basura no
+  // saca la opción: hay que ir a la base a sacarla a mano.
+  //
+  // Si el valor no está en la lista simplemente no se escribe ese campo. La
+  // sugerencia entra igual: es un borrador que alguien va a revisar, y el
+  // dato lo completa quien lo apruebe.
   const tipo = limpiar(datos.tipo, 60);
-  if (tipo) fields["Tipo"] = tipo;
+  if (tipo && TIPOS.includes(tipo)) fields["Tipo"] = tipo;
   const pais = limpiar(datos.pais, 60);
-  if (pais) fields["País"] = pais;
+  if (pais && PAISES.includes(pais)) fields["País"] = pais;
+  // Provincia/Región queda como texto libre a propósito: en la base también lo
+  // es, y en LATAM las divisiones no entran en una lista cerrada.
   const provincia = limpiar(datos.provincia, 120);
   if (provincia) fields["Provincia/Región"] = provincia;
   const ciudad = limpiar(datos.ciudad, 120);

@@ -37,21 +37,24 @@ jobs:
         with:
           node-version: "24"
 
+      # Los valores del formulario viajan por env, no pegados dentro del `run`.
+      # Pegados, GitHub los reemplaza ANTES de que bash lea la línea, así que
+      # quien dispara la Action escribe comandos y no un número. Las otras seis
+      # Actions ya lo hacen así.
       - name: Buscar los mails
         env:
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          LIMITE: ${{ inputs.limite || '0' }}
+          ESCRIBIR: ${{ inputs.escribir }}
         run: |
-          node scripts/buscar-contactos.mjs \
-            --limite "${{ inputs.limite || '0' }}" \
-            ${{ inputs.escribir == 'si' && '--escribir' || '' }}
+          # Comparación explícita contra "si": cualquier otro valor NO escribe.
+          if [ "$ESCRIBIR" = "si" ]; then
+            node scripts/buscar-contactos.mjs --limite "$LIMITE" --escribir
+          else
+            node scripts/buscar-contactos.mjs --limite "$LIMITE"
+          fi
 
-      # El informe queda para bajar desde esta misma corrida. No se commitea:
-      # son datos de contacto de terceros y no tienen por qué vivir en el repo.
-      - name: Dejar el informe para bajar
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: contactos-encontrados
-          path: datos-contactos/
-          if-no-files-found: warn
-          retention-days: 14
+      # Acá vivía un paso que subía datos-contactos/ como archivo para bajar.
+      # Se sacó el 6/9/2026: en un repo PÚBLICO no existe el archivo privado.
+      # Son mails de organizadores, y cualquiera podía bajarlos. El informe se
+      # arma igual en la máquina que corre; para leerlo, correr el script local.

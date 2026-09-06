@@ -11,6 +11,7 @@ import {
   MESES_LARGO,
 } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const metadata = {
   alternates: { canonical: "/agenda/esta-semana" },
@@ -153,7 +154,7 @@ export default async function EstaSemana() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

@@ -4,6 +4,7 @@ import Footer from "../../components/Footer";
 import ArmarSnippet from "./ArmarSnippet";
 import { getEventos, formatRango, mesLargo } from "../../lib/agenda";
 import { SITE } from "../../lib/site";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const metadata = {
   alternates: { canonical: "/agenda/verificado" },
@@ -117,7 +118,7 @@ export default async function Verificado() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

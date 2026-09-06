@@ -6,6 +6,7 @@ import { formatFecha } from "../../../lib/articulos";
 import { cortesDeEje, buscarEje } from "../../../lib/ejes";
 import { migas } from "../../../lib/migas";
 import { SITE } from "../../../lib/site";
+import { jsonLdSeguro } from "../../../lib/jsonld";
 
 // Una página por eje editorial.
 //
@@ -80,7 +81,7 @@ export default function EjeDeArticulos({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

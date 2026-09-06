@@ -6,6 +6,7 @@ import { getEpisodes, partirTitulo, formatDate } from "../../lib/youtube";
 import { getArticulos } from "../../lib/articulos";
 import { migas } from "../../lib/migas";
 import { SITE, LINKS, AUTORES } from "../../lib/site";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 // La página de cada uno.
 //
@@ -93,7 +94,7 @@ export default async function Persona({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">

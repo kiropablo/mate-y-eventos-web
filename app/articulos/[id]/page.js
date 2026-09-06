@@ -13,6 +13,7 @@ import { SITE } from "../../lib/site";
 import { migas } from "../../lib/migas";
 import { terminosDelEpisodio, getTerminos } from "../../lib/glosario";
 import { terminosMencionados, terminosDelTema } from "../../lib/enlaces";
+import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
 
@@ -154,7 +155,7 @@ export default function Articulo({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="wrap">
