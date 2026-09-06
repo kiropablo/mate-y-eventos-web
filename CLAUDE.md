@@ -207,6 +207,18 @@ Cosas sabidas y verificadas (no volver a investigar):
 
     y con ese id, `gh api repos/kiropablo/mate-y-eventos-web/deployments/<id>/statuses --jq '.[].state'`. Dice `success` o `failure` en un segundo. **Es el chequeo que va después de cada push**, antes de ponerse a verificar nada en la web.
 
+19. **El JSON-LD se serializa con `jsonLdSeguro()`, nunca con `JSON.stringify()` pelado.** `JSON.stringify` no escapa `<`, y el schema se inyecta con `dangerouslySetInnerHTML`: un dato que traiga el cierre de un `script` cierra el bloque y lo que sigue se ejecuta en nuestro dominio. Y los datos NO son de confianza: los eventos los carga un robot que scrapea webs ajenas y cualquiera puede mandar una sugerencia por el formulario público. Está en `app/lib/jsonld.js` y se usa en los 26 puntos. Google y las IA leen exactamente el mismo dato: cambia cómo se escribe, no qué dice.
+
+20. **El repo es PÚBLICO, y sus registros de Actions también.** Un `console.log` con una dirección de correo la publica para cualquiera. Ya pasó: 112 mails de organizadores quedaron a la vista, más un archivo descargable con el informe entero. Los scripts ahora registran **el dominio, no la dirección**. Y en un repo público **no existe el artefacto privado**: si un dato no puede ser público, no se sube como artifact.
+
+21. **Un tope guardado en memoria no es un tope.** En Vercel cada instancia de la función tiene su propio `Map` y arranca vacía; el atacante que hace más pedidos hace nacer más instancias. Sirve como amortiguador contra el bot de una conexión, y nada más. Cuando el tope tiene que ser real, va contra Airtable o contra el firewall de Vercel. **Esto está escrito en cada lugar donde hay uno**: `sugerir`, `avisame`, `organizador`, `login`. No volver a "arreglarlo" subiendo el número.
+
+22. **El contador y el dato del usuario no comparten cajón.** El tope de `/confirmar` se calculaba contando `[fecha]` dentro del mismo campo donde el organizador escribe texto libre: escribiendo fechas futuras ahí, el evento quedaba bloqueado años. Ahora la marca es `^[fecha] Respuesta del organizador`, que solo puede escribir el servidor porque `sangrar()` corre con espacios todo lo que manda el organizador.
+
+23. **`typecast: true` no valida: inventa.** Airtable no rechaza un valor que no está en el desplegable, lo **crea para siempre**. Borrar después el registro basura no saca la opción. Toda ruta que escriba un `singleSelect` valida antes contra la lista de `app/lib/ficha-editable.js`. Y esas listas tienen que coincidir **exactamente** con Airtable: faltaban Ecuador y Reino Unido, y desde que la lista también valida el formulario público, una opción que falta es un campo que se pierde en silencio.
+
+24. **Nadie de afuera decide a dónde mandamos un link firmado.** La ruta pública del organizador escribía el mail que le mandaban en el campo `Email del organizador`, que es de donde después sale la invitación con el link. Ese dato llega igual por la nota interna y por el correo al equipo; que se copie a mano después de mirarlo es exactamente el paso que hace que el sello valga algo.
+
 ---
 
 ## ESTADO Y PENDIENTES
