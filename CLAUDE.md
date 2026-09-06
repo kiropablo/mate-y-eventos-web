@@ -98,6 +98,18 @@ Las Actions tienen un **bucle de 3 reintentos con `git pull --rebase`** antes de
 4. Se manda la **confirmación**: el sello, el código del badge para su web, cuándo sale la difusión, y recién ahí se pide algo —los otros eventos que organizan— y se ofrece cobertura y contactos. No se vende: al pie una línea aclara que el sello no se paga.
 5. Cuando se postea en redes, el botón **"Ya lo difundimos"** se lo avisa.
 
+### "Avisame cuando confirmen la fecha"
+
+De los 338 aprobados, 110 no tienen fecha anunciada. Esa persona busca "fiesta de la chaya 2027", cae en la ficha y lee "fechas por anunciar": es la visita con la intención más clara de todo el sitio y hasta ahora no tenía nada que hacer. En esas fichas —y **solo** en esas— hay un renglón para dejar el correo.
+
+Los pedidos van a la tabla **`Avisos de fecha`** de Airtable (`app/lib/avisos.js`). Todos los días, después del refresco, la Action de la agenda llama a `/api/agenda/avisos` y pregunta si algún evento que alguien espera ya tiene fecha; si lo tiene, sale el correo. No hay que detectar "el día que se confirmó": se pregunta cada día y listo, no hay estado que se pueda desincronizar.
+
+Dos reglas que no se tocan:
+- **Se marca "Avisado el" DESPUÉS de que el correo salió**, nunca antes. Al revés, un envío fallado deja a alguien esperando para siempre un correo que nunca va a llegar, y no hay forma de darse cuenta. El riesgo del otro lado es un correo repetido: molesta, no rompe la promesa.
+- **Si la lectura de la agenda viene incompleta, la corrida no manda nada** y lo dice en los registros. Mañana se reintenta sola.
+
+La promesa es chica a propósito —un correo, una vez, por ese evento— y por eso se puede cumplir tal cual. **No entra al newsletter**: convertirlo en una lista sería otra cosa que la que la persona aceptó.
+
 Los textos de los dos mails se editan desde `/admin` → Mensaje, con vista previa sobre un evento real.
 
 ### Cómo se carga la agenda sola
