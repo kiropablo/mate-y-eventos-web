@@ -19,6 +19,7 @@ import { SITE } from "../../lib/site";
 import { migas } from "../../lib/migas";
 import { todosLosCortes, textosDe } from "../cortes";
 import SoyOrganizador from "./SoyOrganizador";
+import AvisameDeLaFecha from "./AvisameDeLaFecha";
 
 export const revalidate = 3600;
 
@@ -476,6 +477,13 @@ export default async function Evento({ params }) {
               </div>
             </section>
           ) : null}
+
+          {/* Sin fecha anunciada no hay nada que hacer en esta página: la
+              persona vino a preguntar cuándo es y la respuesta no existe
+              todavía. Ofrecerle avisarle es contestarle más tarde. */}
+          {!ev.fechaInicio && !pasado && (
+            <AvisameDeLaFecha slug={ev.slug} nombre={nombreConAnio(ev)} />
+          )}
 
           {/* El pedido de verificación, al pie y solo si el sello todavía no
               está encendido. Al organizador de un evento ya verificado no se

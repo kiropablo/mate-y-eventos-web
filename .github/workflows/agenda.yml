@@ -66,3 +66,18 @@ jobs:
           else
             echo "Sin REVALIDATE_TOKEN: la web se actualiza sola dentro de una hora."
           fi
+
+      # Avisar a los que pidieron "avisame cuando confirmen la fecha".
+      #
+      # Va después del refresco a propósito: primero la web se entera de las
+      # fechas nuevas, después se avisa. Y si algo falla no se corta la Action:
+      # nadie queda marcado como avisado, así que mañana se reintenta solo.
+      - name: Avisar fechas confirmadas
+        env:
+          REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
+        run: |
+          if [ -n "$REVALIDATE_TOKEN" ]; then
+            curl -s "https://www.mateyeventos.com/api/agenda/avisos?token=$REVALIDATE_TOKEN" || true
+          else
+            echo "Sin REVALIDATE_TOKEN: los avisos de fecha quedan para mañana."
+          fi
