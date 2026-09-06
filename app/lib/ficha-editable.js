@@ -15,11 +15,19 @@
 // lista antes de escribir: Airtable, con typecast prendido, CREA la opción que
 // no existe. Un país mal tipeado no daría error, agregaría "Argentna" al
 // desplegable para siempre y rompería el filtro de la agenda.
+// Tiene que coincidir EXACTAMENTE con el desplegable "País" de Airtable.
+//
+// Desde el 6/9/2026 esta lista también valida el formulario público de
+// sugerencias: lo que no está acá no se escribe. Así que una opción que falte
+// no es un detalle, es un campo que se pierde en silencio. Faltaban Ecuador y
+// Reino Unido, que existen en la base desde antes.
+//
+// Si algún día se agrega un país en Airtable, hay que agregarlo acá.
 export const PAISES = [
   "Argentina", "Uruguay", "Chile", "Brasil", "Paraguay", "Bolivia", "México",
-  "Colombia", "Perú", "Panamá", "El Salvador", "Estados Unidos", "Canadá",
-  "España", "Francia", "Alemania", "Italia", "Jamaica",
-  "Emiratos Árabes Unidos", "Internacional", "Otro",
+  "Colombia", "Perú", "Ecuador", "Panamá", "El Salvador", "Estados Unidos",
+  "Canadá", "España", "Francia", "Alemania", "Italia", "Reino Unido",
+  "Jamaica", "Emiratos Árabes Unidos", "Internacional", "Otro",
 ];
 
 export const TIPOS = [
