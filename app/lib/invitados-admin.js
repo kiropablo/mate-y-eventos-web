@@ -80,6 +80,49 @@ function puntuar(ficha, r) {
   return comunes > 0 ? { p: 40 + comunes * 10, seguro: false } : { p: 0, seguro: false };
 }
 
+// Cuántas letras hay que cambiar para pasar de un texto al otro.
+function distancia(a, b) {
+  if (a === b) return 0;
+  const fila = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let previa = fila[0];
+    fila[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const guardar = fila[j];
+      fila[j] = Math.min(
+        fila[j] + 1,
+        fila[j - 1] + 1,
+        previa + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+      previa = guardar;
+    }
+  }
+  return fila[b.length];
+}
+
+// Fichas que podrían ser la misma persona escrita distinto.
+//
+// Pasa seguido y no es culpa de nadie: los subtítulos automáticos de YouTube
+// escriben el mismo apellido de dos formas en dos episodios. "Facundo Bogarín"
+// en uno y "Facundo Borgarín" —una r de más— en el otro, y salen dos fichas.
+// Con Nicolás Ekmekdjian salieron tres grafías distintas en dos episodios.
+//
+// Acá NO se unen solas. Unir dos fichas es decidir que dos nombres son la misma
+// persona, y a una letra de distancia también están "María López" y "Mario
+// López". El panel las marca y la decisión la toma quien mira.
+function parecidasA(ficha, todas) {
+  const mio = ficha.id;
+  return todas
+    .filter((o) => o.id !== mio)
+    .map((o) => ({ o, d: distancia(mio, o.id) }))
+    // Hasta dos letras, y solo si el nombre es largo: en uno corto, dos letras
+    // de diferencia pueden ser dos personas distintas.
+    .filter((x) => x.d > 0 && x.d <= 2 && Math.min(mio.length, x.o.id.length) >= 8)
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 3)
+    .map(({ o }) => ({ id: o.id, nombre: o.nombre }));
+}
+
 export function unirConAirtable(fichas, registros, registroDeFicha) {
   // Los que no están atados a ninguna ficha: son los únicos que se pueden
   // ofrecer. Uno ya atado aparecería como candidato de dos fichas distintas.
@@ -103,6 +146,7 @@ export function unirConAirtable(fichas, registros, registroDeFicha) {
           }));
     return {
       ...f,
+      parecidas: parecidasA(f, fichas),
       sugeridos,
       // Todos los libres, por si el sugerido no es ninguno de los cinco.
       libres: r

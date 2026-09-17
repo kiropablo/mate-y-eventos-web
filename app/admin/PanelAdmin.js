@@ -2449,6 +2449,11 @@ export default function PanelAdmin({
                       {!i.foto ? (
                         <span className="adm-chip adm-chip--falta">sin foto</span>
                       ) : null}
+                      {i.parecidas?.length ? (
+                        <span className="adm-chip adm-chip--espera">
+                          ¿la misma persona que {i.parecidas[0].nombre}?
+                        </span>
+                      ) : null}
                       {/* En qué punto está el circuito con el invitado. Solo se
                           nombra cuando hay algo que decir: una ficha recién
                           generada no tiene estado todavía. */}
@@ -2633,6 +2638,30 @@ export default function PanelAdmin({
                             )}
                           </div>
                         )}
+
+                        {/* Dos fichas que podrían ser la misma persona escrita
+                            distinto. Los subtítulos automáticos escriben el
+                            mismo apellido de dos formas en dos episodios y
+                            salen dos fichas. No se unen solas: a una letra de
+                            distancia también están "María López" y "Mario
+                            López". */}
+                        {i.parecidas?.length ? (
+                          <div className="inv-unir">
+                            <span className="org-rotulo">Ojo: ¿es la misma persona?</span>
+                            <p className="adm-ayuda" style={{ marginTop: 0 }}>
+                              Hay{" "}
+                              {i.parecidas.length === 1 ? "otra ficha" : "otras fichas"}{" "}
+                              con un nombre casi igual:{" "}
+                              <strong>
+                                {i.parecidas.map((x) => x.nombre).join(", ")}
+                              </strong>
+                              . Suele pasar cuando los subtítulos escriben el
+                              apellido de dos formas. Si son la misma, quedate
+                              con una, pasale los episodios de la otra y eliminá
+                              la que sobra.
+                            </p>
+                          </div>
+                        ) : null}
 
                         <FotoInvitado
                           id={i.id}
