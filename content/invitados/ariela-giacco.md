@@ -2,7 +2,7 @@
 nombre: "Ariela Giacco"
 rol: "Miembro de EcoAemy, iniciativa que educa a productores y gestores culturales en economía circular"
 bio: "Ariela Giacco, de EcoAemy, explicó cómo medir y reducir el impacto ambiental de festivales masivos a través de datos y diseño."
-episodios: ["3aPh6wbebDk"]
+episodios: ["3aPh6wbebDk", "axR3Ow-V3sI"]
 episodioTitulo: "T02E08 | Un festival funciona como una ciudad (y nadie lo nota) | Ariela Giacco"
 web: ""
 redes: []

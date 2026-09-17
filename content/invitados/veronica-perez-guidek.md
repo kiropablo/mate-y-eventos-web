@@ -2,7 +2,7 @@
 nombre: "Verónica Perez Guidek"
 rol: "Locutora y conductora de eventos"
 bio: "Locutora y conductora de eventos que contó cómo se lee una sala, se maneja a oradores nerviosos y se arma un presupuesto profesional."
-episodios: ["D8SD_ASAmqs"]
+episodios: ["D8SD_ASAmqs", "Qxf21vLVCgk"]
 episodioTitulo: "T01E15 - La Voz que Ordena un Evento - Con Verónica Perez Guidek"
 web: ""
 redes: []

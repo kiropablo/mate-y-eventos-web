@@ -2,7 +2,7 @@
 nombre: "Cielo Ambientaciones"
 rol: "Emprendedora y dueña de una agencia de ambientaciones para eventos"
 bio: "Cielo, de Cielo Ambientaciones, contó cómo estructura su agencia, delega sin perder estándar y encontró un micronicho rentable con la cabina despejada."
-episodios: ["M9-bsaOsP0E"]
+episodios: ["M9-bsaOsP0E", "vwwHytGG140"]
 episodioTitulo: "T02E06 | Cómo convertir creatividad en un negocio rentable | Cielo Ambientaciones"
 web: ""
 redes: []
