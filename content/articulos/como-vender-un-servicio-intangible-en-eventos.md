@@ -1,5 +1,5 @@
 ---
-titulo: "El precio de lo que no se puede tocar: vender un show en vivo"
+titulo: "El precio de lo que no se puede tocar: vender una experiencia"
 bajada: "Un mentalista no vende objetos ni materiales: vende una experiencia que dura minutos y se cobra igual. Cómo se construye valor cuando no hay nada que mostrar antes de actuar."
 metaDescripcion: "Cómo poner valor a un servicio intangible en eventos: la lógica detrás de vender una experiencia en vivo sin nada material que mostrar."
 episodio: "pURjtiT-wak"
@@ -9,8 +9,11 @@ eje: "Estrategia & Negocio"
 etiquetas: ["servicios intangibles", "shows en vivo", "segmentación de público", "venta de valor", "mentalismo"]
 lectura: 5
 generado: "2026-09-17"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-09-17"
 ---
+
 Hay proveedores de eventos que venden una estructura, una tarima, un menú, algo que se puede tocar antes de pagarlo. Y después está el otro extremo: alguien que sube a un escenario, hace algo durante quince minutos y se va sin dejar nada físico atrás. Michel, mentalista invitado en el último episodio de Mate y Eventos, describió ese lugar con una frase simple: "el costo en el caso mío es prácticamente nulo. Entonces el precio es un intangible." Esa idea, llevada al resto de la industria, explica más de lo que parece sobre cómo se cobra por experiencia y no por objeto.
 
 ## El precio no nace del costo, nace de lo que el otro imagina
