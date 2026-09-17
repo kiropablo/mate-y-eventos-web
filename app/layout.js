@@ -88,6 +88,10 @@ const jsonLd = {
       // sea que para una máquina compartían dirección y no se distinguían.
       url: `${SITE.url}/sobre/${a.id}`,
       mainEntityOfPage: { "@id": `${SITE.url}/sobre/${a.id}` },
+      // La cara. Estaba publicada en /sobre desde siempre y el schema no la
+      // declaraba: para una máquina, los dos que firman el sitio no tenían
+      // foto. Es la misma señal que ahora llevan las fichas de invitados.
+      ...(a.foto ? { image: `${SITE.url}${a.foto}` } : {}),
       ...(a.perfil ? { sameAs: [a.perfil] } : {}),
     })),
     // AV Eventos entra como nodo propio, no como texto suelto dentro de la

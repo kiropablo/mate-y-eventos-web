@@ -94,6 +94,11 @@ export const AUTORES = [
     // dentro de una oración —"{cargo} de Mate y Eventos"— y ahí un título como
     // "Director de AV Eventos" quedaría roto. Acá no hay oración: hay entidad.
     jobTitle: "Productor técnico y director de producción de eventos",
+    // La foto, escrita y no calculada. Salía de partir el id por el guion
+    // —"pablo-quiroga" → "/pablo.jpg"— en la página, y el schema directamente
+    // no la declaraba. Con el dato acá, los dos leen lo mismo y el día que una
+    // foto cambie de nombre se cambia en un solo lugar. 800×1000.
+    foto: "/pablo.jpg",
     // La corta: es la que Google muestra abajo del título y la que va al
     // schema, así que se mantiene cerca de los 160 caracteres. La larga, la que
     // se lee en la página, está en "presentacion".
@@ -136,6 +141,7 @@ export const AUTORES = [
     rol: "Co-conductor · Producción",
     cargo: "Productor de eventos y co-conductor",
     jobTitle: "Director creativo y productor de eventos",
+    foto: "/alexis.jpg",
     bio: "Productor y creativo desde 1999, con más de 800 producciones. Dirige AV Eventos, Growth Engine y Mate y Eventos, con una mirada que entra siempre por la luz.",
     presentacion:
       "Alexis Vidal trabaja en eventos desde 1999 y lleva más de 800 producciones. Junto a Pablo Quiroga dirige AV Eventos, donde se ocupa del diseño conceptual y espacial, la visualización 3D y la dirección comercial de la agencia —una de las primeras del país en incorporar el diseño de espacios en 3D al proceso creativo. Su formación es deliberadamente cruzada: escenografía con Tito Urza, escenógrafo del Teatro Colón, y estudios en cine, diseño de interiores, hotelería y gastronomía. De ahí su manera de mirar, que entra siempre por la luz: cómo la luz, la forma y la textura construyen un espacio y conducen a quien lo recorre. Trabaja en eventos corporativos y sociales desde una sola pregunta: qué necesita este evento.",

@@ -69,7 +69,7 @@ export function generateMetadata({ params }) {
       url: `${SITE.url}/sobre/${p.id}`,
       siteName: SITE.name,
       locale: "es_AR",
-      images: [{ url: `/${p.id.split("-")[0]}.jpg`, width: 800, height: 1000 }],
+      images: [{ url: p.foto || `/${p.id.split("-")[0]}.jpg`, width: 800, height: 1000 }],
     },
   };
 }
@@ -79,7 +79,7 @@ export default async function Persona({ params }) {
   if (!p) notFound();
 
   const otro = AUTORES.find((a) => a.id !== p.id);
-  const foto = `/${p.id.split("-")[0]}.jpg`;
+  const foto = p.foto || `/${p.id.split("-")[0]}.jpg`;
 
   // Los episodios se piden a YouTube y pueden no venir: la página tiene que
   // salir igual, porque lo que la sostiene es la biografía y no la lista.
