@@ -16,6 +16,7 @@ import {
 } from "../../lib/transcripts";
 import { getArticuloDeEpisodio } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
+import { invitadosDelEpisodio } from "../../lib/invitados";
 import { SITE, LINKS, AUTORES } from "../../lib/site";
 import { migas } from "../../lib/migas";
 import { jsonLdSeguro } from "../../lib/jsonld";
@@ -86,6 +87,8 @@ export default async function Episodio({ params }) {
   const bloques = armarTranscripcion(transcript, getSecciones(ep.id));
   const terminos = terminosDelEpisodio(ep.id);
   const articulo = getArticuloDeEpisodio(ep.id);
+  // Quién vino a hablar, si ya tiene ficha publicada.
+  const invitados = invitadosDelEpisodio(ep.id);
 
   // Cada entidad se declara UNA vez y con @id, y lo demás la referencia.
   //
@@ -129,6 +132,17 @@ export default async function Episodio({ params }) {
     publisher: { "@id": `${SITE.url}/#organization` },
     // Los dos que conducen, por @id contra los Person del layout.
     author: AUTORES.map((a) => ({ "@id": `${SITE.url}/#${a.id}` })),
+    // Y quién vino de invitado, por @id contra el Person de su ficha. Hasta
+    // ahora ninguno de los 42 episodios declaraba a su invitado: para una
+    // máquina, la persona que habló media hora no existía. Se declara solo si
+    // tiene ficha publicada, o sea si alguien la revisó.
+    ...(invitados.length
+      ? {
+          actor: invitados.map((i) => ({
+            "@id": `${SITE.url}/invitados/${i.slug}#persona`,
+          })),
+        }
+      : {}),
   };
 
   const jsonLd = [
@@ -166,9 +180,23 @@ export default async function Episodio({ params }) {
             {formatDate(ep.published)}
           </div>
           <h1 style={{ marginTop: "10px" }}>{partes.tema}</h1>
-          {partes.invitado ? (
+          {/* Quién vino. Si esa persona ya tiene ficha publicada, su nombre
+              lleva a ella; si no, sale como texto igual que antes. El título
+              del video es la fuente: es el dato que escribió una persona. */}
+          {partes.invitado || invitados.length ? (
             <p className="lead reveal" style={{ marginTop: "14px" }}>
-              Con {partes.invitado}
+              Con{" "}
+              {invitados.length ? (
+                invitados.map((inv, n) => (
+                  <span key={inv.slug}>
+                    {n > 0 ? " y " : ""}
+                    <Link href={`/invitados/${inv.slug}`}>{inv.nombre}</Link>
+                    {inv.rol ? `, ${inv.rol.toLowerCase()}` : ""}
+                  </span>
+                ))
+              ) : (
+                partes.invitado
+              )}
               {partes.codigo ? ` · ${partes.codigo}` : ""}
             </p>
           ) : null}

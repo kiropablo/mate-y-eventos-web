@@ -19,12 +19,13 @@ const AVISAR_A = process.env.AVISAR_A || REPO.split("/")[0] || "";
 // Qué carpeta mira. Cada Action avisa solo de lo suyo: si no, la de Glosario
 // termina abriendo un issue con los artículos que la de Artículos ya avisó
 // diez minutos antes, porque las dos leen el último commit del repo.
-//   articulos · glosario · secciones · (vacío = todas)
+//   articulos · glosario · invitados · secciones · (vacío = todas)
 const SOLO = (process.env.SOLO || "").trim();
 
 const CARPETAS = {
   articulos: "content/articulos/",
   glosario: "content/glosario/",
+  invitados: "content/invitados/",
   secciones: "content/transcripts/secciones/",
 };
 const MIRA = SOLO && CARPETAS[SOLO] ? [CARPETAS[SOLO]] : Object.values(CARPETAS);
@@ -64,6 +65,7 @@ const campo = (texto, clave) => {
 
 const borradores = [];
 const terminos = [];
+const invitados = [];
 const segmentados = [];
 for (const ruta of archivos) {
   try {
@@ -85,6 +87,21 @@ for (const ruta of archivos) {
 
     if (campo(texto, "publicado") !== "false") continue;
     const id = ruta.split("/").pop().replace(/\.md$/, "");
+
+    // Una ficha de invitado se revisa distinto que un artículo: lo que hay que
+    // mirar antes de aprobar no es si está bien escrita, es si el nombre y el
+    // rol son los de la persona real. Por eso el aviso muestra "fuente", que es
+    // la frase textual de la transcripción de donde el robot los sacó.
+    if (ruta.startsWith("content/invitados/")) {
+      invitados.push({
+        id,
+        nombre: campo(texto, "nombre") || "(sin nombre)",
+        rol: campo(texto, "rol"),
+        fuente: campo(texto, "fuente"),
+        episodio: campo(texto, "episodioTitulo"),
+      });
+      continue;
+    }
 
     if (ruta.startsWith("content/glosario/")) {
       terminos.push({
@@ -110,7 +127,12 @@ for (const ruta of archivos) {
   }
 }
 
-if (borradores.length === 0 && terminos.length === 0 && segmentados.length === 0) {
+if (
+  borradores.length === 0 &&
+  terminos.length === 0 &&
+  invitados.length === 0 &&
+  segmentados.length === 0
+) {
   console.log("No hay borradores nuevos: no se manda aviso.");
   process.exit(0);
 }
@@ -130,6 +152,10 @@ if (terminos.length)
   partes.push(
     `${terminos.length} ${terminos.length === 1 ? "término" : "términos"}`
   );
+if (invitados.length)
+  partes.push(
+    `${invitados.length} ${invitados.length === 1 ? "invitado" : "invitados"}`
+  );
 if (segmentados.length)
   partes.push(
     `${segmentados.length} ${
@@ -140,7 +166,8 @@ if (segmentados.length)
 const titulo = `${partes.join(" y ")} para revisar (${hoy})`;
 
 // El panel sirve para artículos y glosario. Las secciones no pasan por ahí.
-const hayPanel = borradores.length > 0 || terminos.length > 0;
+const hayPanel =
+  borradores.length > 0 || terminos.length > 0 || invitados.length > 0;
 
 const cuerpo = [
   hayPanel
@@ -183,6 +210,29 @@ const cuerpo = [
               (t.definicion || "—").replace(/\|/g, "\\|")
             } | ${(t.episodio || "—").replace(/\|/g, "\\|")} |`
         ),
+        "",
+      ]
+    : []),
+  ...(invitados.length
+    ? [
+        "---",
+        "",
+        "## Invitados",
+        "",
+        "Antes de aprobar, mirá que **el nombre y el rol sean los de la persona**.",
+        "La columna «de dónde salió» es la frase textual de la transcripción que",
+        "usó el robot: si eso no dice lo que dice la ficha, no la apruebes.",
+        "Las redes y la web las cargás vos desde el panel.",
+        "",
+        "| Quién | De dónde salió | Episodio |",
+        "| --- | --- | --- |",
+        ...invitados.map((i) => {
+          const barra = (t) => String(t || "—").replace(/\|/g, "\\|");
+          return (
+            `| **[${i.nombre}](https://github.com/${REPO}/blob/main/content/invitados/${i.id}.md)**` +
+            `${i.rol ? ` — ${barra(i.rol)}` : ""} | ${barra(i.fuente).slice(0, 160)} | ${barra(i.episodio)} |`
+          );
+        }),
         "",
       ]
     : []),

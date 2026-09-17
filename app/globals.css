@@ -1175,6 +1175,63 @@ footer.site {
   box-shadow: 0 0 34px rgba(234, 71, 138, 0.6);
   transform: translate(-50%, -50%) scale(1.06);
 }
+/* ---------- Invitados ---------- */
+/* El rol va abajo del nombre y antes de la bio: es lo primero que alguien
+   necesita saber de una persona que no conoce. */
+.inv-rol {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 10px;
+}
+.inv-grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.inv-tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px 22px;
+  text-decoration: none;
+  transition: border-color 0.25s ease;
+}
+.inv-tarjeta:hover {
+  border-color: var(--accent);
+}
+.inv-tarjeta h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+.inv-tarjeta__rol {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--acento-claro);
+}
+.inv-tarjeta p {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--mute);
+}
+.inv-tarjeta__eps {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  color: var(--faint);
+  margin-top: auto;
+  padding-top: 6px;
+}
+
 /* "Conducen Fulano y Mengano", abajo del título del episodio. Discreto: es un
    dato de ficha técnica, no un titular. Pero los nombres sí se ven como links,
    porque son el camino a la página de cada uno. */

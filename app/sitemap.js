@@ -4,6 +4,7 @@ import { getArticulos } from "./lib/articulos";
 import { cortesDeEje } from "./lib/ejes";
 import { getEventos, edicionesImperdibles } from "./lib/agenda";
 import { getTerminos } from "./lib/glosario";
+import { getInvitados } from "./lib/invitados";
 import { todosLosCortes } from "./agenda/cortes";
 
 export const revalidate = 3600;
@@ -23,6 +24,7 @@ export default async function sitemap() {
     "/agenda/sugerir",
     "/imperdibles",
     "/glosario",
+    "/invitados",
     "/sobre",
     "/sobre/pablo-quiroga",
     "/sobre/alexis-vidal",
@@ -145,6 +147,22 @@ export default async function sitemap() {
     glo = [];
   }
 
+  // Una URL por ficha de invitado.
+  let invs = [];
+  try {
+    invs = getInvitados().map((i) => ({
+      url: `${SITE.url}/invitados/${i.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }));
+  } catch (e) {
+    // Igual que el glosario: una lectura que falla en silencio saca URLs del
+    // sitemap y nadie se entera nunca.
+    console.error(`[sitemap] no se pudo armar "invs": ${e.message}`);
+    invs = [];
+  }
+
   // Las landings de la agenda: una URL por país, tipo, provincia y mes.
   // Se arman solas con los datos, así que el sitemap las sigue sin que nadie
   // tenga que acordarse de agregarlas.
@@ -165,5 +183,7 @@ export default async function sitemap() {
     cortes = [];
   }
 
-  return [...base, ...eps, ...arts, ...ejes, ...evs, ...imps, ...glo, ...cortes];
+  return [
+    ...base, ...eps, ...arts, ...ejes, ...evs, ...imps, ...glo, ...invs, ...cortes,
+  ];
 }

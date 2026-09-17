@@ -1,0 +1,84 @@
+name: Invitados
+
+on:
+  # Botón "Run workflow" para correrlo a mano. Con "episodios: 100" revisa
+  # todo el archivo de una sola vez.
+  workflow_dispatch:
+    inputs:
+      episodios:
+        description: "Cuántos episodios revisar (100 = todos los pendientes)"
+        required: false
+        default: "5"
+  # Se dispara sola cuando termina la Action de Glosario. La cadena queda:
+  # Transcripciones → Artículos → Glosario → Invitados (y Secciones en paralelo).
+  # Escriben en carpetas distintas, así que no se pisan; y si las dos empujan
+  # al mismo tiempo, el reintento con rebase lo resuelve.
+  workflow_run:
+    workflows: ["Glosario"]
+    types:
+      - completed
+
+# Dos corridas en paralelo crearían la ficha de la misma persona dos veces: la
+# segunda lee la carpeta antes de que la primera guarde.
+concurrency:
+  group: invitados
+  cancel-in-progress: false
+
+jobs:
+  invitados:
+    runs-on: ubuntu-latest
+    # La carga inicial revisa 44 episodios: le damos aire.
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Armar fichas de invitados
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          MAX_EPISODIOS: ${{ inputs.episodios || '5' }}
+        run: node scripts/generar-invitados.mjs
+      - name: Guardar cambios
+        id: guardar
+        # Corre aunque el paso anterior se haya caído: las fichas que alcanzó
+        # a escribir se guardan igual en vez de irse con el runner.
+        if: always()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add content/invitados
+          if git diff --staged --quiet; then
+            echo "hubo=no" >> "$GITHUB_OUTPUT"
+            echo "Sin fichas nuevas."
+            exit 0
+          fi
+          git commit -m "Nuevas fichas de invitados (borradores)"
+          echo "hubo=si" >> "$GITHUB_OUTPUT"
+          # Si el repo cambió mientras corría, traemos lo nuevo antes de subir.
+          # Hasta 3 intentos.
+          for intento in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              echo "Guardado en el intento $intento."
+              exit 0
+            fi
+            echo "El repo cambió mientras tanto. Reintento $intento..."
+            sleep 8
+          done
+          echo "No se pudo guardar después de 3 intentos."
+          exit 1
+      - name: Avisar que hay fichas nuevas
+        if: steps.guardar.outcome == 'success' && steps.guardar.outputs.hubo == 'si'
+        # Si el aviso falla, la Action no se cae: las fichas ya están guardadas.
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PANEL_URL: "https://www.mateyeventos.com/admin"
+          SOLO: invitados
+        run: node scripts/avisar-borradores.mjs

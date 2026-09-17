@@ -59,6 +59,11 @@ export default function Footer() {
               <Link href="/episodios">Todos los episodios</Link>
               <Link href="/articulos">Artículos</Link>
               <Link href="/glosario">Glosario de la industria</Link>
+              {/* Va en el pie y no en el menú de arriba: ese ya tiene nueve
+                  entradas y en pantallas medianas se apilan unas sobre otras.
+                  La sección igual se encuentra: está en el sitemap y cada
+                  episodio linkea a la ficha de quien vino. */}
+              <Link href="/invitados">Invitados</Link>
             </div>
             <div className="foot-col">
               <h4>Proyecto</h4>
