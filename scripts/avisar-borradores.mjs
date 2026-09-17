@@ -171,7 +171,10 @@ const hayPanel =
 
 const cuerpo = [
   hayPanel
-    ? `Hay **${partes.join("** y **")}** esperando tu revisión. Los artículos y los términos no están online todavía.`
+    ? // Se nombra lo que de verdad vino en esta tanda. Decía siempre "los
+      // artículos y los términos", así que un aviso que traía solo fichas de
+      // invitados hablaba de dos cosas que no estaban.
+      `Hay **${partes.join("** y **")}** esperando tu revisión. Todavía no están online.`
     : `Hay **${partes.join("** y **")}** para que les des una mirada.`,
   "",
   ...(hayPanel ? [`👉 **[Abrir el panel para revisarlos](${PANEL})**`, ""] : []),
@@ -285,5 +288,6 @@ if (!res.ok) {
 const issue = await res.json();
 console.log(
   `Aviso enviado: issue #${issue.number} · ${borradores.length} artículos · ` +
-    `${terminos.length} términos · ${segmentados.length} transcripciones.`
+    `${terminos.length} términos · ${invitados.length} invitados · ` +
+    `${segmentados.length} transcripciones.`
 );
