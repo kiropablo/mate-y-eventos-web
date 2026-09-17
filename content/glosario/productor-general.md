@@ -8,8 +8,10 @@ minuto: ""
 eje: "Estrategia & Negocio"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-09-17"
 ---
+
 Es el rol que el episodio pone en el centro de todo el análisis. A diferencia del organizador, el diseñador, el ambientador o el productor técnico, el productor general es quien atraviesa todas las etapas: comprensión estratégica del pedido del cliente, conceptualización, diseño espacial y, finalmente, la ejecución en el día del evento.
 
 Su trabajo empieza semanas o meses antes del evento: hace relevamientos previos, reúne a todos los técnicos y proveedores con sus planos y listados de material para integrarlos, arma el timing de montaje y define cómo se van a alinear los distintos servicios para que no se pisen entre sí.
