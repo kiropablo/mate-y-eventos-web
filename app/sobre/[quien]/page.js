@@ -134,7 +134,7 @@ export default async function Persona({ params }) {
           </div>
           <h1>{p.nombre}</h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
-            {p.cargo} de <strong>{SITE.name}</strong>. {p.bio}
+            {p.cargo} de <strong>{SITE.name}</strong>. {conLinkAV(p.bio)}
           </p>
           <div
             style={{

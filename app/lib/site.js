@@ -29,8 +29,16 @@ export const LINKS = {
   // La productora que dirigen los dos. No es Mate y Eventos y no se mezcla
   // con el medio: se declara aparte, como la empresa donde trabajan. Es lo que
   // respalda los 18 años de oficio que dice la biografía.
+  // OJO: esto ya NO se usa para ningún link de la página. Queda solo para el
+  // "sameAs" del schema, que no es un link que alguien clickea: es la forma de
+  // decirle a Google "esta empresa y ese perfil de LinkedIn son la misma". Sin
+  // eso, para una máquina son dos entidades distintas. Todo lo que el lector ve
+  // va a webAvEventos.
   linkedinAvEventos: "https://www.linkedin.com/company/av-eventos/",
-  webAvEventos: "https://av-eventos.com",
+  // A dónde va SIEMPRE cualquier mención visible de "AV Eventos". Con la barra
+  // final, que es la dirección que devuelve el servidor: sin ella el navegador
+  // hace un salto de más antes de llegar.
+  webAvEventos: "https://av-eventos.com/",
   linkedinNewsletter:
     "https://www.linkedin.com/newsletters/mate-y-eventos-7379142939676917760",
   rss: "https://anchor.fm/s/1085a73c4/podcast/rss",

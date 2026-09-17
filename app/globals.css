@@ -2907,7 +2907,9 @@ footer.site {
    resto del sitio. */
 .sem-nota a,
 .ver-item dt a,
-.ver-item dd a {
+.ver-item dd a,
+.page-top .lead a,
+.host__bio a {
   color: var(--acento-claro);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -2915,7 +2917,9 @@ footer.site {
 }
 .sem-nota a:hover,
 .ver-item dt a:hover,
-.ver-item dd a:hover {
+.ver-item dd a:hover,
+.page-top .lead a:hover,
+.host__bio a:hover {
   color: var(--blanco);
 }
 .sem-cierre {
