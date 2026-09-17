@@ -380,6 +380,24 @@ async function main() {
   }
 
   console.log(`Listo. Segmentados: ${hechos} · con error: ${fallados}`);
+
+// Si hubo errores y NO salió nada, la corrida se pone en rojo.
+//
+// Antes salía en verde igual: el error quedaba escrito en el log y GitHub
+// mostraba un tilde, así que no llegaba ningún mail. El 17/9/2026 la API de
+// Anthropic se quedó sin crédito, fallaron seis llamadas seguidas entre las
+// tres Actions, las tres dieron verde, y se descubrió leyendo el log a mano.
+//
+// El corte es "no salió NADA", no "hubo algún error": lo que falló se reintenta
+// solo en la próxima corrida porque sigue contando como pendiente, y lo que
+// salió bien ya está guardado.
+  if (fallados > 0 && hechos === 0) {
+    console.error(
+      `Fallaron las ${fallados} y no se segmentó ninguna transcripción. ` +
+        "Mirá el error de arriba: si dice «credit balance», hay que cargar crédito."
+    );
+    process.exitCode = 1;
+  }
 }
 
 // Solo cuando se corre desde la Action, no cuando lo importa el test.

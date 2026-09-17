@@ -21,6 +21,8 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: write
+      # Para abrir el issue cuando falta un episodio en la playlist.
+      issues: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,6 +30,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+      # Va ANTES de bajar nada: si falta un episodio en la playlist, este paso
+      # es el único momento del día en que alguien se puede enterar. La web y
+      # todos los scripts leen las playlists, no el canal, así que un video que
+      # quedó afuera no da error en ningún lado — no pasa nada, y listo.
+      - name: Avisar si falta un episodio en la playlist
+        # Que este chequeo falle no puede voltear la cadena de contenido.
+        continue-on-error: true
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/avisar-playlist.mjs
       - name: Bajar transcripciones nuevas
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
