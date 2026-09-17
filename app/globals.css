@@ -1175,6 +1175,24 @@ footer.site {
   box-shadow: 0 0 34px rgba(234, 71, 138, 0.6);
   transform: translate(-50%, -50%) scale(1.06);
 }
+/* "Conducen Fulano y Mengano", abajo del título del episodio. Discreto: es un
+   dato de ficha técnica, no un titular. Pero los nombres sí se ven como links,
+   porque son el camino a la página de cada uno. */
+.ep-conducen {
+  font-family: var(--font-ui);
+  font-size: 0.86rem;
+  color: var(--mute);
+  margin-top: 14px;
+}
+.ep-conducen a {
+  color: var(--acento-claro);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.ep-conducen a:hover {
+  color: var(--blanco);
+}
 .ep-date {
   font-family: var(--font-ui);
   font-size: 0.72rem;

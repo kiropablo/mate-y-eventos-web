@@ -195,3 +195,83 @@ export async function POST(request) {
     );
   }
 }
+
+// Eliminar un término.
+//
+// Borra el archivo del repositorio. Suena definitivo y no lo es tanto: el
+// término queda en el historial de git para siempre, así que se puede
+// recuperar. Lo que sí desaparece es la página, y con ella su dirección: si
+// alguien la tenía linkeada, le va a dar 404. Por eso el panel pregunta antes.
+//
+// Existe porque de 88 términos generados hay 29 que nunca se van a publicar
+// —repetidos, mal recortados, o que no son del rubro— y hasta ahora la única
+// forma de sacarlos de la lista era dejarlos ahí como borradores para siempre.
+export async function DELETE(request) {
+  if (!haySesion()) {
+    return Response.json({ ok: false, error: "Sesión vencida." }, { status: 401 });
+  }
+
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    return Response.json(
+      { ok: false, error: "Falta configurar GITHUB_TOKEN en Vercel." },
+      { status: 500 }
+    );
+  }
+
+  let id = "";
+  try {
+    id = String((await request.json())?.id || "");
+  } catch {
+    return Response.json({ ok: false, error: "Pedido inválido." }, { status: 400 });
+  }
+  // El mismo molde que usa POST. Sin esto, un id con "../" borraría un archivo
+  // de cualquier otra parte del repositorio.
+  if (!/^[a-z0-9-]{2,60}$/.test(id)) {
+    return Response.json({ ok: false, error: "Término inválido." }, { status: 400 });
+  }
+
+  try {
+    // GitHub pide el sha del archivo para borrarlo: es lo que garantiza que se
+    // borra el que se miró y no uno que cambió mientras tanto.
+    const actual = await fetch(`${apiUrl(id)}?ref=${RAMA}`, {
+      headers: cabeceras(token),
+      cache: "no-store",
+    });
+    if (!actual.ok) {
+      return Response.json(
+        { ok: false, error: explicar(actual.status, "el término") },
+        { status: 502 }
+      );
+    }
+    const info = await actual.json();
+
+    const borrado = await fetch(apiUrl(id), {
+      method: "DELETE",
+      headers: cabeceras(token),
+      body: JSON.stringify({
+        message: `Eliminar el término "${id}" desde el panel`,
+        sha: info.sha,
+        branch: RAMA,
+      }),
+    });
+
+    if (!borrado.ok) {
+      const detalle = await borrado.text();
+      return Response.json(
+        {
+          ok: false,
+          error: `GitHub rechazó el borrado (${borrado.status}). ${detalle.slice(0, 160)}`,
+        },
+        { status: 502 }
+      );
+    }
+
+    return Response.json({ ok: true, id });
+  } catch (e) {
+    return Response.json(
+      { ok: false, error: e?.message || "Error inesperado." },
+      { status: 500 }
+    );
+  }
+}

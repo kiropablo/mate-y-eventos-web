@@ -44,6 +44,14 @@ const CSS = `
 .adm-bloque h2{font-family:var(--font-display);font-weight:700;font-size:1.15rem;margin-bottom:6px}
 .adm-bloque p{font-family:var(--font-body);font-size:.9rem;line-height:1.55;color:rgba(245,245,245,.55)}
 .adm-bloque .adm-acciones{margin-top:18px}
+.adm-comofunciona{margin-top:16px;border-top:1px solid rgba(245,245,245,.08);padding-top:14px}
+.adm-comofunciona summary{cursor:pointer;font-family:var(--font-ui);font-size:.85rem;color:#93d5f7;list-style:none}
+.adm-comofunciona summary::-webkit-details-marker{display:none}
+.adm-comofunciona summary::before{content:"▸ ";color:rgba(245,245,245,.34)}
+.adm-comofunciona[open] summary::before{content:"▾ "}
+.adm-comofunciona h3{font-family:var(--font-ui);font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:#f5f5f5;margin:18px 0 6px}
+.adm-comofunciona p{margin-bottom:9px;max-width:72ch}
+.adm-comofunciona strong{color:rgba(245,245,245,.85)}
 .adm-btn--agenda{background:#93d5f7;color:#0c0c0f}
 .adm-tabs{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap}
 .adm-tab{background:none;border:1px solid rgba(245,245,245,.14);color:rgba(245,245,245,.55);border-radius:999px;padding:9px 20px;font-family:var(--font-ui);font-size:.84rem;cursor:pointer}
@@ -185,6 +193,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
     cuerpo: "",
   });
   const [guardandoGlo, setGuardandoGlo] = useState(false);
+  const [borrandoGlo, setBorrandoGlo] = useState("");
   const [msgGlo, setMsgGlo] = useState(null);
   const [abierto, setAbierto] = useState(null);
   const [campos, setCampos] = useState({
@@ -393,6 +402,41 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       setFichaMsj({ ok: false, texto: e.message });
     } finally {
       setFichaGuardando(false);
+    }
+  }
+
+  // Eliminar un término del glosario. Borra el archivo del repositorio: la
+  // página deja de existir y su dirección pasa a dar 404. Se avisa eso, que es
+  // lo único que no se deshace solo —el texto queda en el historial de git—.
+  async function borrarTermino(t) {
+    if (
+      !confirm(
+        `¿Eliminar el término "${t.termino}"?\n\n` +
+          (t.publicado
+            ? `Está PUBLICADO: la página /glosario/${t.id} va a dejar de existir y quien la tenga linkeada va a ver un 404.\n\n`
+            : "Es un borrador, así que no está publicado en ningún lado.\n\n") +
+          "El texto queda guardado en el historial del repositorio, así que se puede recuperar."
+      )
+    )
+      return;
+    setBorrandoGlo(t.id);
+    setMsgGlo(null);
+    try {
+      const res = await fetch("/api/admin/glosario", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: t.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo eliminar.");
+      setGlo((previa) => previa.filter((x) => x.id !== t.id));
+      setAbiertoGlo(null);
+    } catch (e) {
+      // El render mira msgGlo.tipo, no msgGlo.ok: con la otra forma el cartel
+      // salía igual pero siempre en rojo, incluso cuando había salido bien.
+      setMsgGlo({ tipo: "mal", texto: e.message });
+    } finally {
+      setBorrandoGlo("");
     }
   }
 
@@ -1089,12 +1133,109 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
         </div>
       </div>
 
+      {/* Los botones de la agenda y la explicación del circuito. Van SOLO en
+          esta pestaña: estaban fuera de toda condición y aparecían igual en
+          Artículos, Glosario y Mensaje, donde no hacen nada. */}
+      {seccion === "organizadores" ? (
       <section className="adm-bloque">
         <h2>Agenda de eventos</h2>
         <p>
           La web se actualiza sola cada hora y todos los días a la mañana
           busca novedades. Estos botones son para no esperar.
         </p>
+
+        {/* Para que alguien del equipo entienda el circuito sin que se lo
+            expliquen. Va plegado: el que ya lo sabe no lo abre nunca. */}
+        <details className="adm-comofunciona">
+          <summary>Cómo funciona la agenda, de punta a punta</summary>
+
+          <h3>1 · Relevamiento (solo)</h3>
+          <p>
+            Todos los días a las 8 de la mañana un robot busca eventos nuevos en
+            internet. Barre 3 rubros por día, rotando entre 10, y trae hasta 4 de
+            cada uno. <strong>Solo carga los que están completos</strong>: fecha
+            futura ya anunciada, tipo, país, provincia, ciudad, organizador, web
+            y descripción. Al que le falta algo le da una segunda pasada buscando
+            solo eso; si sigue incompleto, no entra. Es a propósito: preferimos
+            menos eventos y bien cargados que muchos a medias.
+          </p>
+          <p>
+            Todo entra como <strong>Borrador IA</strong>. El robot nunca publica
+            nada.
+          </p>
+
+          <h3>2 · Repaso de lo que ya está (solo)</h3>
+          <p>
+            En la misma corrida revisa 10 fichas ya publicadas contra sus fuentes
+            oficiales. <strong>Nunca pisa un dato</strong>: si encuentra algo
+            distinto lo anota y marca la ficha como «Revisar», para que lo mire
+            una persona. Lo único que completa solo son fechas que estaban sin
+            anunciar, y solo si son futuras.
+          </p>
+
+          <h3>3 · Aprobación (una persona)</h3>
+          <p>
+            Acá en el panel, el borrador pasa a <strong>Aprobado</strong>. Recién
+            en ese momento el evento sale publicado en la web.
+          </p>
+
+          <h3>4 · Primer contacto con el organizador</h3>
+          <p>
+            Desde esta pestaña se le manda un mail con su ficha tal como está
+            publicada, los otros eventos de esa semana, y un{" "}
+            <strong>link firmado</strong> para que la revise. El link es único
+            por evento: nadie puede confirmar la ficha de otro.
+          </p>
+
+          <h3>5 · El organizador contesta</h3>
+          <p>
+            Entra al link y confirma o corrige <strong>campo por campo</strong>.
+            La ficha queda en «Espera tu OK».{" "}
+            <strong>Nada de lo que él escribe se aplica solo</strong>: si se
+            aplicara, el sello diría «alguien apretó un botón» en vez de «los
+            datos están bien».
+          </p>
+
+          <h3>6 · Se aplica y se verifica</h3>
+          <p>
+            Con <strong>«Editar los datos»</strong> se ven sus correcciones al
+            lado de cada campo y se aplican de a una. Con{" "}
+            <strong>«Dar el OK»</strong> se enciende el sello{" "}
+            <em>Verificado por el organizador</em>, con el mes. La fecha va a
+            propósito: un dato confirmado hace dos años no vale lo mismo que uno
+            de este mes.
+          </p>
+
+          <h3>7 · Se le avisa</h3>
+          <p>
+            <strong>«Avisarle del sello»</strong> manda el segundo mail: que
+            quedó verificado, el código del badge para poner en su propia web, y
+            cuándo sale la difusión. Recién ahí se le pide algo, y no es plata:
+            los otros eventos que organiza.
+          </p>
+
+          <h3>8 · Difusión en redes</h3>
+          <p>
+            Se postea en Instagram, TikTok y LinkedIn. Cuando salió, el botón{" "}
+            <strong>«Ya lo difundimos»</strong> se lo avisa por mail y lo deja
+            marcado.
+          </p>
+
+          <h3>Las dos reglas que no se negocian</h3>
+          <p>
+            <strong>El sello no se compra ni se pide.</strong> Lo proponemos
+            nosotros y se enciende solo cuando el organizador confirmó sus datos.
+            Un evento que nunca pagó nada puede tenerlo, y uno que pagó el
+            destacado no lo tiene si no confirmó.
+          </p>
+          <p>
+            <strong>El Destacado sí es pago, y se declara siempre.</strong> En la
+            tira, en los listados y en el link al sitio del evento. Publicidad
+            sin declarar es lo que Google penaliza, y además nos haría perder lo
+            único que hace que todo lo demás valga.
+          </p>
+        </details>
+
         <div className="adm-acciones">
           <button
             type="button"
@@ -1123,6 +1264,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           ) : null}
         </div>
       </section>
+      ) : null}
 
       {seccion === "articulos" && listaFiltrada.length === 0 ? (
         <div className="adm-vacio">
@@ -2124,6 +2266,17 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
                         }}
                       >
                         Cerrar
+                      </button>
+                      {/* Borrar de verdad, para los términos que nunca se van a
+                          publicar. Va último y en rojo apagado, como el de la
+                          agenda. */}
+                      <button
+                        className="adm-btn adm-btn--peligro"
+                        type="button"
+                        disabled={guardandoGlo || borrandoGlo === t.id}
+                        onClick={() => borrarTermino(t)}
+                      >
+                        {borrandoGlo === t.id ? "Eliminando…" : "Eliminar"}
                       </button>
                       {msgGlo ? (
                         <span

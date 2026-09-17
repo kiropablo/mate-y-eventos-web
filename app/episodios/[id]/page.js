@@ -172,6 +172,22 @@ export default async function Episodio({ params }) {
               {partes.codigo ? ` · ${partes.codigo}` : ""}
             </p>
           ) : null}
+
+          {/* Quién conduce, con link a la página de cada uno.
+              El schema ya los declaraba como autores por @id, pero en la
+              página visible no había un solo link: 42 episodios × 2 personas,
+              84 links internos que no existían. Son los que atan el contenido
+              a quien lo firma, que es lo que hace verificable la autoría —para
+              un lector y para una IA—. */}
+          <p className="ep-conducen">
+            Conducen{" "}
+            {AUTORES.map((a, i) => (
+              <span key={a.id}>
+                {i > 0 ? " y " : ""}
+                <Link href={`/sobre/${a.id}`}>{a.nombre}</Link>
+              </span>
+            ))}
+          </p>
         </div>
       </section>
 
