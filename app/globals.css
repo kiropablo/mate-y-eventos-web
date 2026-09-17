@@ -1273,6 +1273,14 @@ footer.site {
 .inv-tarjeta:hover {
   border-color: var(--accent);
 }
+.inv-tarjeta__foto {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center 25%;
+  border-radius: 10px;
+  margin-bottom: 4px;
+}
 .inv-tarjeta h2 {
   font-family: var(--font-display);
   font-weight: 700;

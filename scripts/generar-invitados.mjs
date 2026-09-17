@@ -281,6 +281,10 @@ function escribirFicha(slug, d, videoId, tituloEpisodio) {
     // fuente y adivinarlos sería inventar.
     `web: ""`,
     `redes: []`,
+    // La foto la sube una persona desde el panel: no hay ninguna fuente de
+    // donde sacarla, y agarrar una de internet sería publicar la imagen de
+    // alguien sin permiso.
+    `foto: false`,
     `fuente: ${comillas(d.fuente || "")}`,
     `generado: ${comillas(hoy)}`,
     `publicado: false`,

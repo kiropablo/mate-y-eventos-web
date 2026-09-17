@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FotoInvitado from "./FotoInvitado";
 
 const CSS = `
 .adm{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:40px clamp(20px,4vw,40px) 90px}
@@ -50,6 +51,11 @@ const CSS = `
 .inv-fuente{margin-bottom:22px;padding:14px 16px;border-left:2px solid #93d5f7;background:rgba(147,213,247,.07);border-radius:0 10px 10px 0;font-family:var(--font-body);font-size:.9rem;line-height:1.6;color:rgba(245,245,245,.72)}
 .inv-fuente em{display:block;margin-top:8px;color:#f5f5f5;font-style:italic}
 .adm-chip--espera{color:#f2c14e;border:1px solid rgba(242,193,78,.5)}
+.inv-foto{display:flex;gap:14px;align-items:flex-start}
+.inv-foto__vista{width:80px;height:100px;object-fit:cover;border-radius:8px;border:1px solid rgba(245,245,245,.14)}
+.inv-foto__vacia{width:80px;height:100px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px dashed rgba(245,245,245,.2);color:rgba(245,245,245,.34);font-family:var(--font-ui);font-size:.7rem}
+.inv-foto__acciones{display:flex;flex-direction:column;gap:8px}
+.inv-foto__acciones .adm-btn{cursor:pointer;text-align:center}
 .inv-unir{margin-bottom:22px;padding:14px 16px;background:rgba(255,179,90,.06);border:1px solid rgba(255,179,90,.28);border-radius:10px}
 .inv-unir select{width:100%;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:9px;padding:10px 12px;font-family:var(--font-ui);font-size:.86rem;margin-bottom:10px}
 .inv-unir select:focus{outline:none;border-color:#5aa0ff}
@@ -2440,6 +2446,9 @@ export default function PanelAdmin({
                       {!i.listoParaPublicar ? (
                         <span className="adm-chip adm-chip--falta">sin episodio</span>
                       ) : null}
+                      {!i.foto ? (
+                        <span className="adm-chip adm-chip--falta">sin foto</span>
+                      ) : null}
                       {/* En qué punto está el circuito con el invitado. Solo se
                           nombra cuando hay algo que decir: una ficha recién
                           generada no tiene estado todavía. */}
@@ -2624,6 +2633,18 @@ export default function PanelAdmin({
                             )}
                           </div>
                         )}
+
+                        <FotoInvitado
+                          id={i.id}
+                          tieneFoto={i.foto}
+                          onCambio={(tiene) =>
+                            setInvs((previa) =>
+                              previa.map((x) =>
+                                x.id === i.id ? { ...x, foto: tiene } : x
+                              )
+                            )
+                          }
+                        />
 
                         {[
                           ["nombre", "Nombre", "Como lo nombraron al aire. Sin apellidos que no se hayan dicho."],

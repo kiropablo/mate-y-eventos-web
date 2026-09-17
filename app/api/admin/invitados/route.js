@@ -142,6 +142,9 @@ export async function POST(request) {
       `web: ${comillas(d.web || "")}`,
       `redes: ${lista(redes)}`,
       `fuente: ${campoDe(crudo, "fuente") || '""'}`,
+      // La foto la sube otra ruta. Se copia tal cual del archivo: si se
+      // reconstruyera acá, guardar la ficha desde el panel le borraría la foto.
+      `foto: ${campoDe(crudo, "foto") === "true" ? "true" : "false"}`,
       `generado: ${campoDe(crudo, "generado") || comillas(hoy)}`,
       `publicado: ${d.publicado ? "true" : "false"}`,
       // Cuándo una persona la aprobó. Se anota al publicar y no se toca al

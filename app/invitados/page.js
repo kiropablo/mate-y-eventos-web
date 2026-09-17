@@ -105,6 +105,17 @@ export default function Invitados() {
                   key={i.slug}
                   className="inv-tarjeta reveal"
                 >
+                  {i.foto ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      className="inv-tarjeta__foto"
+                      src={`/invitados/${i.slug}.jpg`}
+                      alt=""
+                      width={800}
+                      height={1000}
+                      loading="lazy"
+                    />
+                  ) : null}
                   <h2>{i.nombre}</h2>
                   {i.rol ? <span className="inv-tarjeta__rol">{i.rol}</span> : null}
                   {i.bio ? <p>{i.bio}</p> : null}

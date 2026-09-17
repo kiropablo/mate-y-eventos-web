@@ -86,6 +86,9 @@ export default async function FichaInvitado({ params }) {
         name: i.nombre,
         ...(i.rol ? { jobTitle: i.rol } : {}),
         ...(i.bio ? { description: i.bio } : {}),
+        // La foto entra al schema: una Person con imagen pesa distinto que una
+        // sin, tanto para Google como para una IA que la cite.
+        ...(i.foto ? { image: `${SITE.url}/invitados/${i.slug}.jpg` } : {}),
         url: `${SITE.url}/invitados/${i.slug}`,
         mainEntityOfPage: { "@id": `${SITE.url}/invitados/${i.slug}` },
         // Sus perfiles públicos. Es lo que hace que esta persona del schema y
@@ -175,15 +178,32 @@ export default async function FichaInvitado({ params }) {
 
       <section className="section-p" data-accent="blue">
         <div className="wrap">
-          {i.cuerpo ? (
-            <section className="sem-bloque reveal">
-              {i.cuerpo.split(/\n{2,}/).map((p, n) => (
-                <p className="sem-nota" key={n}>
-                  {p.trim()}
-                </p>
-              ))}
-            </section>
-          ) : null}
+          {/* La foto al lado del texto, como en las páginas de Pablo y Alexis.
+              Si no hay, el texto ocupa todo el ancho y no queda un hueco. */}
+          <div className={i.foto ? "persona" : ""}>
+            {i.foto ? (
+              <div className="persona__foto">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/invitados/${i.slug}.jpg`}
+                  alt={i.nombre}
+                  width={800}
+                  height={1000}
+                />
+              </div>
+            ) : null}
+            <div className={i.foto ? "persona__texto" : ""}>
+              {i.cuerpo ? (
+                <section className="sem-bloque reveal">
+                  {i.cuerpo.split(/\n{2,}/).map((p, n) => (
+                    <p className="sem-nota" key={n}>
+                      {p.trim()}
+                    </p>
+                  ))}
+                </section>
+              ) : null}
+            </div>
+          </div>
 
           {episodios.length ? (
             <section className="sem-bloque reveal">

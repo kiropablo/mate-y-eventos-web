@@ -78,6 +78,13 @@ function parsear(crudo, slug) {
         ? [datos.episodios]
         : [],
     web: datos.web || "",
+    // Si tiene foto cargada. Es un campo de la cabecera y NO un fs.existsSync()
+    // sobre public/: los archivos del repositorio no viajan solos a las
+    // funciones del servidor —es la regla 7, la que dejó el sitemap sin
+    // artículos durante semanas— y una comprobación que falla en silencio acá
+    // haría desaparecer la foto de todas las fichas sin que nadie se entere.
+    // La escribe la ruta que sube la imagen, en el mismo momento.
+    foto: datos.foto === true,
     redes: Array.isArray(datos.redes) ? datos.redes : [],
     // De dónde salió el nombre y el rol. No se publica: lo lee quien aprueba,
     // para comprobar que el robot no inventó nada.

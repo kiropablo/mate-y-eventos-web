@@ -170,6 +170,7 @@ export function listarInvitadosParaPanel() {
         rol: limpiar(datos.rol || ""),
         bio: limpiar(datos.bio || ""),
         web: limpiar(datos.web || ""),
+        foto: limpiar(datos.foto || "") === "true",
         // Se editan como texto, un link por línea: es más fácil de pegar que
         // una lista con corchetes y comillas.
         redes: comoLista(datos.redes).join("\n"),
