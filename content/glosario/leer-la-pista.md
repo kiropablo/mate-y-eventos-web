@@ -8,8 +8,10 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-08-19"
-publicado: false
+publicado: true
+revisado: "2026-09-17"
 ---
+
 La idea central es que el DJ puede llegar con una idea de set en la cabeza, pero "el que manda es la pista": si algo funciona, sigue por ahí; si no, cambia. Es una lectura constante del feedback del público, no una ejecución mecánica de una lista de temas.
 
 Esta lectura no es solo musical: implica estar atento a quién está bailando, qué edad tiene el público, cómo está el clima de la fiesta, y hasta psicológico con los clientes (nervios, expectativas). Por eso se plantea que el rol del DJ excede "poner música": administra la energía del evento a partir de lo que lee en la pista momento a momento.
