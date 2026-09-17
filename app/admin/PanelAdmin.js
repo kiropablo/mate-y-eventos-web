@@ -50,6 +50,9 @@ const CSS = `
 .inv-fuente{margin-bottom:22px;padding:14px 16px;border-left:2px solid #93d5f7;background:rgba(147,213,247,.07);border-radius:0 10px 10px 0;font-family:var(--font-body);font-size:.9rem;line-height:1.6;color:rgba(245,245,245,.72)}
 .inv-fuente em{display:block;margin-top:8px;color:#f5f5f5;font-style:italic}
 .adm-chip--espera{color:#f2c14e;border:1px solid rgba(242,193,78,.5)}
+.inv-unir{margin-bottom:22px;padding:14px 16px;background:rgba(255,179,90,.06);border:1px solid rgba(255,179,90,.28);border-radius:10px}
+.inv-unir select{width:100%;background:#0c0c0f;border:1px solid rgba(245,245,245,.14);color:#f5f5f5;border-radius:9px;padding:10px 12px;font-family:var(--font-ui);font-size:.86rem;margin-bottom:10px}
+.inv-unir select:focus{outline:none;border-color:#5aa0ff}
 .inv-contacto{margin-bottom:22px;padding:13px 16px;background:rgba(245,245,245,.03);border:1px solid rgba(245,245,245,.08);border-radius:10px;font-family:var(--font-ui);font-size:.86rem;line-height:1.75;color:rgba(245,245,245,.68)}
 .inv-contacto .org-rotulo{margin-bottom:6px}
 .inv-fuente--sin{border-left-color:#ffb35a;background:rgba(255,179,90,.07);color:#ffb35a}
@@ -220,6 +223,9 @@ export default function PanelAdmin({
   // El circuito de validación con el invitado.
   const [pidiendoInv, setPidiendoInv] = useState("");
   const [mailInv, setMailInv] = useState({});
+  // Qué registro de Airtable eligió para unir a cada ficha todavía sin unir.
+  const [unirCon, setUnirCon] = useState({});
+  const [uniendo, setUniendo] = useState("");
   const [msgGlo, setMsgGlo] = useState(null);
   const [abierto, setAbierto] = useState(null);
   const [campos, setCampos] = useState({
@@ -464,6 +470,39 @@ export default function PanelAdmin({
       setMsgGlo({ tipo: "mal", texto: e.message });
     } finally {
       setBorrandoGlo("");
+    }
+  }
+
+  // Unir una ficha con su registro de Airtable. Lo decide una persona: el
+  // panel solo ordena los candidatos y pone primero al más parecido.
+  async function unirInvitado(i) {
+    const registroId = unirCon[i.id] || i.sugeridos?.[0]?.id || "";
+    if (!registroId) return;
+    setUniendo(i.id);
+    setMsgInv(null);
+    try {
+      const res = await fetch("/api/admin/unir-invitado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: i.id, registroId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo unir.");
+      setInvs((previa) =>
+        previa.map((x) =>
+          x.id === i.id
+            ? { ...x, registro: data.registro, sugeridos: [], libres: [] }
+            : x
+        )
+      );
+      setMsgInv({
+        tipo: "ok",
+        texto: `Unida a ${data.registro.nombreCompleto}. Ahora podés traer sus datos a la ficha.`,
+      });
+    } catch (e) {
+      setMsgInv({ tipo: "mal", texto: e.message });
+    } finally {
+      setUniendo("");
     }
   }
 
@@ -2475,13 +2514,114 @@ export default function PanelAdmin({
                             <div>{i.registro.email || "sin mail cargado"}</div>
                             {i.registro.telefono ? <div>{i.registro.telefono}</div> : null}
                           </div>
+                        ) : null}
+
+                        {/* Lo que Airtable sabe y la ficha no. Se ofrece campo
+                            por campo y no de una: el robot escribió lo que se
+                            dijo al aire y Airtable lo que puso la persona, y
+                            cuál de los dos vale lo decide quien mira. */}
+                        {i.registro &&
+                        camposInv &&
+                        [
+                          ["rol", "A qué se dedica", i.registro.empresa],
+                          ["web", "Su sitio", i.registro.web],
+                          ["redes", "Sus redes", (i.registro.redes || []).join("\n")],
+                        ].some(([k, , v]) => v && v !== camposInv[k]) ? (
+                          <div className="org-propuestas">
+                            <span className="org-rotulo">
+                              Lo que dice Airtable y la ficha no
+                            </span>
+                            {[
+                              ["rol", "A qué se dedica", i.registro.empresa],
+                              ["web", "Su sitio", i.registro.web],
+                              ["redes", "Sus redes", (i.registro.redes || []).join("\n")],
+                            ]
+                              .filter(([k, , v]) => v && v !== camposInv[k])
+                              .map(([clave, rotulo, valor]) => (
+                                <div className="org-prop" key={clave}>
+                                  <div className="org-prop__que">{rotulo}</div>
+                                  {camposInv[clave] ? (
+                                    <div className="org-prop__dice">
+                                      {camposInv[clave]}
+                                    </div>
+                                  ) : null}
+                                  <div className="org-prop__nuevo">{valor}</div>
+                                  <button
+                                    type="button"
+                                    className="adm-btn adm-btn--sec"
+                                    onClick={() =>
+                                      setCamposInv((p) => ({ ...p, [clave]: valor }))
+                                    }
+                                  >
+                                    Usar este
+                                  </button>
+                                </div>
+                              ))}
+                          </div>
                         ) : (
-                          <div className="inv-fuente inv-fuente--sin">
-                            Esta ficha no está unida a ningún registro de
-                            «Invitados MyE» en Airtable, así que no sabemos a
-                            quién escribirle. Poné el slug{" "}
-                            <strong>{i.id}</strong> en el campo «Ficha» del
-                            registro que le corresponda.
+                          <div className="inv-unir">
+                            <span className="org-rotulo">
+                              Falta unirla con su registro de Airtable
+                            </span>
+                            <p className="adm-ayuda" style={{ marginTop: 0 }}>
+                              Sin eso no tenemos su mail y no se le puede pedir
+                              que revise. Elegí cuál es.
+                              {i.sugeridos?.[0]?.seguro ? null : (
+                                <>
+                                  {" "}
+                                  <strong>
+                                    Mirá bien el nombre: el parecido no alcanza.
+                                  </strong>
+                                </>
+                              )}
+                            </p>
+                            {i.libres?.length ? (
+                              <>
+                                <select
+                                  value={unirCon[i.id] ?? i.sugeridos?.[0]?.id ?? ""}
+                                  onChange={(e) =>
+                                    setUnirCon((p) => ({ ...p, [i.id]: e.target.value }))
+                                  }
+                                >
+                                  <option value="">— elegir —</option>
+                                  {/* Primero los que se parecen, después el
+                                      resto. Un separador entre los dos, para
+                                      que no parezcan todos igual de probables. */}
+                                  {i.sugeridos?.length ? (
+                                    <optgroup label="Se parecen">
+                                      {i.sugeridos.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                          {c.nombre}
+                                          {c.empresa ? ` — ${c.empresa}` : ""}
+                                        </option>
+                                      ))}
+                                    </optgroup>
+                                  ) : null}
+                                  <optgroup label="Todos los que no están unidos">
+                                    {i.libres.map((c) => (
+                                      <option key={c.id} value={c.id}>
+                                        {c.nombre}
+                                        {c.empresa ? ` — ${c.empresa}` : ""}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                </select>
+                                <button
+                                  type="button"
+                                  className="adm-btn adm-btn--sec"
+                                  disabled={uniendo === i.id}
+                                  onClick={() => unirInvitado(i)}
+                                >
+                                  {uniendo === i.id ? "Uniendo…" : "Unir"}
+                                </button>
+                              </>
+                            ) : (
+                              <p className="adm-ayuda">
+                                No hay ningún registro libre en «Invitados MyE».
+                                Si esta persona no está cargada, mandale el
+                                formulario con el link de arriba.
+                              </p>
+                            )}
                           </div>
                         )}
 
