@@ -2,7 +2,7 @@
 nombre: "Facundo Bogarín"
 rol: "Actor, músico y estratega sensorial, director creativo en Teatro Ciego"
 bio: "Facundo Bogarín, director creativo de Teatro Ciego, explicó cómo diseñar eventos que se experimentan sin el sentido de la vista."
-episodios: ["wjdmnMkYCT4"]
+episodios: ["wjdmnMkYCT4", "GVQOqNnF5qs"]
 episodioTitulo: "T02E10 | Cerrá los ojos: así se diseñan eventos que se sienten"
 web: ""
 redes: []
