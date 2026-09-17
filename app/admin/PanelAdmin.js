@@ -49,6 +49,9 @@ const CSS = `
    publicar la página de una persona real. */
 .inv-fuente{margin-bottom:22px;padding:14px 16px;border-left:2px solid #93d5f7;background:rgba(147,213,247,.07);border-radius:0 10px 10px 0;font-family:var(--font-body);font-size:.9rem;line-height:1.6;color:rgba(245,245,245,.72)}
 .inv-fuente em{display:block;margin-top:8px;color:#f5f5f5;font-style:italic}
+.adm-chip--espera{color:#f2c14e;border:1px solid rgba(242,193,78,.5)}
+.inv-contacto{margin-bottom:22px;padding:13px 16px;background:rgba(245,245,245,.03);border:1px solid rgba(245,245,245,.08);border-radius:10px;font-family:var(--font-ui);font-size:.86rem;line-height:1.75;color:rgba(245,245,245,.68)}
+.inv-contacto .org-rotulo{margin-bottom:6px}
 .inv-fuente--sin{border-left-color:#ffb35a;background:rgba(255,179,90,.07);color:#ffb35a}
 .adm-comofunciona{margin-top:16px;border-top:1px solid rgba(245,245,245,.08);padding-top:14px}
 .adm-comofunciona summary{cursor:pointer;font-family:var(--font-ui);font-size:.85rem;color:#93d5f7;list-style:none}
@@ -214,6 +217,9 @@ export default function PanelAdmin({
   const [guardandoInv, setGuardandoInv] = useState(false);
   const [borrandoInv, setBorrandoInv] = useState("");
   const [msgInv, setMsgInv] = useState(null);
+  // El circuito de validación con el invitado.
+  const [pidiendoInv, setPidiendoInv] = useState("");
+  const [mailInv, setMailInv] = useState({});
   const [msgGlo, setMsgGlo] = useState(null);
   const [abierto, setAbierto] = useState(null);
   const [campos, setCampos] = useState({
@@ -458,6 +464,86 @@ export default function PanelAdmin({
       setMsgGlo({ tipo: "mal", texto: e.message });
     } finally {
       setBorrandoGlo("");
+    }
+  }
+
+  // Pedirle al invitado que revise su ficha antes de publicarla. Manda el mail
+  // con un link firmado; nada se publica hasta que él conteste y vos apliques.
+  async function pedirRevision(i) {
+    const para = (mailInv[i.id] ?? i.registro?.email ?? "").trim();
+    if (
+      !confirm(
+        `¿Mandarle a ${i.nombre} el pedido de revisión?\n\n` +
+          (para ? `Se le escribe a ${para}.` : "Falta el mail.") +
+          "\n\nVa a ver su ficha tal como quedaría y puede corregir campo por campo."
+      )
+    )
+      return;
+    await mandarPedido(i, para, false);
+  }
+
+  async function mandarPedido(i, para, igual) {
+    setPidiendoInv(i.id);
+    setMsgInv(null);
+    try {
+      const res = await fetch("/api/admin/invitar-invitado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: i.id, para, igual }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 409 && data.yaPedido) {
+        if (
+          confirm(
+            `Según Airtable ya se le pidió el ${data.yaPedido}.\n\n¿Mandarlo igual?`
+          )
+        ) {
+          await mandarPedido(i, para, true);
+        }
+        return;
+      }
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo mandar.");
+      setInvs((previa) =>
+        previa.map((x) =>
+          x.id === i.id
+            ? { ...x, registro: { ...(x.registro || {}), pedidoEl: data.fecha } }
+            : x
+        )
+      );
+      setMsgInv({
+        tipo: "ok",
+        texto: `Mandado a ${data.para}.${data.aviso ? ` ${data.aviso}` : ""}`,
+      });
+    } catch (e) {
+      setMsgInv({ tipo: "mal", texto: e.message });
+    } finally {
+      setPidiendoInv("");
+    }
+  }
+
+  // "Ya lo miré". No publica ni aplica nada: solo apaga el cartel de pendiente.
+  async function okInvitado(i) {
+    setPidiendoInv(i.id);
+    setMsgInv(null);
+    try {
+      const res = await fetch("/api/admin/ok-invitado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registroId: i.registro?.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo guardar.");
+      setInvs((previa) =>
+        previa.map((x) =>
+          x.id === i.id
+            ? { ...x, registro: { ...(x.registro || {}), revisionPendiente: false } }
+            : x
+        )
+      );
+    } catch (e) {
+      setMsgInv({ tipo: "mal", texto: e.message });
+    } finally {
+      setPidiendoInv("");
     }
   }
 
@@ -2315,6 +2401,23 @@ export default function PanelAdmin({
                       {!i.listoParaPublicar ? (
                         <span className="adm-chip adm-chip--falta">sin episodio</span>
                       ) : null}
+                      {/* En qué punto está el circuito con el invitado. Solo se
+                          nombra cuando hay algo que decir: una ficha recién
+                          generada no tiene estado todavía. */}
+                      {i.registro?.revisionPendiente ? (
+                        <span className="adm-chip adm-chip--espera">espera tu OK</span>
+                      ) : i.registro?.validadoEl ? (
+                        <span className="adm-chip adm-chip--publicado">
+                          la validó el {i.registro.validadoEl}
+                        </span>
+                      ) : i.registro?.pedidoEl ? (
+                        <span className="adm-chip adm-chip--eje">
+                          le pedimos el {i.registro.pedidoEl}
+                        </span>
+                      ) : null}
+                      {!i.registro ? (
+                        <span className="adm-chip adm-chip--falta">sin Airtable</span>
+                      ) : null}
                     </div>
                     <h2>{i.nombre}</h2>
                     {i.bio ? <p>{i.bio}</p> : null}
@@ -2341,6 +2444,44 @@ export default function PanelAdmin({
                             Esta ficha no tiene anotada la frase de origen.
                             Comprobá el nombre escuchando el episodio antes de
                             publicarla.
+                          </div>
+                        )}
+
+                        {/* Lo que pidió corregir el invitado. Va arriba del
+                            formulario, como la frase de origen: es lo que hay
+                            que aplicar antes de publicar. */}
+                        {i.registro?.correcciones ? (
+                          <div className="org-correcciones">
+                            <strong>Pidió corregir:</strong>{" "}
+                            {i.registro.correcciones}
+                          </div>
+                        ) : null}
+
+                        {/* El contacto. Vive en Airtable y no en el repo porque
+                            el repo es público; acá se muestra igual, que es de
+                            lo único que se trata. */}
+                        {i.registro ? (
+                          <div className="inv-contacto">
+                            <span className="org-rotulo">Contacto (no se publica)</span>
+                            {i.registro.nombreCompleto &&
+                            i.registro.nombreCompleto !== i.nombre ? (
+                              <div>
+                                Nombre completo: <strong>{i.registro.nombreCompleto}</strong>
+                              </div>
+                            ) : null}
+                            {i.registro.empresa ? (
+                              <div>Empresa / cargo: {i.registro.empresa}</div>
+                            ) : null}
+                            <div>{i.registro.email || "sin mail cargado"}</div>
+                            {i.registro.telefono ? <div>{i.registro.telefono}</div> : null}
+                          </div>
+                        ) : (
+                          <div className="inv-fuente inv-fuente--sin">
+                            Esta ficha no está unida a ningún registro de
+                            «Invitados MyE» en Airtable, así que no sabemos a
+                            quién escribirle. Poné el slug{" "}
+                            <strong>{i.id}</strong> en el campo «Ficha» del
+                            registro que le corresponda.
                           </div>
                         )}
 
@@ -2394,6 +2535,42 @@ export default function PanelAdmin({
                             El texto de la ficha. Un renglón en blanco separa
                             párrafos.
                           </p>
+                        </div>
+
+                        {/* El circuito con el invitado. Va antes de publicar
+                            porque ese es el orden: primero lo mira él. */}
+                        <div className="org-invitar" data-sinmail={i.registro?.email ? "no" : "si"}>
+                          <input
+                            className="org-mail"
+                            type="email"
+                            placeholder="mail del invitado"
+                            value={mailInv[i.id] ?? i.registro?.email ?? ""}
+                            onChange={(e) =>
+                              setMailInv((p) => ({ ...p, [i.id]: e.target.value }))
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="adm-btn adm-btn--sec"
+                            disabled={pidiendoInv === i.id}
+                            onClick={() => pedirRevision(i)}
+                          >
+                            {pidiendoInv === i.id
+                              ? "Mandando…"
+                              : i.registro?.pedidoEl
+                                ? "Volver a pedirle que revise"
+                                : "Pedirle que revise su ficha"}
+                          </button>
+                          {i.registro?.revisionPendiente ? (
+                            <button
+                              type="button"
+                              className="adm-btn"
+                              disabled={pidiendoInv === i.id}
+                              onClick={() => okInvitado(i)}
+                            >
+                              Ya lo miré
+                            </button>
+                          ) : null}
                         </div>
 
                         <div className="adm-acciones">

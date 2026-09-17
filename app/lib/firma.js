@@ -97,6 +97,35 @@ export function linkDeConfirmacion(slug) {
 // Lo que esta clave protege NO es un dato sensible: es que la página no ande
 // suelta por internet ni la encuentre Google. La página además lleva noindex y
 // no está en el sitemap ni en el menú.
+// La firma de los links de invitados. Va en su propio espacio y NO reusa
+// firmar(), que firma "agenda:{slug}": si algún día un evento y un invitado
+// compartieran slug —y el robot arma los dos a partir de un nombre— la misma
+// firma serviría para los dos links. Son circuitos distintos y no tienen por
+// qué cruzarse nunca.
+export function firmarInvitado(slug) {
+  if (!hayClave()) {
+    throw new Error(
+      "Falta AGENDA_FIRMA_SECRET (o es muy corta): no se pueden firmar los links de invitados."
+    );
+  }
+  return crypto
+    .createHmac("sha256", CLAVE)
+    .update(`invitado:${slug}`)
+    .digest("hex")
+    .slice(0, LARGO);
+}
+
+export function firmaInvitadoValida(slug, firma) {
+  if (!hayClave() || !slug || typeof firma !== "string") return false;
+  const esperada = firmarInvitado(slug);
+  if (firma.length !== esperada.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(firma), Buffer.from(esperada));
+  } catch {
+    return false;
+  }
+}
+
 export function claveFormulario() {
   if (!hayClave()) {
     throw new Error(

@@ -28,6 +28,36 @@ function comoLista(valor) {
     .filter(Boolean);
 }
 
+// Le pega a cada ficha lo suyo de Airtable: el mail, en qué punto está el
+// circuito y qué pidió corregir. Las dos mitades viven separadas porque una es
+// pública y la otra no, pero el panel las muestra juntas: quien lo usa no tiene
+// por qué saber que están en dos lados.
+export function unirConAirtable(fichas, registros, registroDeFicha) {
+  return fichas.map((f) => {
+    const r = registroDeFicha(registros, f);
+    return {
+      ...f,
+      // Sin registro no hay mail ni circuito, y el panel lo dice en vez de
+      // mostrar botones que no van a funcionar.
+      registro: r
+        ? {
+            id: r.id,
+            email: r.email,
+            telefono: r.telefono,
+            empresa: r.empresa,
+            nombreCompleto: r.nombre,
+            web: r.web,
+            redes: r.redes,
+            pedidoEl: r.pedidoEl,
+            validadoEl: r.validadoEl,
+            revisionPendiente: r.revisionPendiente,
+            correcciones: r.correcciones,
+          }
+        : null,
+    };
+  });
+}
+
 export function listarInvitadosParaPanel() {
   let archivos = [];
   try {
