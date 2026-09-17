@@ -44,6 +44,12 @@ const CSS = `
 .adm-bloque h2{font-family:var(--font-display);font-weight:700;font-size:1.15rem;margin-bottom:6px}
 .adm-bloque p{font-family:var(--font-body);font-size:.9rem;line-height:1.55;color:rgba(245,245,245,.55)}
 .adm-bloque .adm-acciones{margin-top:18px}
+/* La frase de la transcripción de donde salió el nombre. Va arriba de todo el
+   editor y destacada porque es lo único que hay que leer sí o sí antes de
+   publicar la página de una persona real. */
+.inv-fuente{margin-bottom:22px;padding:14px 16px;border-left:2px solid #93d5f7;background:rgba(147,213,247,.07);border-radius:0 10px 10px 0;font-family:var(--font-body);font-size:.9rem;line-height:1.6;color:rgba(245,245,245,.72)}
+.inv-fuente em{display:block;margin-top:8px;color:#f5f5f5;font-style:italic}
+.inv-fuente--sin{border-left-color:#ffb35a;background:rgba(255,179,90,.07);color:#ffb35a}
 .adm-comofunciona{margin-top:16px;border-top:1px solid rgba(245,245,245,.08);padding-top:14px}
 .adm-comofunciona summary{cursor:pointer;font-family:var(--font-ui);font-size:.85rem;color:#93d5f7;list-style:none}
 .adm-comofunciona summary::-webkit-details-marker{display:none}
@@ -120,7 +126,7 @@ const CSS = `
 // cuatrocientas, y cada una trae botones, mails y el bloque de correcciones.
 const POR_TANDA = 60;
 
-export default function PanelAdmin({ articulos, glosario, organizadores }) {
+export default function PanelAdmin({ articulos, glosario, invitados, organizadores }) {
   const [seccion, setSeccion] = useState("articulos");
   const [orgs, setOrgs] = useState(organizadores?.eventos || []);
   const hayFirma = organizadores?.hayFirma !== false;
@@ -194,6 +200,14 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   });
   const [guardandoGlo, setGuardandoGlo] = useState(false);
   const [borrandoGlo, setBorrandoGlo] = useState("");
+  // Las fichas de invitados: la lista, cuál está abierta, lo que hay escrito en
+  // el formulario y el cartel de resultado.
+  const [invs, setInvs] = useState(invitados || []);
+  const [abiertoInv, setAbiertoInv] = useState(null);
+  const [camposInv, setCamposInv] = useState(null);
+  const [guardandoInv, setGuardandoInv] = useState(false);
+  const [borrandoInv, setBorrandoInv] = useState("");
+  const [msgInv, setMsgInv] = useState(null);
   const [msgGlo, setMsgGlo] = useState(null);
   const [abierto, setAbierto] = useState(null);
   const [campos, setCampos] = useState({
@@ -216,6 +230,7 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
   // lista ahora trae también borradores, archivados y los que ya pasaron, y
   // contar sobre todo eso daría un "listos para escribir" que incluye eventos
   // de 2024 y fichas que nadie aprobó.
+  const borradoresInv = invs.filter((i) => !i.publicado).length;
   const escribibles = orgs.filter((e) => e.estado === "Aprobado" && !e.paso);
   const sinContactar = escribibles.filter((e) => !e.verificado).length;
   // Los que se pueden escribir hoy: tienen un mail al que escribirle y nadie
@@ -437,6 +452,82 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       setMsgGlo({ tipo: "mal", texto: e.message });
     } finally {
       setBorrandoGlo("");
+    }
+  }
+
+  // ---- Fichas de invitados -------------------------------------------------
+  function abrirInvitado(i) {
+    setAbiertoInv(i.id);
+    setMsgInv(null);
+    setCamposInv({
+      nombre: i.nombre,
+      rol: i.rol || "",
+      bio: i.bio || "",
+      web: i.web || "",
+      redes: i.redes || "",
+      cuerpo: i.cuerpo || "",
+    });
+  }
+
+  async function guardarInvitado(i, publicar) {
+    setGuardandoInv(true);
+    setMsgInv(null);
+    try {
+      const res = await fetch("/api/admin/invitados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: i.id, ...camposInv, publicado: publicar }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo guardar.");
+      setInvs((previa) =>
+        previa.map((x) =>
+          x.id === i.id ? { ...x, ...camposInv, publicado: publicar } : x
+        )
+      );
+      setMsgInv({
+        tipo: "ok",
+        texto: publicar
+          ? "Publicada. La página va a estar online en un minuto."
+          : "Guardada como borrador.",
+      });
+    } catch (e) {
+      setMsgInv({ tipo: "mal", texto: e.message });
+    } finally {
+      setGuardandoInv(false);
+    }
+  }
+
+  // Eliminar una ficha. Además del caso obvio —el robot identificó mal a
+  // alguien— esto tiene que existir para cuando la persona pide que la bajemos:
+  // eso se resuelve en el momento, no abriendo Airtable ni GitHub.
+  async function borrarInvitado(i) {
+    if (
+      !confirm(
+        `¿Eliminar la ficha de "${i.nombre}"?\n\n` +
+          (i.publicado
+            ? `Está PUBLICADA: la página /invitados/${i.id} va a dejar de existir.\n\n`
+            : "Es un borrador, no está publicada.\n\n") +
+          "El texto queda en el historial del repositorio, así que se puede recuperar."
+      )
+    )
+      return;
+    setBorrandoInv(i.id);
+    setMsgInv(null);
+    try {
+      const res = await fetch("/api/admin/invitados", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: i.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo eliminar.");
+      setInvs((previa) => previa.filter((x) => x.id !== i.id));
+      setAbiertoInv(null);
+    } catch (e) {
+      setMsgInv({ tipo: "mal", texto: e.message });
+    } finally {
+      setBorrandoInv("");
     }
   }
 
@@ -973,11 +1064,13 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
         <h1>
           {seccion === "articulos"
             ? "Artículos"
-            : seccion === "glosario"
-              ? "Glosario"
-              : seccion === "mensaje"
-                ? "Mensaje de primer contacto"
-                : "Organizadores"}
+            : seccion === "invitados"
+              ? "Invitados"
+              : seccion === "glosario"
+                ? "Glosario"
+                : seccion === "mensaje"
+                  ? "Mensaje de primer contacto"
+                  : "Organizadores"}
         </h1>
         <button className="adm-salir" type="button" onClick={salir}>
           Cerrar sesión
@@ -987,11 +1080,13 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
       <div className="adm-resumen">
         {seccion === "articulos"
           ? `${lista.length} artículos · ${borradores} sin revisar`
-          : seccion === "glosario"
-            ? `${glo.length} términos · ${borradoresGlo} sin revisar`
-            : seccion === "mensaje"
-              ? "El mail que sale la primera vez que le escribimos a un organizador"
-              : `${orgs.length} eventos en la base · ${listos} con mail listos para escribir · ${sinContactar} sin verificar`}
+          : seccion === "invitados"
+            ? `${invs.length} fichas · ${borradoresInv} sin revisar. Antes de publicar, mirá que el nombre y el rol sean los de la persona: la frase de origen está en cada ficha.`
+            : seccion === "glosario"
+              ? `${glo.length} términos · ${borradoresGlo} sin revisar`
+              : seccion === "mensaje"
+                ? "El mail que sale la primera vez que le escribimos a un organizador"
+                : `${orgs.length} eventos en la base · ${listos} con mail listos para escribir · ${sinContactar} sin verificar`}
       </div>
 
       <div className="adm-tabs">
@@ -1010,6 +1105,15 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
           onClick={() => setSeccion("glosario")}
         >
           Glosario{borradoresGlo ? <span>{borradoresGlo} sin revisar</span> : null}
+        </button>
+        <button
+          type="button"
+          className="adm-tab"
+          data-on={seccion === "invitados" ? "si" : "no"}
+          onClick={() => setSeccion("invitados")}
+        >
+          Invitados
+          {borradoresInv ? <span>{borradoresInv} sin revisar</span> : null}
         </button>
         <button
           type="button"
@@ -1115,7 +1219,9 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
               ? "Buscar por título, eje o etiqueta…"
               : seccion === "glosario"
                 ? "Buscar un término…"
-                : "Buscar por evento u organizador…"
+                : seccion === "invitados"
+                  ? "Buscar un invitado…"
+                  : "Buscar por evento u organizador…"
           }
         />
         <div className="adm-filtros">
@@ -2129,6 +2235,193 @@ export default function PanelAdmin({ articulos, glosario, organizadores }) {
             </div>
           )}
         </>
+      ) : seccion === "invitados" ? (
+        invs.length === 0 ? (
+          <div className="adm-vacio">
+            Todavía no hay fichas. Corré la Action «Invitados» en GitHub y volvé
+            a entrar acá: revisa las transcripciones y arma un borrador por cada
+            persona que pasó por un episodio.
+          </div>
+        ) : (
+          <div className="adm-lista">
+            {invs
+              .filter((i) => coincide(i.nombre, i.rol, i.bio))
+              .filter(
+                (i) =>
+                  filtro === "todos" ||
+                  (filtro === "borradores" ? !i.publicado : i.publicado)
+              )
+              .map((i) => {
+                const abierta = abiertoInv === i.id;
+                return (
+                  <article
+                    className="adm-item"
+                    key={i.id}
+                    data-abierto={abierta ? "si" : "no"}
+                    onClick={() => {
+                      if (!abierta) abrirInvitado(i);
+                    }}
+                  >
+                    <div className="adm-item__top">
+                      <span
+                        className={
+                          i.publicado
+                            ? "adm-chip adm-chip--publicado"
+                            : "adm-chip adm-chip--borrador"
+                        }
+                      >
+                        {i.publicado ? "Publicada" : "Borrador"}
+                      </span>
+                      {i.rol ? <span className="adm-chip adm-chip--eje">{i.rol}</span> : null}
+                      {!i.listoParaPublicar ? (
+                        <span className="adm-chip adm-chip--falta">sin episodio</span>
+                      ) : null}
+                    </div>
+                    <h2>{i.nombre}</h2>
+                    {i.bio ? <p>{i.bio}</p> : null}
+                    <div className="adm-ep">
+                      {i.episodios.length === 1
+                        ? "1 episodio"
+                        : `${i.episodios.length} episodios`}
+                      {i.episodioTitulo ? ` · ${i.episodioTitulo}` : ""}
+                    </div>
+
+                    {abierta && camposInv ? (
+                      <div className="adm-editor" onClick={(e) => e.stopPropagation()}>
+                        {/* Lo primero que hay que mirar. Si esta frase no dice
+                            lo que dice la ficha, el robot se equivocó de
+                            persona y la ficha no se publica: se elimina. */}
+                        {i.fuente ? (
+                          <div className="inv-fuente">
+                            <strong>De dónde salió el nombre —</strong> esto es
+                            lo que se dijo en el episodio, textual:
+                            <em>«{i.fuente}»</em>
+                          </div>
+                        ) : (
+                          <div className="inv-fuente inv-fuente--sin">
+                            Esta ficha no tiene anotada la frase de origen.
+                            Comprobá el nombre escuchando el episodio antes de
+                            publicarla.
+                          </div>
+                        )}
+
+                        {[
+                          ["nombre", "Nombre", "Como lo nombraron al aire. Sin apellidos que no se hayan dicho."],
+                          ["rol", "A qué se dedica", "Pocas palabras: «Mentalista», «Artista y diseñadora»."],
+                          ["bio", "Bio corta", "Una oración. Es la que muestra Google, así que no pasar de ~160 caracteres."],
+                          ["web", "Su sitio", "Opcional. La dirección de su web."],
+                        ].map(([clave, rotulo, ayuda]) => (
+                          <div className="adm-campo" key={clave}>
+                            <label htmlFor={`inv-${i.id}-${clave}`}>{rotulo}</label>
+                            <input
+                              id={`inv-${i.id}-${clave}`}
+                              type="text"
+                              value={camposInv[clave]}
+                              onChange={(e) =>
+                                setCamposInv((p) => ({ ...p, [clave]: e.target.value }))
+                              }
+                            />
+                            <p className="adm-ayuda">{ayuda}</p>
+                          </div>
+                        ))}
+
+                        <div className="adm-campo">
+                          <label htmlFor={`inv-${i.id}-redes`}>Redes</label>
+                          <textarea
+                            id={`inv-${i.id}-redes`}
+                            value={camposInv.redes}
+                            onChange={(e) =>
+                              setCamposInv((p) => ({ ...p, redes: e.target.value }))
+                            }
+                          />
+                          <p className="adm-ayuda">
+                            Un link por línea. Perfiles públicos: Instagram,
+                            LinkedIn, su canal. <strong>Mail y teléfono no van</strong>:
+                            vino a una charla, no a que publiquemos su contacto.
+                          </p>
+                        </div>
+
+                        <div className="adm-campo">
+                          <label htmlFor={`inv-${i.id}-cuerpo`}>Quién es</label>
+                          <textarea
+                            id={`inv-${i.id}-cuerpo`}
+                            className="grande"
+                            value={camposInv.cuerpo}
+                            onChange={(e) =>
+                              setCamposInv((p) => ({ ...p, cuerpo: e.target.value }))
+                            }
+                          />
+                          <p className="adm-ayuda">
+                            El texto de la ficha. Un renglón en blanco separa
+                            párrafos.
+                          </p>
+                        </div>
+
+                        <div className="adm-acciones">
+                          <button
+                            className="adm-btn adm-btn--pub"
+                            type="button"
+                            disabled={guardandoInv || !i.listoParaPublicar}
+                            onClick={() => guardarInvitado(i, true)}
+                          >
+                            {guardandoInv ? "Guardando…" : "Publicar"}
+                          </button>
+                          <button
+                            className="adm-btn adm-btn--sec"
+                            type="button"
+                            disabled={guardandoInv}
+                            onClick={() => guardarInvitado(i, false)}
+                          >
+                            {i.publicado ? "Despublicar" : "Guardar borrador"}
+                          </button>
+                          <button
+                            className="adm-btn adm-btn--sec"
+                            type="button"
+                            disabled={guardandoInv}
+                            onClick={() => {
+                              setAbiertoInv(null);
+                              setMsgInv(null);
+                            }}
+                          >
+                            Cerrar
+                          </button>
+                          {i.publicado ? (
+                            <a
+                              className="adm-btn adm-btn--sec"
+                              href={`/invitados/${i.id}`}
+                              target="_blank"
+                              rel="noopener"
+                            >
+                              Ver la ficha
+                            </a>
+                          ) : null}
+                          <button
+                            className="adm-btn adm-btn--peligro"
+                            type="button"
+                            disabled={guardandoInv || borrandoInv === i.id}
+                            onClick={() => borrarInvitado(i)}
+                          >
+                            {borrandoInv === i.id ? "Eliminando…" : "Eliminar"}
+                          </button>
+                          {msgInv ? (
+                            <span
+                              className={
+                                msgInv.tipo === "ok"
+                                  ? "adm-msg adm-msg--ok"
+                                  : "adm-msg adm-msg--mal"
+                              }
+                            >
+                              {msgInv.texto}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
+          </div>
+        )
       ) : gloFiltrado.length === 0 ? (
         <div className="adm-vacio">
           {glo.length === 0

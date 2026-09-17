@@ -1,6 +1,7 @@
 import { haySesion } from "../lib/admin";
 import { listarParaPanel } from "../lib/articulos-admin";
 import { listarGlosarioParaPanel } from "../lib/glosario-admin";
+import { listarInvitadosParaPanel } from "../lib/invitados-admin";
 import { listarOrganizadoresParaPanel } from "../lib/organizadores-admin";
 import LoginAdmin from "./LoginAdmin";
 import PanelAdmin from "./PanelAdmin";
@@ -22,6 +23,7 @@ export default async function Admin() {
     <PanelAdmin
       articulos={listarParaPanel()}
       glosario={listarGlosarioParaPanel()}
+      invitados={listarInvitadosParaPanel()}
       organizadores={organizadores}
     />
   );
