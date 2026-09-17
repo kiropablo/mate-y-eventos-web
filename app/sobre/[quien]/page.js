@@ -8,6 +8,31 @@ import { migas } from "../../lib/migas";
 import { SITE, LINKS, AUTORES } from "../../lib/site";
 import { jsonLdSeguro } from "../../lib/jsonld";
 
+// La biografía se guarda en texto plano y el link se pone acá, al dibujarla.
+//
+// Guardarla con el <a> adentro obligaría a inyectar HTML crudo en la página, y
+// además ese mismo texto lo lee el schema y la descripción de Google, donde una
+// etiqueta no es un link: es basura en el medio de una oración.
+function conLinkAV(texto) {
+  return String(texto || "")
+    .split("AV Eventos")
+    .flatMap((trozo, i) =>
+      i === 0
+        ? [trozo]
+        : [
+            <a
+              key={`av-${i}`}
+              href={LINKS.webAvEventos}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              AV Eventos
+            </a>,
+            trozo,
+          ]
+    );
+}
+
 // La página de cada uno.
 //
 // El nodo Person del layout necesitaba una dirección propia: hasta ahora las
@@ -129,9 +154,11 @@ export default async function Persona({ params }) {
                 LinkedIn
               </a>
             ) : null}
+            {/* Al sitio de la productora, no a su LinkedIn: un botón que se
+                llama como la empresa tiene que llevar a la empresa. */}
             <a
               className="btn btn--ghost"
-              href={LINKS.linkedinAvEventos}
+              href={LINKS.webAvEventos}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -149,13 +176,20 @@ export default async function Persona({ params }) {
               <img src={foto} alt={p.nombre} width={800} height={1000} />
             </div>
             <div className="persona__texto">
+              {p.presentacion ? (
+                <section className="sem-bloque reveal">
+                  <h2 className="ag-mes">Quién es</h2>
+                  <p className="sem-nota">{conLinkAV(p.presentacion)}</p>
+                </section>
+              ) : null}
+
               <section className="sem-bloque reveal">
                 <h2 className="ag-mes">El recorrido</h2>
                 <dl className="ver-lista">
                   {p.recorrido.map(([titulo, texto]) => (
                     <div className="ver-item" key={titulo}>
-                      <dt>{titulo}</dt>
-                      <dd>{texto}</dd>
+                      <dt>{conLinkAV(titulo)}</dt>
+                      <dd>{conLinkAV(texto)}</dd>
                     </div>
                   ))}
                 </dl>

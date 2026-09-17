@@ -2879,6 +2879,27 @@ footer.site {
   max-width: 66ch;
   margin-bottom: 16px;
 }
+/* Los links de adentro de una nota tienen que verse.
+   La regla global del sitio es `a { color: inherit; text-decoration: none }`,
+   así que cada link tiene que pedir su estilo, y estos nunca lo pidieron:
+   quedaban del mismo color, sin subrayado y con el mismo grosor que el párrafo.
+   O sea, invisibles. Pasaba en cuatro páginas, y en /agenda/destacado los
+   invisibles eran «Escribinos a…» y «cargalo primero», que son las dos formas
+   de contratar en una página que vende. Toman el acento de la sección, como el
+   resto del sitio. */
+.sem-nota a,
+.ver-item dt a,
+.ver-item dd a {
+  color: var(--acento-claro);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.sem-nota a:hover,
+.ver-item dt a:hover,
+.ver-item dd a:hover {
+  color: var(--blanco);
+}
 .sem-cierre {
   margin-top: 44px;
   padding-top: 30px;

@@ -30,6 +30,7 @@ export const LINKS = {
   // con el medio: se declara aparte, como la empresa donde trabajan. Es lo que
   // respalda los 18 años de oficio que dice la biografía.
   linkedinAvEventos: "https://www.linkedin.com/company/av-eventos/",
+  webAvEventos: "https://av-eventos.com",
   linkedinNewsletter:
     "https://www.linkedin.com/newsletters/mate-y-eventos-7379142939676917760",
   rss: "https://anchor.fm/s/1085a73c4/podcast/rss",
@@ -80,7 +81,18 @@ export const AUTORES = [
     nombre: "Pablo Quiroga",
     rol: "Co-conductor · Visión editorial",
     cargo: "Productor de eventos y co-conductor",
-    bio: "Productor con más de 18 años en la industria de eventos. Empezó como productor técnico en shows masivos y hoy trabaja en el sector corporativo. En Mate y Eventos lleva la visión editorial y estratégica.",
+    // La corta: es la que Google muestra abajo del título y la que va al
+    // schema, así que se mantiene cerca de los 160 caracteres. La larga, la que
+    // se lee en la página, está en "presentacion".
+    bio: "Productor con más de 18 años en eventos. Del sonido en vivo y los estadios a dirigir AV Eventos, Growth Engine y Mate y Eventos, donde lleva la visión editorial.",
+    // La biografía larga, la que se lee en la página. Va aparte de "bio", que
+    // es la corta y sigue siendo la que usan la descripción de Google y el
+    // schema: una descripción de mil caracteres la corta el buscador a la
+    // mitad de una oración. Se guarda en texto plano —el link a AV Eventos lo
+    // pone la página— porque el mismo texto lo puede leer una máquina, y ahí
+    // el HTML sobra.
+    presentacion:
+      "Pablo Quiroga viene del espectáculo en vivo y lleva más de 18 años en la industria. Se formó en sus inicios en Teddy Goldman, pionero del sonido en vivo en Buenos Aires, y trabajó como productor técnico y stage manager en estadios y salas como el Luna Park, además de haber sido manager de artistas. Es técnico electrónico y en sonido: diseñó y construyó la línea de iluminación escenográfica de AV Eventos, y esa formación técnica se traduce en soluciones constructivas propias para escenografías y puestas en escena. En AV, que dirige junto a Alexis Vidal, coordina las producciones técnicas, lidera los equipos y hace el maquetado y la documentación de los proyectos —el paso donde una idea se vuelve construible. Le interesa lo que viene: tecnología, inteligencia artificial, hacia dónde se mueve el oficio. En Mate y Eventos lleva la visión editorial y estratégica, con una convicción: casi todo lo que define si un evento funciona ocurre donde nadie lo ve, y esa parte nunca se cuenta.",
     perfil: "https://www.linkedin.com/in/pablomquiroga/",
     // Lo que hace acá adentro, que es distinto de lo que hace en el rubro.
     enElMedio:
@@ -95,8 +107,8 @@ export const AUTORES = [
         "De la técnica al armado completo del evento, con la logística, los proveedores y los equipos adentro.",
       ],
       [
-        "Hoy, corporativo",
-        "Enfocado en el sector corporativo y dirigiendo AV Eventos junto a Alexis Vidal.",
+        "Hoy, producción y dirección",
+        "Producción de eventos en general, y la dirección de AV Eventos, Growth Engine y Mate y Eventos junto a Alexis Vidal.",
       ],
     ],
     obsesion:
@@ -107,7 +119,9 @@ export const AUTORES = [
     nombre: "Alexis Vidal",
     rol: "Co-conductor · Producción",
     cargo: "Productor de eventos y co-conductor",
-    bio: "Productor y creativo, especializado en la operación real de los eventos, donde la creatividad y la técnica conviven todo el tiempo. En Mate y Eventos lleva la producción.",
+    bio: "Productor y creativo desde 1999, con más de 800 producciones. Dirige AV Eventos, Growth Engine y Mate y Eventos, con una mirada que entra siempre por la luz.",
+    presentacion:
+      "Alexis Vidal trabaja en eventos desde 1999 y lleva más de 800 producciones. Junto a Pablo Quiroga dirige AV Eventos, donde se ocupa del diseño conceptual y espacial, la visualización 3D y la dirección comercial de la agencia —una de las primeras del país en incorporar el diseño de espacios en 3D al proceso creativo. Su formación es deliberadamente cruzada: escenografía con Tito Urza, escenógrafo del Teatro Colón, y estudios en cine, diseño de interiores, hotelería y gastronomía. De ahí su manera de mirar, que entra siempre por la luz: cómo la luz, la forma y la textura construyen un espacio y conducen a quien lo recorre. Trabaja en eventos corporativos y sociales desde una sola pregunta: qué necesita este evento.",
     perfil: "https://www.linkedin.com/in/alexis-vidal-av/",
     enElMedio:
       "Aporta el análisis y la experiencia de cancha: la mirada de alguien que estuvo en la operación real y cuenta los desafíos de cada día sin adornarlos.",
@@ -121,8 +135,8 @@ export const AUTORES = [
         "Su fuerte es el terreno, donde la creatividad y la técnica tienen que convivir todo el tiempo y sin margen.",
       ],
       [
-        "Hoy, al frente de AV Eventos",
-        "Dirige la productora junto a Pablo Quiroga.",
+        "Hoy, al frente de tres proyectos",
+        "Dirige AV Eventos, Growth Engine y Mate y Eventos junto a Pablo Quiroga.",
       ],
     ],
     obsesion:

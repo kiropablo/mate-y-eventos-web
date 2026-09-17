@@ -96,6 +96,10 @@ const jsonLd = {
       name: "AV Eventos",
       description:
         "Productora de eventos dirigida por Pablo Quiroga y Alexis Vidal.",
+      // Su sitio propio. Sin esto el nodo existía sin dirección: una máquina
+      // leía que hay una productora, pero no tenía cómo llegar a ella ni cómo
+      // atarla a la empresa que ya conoce por otro lado.
+      url: LINKS.webAvEventos,
       sameAs: [LINKS.linkedinAvEventos],
     },
     {

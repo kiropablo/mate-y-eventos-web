@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
-import { SITE } from "../lib/site";
+import { SITE, LINKS } from "../lib/site";
 
 export const metadata = {
   alternates: { canonical: "/sobre" },
@@ -133,10 +133,18 @@ export default function Sobre() {
                 Pablo lleva más de 18 años en los eventos, y los conoce desde
                 adentro. Empezó como productor técnico en shows masivos
                 —recitales internacionales en estadios— y con los años pasó a la
-                producción general, hasta enfocarse en el sector corporativo.
-                Hoy dirige AV Eventos junto a Alexis Vidal. De todo ese recorrido
-                le quedó una obsesión: profesionalizar la industria y compartir
-                lo que casi nunca se cuenta. En Mate y Eventos lleva la visión
+                producción general. Hoy hace producción de eventos en general y
+                dirige{" "}
+                <a
+                  href={LINKS.webAvEventos}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  AV Eventos
+                </a>
+                , Growth Engine y Mate y Eventos junto a Alexis Vidal. De todo
+                ese recorrido le quedó una obsesión: profesionalizar la industria
+                y compartir lo que casi nunca se cuenta. Acá lleva la visión
                 editorial y estratégica.
               </p>
             </article>
@@ -154,9 +162,17 @@ export default function Sobre() {
                 Alexis es productor y creativo, de cabeza práctica y resolutiva:
                 de los que hacen que las cosas pasen. Su fuerte es la operación
                 real, donde la creatividad y la técnica tienen que convivir todo
-                el tiempo. Junto a Pablo dirige AV Eventos, y en Mate y Eventos
-                aporta análisis, experiencia de cancha y una mirada honesta sobre
-                los desafíos de cada día.
+                el tiempo. Junto a Pablo dirige{" "}
+                <a
+                  href={LINKS.webAvEventos}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  AV Eventos
+                </a>
+                , Growth Engine y Mate y Eventos, y acá aporta análisis,
+                experiencia de cancha y una mirada honesta sobre los desafíos de
+                cada día.
               </p>
             </article>
           </div>
