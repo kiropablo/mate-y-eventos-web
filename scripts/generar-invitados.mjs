@@ -249,7 +249,53 @@ async function pedirFicha(titulo, transcripcion, pistaDelTitulo) {
     .trim()
     .replace(/^```(?:json)?\s*|\s*```$/g, "");
 
-  return JSON.parse(texto);
+  return parsearJson(texto);
+}
+
+// JSON.parse, pero aguantando que adentro de un texto venga un salto de línea
+// sin escapar.
+//
+// Pasa: el modelo copia en "fuente" una frase textual de la transcripción y, si
+// esa frase traía un salto, lo manda tal cual. JSON no lo permite y la ficha se
+// pierde entera por un carácter invisible. Ocurrió en la corrida completa del
+// 17/9/2026 con un episodio de 44: "Bad control character in string literal at
+// position 750".
+//
+// Se intenta parsear derecho primero. Solo si falla se escapan los caracteres
+// de control, y solo los que están ADENTRO de un texto entre comillas: fuera de
+// ahí un salto de línea es formato normal del JSON y tocarlo lo rompería.
+function parsearJson(texto) {
+  try {
+    return JSON.parse(texto);
+  } catch (e) {
+    let dentro = false;
+    let escapando = false;
+    let salida = "";
+    for (const ch of texto) {
+      if (escapando) {
+        salida += ch;
+        escapando = false;
+        continue;
+      }
+      if (ch === "\\" && dentro) {
+        salida += ch;
+        escapando = true;
+        continue;
+      }
+      if (ch === '"') dentro = !dentro;
+      if (dentro && ch === "\n") salida += "\\n";
+      else if (dentro && ch === "\r") salida += "\\r";
+      else if (dentro && ch === "\t") salida += "\\t";
+      else salida += ch;
+    }
+    // Si el arreglo tampoco alcanza, se tira el error original: dice mejor qué
+    // pasó que uno sobre el texto ya manoseado.
+    try {
+      return JSON.parse(salida);
+    } catch {
+      throw e;
+    }
+  }
 }
 
 // Le suma un episodio a una ficha que ya existe, sin tocar nada más. Lo que
