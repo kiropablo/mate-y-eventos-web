@@ -75,7 +75,10 @@ const jsonLd = {
       "@type": "Person",
       "@id": `${SITE.url}/#${a.id}`,
       name: a.nombre,
-      jobTitle: a.cargo,
+      // El título profesional de verdad, no el que sirve para armar la oración
+      // de la página. Es lo que una máquina lee como "a qué se dedica": "co-
+      // conductor" describe el podcast, no el oficio que respalda lo que dice.
+      jobTitle: a.jobTitle || a.cargo,
       description: a.bio,
       worksFor: { "@id": `${SITE.url}/#organization` },
       // La productora que dirigen: es lo que respalda el oficio que cuenta la

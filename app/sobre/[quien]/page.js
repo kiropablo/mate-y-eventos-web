@@ -207,10 +207,18 @@ export default async function Persona({ params }) {
                     : `Conduce el podcast junto a ${otro?.nombre}, `}
                   que sale todos los miércoles. Los{" "}
                   <Link href="/articulos">{articulos} artículos del sitio</Link>{" "}
-                  los firma el equipo
+                  {/* Esta línea no es un detalle de oficina: el schema de cada
+                      artículo declara a Pablo como "editor", y si la página no
+                      lo dijera en ningún lado estaríamos declarando algo que el
+                      lector no puede ver, que es la regla 13. Lo que cambia es
+                      cómo se dice: "los revisa y publica" describe una tarea;
+                      "responde por lo que dicen" es lo que significa ser el
+                      editor de un medio.
+                      Ojo con el salto de línea antes de la llave: JSX lo
+                      convierte en un espacio y quedaba "el equipo , y él". */}
                   {p.id === "pablo-quiroga"
-                    ? ", y los revisa y publica él."
-                    : "."}
+                    ? "los firma el equipo, y él los edita y responde por lo que dicen."
+                    : "los firma el equipo."}
                 </p>
               </section>
             </div>

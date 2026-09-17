@@ -89,6 +89,11 @@ export const AUTORES = [
     nombre: "Pablo Quiroga",
     rol: "Co-conductor · Visión editorial",
     cargo: "Productor de eventos y co-conductor",
+    // El que va al "jobTitle" del schema, que es lo que una máquina lee como
+    // "a qué se dedica esta persona". Va aparte de "cargo" porque ese se usa
+    // dentro de una oración —"{cargo} de Mate y Eventos"— y ahí un título como
+    // "Director de AV Eventos" quedaría roto. Acá no hay oración: hay entidad.
+    jobTitle: "Productor técnico y director de producción de eventos",
     // La corta: es la que Google muestra abajo del título y la que va al
     // schema, así que se mantiene cerca de los 160 caracteres. La larga, la que
     // se lee en la página, está en "presentacion".
@@ -102,9 +107,12 @@ export const AUTORES = [
     presentacion:
       "Pablo Quiroga viene del espectáculo en vivo y lleva más de 18 años en la industria. Se formó en sus inicios en Teddy Goldman, pionero del sonido en vivo en Buenos Aires, y trabajó como productor técnico y stage manager en estadios y salas como el Luna Park, además de haber sido manager de artistas. Es técnico electrónico y en sonido: diseñó y construyó la línea de iluminación escenográfica de AV Eventos, y esa formación técnica se traduce en soluciones constructivas propias para escenografías y puestas en escena. En AV, que dirige junto a Alexis Vidal, coordina las producciones técnicas, lidera los equipos y hace el maquetado y la documentación de los proyectos —el paso donde una idea se vuelve construible. Le interesa lo que viene: tecnología, inteligencia artificial, hacia dónde se mueve el oficio. En Mate y Eventos lleva la visión editorial y estratégica, con una convicción: casi todo lo que define si un evento funciona ocurre donde nadie lo ve, y esa parte nunca se cuenta.",
     perfil: "https://www.linkedin.com/in/pablomquiroga/",
-    // Lo que hace acá adentro, que es distinto de lo que hace en el rubro.
+    // Qué hace acá adentro, que es distinto de lo que hace en el rubro.
+    // No es la lista de tareas: es por qué su criterio vale. Decía "revisa y
+    // publica cada artículo del sitio", que describe un trabajo administrativo
+    // y no la autoridad que respalda lo que el medio afirma.
     enElMedio:
-      "Lleva la visión editorial y estratégica: define qué se cubre, revisa y publica cada artículo del sitio, y mantiene la agenda de eventos de la región.",
+      "Define qué se cubre y con qué criterio, y ese criterio tiene dieciocho años atrás: los estadios, el Luna Park, la producción técnica donde el error no se corrige después. Cuando el podcast afirma algo sobre cómo se monta un evento, es porque lo montó. Nada sale publicado sin que lo haya leído.",
     recorrido: [
       [
         "Empezó en la técnica",
@@ -127,12 +135,13 @@ export const AUTORES = [
     nombre: "Alexis Vidal",
     rol: "Co-conductor · Producción",
     cargo: "Productor de eventos y co-conductor",
+    jobTitle: "Director creativo y productor de eventos",
     bio: "Productor y creativo desde 1999, con más de 800 producciones. Dirige AV Eventos, Growth Engine y Mate y Eventos, con una mirada que entra siempre por la luz.",
     presentacion:
       "Alexis Vidal trabaja en eventos desde 1999 y lleva más de 800 producciones. Junto a Pablo Quiroga dirige AV Eventos, donde se ocupa del diseño conceptual y espacial, la visualización 3D y la dirección comercial de la agencia —una de las primeras del país en incorporar el diseño de espacios en 3D al proceso creativo. Su formación es deliberadamente cruzada: escenografía con Tito Urza, escenógrafo del Teatro Colón, y estudios en cine, diseño de interiores, hotelería y gastronomía. De ahí su manera de mirar, que entra siempre por la luz: cómo la luz, la forma y la textura construyen un espacio y conducen a quien lo recorre. Trabaja en eventos corporativos y sociales desde una sola pregunta: qué necesita este evento.",
     perfil: "https://www.linkedin.com/in/alexis-vidal-av/",
     enElMedio:
-      "Aporta el análisis y la experiencia de cancha: la mirada de alguien que estuvo en la operación real y cuenta los desafíos de cada día sin adornarlos.",
+      "Trae el criterio de más de ochocientas producciones desde 1999. Es el que cuenta cómo se resuelve de verdad y no cómo debería resolverse. Lo estético y lo operativo no se le separan nunca, porque los aprendió juntos: escenografía con el escenógrafo del Teatro Colón, más cine, interiorismo y gastronomía.",
     recorrido: [
       [
         "Productor y creativo",
