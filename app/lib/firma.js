@@ -87,3 +87,40 @@ export function linkDelEquipo() {
 export function linkDeConfirmacion(slug) {
   return `${SITE.url}/agenda/${slug}/confirmar?f=${firmar(slug)}`;
 }
+
+// El formulario de invitados. Mismo mecanismo que el link del equipo: una
+// clave sola, derivada del secreto, que se comparte con quien tenga que
+// llenarlo. No es un link por persona a propósito: el formulario lo llena
+// alguien que todavía no está en ninguna base nuestra —por eso lo llena— así
+// que no hay a quién atarle una firma.
+//
+// Lo que esta clave protege NO es un dato sensible: es que la página no ande
+// suelta por internet ni la encuentre Google. La página además lleva noindex y
+// no está en el sitemap ni en el menú.
+export function claveFormulario() {
+  if (!hayClave()) {
+    throw new Error(
+      "Falta AGENDA_FIRMA_SECRET: no se puede armar el link del formulario."
+    );
+  }
+  return crypto
+    .createHmac("sha256", CLAVE)
+    .update("invitados:formulario")
+    .digest("hex")
+    .slice(0, 20);
+}
+
+export function claveFormularioValida(clave) {
+  if (!hayClave() || typeof clave !== "string") return false;
+  const esperada = claveFormulario();
+  if (clave.length !== esperada.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(clave), Buffer.from(esperada));
+  } catch {
+    return false;
+  }
+}
+
+export function linkDelFormulario() {
+  return `${SITE.url}/invitados/formulario/${claveFormulario()}`;
+}

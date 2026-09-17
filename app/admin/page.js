@@ -2,6 +2,7 @@ import { haySesion } from "../lib/admin";
 import { listarParaPanel } from "../lib/articulos-admin";
 import { listarGlosarioParaPanel } from "../lib/glosario-admin";
 import { listarInvitadosParaPanel } from "../lib/invitados-admin";
+import { hayClave, linkDelFormulario } from "../lib/firma";
 import { listarOrganizadoresParaPanel } from "../lib/organizadores-admin";
 import LoginAdmin from "./LoginAdmin";
 import PanelAdmin from "./PanelAdmin";
@@ -24,6 +25,7 @@ export default async function Admin() {
       articulos={listarParaPanel()}
       glosario={listarGlosarioParaPanel()}
       invitados={listarInvitadosParaPanel()}
+      linkFormulario={hayClave() ? linkDelFormulario() : ""}
       organizadores={organizadores}
     />
   );

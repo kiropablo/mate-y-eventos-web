@@ -126,7 +126,13 @@ const CSS = `
 // cuatrocientas, y cada una trae botones, mails y el bloque de correcciones.
 const POR_TANDA = 60;
 
-export default function PanelAdmin({ articulos, glosario, invitados, organizadores }) {
+export default function PanelAdmin({
+  articulos,
+  glosario,
+  invitados,
+  linkFormulario,
+  organizadores,
+}) {
   const [seccion, setSeccion] = useState("articulos");
   const [orgs, setOrgs] = useState(organizadores?.eventos || []);
   const hayFirma = organizadores?.hayFirma !== false;
@@ -1165,6 +1171,39 @@ export default function PanelAdmin({ articulos, glosario, invitados, organizador
           >
             Abrirla
           </a>
+        </div>
+      ) : null}
+
+      {/* El link del formulario que se le manda a un invitado antes de
+          grabar. Va acá arriba y no adentro de una ficha porque se manda
+          ANTES de que la ficha exista. */}
+      {seccion === "invitados" && linkFormulario ? (
+        <div className="adm-exportar">
+          <span>
+            Formulario para mandarle a un invitado antes de la entrevista. Pide
+            sus datos de contacto y sus redes.
+          </span>
+          <button
+            type="button"
+            onClick={() => copiar(linkFormulario, "formulario")}
+          >
+            {copiado === "formulario" ? "Copiado" : "Copiar el link"}
+          </button>
+          <a
+            className="adm-btn adm-btn--sec"
+            href={linkFormulario}
+            target="_blank"
+            rel="noopener"
+          >
+            Abrirlo
+          </a>
+        </div>
+      ) : null}
+
+      {seccion === "invitados" && !linkFormulario ? (
+        <div className="adm-aviso">
+          Falta cargar AGENDA_FIRMA_SECRET en Vercel: sin esa clave no se puede
+          armar el link del formulario.
         </div>
       ) : null}
 

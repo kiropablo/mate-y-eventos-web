@@ -1175,6 +1175,74 @@ footer.site {
   box-shadow: 0 0 34px rgba(234, 71, 138, 0.6);
   transform: translate(-50%, -50%) scale(1.06);
 }
+/* ---------- Formulario de invitados ----------
+   Clases propias y no las del panel: las del panel (.adm-campo y compañía)
+   viven adentro de PanelAdmin.js, inyectadas en esa página. Usarlas acá
+   dibujaba el formulario sin un solo estilo. */
+.form-campo { margin-bottom: 22px; }
+.form-campo label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--acento-claro);
+  margin-bottom: 9px;
+}
+.form-campo input,
+.form-campo textarea {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 13px 15px;
+  color: var(--blanco);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+.form-campo textarea { min-height: 110px; }
+.form-campo input:focus,
+.form-campo textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-ayuda {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--faint);
+  margin-top: 7px;
+}
+.form-acciones {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.form-error {
+  font-family: var(--font-ui);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #ff8a8a;
+}
+
+/* El cartel de "esto no se publica", al lado del rótulo de mail y teléfono.
+   Va ahí y no en la ayuda de abajo porque es lo que decide si alguien escribe
+   su número o lo deja en blanco, y eso se decide mirando el rótulo. */
+.form-privado {
+  display: inline-block;
+  margin-left: 9px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 213, 247, 0.4);
+  color: var(--celeste);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 /* ---------- Invitados ---------- */
 /* El rol va abajo del nombre y antes de la bio: es lo primero que alguien
    necesita saber de una persona que no conoce. */
