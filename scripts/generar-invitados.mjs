@@ -63,7 +63,18 @@ y tenés que armar la ficha de la persona INVITADA, si la hubo.
 QUÉ ES UN INVITADO
 Alguien de afuera que vino a la conversación. Los dos conductores —Pablo
 Quiroga y Alexis Vidal— NO son invitados: si en el episodio hablan solo ellos
-dos, no hay invitado y lo decís.
+dos, no hay invitados y lo decís.
+
+PUEDEN SER VARIOS
+Un episodio puede tener uno, dos o ninguno. Si vinieron dos personas, devolvés
+DOS fichas, una por cada una, con su propio nombre y su propio texto. No las
+mezcles en una sola y sobre todo NO uses el nombre de la empresa de la que
+vienen: "Teatro Ciego" es una compañía, no una persona, y una ficha con ese
+nombre dice que una productora es alguien.
+
+Si dos personas trabajan juntas y hablaron de lo mismo, igual van separadas: el
+texto de cada una cuenta lo que dijo esa persona. Si una de las dos casi no
+habló y no hay con qué escribirle una ficha, devolvés solo la que sí habló.
 
 LO QUE NO PODÉS HACER, NUNCA
 - No inventes el apellido. Si al aire dijeron solo "Michel", el nombre es
@@ -75,7 +86,7 @@ LO QUE NO PODÉS HACER, NUNCA
 - Si no estás seguro de quién es el invitado, decí que no lo encontraste. Es
   una respuesta correcta y preferible.
 
-QUÉ ESCRIBÍS
+QUÉ ESCRIBÍS, POR CADA INVITADO
 - nombre: como lo nombraron al aire. Sin títulos ("Lic.", "Sr.").
 - rol: a qué se dedica, en pocas palabras y tal como lo presentaron.
   Ejemplos: "Mentalista", "Artista y diseñadora", "Percusionista de La Bomba de Tiempo".
@@ -91,9 +102,11 @@ QUÉ ESCRIBÍS
   lo lee quien aprueba, para comprobar que no inventaste nada.
 
 Devolvé JSON y nada más, sin texto alrededor y sin backticks:
-{"hayInvitado": true|false,
- "porQueNo": "si hayInvitado es false, en una línea",
- "nombre": "", "rol": "", "bio": "", "cuerpo": "", "fuente": ""}`;
+{"hayInvitados": true|false,
+ "porQueNo": "si hayInvitados es false, en una línea",
+ "invitados": [
+   {"nombre": "", "rol": "", "bio": "", "cuerpo": "", "fuente": ""}
+ ]}`;
 
 // --------------------------------------------------------------------------
 
@@ -139,6 +152,19 @@ function partirInvitado(texto) {
     return { nombre: t.slice(0, coma).trim(), rol: t.slice(coma + 1).trim() };
   }
   return { nombre: t, rol: "" };
+}
+
+// ¿El título nombra a UNA sola persona? Solo en ese caso el nombre del título
+// pisa al que oyó el modelo.
+//
+// Con dos —"Sofía Martín y Facundo Bogarín"— no se puede pisar nada: habría que
+// decidir cuál de los dos nombres le toca a cuál ficha, y eso es adivinar. Ahí
+// mandan los nombres que devolvió el modelo, que salen de la presentación
+// hablada, y la frase de origen queda anotada para comprobarlo.
+function nombraAUnoSolo(texto) {
+  const t = String(texto || "").trim();
+  if (!t) return false;
+  return !/\s+y\s+|\s*&\s*|\s+·\s+|\s*\/\s*/i.test(t.split(",")[0]);
 }
 
 function leerRegistro() {
@@ -211,8 +237,11 @@ async function titulosDeVideos(ids) {
 async function pedirFicha(titulo, transcripcion, pistaDelTitulo) {
   const entrada =
     (pistaDelTitulo
-      ? `EL TÍTULO DEL VIDEO YA NOMBRA AL INVITADO: "${pistaDelTitulo}".\n` +
-        `Usá ese nombre tal cual. No lo completes ni lo corrijas.\n\n`
+      ? `EL TÍTULO DEL VIDEO NOMBRA ASÍ AL INVITADO O A LOS INVITADOS: ` +
+        `"${pistaDelTitulo}".\n` +
+        `Esos nombres los escribió una persona al subir el video, así que valen ` +
+        `más que lo que oigas en la charla: usalos tal cual, sin completarlos ` +
+        `ni corregirlos. Si ahí hay dos personas, devolvé dos fichas.\n\n`
       : "") +
     `TÍTULO DEL EPISODIO: ${titulo || "(sin título)"}\n\n` +
     `TRANSCRIPCIÓN:\n${transcripcion}`;
@@ -388,49 +417,71 @@ for (const videoId of tanda) {
     );
 
     const delTitulo = invitadoDelTitulo(titulo);
-    const pista = delTitulo ? partirInvitado(delTitulo).nombre : "";
 
-    const d = await pedirFicha(titulo, transcripcion, pista);
+    const d = await pedirFicha(titulo, transcripcion, delTitulo);
 
-    if (!d?.hayInvitado || !String(d.nombre || "").trim()) {
+    // Un episodio puede traer uno, dos o ninguno. Antes se asumía uno, y cuando
+    // vinieron dos —T02E11, Sofía Martín y Facundo Bogarín— el modelo no podía
+    // elegir y le puso a la ficha el nombre de la compañía: quedó un "Teatro
+    // Ciego" declarado como persona.
+    const lista = Array.isArray(d?.invitados) ? d.invitados : [];
+    const validos = lista.filter((x) => String(x?.nombre || "").trim());
+
+    if (!d?.hayInvitados || validos.length === 0) {
       sinInvitado++;
-      console.log(`    · ${videoId} — sin invitado (${d?.porQueNo || "no se encontró"})`);
+      console.log(`    · ${videoId} — sin invitados (${d?.porQueNo || "no se encontró"})`);
       yaRevisados.add(videoId);
       continue;
     }
 
-    // Si el título traía el nombre, ese manda. Lo escribió una persona.
-    if (pista) d.nombre = pista;
-    if (delTitulo && !d.rol) d.rol = partirInvitado(delTitulo).rol;
-
-    const slug = aSlug(d.nombre);
-    if (!slug) {
-      errores++;
-      console.log(`    ✗ ${videoId} — el nombre no da una dirección usable: "${d.nombre}"`);
-      continue;
+    // El nombre del título solo pisa al del modelo cuando el título nombra a UNA
+    // sola persona y el modelo también devolvió una. Con dos no hay forma de
+    // saber cuál va con cuál sin adivinar.
+    if (validos.length === 1 && delTitulo && nombraAUnoSolo(delTitulo)) {
+      const { nombre, rol } = partirInvitado(delTitulo);
+      if (nombre) validos[0].nombre = nombre;
+      if (rol && !validos[0].rol) validos[0].rol = rol;
     }
 
-    if (yaUsados.has(slug)) {
-      // Ya tiene ficha: es alguien que volvió. Se le agrega el episodio y no se
-      // pisa nada de lo que ya estaba escrito ni de lo que editó una persona.
-      const suma = sumarEpisodio(slug, existentes.get(slug), videoId);
-      if (suma) sumadas++;
-      console.log(
-        `    ↻ ${videoId} — ${d.nombre} ya tenía ficha${suma ? ", se le sumó este episodio" : " y ya lo tenía"}`
-      );
-    } else {
-      escribirFicha(slug, d, videoId, titulo);
-      yaUsados.add(slug);
-      existentes.set(slug, {
-        archivo: `${slug}.md`,
-        nombre: d.nombre,
-        episodios: [videoId],
-      });
-      nuevas++;
-      console.log(`    ✓ ${videoId} — ${d.nombre}${d.rol ? ` (${d.rol})` : ""} → /invitados/${slug}`);
+    let algunaSalioBien = false;
+    for (const inv of validos) {
+      const slug = aSlug(inv.nombre);
+      if (!slug) {
+        errores++;
+        console.log(
+          `    ✗ ${videoId} — el nombre no da una dirección usable: "${inv.nombre}"`
+        );
+        continue;
+      }
+
+      if (yaUsados.has(slug)) {
+        // Ya tiene ficha: es alguien que volvió. Se le agrega el episodio y no
+        // se pisa nada de lo escrito ni de lo que editó una persona.
+        const suma = sumarEpisodio(slug, existentes.get(slug), videoId);
+        if (suma) sumadas++;
+        algunaSalioBien = true;
+        console.log(
+          `    ↻ ${videoId} — ${inv.nombre} ya tenía ficha${suma ? ", se le sumó este episodio" : " y ya lo tenía"}`
+        );
+      } else {
+        escribirFicha(slug, inv, videoId, titulo);
+        yaUsados.add(slug);
+        existentes.set(slug, {
+          archivo: `${slug}.md`,
+          nombre: inv.nombre,
+          episodios: [videoId],
+        });
+        nuevas++;
+        algunaSalioBien = true;
+        console.log(
+          `    ✓ ${videoId} — ${inv.nombre}${inv.rol ? ` (${inv.rol})` : ""} → /invitados/${slug}`
+        );
+      }
     }
 
-    yaRevisados.add(videoId);
+    // El episodio se marca como revisado solo si algo salió. Si las dos fichas
+    // fallaron, se reintenta mañana en vez de quedar procesado y vacío.
+    if (algunaSalioBien) yaRevisados.add(videoId);
   } catch (e) {
     errores++;
     console.log(`    ✗ ${videoId} (${e.message})`);
