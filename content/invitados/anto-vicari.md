@@ -1,12 +1,13 @@
 ---
 nombre: "Anto Vicari"
-rol: "Creadora y fundadora de When I Wish, productora de eventos y entretenimiento infantil"
+rol: "When I Wish Entretenimiento - Creadora"
 bio: "Anto Vicari, fundadora de When I Wish, contó cómo diseña experiencias temáticas para chicos y gestionó el crecimiento acelerado de su empresa."
 episodios: ["OSiFr7cvUUg", "oHtdo_8RCpc"]
 episodioTitulo: "T02E18 | ¿Cómo se crea un evento que un niño nunca olvida? | Anto Vicari"
 web: ""
 redes: []
 fuente: "Hoy tenemos una invitadaza, Anto Vicari, creadora fundadora de Wena Wish."
+foto: false
 generado: "2026-09-17"
 publicado: false
 revisado: ""
