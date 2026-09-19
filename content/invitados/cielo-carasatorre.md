@@ -10,6 +10,7 @@ fuente: "Bienvenida, Cielo Carazata, Torre. Cuenta como su formación en relacio
 generado: "2026-09-17"
 publicado: false
 revisado: ""
+foto: true
 ---
 
 Cielo, al frente de su agencia de ambientaciones, repasó cómo dividió su empresa en áreas creativa, operativa y administrativa, y por qué delegar implica primero haber hecho uno mismo cada proceso para poder enseñarlo. Habló de la escucha activa con el cliente y el equipo como motor del trabajo creativo, y de cómo evita los combos cerrados porque van en contra de su naturaleza creativa.
