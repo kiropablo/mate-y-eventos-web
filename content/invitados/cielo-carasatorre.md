@@ -1,6 +1,6 @@
 ---
 nombre: "Cielo Carasatorre"
-rol: "Emprendedora y creadora de SoyCielo Ambientaciones, su agencia de ambientaciones para eventos"
+rol: "Creadora de SoyCielo Ambientaciones"
 bio: "Cielo Carasatorre, creadora de SoyCielo Ambientaciones, contó cómo estructura su agencia, delega sin perder estándar y encontró un micronicho rentable con la cabina despejada."
 episodios: ["M9-bsaOsP0E", "vwwHytGG140"]
 episodioTitulo: "T02E06 | Cómo convertir creatividad en un negocio rentable | Cielo Ambientaciones"
