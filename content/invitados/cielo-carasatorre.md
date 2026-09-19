@@ -7,10 +7,10 @@ episodioTitulo: "T02E06 | Cómo convertir creatividad en un negocio rentable | C
 web: ""
 redes: []
 fuente: "Bienvenida, Cielo Carazata, Torre. Cuenta como su formación en relaciones públicas, protocolo y ceremonial y la llegó a hacer globos a construir una agencia sólida que vende Bichub y Bichu C sin bajar precios. — El apellido y los dos nombres de producto vienen deformados por la transcripción automática. El nombre real y el de la empresa NO salen de acá: los escribió ella misma en el formulario de invitados (Airtable), donde figura como «Cielo Carasatorre» y «Creadora de SoyCielo Ambientaciones»."
+foto: true
 generado: "2026-09-17"
 publicado: false
 revisado: ""
-foto: true
 ---
 
 Cielo, al frente de su agencia de ambientaciones, repasó cómo dividió su empresa en áreas creativa, operativa y administrativa, y por qué delegar implica primero haber hecho uno mismo cada proceso para poder enseñarlo. Habló de la escucha activa con el cliente y el equipo como motor del trabajo creativo, y de cómo evita los combos cerrados porque van en contra de su naturaleza creativa.
