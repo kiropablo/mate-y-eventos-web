@@ -13,6 +13,11 @@ import { SITE } from "../../lib/site";
 import { migas } from "../../lib/migas";
 import { terminosDelEpisodio, getTerminos } from "../../lib/glosario";
 import { terminosMencionados, terminosDelTema } from "../../lib/enlaces";
+import { getInvitados } from "../../lib/invitados";
+import {
+  conEnlacesAInvitados,
+  personasMencionadas,
+} from "../../lib/menciones";
 import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
@@ -70,6 +75,14 @@ export default function Articulo({ params }) {
   const mencionados = terminosMencionados(art, getTerminos());
   const delTema = terminosDelTema(art, mencionados);
 
+  // Y las personas: los invitados con ficha PUBLICADA a los que este artículo
+  // nombra. El nombre se convierte en link adentro del texto, que es donde el
+  // lector lo lee, y la misma lista se declara en el schema. Las dos cosas
+  // salen de acá, así que lo que dice el código es lo que se ve en la página.
+  const fichas = getInvitados();
+  const personas = personasMencionadas(art.cuerpo, fichas);
+  const cuerpoConEnlaces = conEnlacesAInvitados(art.cuerpo, fichas);
+
   const url = `${SITE.url}/articulos/${art.id}`;
 
   const articleLd = {
@@ -118,13 +131,27 @@ export default function Articulo({ params }) {
           })),
         }
       : {}),
-    ...(mencionados.length
+    //
+    // En "mentions" conviven dos clases de cosas y está bien que así sea: los
+    // términos que el artículo nombra y las PERSONAS que nombra. Para una
+    // máquina, "este texto habla de Ariela Giacco" y "Ariela Giacco es esta
+    // persona, con esta ficha y este episodio" es la misma cadena que ata al
+    // artículo con alguien real. Es lo que le da autoridad a lo que se cuenta:
+    // no lo dice el medio, lo dijo esa persona en ese capítulo.
+    ...(mencionados.length || personas.length
       ? {
-          mentions: mencionados.map((t) => ({
-            "@type": "DefinedTerm",
-            "@id": `${SITE.url}/glosario/${t.slug}`,
-            name: t.termino,
-          })),
+          mentions: [
+            ...mencionados.map((t) => ({
+              "@type": "DefinedTerm",
+              "@id": `${SITE.url}/glosario/${t.slug}`,
+              name: t.termino,
+            })),
+            ...personas.map((p) => ({
+              "@type": "Person",
+              "@id": `${SITE.url}/invitados/${p.slug}`,
+              name: p.nombre,
+            })),
+          ],
         }
       : {}),
   };
@@ -194,7 +221,7 @@ export default function Articulo({ params }) {
       <section className="section-p" data-accent="magenta" style={{ paddingTop: "40px" }}>
         <div className="wrap">
           <div className="art-col">
-            <ArticuloCuerpo markdown={art.cuerpo} />
+            <ArticuloCuerpo markdown={cuerpoConEnlaces} />
 
             {art.preguntas.length ? (
               <div className="art-faq">

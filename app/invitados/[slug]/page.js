@@ -4,6 +4,8 @@ import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import { getInvitado, getInvitados } from "../../lib/invitados";
 import { getEpisodes, partirTitulo, formatDate } from "../../lib/youtube";
+import { getArticulos } from "../../lib/articulos";
+import { articulosQueNombran } from "../../lib/menciones";
 import { migas } from "../../lib/migas";
 import { SITE } from "../../lib/site";
 import { jsonLdSeguro } from "../../lib/jsonld";
@@ -68,6 +70,18 @@ export default async function FichaInvitado({ params }) {
   } catch {
     episodios = [];
   }
+
+  // Los artículos que lo nombran. Es la vuelta del enlazado: desde el artículo
+  // se llega a la ficha por el nombre escrito en el texto, y desde la ficha se
+  // vuelve a los artículos donde se lo nombra.
+  //
+  // Esto se MUESTRA pero no se declara en el schema, y es a propósito. El
+  // vínculo ya está declarado del otro lado —el artículo dice "mentions: esta
+  // persona"— y ahí es donde es cierto. Ponerlo acá como "subjectOf" diría que
+  // el artículo TRATA sobre esta persona, y un artículo que la nombra al pasar
+  // no trata sobre ella. Es la regla 12 mirada del otro lado: no alcanza con
+  // que el nombre esté escrito para declarar de qué habla el texto.
+  const nombradoEn = articulosQueNombran(i, getArticulos());
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -228,6 +242,33 @@ export default async function FichaInvitado({ params }) {
                     </Link>
                   );
                 })}
+              </div>
+            </section>
+          ) : null}
+
+          {nombradoEn.length ? (
+            <section className="sem-bloque reveal">
+              <h2 className="ag-mes">
+                {/* Neutro a propósito: "donde se lo nombra" le pone género a
+                    una persona de la que no sabemos ninguno, y la ficha la
+                    escribe un robot. "Donde aparece su nombre" además dice
+                    exactamente cuál es el criterio: el nombre está escrito en
+                    ese artículo y se puede comprobar con Ctrl+F. */}
+                {nombradoEn.length === 1
+                  ? "El artículo donde aparece su nombre"
+                  : `Los ${nombradoEn.length} artículos donde aparece su nombre`}
+              </h2>
+              <div className="ag-tabla">
+                {nombradoEn.map((a) => (
+                  <Link
+                    href={`/articulos/${a.id}`}
+                    key={a.id}
+                    className="ag-fila"
+                  >
+                    <span className="ag-fila__fecha">{a.eje}</span>
+                    <span className="ag-fila__nombre">{a.titulo}</span>
+                  </Link>
+                ))}
               </div>
             </section>
           ) : null}

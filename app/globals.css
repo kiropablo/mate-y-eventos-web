@@ -3037,11 +3037,17 @@ footer.site {
    O sea, invisibles. Pasaba en cuatro páginas, y en /agenda/destacado los
    invisibles eran «Escribinos a…» y «cargalo primero», que son las dos formas
    de contratar en una página que vende. Toman el acento de la sección, como el
-   resto del sitio. */
+   resto del sitio.
+
+   .art-cuerpo a entró después, con las menciones a invitados: el nombre de una
+   persona dentro de un párrafo era un link real, con su href y todo, pintado
+   exactamente del mismo color que el texto y sin subrayar. O sea: nadie lo iba
+   a tocar nunca. Un link que no se ve no es un link, es una trampa. */
 .sem-nota a,
 .ver-item dt a,
 .ver-item dd a,
 .page-top .lead a,
+.art-cuerpo a,
 .host__bio a {
   color: var(--acento-claro);
   text-decoration: underline;
@@ -3052,6 +3058,7 @@ footer.site {
 .ver-item dt a:hover,
 .ver-item dd a:hover,
 .page-top .lead a:hover,
+.art-cuerpo a:hover,
 .host__bio a:hover {
   color: var(--blanco);
 }
