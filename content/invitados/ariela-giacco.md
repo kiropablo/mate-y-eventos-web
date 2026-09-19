@@ -1,12 +1,13 @@
 ---
 nombre: "Ariela Giacco"
-rol: "Miembro de Eco Academy, iniciativa que educa a productores y gestores culturales en economía circular"
+rol: "Directora de Sostenibilidad en Eco Academy"
 bio: "Ariela Giacco, de Eco Academy, explicó cómo medir y reducir el impacto ambiental de festivales masivos a través de datos y diseño."
 episodios: ["3aPh6wbebDk", "axR3Ow-V3sI"]
 episodioTitulo: "T02E08 | Un festival funciona como una ciudad (y nadie lo nota) | Ariela Giacco"
 web: ""
 redes: []
 fuente: "Ella es miembro de EcoAemy, una iniciativa de vanguardia dedicada a educar a productores, gestores culturales, municipios en modelo de negocios basados en la economía circular."
+foto: false
 generado: "2026-09-17"
 publicado: false
 revisado: ""
