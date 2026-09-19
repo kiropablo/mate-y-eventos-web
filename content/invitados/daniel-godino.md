@@ -1,13 +1,13 @@
 ---
 nombre: "Daniel Godino"
-rol: "Cofundador y presidente de una empresa de alquiler de mobiliario para eventos"
+rol: "Godino Saenz s.a"
 bio: "Cofundador de una empresa de alquiler de mobiliario para eventos, lleva más de 30 años en el rubro y habló de cómo elegir productos y crecer sin perder rentabilidad."
 episodios: ["YCc0wTmovjg"]
 episodioTitulo: "T02E17 | Cómo se construye una marca que domina su mercado | Daniel Godino"
 web: ""
 redes: []
-foto: false
 fuente: "Acá estamos con el cofundador de Godino Science, eh presidente además inquieto, que sabe competir, que busca, que va para adelante y con muchísimos años de experiencia en el ruburo, siendo punta de lanza en su especialidad."
+foto: false
 generado: "2026-09-17"
 publicado: false
 revisado: ""
