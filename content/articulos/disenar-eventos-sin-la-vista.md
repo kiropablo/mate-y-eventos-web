@@ -1,7 +1,7 @@
 ---
 titulo: "Diseñar sin la vista: lo que enseña el Teatro Ciego a los eventos"
 tituloSeo: "Diseñar eventos sin la vista: accesibilidad real"
-bajada: "Sofía Martín y Facundo Borgarín explican cómo se construye una experiencia cuando el sentido dominante desaparece, y qué de eso aplica a cualquier evento con público."
+bajada: "Sofía Martín y Facundo Bogarín explican cómo se construye una experiencia cuando el sentido dominante desaparece, y qué de eso aplica a cualquier evento con público."
 metaDescripcion: "Qué enseña el Teatro Ciego sobre diseño de experiencias sensoriales para aplicar en eventos corporativos."
 episodio: "GVQOqNnF5qs"
 episodioTitulo: "T02E11 | ¿Y si te quitáramos la vista durante un evento? | Teatro Ciego"
@@ -15,7 +15,7 @@ publicado: true
 revisado: "2026-07-22"
 ---
 
-Cuando Facundo Borgarín dice que el Teatro Ciego "no es teatro para ciegos ni de ciegos", está corrigiendo un malentendido que sirve para pensar cualquier evento inclusivo. La discapacidad no es el eje del proyecto: es una consecuencia de un diseño artístico que decidió apagar la luz. Esa distinción cambia por completo cómo se aborda el trabajo, y tiene aplicación directa para quienes producen eventos corporativos, ferias o lanzamientos.
+Cuando Facundo Bogarín dice que el Teatro Ciego "no es teatro para ciegos ni de ciegos", está corrigiendo un malentendido que sirve para pensar cualquier evento inclusivo. La discapacidad no es el eje del proyecto: es una consecuencia de un diseño artístico que decidió apagar la luz. Esa distinción cambia por completo cómo se aborda el trabajo, y tiene aplicación directa para quienes producen eventos corporativos, ferias o lanzamientos.
 
 ## La inclusión es una consecuencia, no el objetivo del diseño
 

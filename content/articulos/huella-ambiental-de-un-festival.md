@@ -17,7 +17,7 @@ revisado: "2026-07-22"
 
 Un festival de tres días con 40 mil personas por noche no es un evento: es una ciudad que aparece, funciona y desaparece en menos de una semana. En Argentina, muchos municipios recién consideran "ciudad" a partir de 10 mil o 30 mil habitantes. Varios festivales de la temporada de verano superan esa cifra multiplicada por dos o tres, y lo hacen sin infraestructura permanente, sin plan urbano y sin red de tratamiento de residuos pensada para ese volumen.
 
-Esa analogía, que Ariela Giacco de EcoAemy plantea en el episodio, no es una metáfora decorativa. Es un cambio de escala mental necesario para entender por qué la sostenibilidad en eventos masivos no se resuelve con buena voluntad ni con un par de cestos de reciclaje bien ubicados. Se resuelve con la misma lógica con la que se planifica una ciudad: anticipación, infraestructura y datos.
+Esa analogía, que Ariela Giacco de Eco Academy plantea en el episodio, no es una metáfora decorativa. Es un cambio de escala mental necesario para entender por qué la sostenibilidad en eventos masivos no se resuelve con buena voluntad ni con un par de cestos de reciclaje bien ubicados. Se resuelve con la misma lógica con la que se planifica una ciudad: anticipación, infraestructura y datos.
 
 ## La huella real no está en el escenario, está en el camino hacia el evento
 

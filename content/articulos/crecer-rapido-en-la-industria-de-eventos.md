@@ -1,8 +1,8 @@
 ---
-titulo: "Cuando crecer rápido casi te sale caro: la lección de Wen I Wish"
+titulo: "Cuando crecer rápido casi te sale caro: la lección de When I Wish"
 tituloSeo: "Crecer rápido en la industria de eventos"
-bajada: "Anto Vicari, fundadora de Wen I Wish, cuenta cómo un boom de demanda post pandemia expuso los límites de su estructura y qué aprendió sobre escalar sin perder calidad."
-metaDescripcion: "Cómo escalar una empresa de eventos infantiles sin perder calidad: el caso de Wen I Wish y sus aprendizajes."
+bajada: "Anto Vicari, fundadora de When I Wish, cuenta cómo un boom de demanda post pandemia expuso los límites de su estructura y qué aprendió sobre escalar sin perder calidad."
+metaDescripcion: "Cómo escalar una empresa de eventos infantiles sin perder calidad: el caso de When I Wish y sus aprendizajes."
 episodio: "OSiFr7cvUUg"
 episodioTitulo: "T02E18 | ¿Cómo se crea un evento que un niño nunca olvida? | Anto Vicari"
 fecha: "2026-05-27"
@@ -15,29 +15,29 @@ publicado: true
 revisado: "2026-07-22"
 ---
 
-Hay un momento en la vida de casi cualquier empresa de eventos donde la demanda supera la capacidad real de respuesta. No es un problema de facturación, es un problema de estructura. Anto Vicari, fundadora de Wen I Wish, lo vivió en carne propia cuando terminó la pandemia y el rubro de eventos infantiles, que venía golpeado, explotó de repente con una demanda que nadie había dimensionado.
+Hay un momento en la vida de casi cualquier empresa de eventos donde la demanda supera la capacidad real de respuesta. No es un problema de facturación, es un problema de estructura. Anto Vicari, fundadora de When I Wish, lo vivió en carne propia cuando terminó la pandemia y el rubro de eventos infantiles, que venía golpeado, explotó de repente con una demanda que nadie había dimensionado.
 
 ## Crecer rápido y escalar bien no son la misma cosa
 
-Wen I Wish arrancó como una empresa familiar, con tres personas a cargo de todo lo administrativo, logístico y de producción. En el pico de esa primera etapa llegaron a recibir cien mensajes de WhatsApp por día pidiendo presupuestos, cerraban un promedio de doce eventos diarios y en algunos fines de semana sumaban cuarenta y cinco eventos entre sábado y domingo. Con tres personas atrás.
+When I Wish arrancó como una empresa familiar, con tres personas a cargo de todo lo administrativo, logístico y de producción. En el pico de esa primera etapa llegaron a recibir cien mensajes de WhatsApp por día pidiendo presupuestos, cerraban un promedio de doce eventos diarios y en algunos fines de semana sumaban cuarenta y cinco eventos entre sábado y domingo. Con tres personas atrás.
 
-Ese desfasaje entre volumen de negocio y capacidad instalada es uno de los puntos ciegos más comunes en la industria de eventos, y no es exclusivo de este rubro. Cuando una marca logra instalar un concepto fuerte y diferenciado, como hizo Wen I Wish frente a un mercado infantil "venido a menos", la reacción del mercado puede ser tan rápida que la propia empresa queda corriendo de atrás a su éxito.
+Ese desfasaje entre volumen de negocio y capacidad instalada es uno de los puntos ciegos más comunes en la industria de eventos, y no es exclusivo de este rubro. Cuando una marca logra instalar un concepto fuerte y diferenciado, como hizo When I Wish frente a un mercado infantil "venido a menos", la reacción del mercado puede ser tan rápida que la propia empresa queda corriendo de atrás a su éxito.
 
 La diferencia entre crecer y escalar está justamente ahí: crecer es que entren más pedidos, escalar es tener la estructura para sostener la calidad prometida en cada uno de esos pedidos. Vicari lo resume con una frase simple pero contundente: crecieron rápido, hicieron muchos eventos, pero "no tal pie", es decir, sin la base necesaria para sostenerlo con el estándar que la marca quería representar.
 
 ## La regla de un rol por persona no es un capricho, es control de calidad
 
-Uno de los mecanismos que Wen I Wish instaló para poder escalar sin diluir su identidad fue una regla operativa muy concreta: cada persona en un evento cumple un solo rol. La animadora no hace sonido y después limpia el piso. El sonidista no cubre logística. Cada función tiene a alguien dedicado exclusivamente a eso.
+Uno de los mecanismos que When I Wish instaló para poder escalar sin diluir su identidad fue una regla operativa muy concreta: cada persona en un evento cumple un solo rol. La animadora no hace sonido y después limpia el piso. El sonidista no cubre logística. Cada función tiene a alguien dedicado exclusivamente a eso.
 
 Esto suena obvio en teoría, pero en la práctica del rubro eventos es una de las primeras cosas que se sacrifican cuando el volumen de trabajo crece más rápido que el equipo. Es tentador, y barato, pedirle a la misma persona que resuelva dos o tres frentes a la vez. El problema es que ese ahorro de corto plazo termina degradando la experiencia que se le vende al cliente.
 
-En un evento estándar de Wen I Wish trabajan mínimo diez a doce personas. En los más grandes, la cifra sube a sesenta: veinte artistas de show, quince de staff de animación, más sonidistas y equipo de stage. Sostener esa cantidad de gente con un rol específico para cada uno exige una lógica de producción mucho más parecida a una puesta teatral que a una animación infantil tradicional, con protocolos de llegada que pueden implicar hasta dos o tres horas antes del evento para caracterización y preparación.
+En un evento estándar de When I Wish trabajan mínimo diez a doce personas. En los más grandes, la cifra sube a sesenta: veinte artistas de show, quince de staff de animación, más sonidistas y equipo de stage. Sostener esa cantidad de gente con un rol específico para cada uno exige una lógica de producción mucho más parecida a una puesta teatral que a una animación infantil tradicional, con protocolos de llegada que pueden implicar hasta dos o tres horas antes del evento para caracterización y preparación.
 
 Esa exigencia interna, que en un primer momento generó resistencia dentro del propio equipo, es lo que permite que un evento no tenga baches: que la energía se sostenga de principio a fin sin que nadie tenga que improvisar una tarea que no le corresponde.
 
 ## Cambiar el nombre de la marca fue reconocer que el concepto ya se había quedado chico
 
-Wen I Wish se llamó originalmente "Wen I Wish Animaciones". El cambio a "Wen I Wish Entretenimiento" no fue un lavado de imagen cosmético: fue el reconocimiento de que el nombre viejo ya no representaba lo que la empresa estaba haciendo ni hacia dónde quería ir.
+When I Wish se llamó originalmente "When I Wish Animaciones". El cambio a "When I Wish Entretenimiento" no fue un lavado de imagen cosmético: fue el reconocimiento de que el nombre viejo ya no representaba lo que la empresa estaba haciendo ni hacia dónde quería ir.
 
 Este tipo de decisión es más habitual de lo que parece en negocios de eventos que empiezan con un nicho muy definido y después descubren que su capacidad creativa excede ese nicho. El riesgo de quedarse con el nombre original es doble: por un lado, comunica al mercado un techo que la empresa ya superó; por otro, termina condicionando internamente qué proyectos se consideran "posibles" y cuáles no.
 
@@ -45,7 +45,7 @@ Al soltar la palabra "animaciones", Vicari pudo abrir su oferta hacia shows de m
 
 ## Sostener la cultura es el verdadero techo de una empresa de eventos
 
-Más allá de la estructura y del nombre, lo que explica que Wen I Wish haya podido escalar sin perder identidad es una cultura de equipo explícita: "familia, cero bardo, cero nada". No es una frase decorativa, es un filtro de selección. Los perfiles con los que trabajan son actores de teatro musical elegidos específicamente porque pueden sostener esa sensibilidad particular que exige trabajar para chicos.
+Más allá de la estructura y del nombre, lo que explica que When I Wish haya podido escalar sin perder identidad es una cultura de equipo explícita: "familia, cero bardo, cero nada". No es una frase decorativa, es un filtro de selección. Los perfiles con los que trabajan son actores de teatro musical elegidos específicamente porque pueden sostener esa sensibilidad particular que exige trabajar para chicos.
 
 La lección de fondo es que la cultura no escala sola. Cuando una empresa de eventos crece y pasa de un puñado de personas a decenas trabajando en un mismo fin de semana, la única forma de que la experiencia siga siendo coherente es que esa cultura esté tan bien definida que cualquiera que se sume la entienda rápido, o directamente no encaje y se vaya.
 
@@ -57,7 +57,7 @@ La lección de fondo es que la cultura no escala sola. Cuando una empresa de eve
 - Identificá en qué momento el volumen de pedidos empezó a superar tu capacidad instalada
 :::
 
-El desafío que viene para Wen I Wish es llevar la empresa a otro país, y ahí aparece la misma tensión de siempre: crecer implica soltar control y aprender a delegar en gente que nunca va a pensar una experiencia exactamente igual que quien la creó. La pregunta que queda abierta no es si se puede escalar la cantidad de eventos, sino si se puede escalar la ternura.
+El desafío que viene para When I Wish es llevar la empresa a otro país, y ahí aparece la misma tensión de siempre: crecer implica soltar control y aprender a delegar en gente que nunca va a pensar una experiencia exactamente igual que quien la creó. La pregunta que queda abierta no es si se puede escalar la cantidad de eventos, sino si se puede escalar la ternura.
 
 ## Preguntas frecuentes
 
