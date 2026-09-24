@@ -61,6 +61,18 @@ const CSS = `
 .inv-unir select:focus{outline:none;border-color:#5aa0ff}
 .inv-contacto{margin-bottom:22px;padding:13px 16px;background:rgba(245,245,245,.03);border:1px solid rgba(245,245,245,.08);border-radius:10px;font-family:var(--font-ui);font-size:.86rem;line-height:1.75;color:rgba(245,245,245,.68)}
 .inv-contacto .org-rotulo{margin-bottom:6px}
+.inv-respuestas{margin-bottom:22px;background:rgba(245,245,245,.03);border:1px solid rgba(245,245,245,.08);border-radius:10px;font-family:var(--font-ui)}
+.inv-respuestas>summary{cursor:pointer;padding:12px 16px;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(245,245,245,.55);list-style:none;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.inv-respuestas>summary::-webkit-details-marker{display:none}
+.inv-respuestas>summary::before{content:"▸";display:inline-block;transition:transform .15s;font-size:.9rem;color:rgba(245,245,245,.4)}
+.inv-respuestas[open]>summary::before{transform:rotate(90deg)}
+.inv-respuestas[open]>summary{border-bottom:1px solid rgba(245,245,245,.08)}
+.inv-respuestas__n{text-transform:none;letter-spacing:0;color:var(--azul,#5aa0ff);font-variant-numeric:tabular-nums}
+.inv-respuestas__f{text-transform:none;letter-spacing:0;color:rgba(245,245,245,.35);font-variant-numeric:tabular-nums}
+.inv-respuesta{padding:14px 16px;border-bottom:1px solid rgba(245,245,245,.06)}
+.inv-respuesta:last-child{border-bottom:none}
+.inv-respuesta__p{margin:0 0 5px;font-size:.8rem;line-height:1.5;color:rgba(245,245,245,.45)}
+.inv-respuesta__r{margin:0;font-size:.92rem;line-height:1.7;color:rgba(245,245,245,.85);white-space:pre-wrap}
 .inv-fuente--sin{border-left-color:#ffb35a;background:rgba(255,179,90,.07);color:#ffb35a}
 .adm-comofunciona{margin-top:16px;border-top:1px solid rgba(245,245,245,.08);padding-top:14px}
 .adm-comofunciona summary{cursor:pointer;font-family:var(--font-ui);font-size:.85rem;color:#93d5f7;list-style:none}
@@ -2528,6 +2540,33 @@ export default function PanelAdmin({
                             <div>{i.registro.email || "sin mail cargado"}</div>
                             {i.registro.telefono ? <div>{i.registro.telefono}</div> : null}
                           </div>
+                        ) : null}
+
+                        {/* Lo que escribió antes de grabar.
+                            Va plegado: son diez respuestas largas y lo que se
+                            mira todos los días es el contacto y el estado del
+                            circuito. Pero estaba SOLO en Airtable, que es
+                            justamente lo que el formulario venía a reemplazar. */}
+                        {i.registro?.respuestas?.length ? (
+                          <details className="inv-respuestas">
+                            <summary>
+                              Lo que contestó antes de grabar
+                              <span className="inv-respuestas__n">
+                                {i.registro.respuestas.length} de 10
+                              </span>
+                              {i.registro.respondioEl ? (
+                                <span className="inv-respuestas__f">
+                                  · {i.registro.respondioEl}
+                                </span>
+                              ) : null}
+                            </summary>
+                            {i.registro.respuestas.map((r) => (
+                              <div className="inv-respuesta" key={r.id}>
+                                <p className="inv-respuesta__p">{r.pregunta}</p>
+                                <p className="inv-respuesta__r">{r.respuesta}</p>
+                              </div>
+                            ))}
+                          </details>
                         ) : null}
 
                         {/* Lo que Airtable sabe y la ficha no. Se ofrece campo

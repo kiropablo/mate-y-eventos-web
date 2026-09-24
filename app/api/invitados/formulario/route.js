@@ -18,6 +18,11 @@ export const dynamic = "force-dynamic";
 const BASE = "appvziqRHGN0jtS19";
 const TABLA = "tblHdZr5d8yWovqNk";
 
+// El link que va en el aviso. Va la tabla y no una vista: una vista puede
+// tener columnas escondidas o un filtro, y entonces el mail manda a un lugar
+// donde la respuesta parece que no llegó.
+const TABLA_URL = `https://airtable.com/${BASE}/${TABLA}`;
+
 // Cuánto se acepta por campo. Sin tope, una sola respuesta puede llenar la
 // tabla: son campos de texto libre abiertos a internet.
 const MAX_CORTO = 300;
@@ -130,8 +135,14 @@ export async function POST(request) {
         v.comoNombrar ? `Lo nombramos: ${texto("comoNombrar", MAX_CORTO)}` : null,
         v.empresa ? `Empresa:  ${texto("empresa", MAX_CORTO)}` : null,
         "",
-        "El contacto y las diez respuestas están en Airtable, en «Invitados MyE».",
-        `También los ves en ${SITE.url}/admin, pestaña Invitados.`,
+        // El link directo, no "está en Airtable". Antes el mail decía que las
+        // respuestas también se veían en el panel, y no era cierto: el panel
+        // lee el contacto, no las diez preguntas. Mandar a alguien a un lugar
+        // donde no está lo que busca es peor que no decirle nada.
+        "Las diez respuestas y el contacto, acá:",
+        TABLA_URL,
+        "",
+        `La ficha pública se arma después, desde ${SITE.url}/admin, pestaña Invitados.`,
       ]
         .filter((l) => l !== null)
         .join("\n"),

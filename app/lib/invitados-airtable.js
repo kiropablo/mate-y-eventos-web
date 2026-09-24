@@ -10,8 +10,14 @@
 // que es lo que pasa con los 16 registros que entraron por el formulario viejo
 // y nunca supieron de ninguna ficha.
 
+import { PREGUNTAS } from "./formulario-invitados";
+
 const BASE = "appvziqRHGN0jtS19";
 const TABLA = "tblHdZr5d8yWovqNk";
+
+// El link a la tabla, para poder saltar a Airtable desde el panel cuando haga
+// falta ver algo que acá no mostramos.
+export const TABLA_URL = `https://airtable.com/${BASE}/${TABLA}`;
 
 const sinAcentos = (t) =>
   String(t || "")
@@ -43,6 +49,22 @@ function mapear(r) {
       .filter(Boolean),
     ficha: String(f["Ficha"] || "").trim(),
     respondioEl: f["Respondió el"] || null,
+    // Las diez respuestas del formulario.
+    //
+    // Antes no se leían: el panel traía el contacto y nada más, así que para
+    // leer lo que la persona había escrito antes de grabar —que es justamente
+    // para lo que se le manda el formulario— había que entrar a Airtable. Y el
+    // mail de aviso decía que se veían en el panel, que no era cierto.
+    //
+    // Los rótulos salen de PREGUNTAS, la misma lista con la que se arma el
+    // formulario: si algún día se cambia una pregunta, acá se cambia sola. Las
+    // vacías no entran, para que la ficha de alguien que contestó tres no
+    // muestre siete renglones en blanco.
+    respuestas: PREGUNTAS.map((p) => ({
+      id: p.id,
+      pregunta: p.rotulo || p.campo,
+      respuesta: String(f[p.campo] || "").trim(),
+    })).filter((r) => r.respuesta),
     // El circuito de validación.
     pedidoEl: f["Le pedimos que revise el"] || null,
     validadoEl: f["Respondió la revisión el"] || null,
