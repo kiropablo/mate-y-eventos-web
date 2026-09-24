@@ -1,4 +1,9 @@
 import { haySesion } from "../../../lib/admin";
+import {
+  getInvitadosAirtable,
+  registroDeFicha,
+} from "../../../lib/invitados-airtable";
+import { listarInvitadosParaPanel } from "../../../lib/invitados-admin";
 
 // Sube o saca la foto de un invitado.
 //
@@ -93,6 +98,57 @@ async function marcarFoto(slug, token, valor) {
   return { ok: guardado.ok, estado: guardado.status };
 }
 
+// Busca en Airtable la foto que mandó el propio invitado y la devuelve lista
+// para subir. No la publica: eso lo hace el mismo camino de siempre, con sus
+// mismas comprobaciones.
+//
+// Se exige la fecha de autorización. Una imagen suelta en el campo Foto
+// —cargada a mano, o que quedó de una prueba— no es una foto autorizada, y
+// publicarla sería poner la cara de alguien en internet porque había un
+// archivo en una celda.
+async function fotoDelRegistro(slug) {
+  const ficha = listarInvitadosParaPanel().find((f) => f.id === slug);
+  if (!ficha) {
+    return { ok: false, estado: 404, error: "No encontramos esa ficha." };
+  }
+
+  const registro = registroDeFicha(await getInvitadosAirtable(), ficha);
+  if (!registro) {
+    return {
+      ok: false,
+      estado: 404,
+      error:
+        "Esta ficha no está unida a ningún registro de Airtable. Unila primero y volvé a probar.",
+    };
+  }
+  if (!registro.foto?.url) {
+    return {
+      ok: false,
+      estado: 404,
+      error: registro.respondioEl
+        ? "No mandó foto, o la mandó sin autorizar que se publique."
+        : "Todavía no contestó el formulario.",
+    };
+  }
+
+  try {
+    // La dirección que da Airtable vence a las pocas horas: se usa ahora y no
+    // se guarda en ningún lado.
+    const res = await fetch(registro.foto.url, { cache: "no-store" });
+    if (!res.ok) {
+      return {
+        ok: false,
+        estado: 502,
+        error: `Airtable no entregó la imagen (${res.status}). Recargá el panel y probá de nuevo: esas direcciones vencen.`,
+      };
+    }
+    const bytes = Buffer.from(await res.arrayBuffer());
+    return { ok: true, base64: bytes.toString("base64") };
+  } catch (e) {
+    return { ok: false, estado: 502, error: `No se pudo traer la imagen: ${e.message}` };
+  }
+}
+
 export async function POST(request) {
   if (!haySesion()) {
     return Response.json({ ok: false, error: "Sesión vencida." }, { status: 401 });
@@ -107,9 +163,11 @@ export async function POST(request) {
 
   let slug = "";
   let base64 = "";
+  let desdeAirtable = false;
   try {
     const body = await request.json();
     slug = String(body?.id || "");
+    desdeAirtable = Boolean(body?.desdeAirtable);
     // Llega como data URL desde el navegador: "data:image/jpeg;base64,...".
     base64 = String(body?.imagen || "").replace(/^data:image\/jpeg;base64,/, "");
   } catch {
@@ -118,6 +176,21 @@ export async function POST(request) {
 
   if (!/^[a-z0-9-]{2,60}$/.test(slug)) {
     return Response.json({ ok: false, error: "Ficha inválida." }, { status: 400 });
+  }
+
+  // "Usar la foto que mandó": la imagen no viene en el pedido, se busca.
+  //
+  // El navegador manda el slug y NADA MÁS. Ni la dirección de la imagen ni si
+  // estaba autorizada: eso se vuelve a mirar acá, contra Airtable. Confiar en
+  // lo que diga el navegador sería dejar que un pedido armado a mano publique
+  // la foto de cualquiera, y el permiso es justamente lo único que hace que
+  // esa foto se pueda publicar.
+  if (desdeAirtable) {
+    const traido = await fotoDelRegistro(slug);
+    if (!traido.ok) {
+      return Response.json({ ok: false, error: traido.error }, { status: traido.estado });
+    }
+    base64 = traido.base64;
   }
   if (!base64 || !/^[A-Za-z0-9+/=]+$/.test(base64)) {
     return Response.json({ ok: false, error: "No llegó la imagen." }, { status: 400 });

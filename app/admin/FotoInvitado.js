@@ -19,7 +19,7 @@ import { useState } from "react";
 const ANCHO = 800;
 const ALTO = 1000;
 
-export default function FotoInvitado({ id, tieneFoto, onCambio }) {
+export default function FotoInvitado({ id, tieneFoto, fotoEnviada, onCambio }) {
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState("");
   // Para que la foto nueva se vea al instante: si no, el navegador sigue
@@ -67,6 +67,37 @@ export default function FotoInvitado({ id, tieneFoto, onCambio }) {
     }
   }
 
+  // Traer la que mandó él mismo por el formulario.
+  //
+  // Solo viaja el id de la ficha. La dirección de la imagen y el permiso los
+  // vuelve a buscar el servidor contra Airtable: si los mandara el navegador,
+  // un pedido armado a mano podría publicar la foto de cualquiera.
+  async function usarLaQueMando() {
+    if (
+      tieneFoto &&
+      !confirm("Esta ficha ya tiene foto. ¿La reemplazo por la que mandó él?")
+    ) {
+      return;
+    }
+    setSubiendo(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/foto-invitado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, desdeAirtable: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo traer.");
+      setVersion((v) => v + 1);
+      onCambio?.(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubiendo(false);
+    }
+  }
+
   async function sacar() {
     if (!confirm("¿Sacar la foto de esta ficha?")) return;
     setSubiendo(true);
@@ -104,6 +135,18 @@ export default function FotoInvitado({ id, tieneFoto, onCambio }) {
           <div className="inv-foto__vacia">sin foto</div>
         )}
         <div className="inv-foto__acciones">
+          {/* Primero la que mandó él, y no la de subir a mano: es la que ya
+              tiene permiso y la que no hay que ir a buscar a ningún lado. */}
+          {fotoEnviada?.url ? (
+            <button
+              type="button"
+              className="adm-btn"
+              disabled={subiendo}
+              onClick={usarLaQueMando}
+            >
+              {subiendo ? "Trayendo…" : "Usar la foto que mandó"}
+            </button>
+          ) : null}
           <label className="adm-btn adm-btn--sec">
             {subiendo ? "Subiendo…" : tieneFoto ? "Cambiar la foto" : "Subir una foto"}
             <input

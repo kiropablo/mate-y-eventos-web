@@ -2676,8 +2676,8 @@ export default function PanelAdmin({
                               </p>
                               <p className="inv-fotoenviada__nota">
                                 {i.foto
-                                  ? "La ficha ya tiene otra foto cargada."
-                                  : "La ficha todavía no tiene foto."}
+                                  ? "La ficha ya tiene otra foto. El botón de abajo la reemplaza."
+                                  : "Traela con «Usar la foto que mandó», acá abajo."}
                               </p>
                             </div>
                           </div>
@@ -2846,6 +2846,7 @@ export default function PanelAdmin({
                         <FotoInvitado
                           id={i.id}
                           tieneFoto={i.foto}
+                          fotoEnviada={i.registro?.foto}
                           onCambio={(tiene) =>
                             setInvs((previa) =>
                               previa.map((x) =>

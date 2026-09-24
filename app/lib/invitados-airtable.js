@@ -130,7 +130,17 @@ export async function getInvitadosAirtable() {
 // sabe que son la misma.
 export function registroDeFicha(registros, ficha) {
   if (!ficha) return null;
-  const porFicha = registros.find((r) => r.ficha && r.ficha === ficha.slug);
+  // El slug puede venir como `slug` o como `id` según quién arme el objeto:
+  // listarInvitadosParaPanel() lo llama `id`, y el resto del código `slug`.
+  //
+  // Mirar solo `slug` hacía que el botón "Unir" del panel no sirviera para
+  // nada: escribía el slug en el campo Ficha de Airtable y acá nunca se leía,
+  // porque las fichas del panel no traen `slug`. La unión se ignoraba y todo
+  // caía en el calce por nombre, que es EXACTAMENTE lo que la unión existe
+  // para resolver: la ficha dice "Michel" y el registro "Miguel Ángel
+  // Clavello", y por nombre no se encuentran nunca.
+  const slug = ficha.slug || ficha.id;
+  const porFicha = slug && registros.find((r) => r.ficha && r.ficha === slug);
   if (porFicha) return porFicha;
   const nombre = sinAcentos(ficha.nombre);
   if (!nombre) return null;
