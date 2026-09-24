@@ -171,10 +171,55 @@ export function unirConAirtable(fichas, registros, registroDeFicha) {
             validadoEl: r.validadoEl,
             revisionPendiente: r.revisionPendiente,
             correcciones: r.correcciones,
+            // Lo que contestó antes de grabar. Esta lista de campos es fija: lo
+            // que no está acá no llega al panel por más que Airtable lo tenga.
+            // Ya pasó con estos dos, que se mapearon en invitados-airtable.js y
+            // se quedaron en el camino justo acá.
+            respondioEl: r.respondioEl,
+            respuestas: r.respuestas,
           }
         : null,
     };
   });
+}
+
+// Los que contestaron el formulario y todavía no tienen ficha.
+//
+// Es el caso NORMAL, no el raro: el formulario se manda antes de la entrevista
+// y la ficha se arma después de que hay episodio. En el medio, esa respuesta no
+// aparecía en ninguna parte del panel —que lista fichas— y había que acordarse
+// de entrar a Airtable.
+//
+// "Sin ficha" es no estar atado por el campo Ficha Y que ninguna ficha lo
+// reclame por nombre: si aparece adentro de una ficha, mostrarlo también acá
+// sería contarlo dos veces.
+export function respuestasSinFicha(fichas, registros, registroDeFicha) {
+  const tomados = new Set();
+  for (const f of fichas) {
+    const r = registroDeFicha(registros, f);
+    if (r) tomados.add(r.id);
+  }
+
+  return registros
+    .filter((r) => !tomados.has(r.id))
+    // Solo los que contestaron el formulario nuevo. Los 16 del formulario viejo
+    // de Airtable no tienen fecha ni respuestas: son un archivo histórico, no
+    // algo para leer antes de una entrevista.
+    .filter((r) => r.respondioEl || r.respuestas?.length)
+    // El más nuevo arriba: es el que viene a grabar.
+    .sort((a, b) => String(b.respondioEl || "").localeCompare(String(a.respondioEl || "")))
+    .map((r) => ({
+      id: r.id,
+      nombre: r.nombre,
+      comoNombrar: r.comoNombrar,
+      empresa: r.empresa,
+      email: r.email,
+      telefono: r.telefono,
+      web: r.web,
+      redes: r.redes,
+      respondioEl: r.respondioEl,
+      respuestas: r.respuestas,
+    }));
 }
 
 export function listarInvitadosParaPanel() {

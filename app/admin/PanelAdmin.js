@@ -73,6 +73,22 @@ const CSS = `
 .inv-respuesta:last-child{border-bottom:none}
 .inv-respuesta__p{margin:0 0 5px;font-size:.8rem;line-height:1.5;color:rgba(245,245,245,.45)}
 .inv-respuesta__r{margin:0;font-size:.92rem;line-height:1.7;color:rgba(245,245,245,.85);white-space:pre-wrap}
+.inv-sinficha{margin-bottom:22px;padding:14px 16px 6px;background:rgba(90,160,255,.05);border:1px solid rgba(90,160,255,.22);border-radius:10px}
+.inv-sinficha__top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.inv-sinficha__air{font-family:var(--font-ui);font-size:.78rem;color:#5aa0ff;text-decoration:none;border-bottom:1px solid rgba(90,160,255,.4)}
+.inv-sinficha__air:hover{border-bottom-color:#5aa0ff}
+.inv-sinficha__ayuda{margin:4px 0 12px;font-family:var(--font-body);font-size:.84rem;line-height:1.55;color:rgba(245,245,245,.55)}
+.inv-sinficha__item{background:rgba(12,12,15,.55);border:1px solid rgba(245,245,245,.08);border-radius:9px;margin-bottom:8px}
+.inv-sinficha__item>summary{cursor:pointer;padding:11px 14px;font-family:var(--font-ui);font-size:.88rem;color:rgba(245,245,245,.8);list-style:none;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.inv-sinficha__item>summary::-webkit-details-marker{display:none}
+.inv-sinficha__item>summary::before{content:"▸";display:inline-block;transition:transform .15s;color:rgba(245,245,245,.4)}
+.inv-sinficha__item[open]>summary::before{transform:rotate(90deg)}
+.inv-sinficha__item[open]>summary{border-bottom:1px solid rgba(245,245,245,.08)}
+.inv-sinficha__alias{color:rgba(245,245,245,.5);font-size:.82rem}
+.inv-sinficha__emp{color:rgba(245,245,245,.45);font-size:.8rem}
+.inv-sinficha__f{margin-left:auto;color:rgba(245,245,245,.35);font-size:.78rem;font-variant-numeric:tabular-nums}
+.inv-sinficha__cuerpo{padding:4px 0 0}
+.inv-sinficha__cuerpo .inv-contacto{margin:12px 14px}
 .inv-fuente--sin{border-left-color:#ffb35a;background:rgba(255,179,90,.07);color:#ffb35a}
 .adm-comofunciona{margin-top:16px;border-top:1px solid rgba(245,245,245,.08);padding-top:14px}
 .adm-comofunciona summary{cursor:pointer;font-family:var(--font-ui);font-size:.85rem;color:#93d5f7;list-style:none}
@@ -154,6 +170,10 @@ export default function PanelAdmin({
   articulos,
   glosario,
   invitados,
+  // Por defecto lista vacía y no undefined: así `sinFicha.length` no revienta
+  // si algún día alguien monta el panel sin pasarla.
+  sinFicha = [],
+  tablaUrl = "",
   linkFormulario,
   organizadores,
 }) {
@@ -1347,6 +1367,75 @@ export default function PanelAdmin({
         <div className="adm-aviso">
           Falta cargar AGENDA_FIRMA_SECRET en Vercel: sin esa clave no se puede
           armar el link del formulario.
+        </div>
+      ) : null}
+
+      {/* Contestaron y todavía no tienen ficha.
+          Va ARRIBA de la lista de fichas a propósito: es gente que viene a
+          grabar, y lo que escribió es justo lo que hay que leer antes. Hasta
+          ahora esto no aparecía en ninguna pantalla. */}
+      {seccion === "invitados" && sinFicha.length ? (
+        <div className="inv-sinficha">
+          <div className="inv-sinficha__top">
+            <span className="org-rotulo">
+              Contestaron el formulario · todavía sin ficha
+            </span>
+            <a
+              className="inv-sinficha__air"
+              href={tablaUrl}
+              target="_blank"
+              rel="noopener"
+            >
+              Verlo en Airtable
+            </a>
+          </div>
+          <p className="inv-sinficha__ayuda">
+            La ficha se arma después, cuando haya episodio. Mientras tanto, esto
+            es lo que contaron de sí mismos.
+          </p>
+
+          {sinFicha.map((p) => (
+            <details className="inv-sinficha__item" key={p.id}>
+              <summary>
+                <strong>{p.nombre || "Sin nombre"}</strong>
+                {p.comoNombrar && p.comoNombrar !== p.nombre ? (
+                  <span className="inv-sinficha__alias">«{p.comoNombrar}»</span>
+                ) : null}
+                {p.empresa ? (
+                  <span className="inv-sinficha__emp">{p.empresa}</span>
+                ) : null}
+                {p.respondioEl ? (
+                  <span className="inv-sinficha__f">{p.respondioEl}</span>
+                ) : null}
+              </summary>
+
+              <div className="inv-sinficha__cuerpo">
+                <div className="inv-contacto">
+                  <span className="org-rotulo">Contacto (no se publica)</span>
+                  <div>{p.email || "sin mail cargado"}</div>
+                  {p.telefono ? <div>{p.telefono}</div> : null}
+                  {p.web ? <div>{p.web}</div> : null}
+                  {p.redes?.length ? <div>{p.redes.join(" · ")}</div> : null}
+                </div>
+
+                {p.respuestas?.length ? (
+                  p.respuestas.map((r) => (
+                    <div className="inv-respuesta" key={r.id}>
+                      <p className="inv-respuesta__p">{r.pregunta}</p>
+                      <p className="inv-respuesta__r">{r.respuesta}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="inv-respuesta">
+                    <p className="inv-respuesta__p">
+                      Dejó sus datos pero no contestó ninguna de las diez
+                      preguntas.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </details>
+          ))}
         </div>
       ) : null}
 
