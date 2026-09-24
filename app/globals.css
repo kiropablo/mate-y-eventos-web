@@ -4124,3 +4124,72 @@ footer.site {
   color: #f2c14e;
   font-size: 0.9rem;
 }
+
+/* La foto del formulario de invitados.
+   Va con su casilla de autorización: la foto no viaja sin el permiso, y el
+   permiso no significa nada antes de que haya una foto que mirar. */
+.form-foto input[type="file"] {
+  width: 100%;
+  padding: 11px 12px;
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  color: rgba(245, 245, 245, 0.7);
+  background: rgba(245, 245, 245, 0.03);
+  border: 1px dashed rgba(245, 245, 245, 0.22);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.form-foto input[type="file"]:hover { border-color: var(--azul); }
+.form-foto__hay {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.form-foto__hay img {
+  width: 96px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex: 0 0 auto;
+}
+.form-foto__lado { flex: 1 1 200px; }
+.form-foto__lado .form-ayuda { margin-top: 0; }
+.form-foto__sacar {
+  margin-top: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(245, 245, 245, 0.3);
+  color: rgba(245, 245, 245, 0.6);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.form-foto__sacar:hover { color: #f5f5f5; border-bottom-color: #f5f5f5; }
+.form-autorizo {
+  display: flex !important;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(90, 160, 255, 0.06);
+  border: 1px solid rgba(90, 160, 255, 0.28);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-ui) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: rgba(245, 245, 245, 0.85) !important;
+}
+.form-autorizo input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  flex: 0 0 auto;
+  accent-color: var(--azul);
+  cursor: pointer;
+}
+.form-ayuda--ojo { color: #ffb35a !important; }

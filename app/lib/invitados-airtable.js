@@ -49,6 +49,21 @@ function mapear(r) {
       .filter(Boolean),
     ficha: String(f["Ficha"] || "").trim(),
     respondioEl: f["Respondió el"] || null,
+    // La foto que mandó él mismo, con la fecha en que autorizó publicarla.
+    //
+    // Se exige la fecha: una imagen suelta en ese campo —cargada a mano, o que
+    // quedó de una prueba— no es una foto autorizada, y esta es la única marca
+    // que distingue "la mandó y dijo que sí" de "hay un archivo ahí".
+    //
+    // La dirección que devuelve Airtable vence a las pocas horas, así que sirve
+    // para mirarla en el panel y no para guardarla en ningún lado.
+    foto: f["Autorizó la foto el"]
+      ? {
+          url: f["Foto"]?.[0]?.url || "",
+          miniatura: f["Foto"]?.[0]?.thumbnails?.large?.url || "",
+          autorizadaEl: f["Autorizó la foto el"],
+        }
+      : null,
     // Las diez respuestas del formulario.
     //
     // Antes no se leían: el panel traía el contacto y nada más, así que para

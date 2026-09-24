@@ -1,5 +1,11 @@
 import { claveFormularioValida } from "../../../lib/firma";
-import { CONTACTO, PREGUNTAS, pareceContacto } from "../../../lib/formulario-invitados";
+import {
+  CONTACTO,
+  PREGUNTAS,
+  FOTO,
+  FOTO_MAX_BYTES,
+  pareceContacto,
+} from "../../../lib/formulario-invitados";
 import { mandarCorreo, correoInterno } from "../../../lib/correo";
 import { SITE } from "../../../lib/site";
 
@@ -22,6 +28,60 @@ const TABLA = "tblHdZr5d8yWovqNk";
 // tener columnas escondidas o un filtro, y entonces el mail manda a un lugar
 // donde la respuesta parece que no llegó.
 const TABLA_URL = `https://airtable.com/${BASE}/${TABLA}`;
+
+// Sube la foto como adjunto del registro.
+//
+// Va en un pedido aparte y DESPUÉS de crear la fila, porque Airtable necesita
+// el id del registro para colgarle un archivo: no se puede mandar todo junto.
+//
+// Devuelve true o false y nunca tira: si la foto no sube, las respuestas ya
+// están guardadas y el trámite del invitado terminó bien. Es la misma regla
+// que el correo — lo secundario no voltea lo principal.
+async function subirFoto(idRegistro, dataUrl, key, nombre) {
+  const m = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(dataUrl || "");
+  if (!m) {
+    console.warn("[formulario-invitados] la foto no vino como imagen: se descarta");
+    return false;
+  }
+  const [, tipo, base64] = m;
+
+  // El tope se mide sobre los bytes reales, no sobre el largo del texto:
+  // base64 abulta un tercio y compararlo así dejaría pasar fotos más pesadas
+  // de lo que dice el número.
+  const bytes = Math.floor((base64.length * 3) / 4);
+  if (bytes > FOTO_MAX_BYTES) {
+    console.warn(`[formulario-invitados] foto de ${bytes} bytes: pasa el tope, se descarta`);
+    return false;
+  }
+
+  try {
+    const res = await fetch(
+      `https://content.airtable.com/v0/${BASE}/${idRegistro}/${FOTO.campo}/uploadAttachment`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contentType: tipo,
+          file: base64,
+          filename: `${nombre || "invitado"}.jpg`,
+        }),
+      }
+    );
+    if (!res.ok) {
+      console.warn(
+        `[formulario-invitados] Airtable ${res.status} al subir la foto: ${(await res.text()).slice(0, 160)}`
+      );
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn(`[formulario-invitados] no se pudo subir la foto: ${e.message}`);
+    return false;
+  }
+}
 
 // Cuánto se acepta por campo. Sin tope, una sola respuesta puede llenar la
 // tabla: son campos de texto libre abiertos a internet.
@@ -101,6 +161,15 @@ export async function POST(request) {
     if (valor) fields[p.campo] = valor;
   }
 
+  // La autorización de la foto se anota con fecha. Es el consentimiento, y un
+  // consentimiento sin fecha no sirve para nada: hay que poder decir cuándo.
+  //
+  // Se escribe solo si además vino la foto. Marcar la casilla y no mandar
+  // ninguna no autoriza nada, así que dejar la fecha sola sería afirmar un
+  // permiso sobre una imagen que no existe.
+  const quiereFoto = Boolean(cuerpo?.fotoAutorizada && cuerpo?.foto);
+  if (quiereFoto) fields[FOTO.campoFecha] = hoy;
+
   const res = await fetch(`https://api.airtable.com/v0/${BASE}/${TABLA}`, {
     method: "POST",
     headers: {
@@ -121,6 +190,16 @@ export async function POST(request) {
     );
   }
 
+  // La foto, después de que la fila existe y sin poder voltear nada.
+  let fotoGuardada = false;
+  if (quiereFoto) {
+    const creado = await res.json().catch(() => ({}));
+    const idRegistro = creado?.records?.[0]?.id;
+    if (idRegistro) {
+      fotoGuardada = await subirFoto(idRegistro, cuerpo.foto, key, nombre);
+    }
+  }
+
   // El aviso va DESPUÉS de guardar y nunca voltea la respuesta: para el
   // invitado el trámite ya terminó bien. Es la misma regla que el resto de los
   // correos del sitio.
@@ -134,6 +213,13 @@ export async function POST(request) {
         `Nombre:   ${nombre}`,
         v.comoNombrar ? `Lo nombramos: ${texto("comoNombrar", MAX_CORTO)}` : null,
         v.empresa ? `Empresa:  ${texto("empresa", MAX_CORTO)}` : null,
+        // Que la foto esté o no cambia lo que hay que hacer después, así que
+        // se dice acá y no hay que ir a mirar.
+        quiereFoto && fotoGuardada
+          ? "Mandó foto y autorizó publicarla."
+          : quiereFoto
+            ? "Mandó foto pero no se pudo guardar. Hay que pedírsela de nuevo."
+            : "No mandó foto: hay que conseguir una.",
         "",
         // El link directo, no "está en Airtable". Antes el mail decía que las
         // respuestas también se veían en el panel, y no era cierto: el panel

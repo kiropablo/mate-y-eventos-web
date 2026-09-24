@@ -177,6 +177,7 @@ export function unirConAirtable(fichas, registros, registroDeFicha) {
             // se quedaron en el camino justo acá.
             respondioEl: r.respondioEl,
             respuestas: r.respuestas,
+            foto: r.foto,
           }
         : null,
     };
@@ -219,6 +220,7 @@ export function respuestasSinFicha(fichas, registros, registroDeFicha) {
       redes: r.redes,
       respondioEl: r.respondioEl,
       respuestas: r.respuestas,
+      foto: r.foto,
     }));
 }
 

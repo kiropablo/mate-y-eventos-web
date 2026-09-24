@@ -2,7 +2,13 @@ import { notFound } from "next/navigation";
 import SiteNav from "../../../components/SiteNav";
 import Footer from "../../../components/Footer";
 import { claveFormularioValida } from "../../../lib/firma";
-import { CONTACTO, PREGUNTAS } from "../../../lib/formulario-invitados";
+import {
+  CONTACTO,
+  PREGUNTAS,
+  FOTO,
+  FOTO_ANCHO,
+  FOTO_ALTO,
+} from "../../../lib/formulario-invitados";
 import FormularioInvitado from "./FormularioInvitado";
 
 // El formulario que se le manda a alguien antes de entrevistarlo.
@@ -49,6 +55,9 @@ export default function PaginaFormulario({ params }) {
             clave={params.clave}
             contacto={CONTACTO}
             preguntas={PREGUNTAS}
+            foto={FOTO}
+            fotoAncho={FOTO_ANCHO}
+            fotoAlto={FOTO_ALTO}
           />
         </div>
       </section>

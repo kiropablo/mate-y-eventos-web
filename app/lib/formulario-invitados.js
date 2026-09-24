@@ -158,14 +158,71 @@ export const PREGUNTAS = [
 
 export const TODOS = [...CONTACTO, ...PREGUNTAS];
 
+// LA FOTO.
+//
+// No va en CONTACTO ni en PREGUNTAS porque no es texto: es un archivo y una
+// autorización, y las dos cosas viajan aparte.
+//
+// El punto no es juntar una foto —esa se puede bajar de cualquier red— sino
+// que la persona diga que sí. La ficha lleva su nombre, su cara y lo que hace,
+// y se publica en un sitio que ella no controla. Por eso la casilla es
+// obligatoria para que la foto se guarde, y la fecha en que la marcó queda
+// escrita al lado de la imagen: si algún día alguien pregunta, la respuesta no
+// es "me parece que sí".
+//
+// Sigue habiendo un segundo paso: antes de publicar la ficha se le manda para
+// que la revise entera, foto incluida. Esto no lo reemplaza, lo adelanta.
+export const FOTO = {
+  id: "foto",
+  campo: "Foto",
+  campoFecha: "Autorizó la foto el",
+  rotulo: "Tu foto",
+  ayuda:
+    "Opcional. Una donde se te vea la cara, de frente. Se recorta sola a vertical y no hace falta que sea liviana: la achica tu navegador antes de mandarla.",
+  // El texto de la casilla. Dice QUÉ se hace con la foto y DÓNDE, que es lo
+  // único que convierte un clic en un permiso.
+  autorizacion:
+    "Autorizo a Mate y Eventos a publicar esta foto en mi ficha de mateyeventos.com.",
+};
+
+// El tamaño al que la recorta el navegador: el mismo de las fotos de Pablo y
+// Alexis, para que una ficha no desentone al lado de otra.
+export const FOTO_ANCHO = 800;
+export const FOTO_ALTO = 1000;
+
+// Tope de lo que acepta el servidor, ya recortada. Una foto de 800×1000 en
+// JPEG pesa entre 60 y 150 KB: medio mega es holgado y corta cualquier cosa
+// rara antes de que llegue a Airtable.
+export const FOTO_MAX_BYTES = 512 * 1024;
+
 // Los campos que NO pueden salir a la web, por id. Lo usa el panel para
 // marcarlos y la ruta que arma la ficha para no copiarlos nunca.
 export const PRIVADOS = CONTACTO.filter((c) => c.privado).map((c) => c.id);
 
 // Un mail o un teléfono escritos donde van las redes. Pasa, y no por maldad:
 // alguien pega su contacto en el campo equivocado y ese campo sí se publica.
+//
+// El mail se busca en cualquier parte del renglón. El teléfono ANTES se pedía
+// que ocupara el renglón entero, así que "11 5555 5555" se frenaba pero
+// "WhatsApp 11 5555 5555" pasaba y se publicaba. Era el mismo daño con una
+// palabra adelante.
+//
+// Lo difícil de buscarlo en cualquier parte son los falsos positivos: un link
+// legítimo puede traer un número largo —"linkedin.com/in/juan-perez-123456789",
+// "youtube.com/watch?v=12345678"— y frenar la red de alguien es peor que dejar
+// pasar un teléfono, porque le rompe el trámite sin que entienda por qué.
+//
+// Por eso el número tiene que arrancar renglón o venir después de un espacio o
+// un paréntesis: pegado a "/", "=", "-" o a una letra es parte de una
+// dirección, no un teléfono. Y se cuentan los dígitos de verdad: ocho o más.
+// "Av. Corrientes 1234" tiene cuatro y no molesta a nadie.
+const TELEFONO = /(?:^|[\s(])(\+?\d[\d\s().-]{5,}\d)/;
+
 export function pareceContacto(texto) {
-  return /^mailto:|[^\s/]@[^\s/]*\.[a-z]{2,}|^tel:|^\+?\d[\d\s()-]{7,}$/i.test(
-    String(texto || "").trim()
-  );
+  const t = String(texto || "").trim();
+  if (/^mailto:|[^\s/]@[^\s/]*\.[a-z]{2,}|^tel:/i.test(t)) return true;
+
+  const m = t.match(TELEFONO);
+  if (!m) return false;
+  return (m[1].match(/\d/g) || []).length >= 8;
 }

@@ -89,6 +89,10 @@ const CSS = `
 .inv-sinficha__f{margin-left:auto;color:rgba(245,245,245,.35);font-size:.78rem;font-variant-numeric:tabular-nums}
 .inv-sinficha__cuerpo{padding:4px 0 0}
 .inv-sinficha__cuerpo .inv-contacto{margin:12px 14px}
+.inv-fotoenviada{display:flex;gap:14px;align-items:flex-start;margin:12px 14px 16px;padding:12px;background:rgba(92,214,166,.06);border:1px solid rgba(92,214,166,.25);border-radius:10px}
+.inv-fotoenviada img{width:72px;height:90px;object-fit:cover;border-radius:6px;flex:0 0 auto;background:rgba(245,245,245,.06)}
+.inv-fotoenviada p{margin:4px 0 0;font-family:var(--font-ui);font-size:.84rem;line-height:1.55;color:rgba(245,245,245,.72)}
+.inv-fotoenviada__nota{color:rgba(245,245,245,.45)!important;font-size:.79rem!important}
 .inv-fuente--sin{border-left-color:#ffb35a;background:rgba(255,179,90,.07);color:#ffb35a}
 .adm-comofunciona{margin-top:16px;border-top:1px solid rgba(245,245,245,.08);padding-top:14px}
 .adm-comofunciona summary{cursor:pointer;font-family:var(--font-ui);font-size:.85rem;color:#93d5f7;list-style:none}
@@ -1410,6 +1414,26 @@ export default function PanelAdmin({
               </summary>
 
               <div className="inv-sinficha__cuerpo">
+                {/* La foto que mandó él mismo, con la fecha de la
+                    autorización. Sin esa fecha no se muestra: es lo que
+                    distingue una foto autorizada de un archivo suelto. */}
+                {p.foto?.url ? (
+                  <div className="inv-fotoenviada">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.foto.miniatura || p.foto.url} alt={p.nombre} />
+                    <div>
+                      <span className="org-rotulo">La mandó él mismo</span>
+                      <p>
+                        Autorizó publicarla el <strong>{p.foto.autorizadaEl}</strong>.
+                      </p>
+                      <p className="inv-fotoenviada__nota">
+                        Ya viene recortada a 800×1000. Bajala de Airtable y
+                        subila a su ficha cuando exista.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="inv-contacto">
                   <span className="org-rotulo">Contacto (no se publica)</span>
                   <div>{p.email || "sin mail cargado"}</div>
@@ -2628,6 +2652,34 @@ export default function PanelAdmin({
                             ) : null}
                             <div>{i.registro.email || "sin mail cargado"}</div>
                             {i.registro.telefono ? <div>{i.registro.telefono}</div> : null}
+                          </div>
+                        ) : null}
+
+                        {/* La foto que mandó con el formulario. Se muestra acá
+                            aunque la ficha ya tenga una: son dos fotos
+                            distintas —la que eligió él y la que subió el
+                            equipo— y cuál vale lo decide quien mira. */}
+                        {i.registro?.foto?.url ? (
+                          <div className="inv-fotoenviada">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={i.registro.foto.miniatura || i.registro.foto.url}
+                              alt={i.nombre}
+                            />
+                            <div>
+                              <span className="org-rotulo">
+                                La foto que mandó él mismo
+                              </span>
+                              <p>
+                                Autorizó publicarla el{" "}
+                                <strong>{i.registro.foto.autorizadaEl}</strong>.
+                              </p>
+                              <p className="inv-fotoenviada__nota">
+                                {i.foto
+                                  ? "La ficha ya tiene otra foto cargada."
+                                  : "La ficha todavía no tiene foto."}
+                              </p>
+                            </div>
                           </div>
                         ) : null}
 
