@@ -14,7 +14,7 @@ import {
   getSecciones,
   armarTranscripcion,
 } from "../../lib/transcripts";
-import { getArticuloDeEpisodio } from "../../lib/articulos";
+import { getArticulosDeEpisodio } from "../../lib/articulos";
 import { terminosDelEpisodio } from "../../lib/glosario";
 import { invitadosDelEpisodio } from "../../lib/invitados";
 import { SITE, LINKS, AUTORES } from "../../lib/site";
@@ -86,7 +86,7 @@ export default async function Episodio({ params }) {
   const transcript = getTranscript(ep.id);
   const bloques = armarTranscripcion(transcript, getSecciones(ep.id));
   const terminos = terminosDelEpisodio(ep.id);
-  const articulo = getArticuloDeEpisodio(ep.id);
+  const articulos = getArticulosDeEpisodio(ep.id);
   // Quién vino a hablar, si ya tiene ficha publicada.
   const invitados = invitadosDelEpisodio(ep.id);
 
@@ -250,19 +250,31 @@ export default async function Episodio({ params }) {
             </div>
           ) : null}
 
-          {articulo ? (
-            <Link
-              href={`/articulos/${articulo.id}`}
-              className="ep-articulo"
-              style={{ marginTop: "40px", maxWidth: "760px" }}
-            >
-              <div className="eyebrow">Para leer</div>
-              <h2 className="ep-articulo__titulo">{articulo.titulo}</h2>
-              <p className="ep-articulo__bajada">{articulo.bajada}</p>
-              <span className="ep-articulo__link">
-                Leer el artículo · {articulo.lectura} min
-              </span>
-            </Link>
+          {/* Los artículos que salieron de este episodio. Suele ser uno —el
+              que escribe el robot— pero las piezas de comparación salen de
+              material ya dicho y varias nacen del mismo episodio. El rótulo
+              se dice en singular o en plural según cuántos haya: "Para leer"
+              arriba de dos tarjetas queda raro. */}
+          {articulos.length > 0 ? (
+            <div style={{ marginTop: "40px", maxWidth: "760px" }}>
+              <div className="eyebrow">
+                {articulos.length === 1 ? "Para leer" : "Para leer · " + articulos.length + " artículos"}
+              </div>
+              {articulos.map((articulo) => (
+                <Link
+                  key={articulo.id}
+                  href={`/articulos/${articulo.id}`}
+                  className="ep-articulo"
+                  style={{ marginTop: "14px" }}
+                >
+                  <h2 className="ep-articulo__titulo">{articulo.titulo}</h2>
+                  <p className="ep-articulo__bajada">{articulo.bajada}</p>
+                  <span className="ep-articulo__link">
+                    Leer el artículo · {articulo.lectura} min
+                  </span>
+                </Link>
+              ))}
+            </div>
           ) : null}
 
           {terminos.length > 0 ? (

@@ -150,12 +150,26 @@ export function getArticulo(id, { incluirBorradores = false } = {}) {
 // Antes esto era getArticulo(videoId) y funcionaba de casualidad, porque el
 // archivo se llamaba igual que el video. Ahora el archivo se llama por su
 // tema, así que hay que buscar por el campo "episodio".
+// TODOS los artículos que salieron de un episodio, no solo el primero.
+//
+// Durante mucho tiempo hubo exactamente uno por episodio, porque los escribe
+// el robot y escribe uno. Pero las piezas de comparación salen de material ya
+// dicho y varias nacen del mismo episodio: seis de las ocho comparten episodio
+// con un artículo que ya estaba publicado.
+//
+// Con la versión de abajo —que devuelve el primero— la página del episodio
+// mostraba uno de los dos y el otro quedaba huérfano, sin que nada diera
+// error. Es la clase de falla que no se ve: la página se arma perfecta, con el
+// artículo equivocado.
+export function getArticulosDeEpisodio(videoId, { incluirBorradores = false } = {}) {
+  if (!videoId) return [];
+  return getArticulos({ incluirBorradores }).filter((a) => a.episodio === videoId);
+}
+
+// El primero, para quien solo necesita uno. Lo usa la ficha del glosario, que
+// muestra un enlace y no una lista.
 export function getArticuloDeEpisodio(videoId, { incluirBorradores = false } = {}) {
-  if (!videoId) return null;
-  return (
-    getArticulos({ incluirBorradores }).find((a) => a.episodio === videoId) ||
-    null
-  );
+  return getArticulosDeEpisodio(videoId, { incluirBorradores })[0] || null;
 }
 
 // Los artículos que mejor acompañan a este. Prioriza los que comparten
