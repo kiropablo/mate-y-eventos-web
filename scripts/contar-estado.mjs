@@ -172,6 +172,34 @@ async function leerPanel() {
   }
 }
 
+// Un número del panel, o null si vino cualquier otra cosa.
+//
+// Por qué se revisa: lo que sale de acá se escribe adentro del CLAUDE.md, que
+// es el archivo que Claude Code carga como instrucciones del proyecto, y el
+// bloque se commitea solo a main. Y `.toLocaleString()` sobre un texto
+// devuelve el texto tal cual, así que sin este control cualquier cadena que
+// contestara el panel entraba entera y nadie la miraba en el camino. El panel
+// es otro proyecto, con su propia base y su propio deploy: no es una fuente
+// en la que este archivo pueda confiar a ojos cerrados.
+//
+// Se convierte con Number() en vez de exigir que ya venga número porque hoy
+// el panel pasa los BIGINT de Neon a número, pero eso es una decisión de ESE
+// repo (`pg.types.setTypeParser` en su `lib/db.mjs`): el día que cambie, un
+// "58079" tiene que seguir contando 58079 y no romper la línea. Lo que se
+// escribe es siempre el número convertido, nunca el texto que llegó.
+const TOPE = 1e9;
+
+function numeroDelPanel(v) {
+  if (typeof v !== "number" && typeof v !== "string") return null;
+  if (typeof v === "string" && v.trim() === "") return null;
+  const n = Number(v);
+  // El tope es un control de sensatez, no un límite real: nada de lo que
+  // medimos llega a mil millones, y un número más grande que eso es el
+  // síntoma de un dato roto, no un récord.
+  if (!Number.isFinite(n) || n < 0 || n > TOPE) return null;
+  return n;
+}
+
 // La ultima semana COMPLETA que tenga datos. Search Console publica con
 // dos o tres dias de atraso, asi que tomar "los ultimos 7 dias" da siempre
 // una semana coja y el numero sale mas chico de lo que fue.
@@ -179,12 +207,48 @@ function semanaSEO(panel) {
   const dias = panel?.seo?.dias;
   if (!Array.isArray(dias) || dias.length < 7) return null;
   const ult = dias.slice(-7);
-  return {
-    desde: ult[0].dia,
-    hasta: ult[6].dia,
-    clicks: ult.reduce((a, d) => a + (d.clicks || 0), 0),
-    impresiones: ult.reduce((a, d) => a + (d.impresiones || 0), 0),
-  };
+
+  let clicks = 0;
+  let impresiones = 0;
+  for (const d of ult) {
+    // Un día sin dato suma 0, como venía siendo. Un día con algo que no es
+    // número invalida la semana entera: sumarlo daría un total que no es el
+    // que fue, y acá un número equivocado es peor que ningún número.
+    const c = !d || typeof d !== "object" ? null : numeroDelPanel(d.clicks ?? 0);
+    const i =
+      !d || typeof d !== "object" ? null : numeroDelPanel(d.impresiones ?? 0);
+    if (c === null || i === null) {
+      // Sin el valor adentro: los registros de las Actions son públicos y no
+      // se publica algo que escribió otro (regla 20).
+      console.error(
+        "[estado] el panel devolvió un día de Search Console sin números de verdad: esa línea no se escribe"
+      );
+      return null;
+    }
+    clicks += c;
+    impresiones += i;
+  }
+
+  return { desde: ult[0].dia, hasta: ult[6].dia, clicks, impresiones };
+}
+
+// Los dos números de YouTube, o null si alguno vino mal. Van juntos a
+// propósito: la línea los nombra a los dos y media línea no se escribe.
+function numerosYouTube(panel) {
+  const actual = panel?.youtube?.actual;
+  if (!actual || typeof actual !== "object") return null; // eso ya se avisa aparte
+
+  const vistas = numeroDelPanel(actual.vistas);
+  const seguidores = numeroDelPanel(actual.seguidores);
+  // Cero visitas no existe con los episodios que ya están arriba: si llega
+  // un 0 es un dato roto, no un dato. Antes lo salteaba el `if (vistas)`.
+  if (vistas === null || seguidores === null || vistas === 0) {
+    console.error(
+      `[estado] el panel no devolvió números de YouTube usables: esa línea no se escribe (llegaron ${typeof actual.vistas} y ${typeof actual.seguidores})`
+    );
+    return null;
+  }
+  return { vistas, seguidores };
 }
 
 function fechaCorta(iso) {
@@ -246,15 +310,18 @@ function armarBloque({ trans, arts, glo, agenda, panel }) {
       `- Search Console, semana del ${fechaCorta(seo.desde)} al ${fechaCorta(seo.hasta)}: **${seo.clicks} clics y ${seo.impresiones.toLocaleString("es-AR")} impresiones**. El grueso sigue entrando por fichas de agenda.`
     );
   }
-  const vistas = panel?.youtube?.actual?.vistas;
-  if (vistas) {
+  const yt = numerosYouTube(panel);
+  if (yt) {
     l.push(
-      `- YouTube: **${vistas.toLocaleString("es-AR")} visitas** y ${panel.youtube.actual.seguidores} suscriptores. Ojo: \`STATS.vistasYouTube\` en \`app/lib/site.js\` es un número aparte, escrito a mano, y es el que se publica en la web.`
+      `- YouTube: **${yt.vistas.toLocaleString("es-AR")} visitas** y ${yt.seguidores} suscriptores. Ojo: \`STATS.vistasYouTube\` en \`app/lib/site.js\` es un número aparte, escrito a mano, y es el que se publica en la web.`
     );
   }
-  if (!seo && !vistas) {
+  if (!seo && !yt) {
+    // Mismo camino para "el panel no contestó" y para "el panel contestó
+    // cualquier cosa": en los dos casos no hay número y no se inventa uno. El
+    // porqué de cada corrida queda en los registros de la Action.
     l.push(
-      `- _El panel (datos.mateyeventos.com) no contestó en esta corrida: faltan los números de Search Console y YouTube._`
+      `- _El panel (datos.mateyeventos.com) no dio números usables en esta corrida: faltan los de Search Console y YouTube._`
     );
   }
 

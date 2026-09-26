@@ -165,7 +165,10 @@ export default async function Evento({ params }) {
         // lo leía vivo o muerto según cuándo pasara. Esta sale de nuestro
         // dominio, mide 1200×630 y no vence.
         image: [`${SITE.url}/agenda/${ev.slug}/opengraph-image`],
-        ...(ev.web ? { sameAs: ev.web } : {}),
+        // sameAs va con la dirección filtrada, no con el texto crudo: acá se
+        // está afirmando ante Google y las IA cuál es el sitio del evento, y
+        // un "javascript:..." o un dominio suelto no son un sitio.
+        ...(ev.webUrl ? { sameAs: ev.webUrl } : {}),
         // El organizador va con su nombre y nada más.
         //
         // Antes llevaba url: ev.web, que es la web del EVENTO, no la del
@@ -383,10 +386,12 @@ export default async function Evento({ params }) {
             <aside className="ev-ficha__datos reveal">
               <h3 className="ev-datos__titulo">Información oficial</h3>
 
-              {ev.web && (
+              {/* webUrl y no web: si lo guardado no es una dirección http o
+                  https, el botón no existe. Ver urlHttp en app/lib/agenda.js. */}
+              {ev.webUrl && (
                 <a
                   className="btn"
-                  href={ev.web}
+                  href={ev.webUrl}
                   target="_blank"
                   /* Si el evento contrató el destacado, el link a su sitio
                      es un link pago y hay que declararlo. Google trata como

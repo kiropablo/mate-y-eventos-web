@@ -892,6 +892,68 @@ function esInstitucional(mail) {
   );
 }
 
+// Los sufijos que en la región ocupan dos niveles. Sin esta lista, de
+// "feria.com.ar" leeríamos que la casa es "com.ar" y todos los .com.ar serían
+// la misma: cualquier info@loquesea.com.ar pasaría como si fuera del evento.
+const SUFIJOS_DE_DOS = new Set([
+  "com", "net", "org", "gob", "gov", "edu", "mil", "int",
+  "co", "ac", "or", "ne", "nom", "tur", "art", "info",
+]);
+
+// El dominio registrable de un host: la casa, sin "www" ni subdominios.
+// "mail.feria.com.ar", "www.feria.com.ar" y "feria.com.ar" devuelven las tres
+// "feria.com.ar", porque son la misma casa.
+function casaDe(host) {
+  const partes = String(host || "").toLowerCase().trim()
+    .replace(/\.$/, "")
+    .split(".")
+    .filter(Boolean);
+  if (partes.length < 2) return "";
+  const tld = partes[partes.length - 1];
+  const anterior = partes[partes.length - 2];
+  const deDos = tld.length === 2 && SUFIJOS_DE_DOS.has(anterior) && partes.length >= 3;
+  return partes.slice(deDos ? -3 : -2).join(".");
+}
+
+// El campo "Web oficial" lo carga el robot y viene como venga: con http, sin
+// http, con barra final o con una ruta atrás. Si no se puede leer como
+// dirección, devuelve vacío y el que llama decide (acá: no se escribe nada).
+function casaDeLaWeb(web) {
+  const t = String(web || "").trim();
+  if (!t) return "";
+  try {
+    return casaDe(new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`).hostname);
+  } catch {
+    return "";
+  }
+}
+
+// ¿El correo cuelga del sitio oficial del evento?
+//
+// Por qué hace falta: esInstitucional() mira la FORMA de la dirección —que
+// empiece con info/contacto/prensa— y nunca el dominio, así que
+// info@cualquiercosa.com pasaba igual. Y este campo no es un dato más: es de
+// donde después sale la invitación con el link firmado del sello. Que nadie de
+// afuera decida a dónde mandamos ese link vale también cuando el que lo trae
+// es el robot.
+//
+// Se comparan dominios registrables, no strings, porque hay dos formas
+// legítimas de "coincidir" y las dos tienen que pasar:
+//   - subdominios: la web en www.feria.com.ar y el correo @feria.com.ar,
+//   - el mismo nombre con otro sufijo: expoeventos.com.ar y @expoeventos.com,
+//     que es normalísimo (la organización registró los dos).
+// Lo que frena es el caso que importa: evento en unaferia.com y correo de la
+// productora @productora.com.
+function esDelDominioOficial(mail, web) {
+  const dominio = String(mail || "").toLowerCase().trim().split("@")[1] || "";
+  const casaMail = casaDe(dominio);
+  const casaWeb = casaDeLaWeb(web);
+  if (!casaMail || !casaWeb) return false;
+  if (casaMail === casaWeb) return true;
+  // El nombre, sin el sufijo: "expoeventos" de "expoeventos.com.ar".
+  return casaMail.split(".")[0] === casaWeb.split(".")[0];
+}
+
 async function verificarVigente(r) {
   const f = r.fields;
   const faltaMail = !String(f["Email del organizador"] || "").trim();
@@ -953,19 +1015,44 @@ Devolvé JSON sin texto alrededor y sin backticks:
   // El correo se guarda aparte de "cambio": que no haya novedades del evento
   // no quiere decir que no hayamos encontrado a quién escribirle.
   //
-  // Se escribe SOLO si el campo estaba vacío y si pasa el filtro de
-  // institucional. El modelo puede traer cualquier cosa; el que decide qué
-  // entra es este código, no el prompt.
+  // Se escribe SOLO si el campo estaba vacío, si pasa el filtro de
+  // institucional y si el dominio es el del sitio oficial del evento. El
+  // modelo puede traer cualquier cosa; el que decide qué entra es este código,
+  // no el prompt.
   if (faltaMail && esInstitucional(d.emailContacto)) {
     const mail = String(d.emailContacto).trim().toLowerCase();
-    campos["Email del organizador"] = mail;
-    campos["Revisar"] = true;
     const de = d.dondeEstaElMail ? ` (de ${sinCitas(d.dondeEstaElMail)})` : "";
-    campos["Hallazgos IA"] =
-      `[${hoy}] Correo de contacto encontrado: ${mail}${de}. Se puede mandar la invitación del sello.`;
-    // Solo el dominio: este repo es público y sus registros también. La
-    // dirección entera queda en Airtable, que es donde tiene que estar.
-    console.log(`  ${f["Nombre"]}: correo encontrado → @${mail.split("@")[1] || "?"}`);
+    // Solo el dominio en los logs: este repo es público y sus registros
+    // también. La dirección entera queda en Airtable, que es donde va.
+    const dominio = `@${mail.split("@")[1] || "?"}`;
+
+    if (esDelDominioOficial(mail, f["Web oficial"])) {
+      campos["Email del organizador"] = mail;
+      campos["Revisar"] = true;
+      campos["Hallazgos IA"] =
+        `[${hoy}] Correo de contacto encontrado: ${mail}${de}. Se puede mandar la invitación del sello.`;
+      console.log(`  ${f["Nombre"]}: correo encontrado → ${dominio}`);
+    } else {
+      // Institucional pero de otra casa que la web oficial —o sin web cargada,
+      // que es el caso en que no hay NADA con qué comprobarlo—. No se escribe
+      // en el campo, y sin web tampoco: lo único que respaldaría la dirección
+      // sería la palabra del modelo, y de ese campo sale el link firmado.
+      //
+      // El dato no se pierde: queda en "Hallazgos IA" con Revisar en true, que
+      // es lo que el script ya hace con todo lo dudoso. Que Pablo lo copie a
+      // mano después de mirarlo es exactamente el paso que hace que el sello
+      // valga algo.
+      const casaWeb = casaDeLaWeb(f["Web oficial"]);
+      const motivo = casaWeb
+        ? `No coincide con el dominio del sitio oficial (${casaWeb}), así que no se cargó solo.`
+        : `El evento no tiene web cargada, así que no hay con qué comprobar que sea del evento y no se cargó solo.`;
+      campos["Hallazgos IA"] =
+        `[${hoy}] Correo de contacto SIN COMPROBAR: ${mail}${de}. ${motivo} Si es el del evento, copialo a mano al campo del organizador.`;
+      campos["Revisar"] = true;
+      console.log(
+        `  ${f["Nombre"]}: correo ${dominio} no escrito, ${casaWeb ? `la web oficial es ${casaWeb}` : "sin web oficial con qué compararlo"} → queda para revisar`
+      );
+    }
   } else if (faltaMail && d.emailContacto) {
     // Queda en el log para poder ajustar el filtro si descarta de más, pero
     // otra vez sin la dirección: para ajustar el filtro alcanza con la forma.

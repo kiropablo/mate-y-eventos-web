@@ -22,16 +22,34 @@ export default async function Image({ params }) {
   let donde = "";
   let tipo = "";
 
+  // Dibujar esta portada no es gratis: hay que medir el texto, cargar las
+  // tipografías y comprimir un PNG de 1200×630, y encima queda una entrada de
+  // caché. Si una dirección inventada saliera con la portada genérica y un
+  // 200, el que manda el pedido elegiría cuánto trabajo hacemos. Así que
+  // cuando el evento no está, se contesta 404 y no se dibuja nada.
+  let ev = null;
+  let lecturaCorta = false;
+
   try {
-    const ev = await getEvento(params.slug);
-    if (ev) {
-      nombre = nombreConAnio(ev);
-      cuando = formatRango(ev) || "Fecha por anunciar";
-      donde = [ev.venue, ev.ciudad, ev.pais].filter(Boolean).join(" · ");
-      tipo = ev.tipo || "";
-    }
+    ev = await getEvento(params.slug);
   } catch {
-    // Si Airtable no contesta, sale la portada genérica y no se rompe nada.
+    // getEvento tira error SOLO cuando no encontró el evento y además la
+    // lectura de Airtable vino incompleta. Ahí no se puede afirmar que el
+    // evento no exista —es lo que dejó 18 fichas de verdad en 404 el
+    // 28/8/2026, y un 404 se cachea—, así que en ese caso NO se contesta 404:
+    // sale la portada genérica, como salía antes.
+    lecturaCorta = true;
+  }
+
+  if (!ev && !lecturaCorta) {
+    return new Response("No existe", { status: 404 });
+  }
+
+  if (ev) {
+    nombre = nombreConAnio(ev);
+    cuando = formatRango(ev) || "Fecha por anunciar";
+    donde = [ev.venue, ev.ciudad, ev.pais].filter(Boolean).join(" · ");
+    tipo = ev.tipo || "";
   }
 
   // Un nombre largo tiene que entrar igual: se achica en escalones.

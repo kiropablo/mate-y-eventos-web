@@ -58,8 +58,10 @@ function Ficha({ ev, hecho }) {
         <Link href={`/agenda/${ev.slug}`} className="eq-link">
           Ver la ficha
         </Link>
-        {ev.web ? (
-          <a href={ev.web} target="_blank" rel="noopener noreferrer" className="eq-link">
+        {/* webUrl y no web, igual que en la ficha pública: el campo lo carga un
+            robot y no sirve para un href sin filtrarlo antes. */}
+        {ev.webUrl ? (
+          <a href={ev.webUrl} target="_blank" rel="noopener noreferrer" className="eq-link">
             Sitio oficial
           </a>
         ) : null}

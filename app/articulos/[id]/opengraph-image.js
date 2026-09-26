@@ -11,18 +11,23 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function Image({ params }) {
-  let titulo = "Mate y Eventos";
-  let eje = "Industria de eventos";
-
-  try {
-    const art = getArticulo(params.id);
-    if (art) {
-      titulo = art.titulo;
-      eje = art.eje || eje;
-    }
-  } catch {
-    // Si algo falla, sale la portada genérica igual.
+  // Si el artículo no está, se contesta 404 y no se dibuja nada.
+  //
+  // Dibujar cuesta: medir el texto, cargar las tipografías y comprimir un PNG
+  // de 1200×630, más la entrada de caché que queda. Con la portada genérica y
+  // un 200, cada dirección inventada nos hacía trabajar de gratis.
+  //
+  // Acá no hay riesgo de cachear un 404 sobre una lectura a medias, como sí lo
+  // hay en la agenda: los artículos son archivos del repo y getArticulo
+  // devuelve null solo cuando el archivo no está o el artículo todavía es
+  // borrador, que es exactamente cuando la página también contesta 404.
+  const art = getArticulo(params.id);
+  if (!art) {
+    return new Response("No existe", { status: 404 });
   }
+
+  const titulo = art.titulo;
+  const eje = art.eje || "Industria de eventos";
 
   return new ImageResponse(
     (

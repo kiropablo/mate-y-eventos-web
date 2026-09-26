@@ -57,12 +57,15 @@ jobs:
           TEMA: ${{ inputs.tema }}
           MAX_EVENTOS: ${{ inputs.cantidad || '4' }}
         run: node scripts/agenda-ia.mjs
+      # La clave va en la cabecera x-token, no en la dirección: Vercel guarda la
+      # URL completa con su querystring en los registros de pedidos, así que un
+      # ?token= deja la clave escrita ahí. En la cabecera no viaja a ningún log.
       - name: Refrescar la web
         env:
           REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
         run: |
           if [ -n "$REVALIDATE_TOKEN" ]; then
-            curl -s "https://www.mateyeventos.com/api/agenda/revalidar?token=$REVALIDATE_TOKEN" || true
+            curl -s -H "x-token: $REVALIDATE_TOKEN" "https://www.mateyeventos.com/api/agenda/revalidar" || true
           else
             echo "Sin REVALIDATE_TOKEN: la web se actualiza sola dentro de una hora."
           fi
@@ -77,7 +80,7 @@ jobs:
           REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
         run: |
           if [ -n "$REVALIDATE_TOKEN" ]; then
-            curl -s "https://www.mateyeventos.com/api/agenda/avisos?token=$REVALIDATE_TOKEN" || true
+            curl -s -H "x-token: $REVALIDATE_TOKEN" "https://www.mateyeventos.com/api/agenda/avisos" || true
           else
             echo "Sin REVALIDATE_TOKEN: los avisos de fecha quedan para mañana."
           fi

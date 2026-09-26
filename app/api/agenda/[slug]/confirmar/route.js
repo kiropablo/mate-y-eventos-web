@@ -121,12 +121,49 @@ export async function POST(req, { params }) {
   const pidioCambios = Object.values(limpias).some((r) => !r.ok);
   const resumen = resumirRespuesta(ev, limpias, hoy);
 
+  // El mail que dejó acá se guarda SOLO si el campo estaba vacío.
+  //
+  // De "Email del organizador" sale la invitación con el link firmado, así que
+  // pisarlo es dejar que quien responde elija a dónde mandamos el próximo
+  // link. Acá no se descarta el dato como en la ruta pública de "soy el
+  // organizador" —el que contesta este link SÍ es el organizador, o alguien a
+  // quien él se lo pasó—, pero una dirección ya cargada no se tapa nunca: esa
+  // es la que el equipo miró antes de invitar. Es el mismo criterio con el que
+  // escriben ese campo el panel de invitar y el de confirmación.
+  //
+  // Y quede guardado o no, el mail se anota en las correcciones. Si no, el
+  // único rastro sería el correo interno, que se archiva y se pierde, y nadie
+  // volvería a mirar de dónde salió esa dirección.
+  const guardarEmail = Boolean(email) && !ev.emailOrganizador;
+  const notaEmail = !email
+    ? ""
+    : guardarEmail
+      ? `Mail que dejó: ${email} — el campo estaba vacío y se cargó con este. Miralo antes de invitar: de ahí sale el link firmado.`
+      : `Mail que dejó: ${email} — NO se guardó: la ficha ya tiene uno cargado. Si hay que escribirle acá, es a esta dirección.`;
+
+  // La nota va pegada al encabezado y NO al pie, a propósito.
+  //
+  // parsearCorrecciones() toma como valor propuesto todo lo que sigue a
+  // "debería decir:" hasta el corte del bloque, y ese corte es la línea
+  // "Confirmó que están bien:" — que no existe cuando el organizador marcó
+  // todo para corregir y no confirmó ningún campo. En ese caso una línea
+  // suelta al pie se colaría adentro del valor y el panel ofrecería aplicarla
+  // al campo. Arriba del "A CORREGIR:" no la lee nadie más que la persona.
+  //
+  // La dirección tampoco puede falsificar un renglón: esEmail() no deja pasar
+  // espacios ni saltos de línea, así que no puede abrir una línea nueva ni
+  // imitar la marca con la que se cuenta el tope de arriba.
+  const cabecera = `[${hoy}] Respuesta del organizador`;
+  const informe = notaEmail
+    ? `${cabecera}\n${notaEmail}${resumen.slice(cabecera.length)}`
+    : resumen;
+
   // El sello NO se enciende acá. La respuesta del organizador queda como
   // pendiente de revisión: una persona la mira, aplica lo que haya que
   // aplicar y recién ahí verifica. Si el sello se encendiera solo, diría
   // "el organizador apretó un botón", no "los datos están bien".
   const previas = ev.correcciones ? `${ev.correcciones}\n\n` : "";
-  const historial = `${previas}${resumen}`;
+  const historial = `${previas}${informe}`;
   const fields = {
     "Revisión pendiente": true,
     "Correcciones del organizador":
@@ -134,7 +171,7 @@ export async function POST(req, { params }) {
         ? `…\n\n${historial.slice(-MAXIMO_CORRECCIONES)}`
         : historial,
   };
-  if (email) fields["Email del organizador"] = email;
+  if (guardarEmail) fields["Email del organizador"] = email;
   if (pidioCambios) {
     fields["Revisar"] = true;
     // Si el organizador avisa que un dato está mal, el sello no puede seguir

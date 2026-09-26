@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export default function NewsletterForm() {
   const [email, setEmail] = useState("");
+  const [tel, setTel] = useState(""); // honeypot: los humanos no lo ven, los bots lo llenan
   const [status, setStatus] = useState("idle"); // idle | loading | ok | pending | error
 
   async function handleSubmit(e) {
@@ -14,7 +15,9 @@ export default function NewsletterForm() {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        // "tel" viaja siempre, vacío: la trampa del servidor solo atrapa algo
+        // si el campo existe en el formulario que el bot está llenando.
+        body: JSON.stringify({ email, tel }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) setStatus("ok");
@@ -55,6 +58,17 @@ export default function NewsletterForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={status === "loading"}
+        />
+        {/* honeypot invisible. Reusa la clase .sug-tel del formulario de
+            sugerir —es la misma idea y la misma regla de CSS— para no sumar
+            otro estilo que haga exactamente lo mismo. */}
+        <input
+          className="sug-tel"
+          tabIndex={-1}
+          autoComplete="off"
+          value={tel}
+          onChange={(e) => setTel(e.target.value)}
+          aria-hidden="true"
         />
         <button
           className="btn"

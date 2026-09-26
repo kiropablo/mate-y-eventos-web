@@ -1,20 +1,22 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { avisarIndexNow, urlDeFicha } from "../../../lib/indexnow";
+import { tokenDeRefrescoValido } from "../../../lib/token-refresco";
 
-// Refresco manual de la agenda: visitar
-//   /api/agenda/revalidar?token=TU_CLAVE
+// Refresco manual de la agenda:
+//   curl -H "x-token: TU_CLAVE" https://www.mateyeventos.com/api/agenda/revalidar
 // (la clave se define en la env var REVALIDATE_TOKEN de Vercel).
 //
 // Sirve para no esperar la hora de refresco automático después de tocar
 // algo en Airtable.
+//
+// La clave va en la cabecera y no en la dirección a propósito: en la dirección
+// termina en los registros de Vercel y en el historial del navegador. El por qué
+// completo —y por qué ?token= se sigue aceptando— está en lib/token-refresco.js.
 
 const SITIO = "https://www.mateyeventos.com";
 
 export async function GET(req) {
-  const token = new URL(req.url).searchParams.get("token");
-  const esperado = process.env.REVALIDATE_TOKEN;
-
-  if (!esperado || token !== esperado) {
+  if (!tokenDeRefrescoValido(req)) {
     return Response.json({ error: "Token inválido" }, { status: 401 });
   }
 

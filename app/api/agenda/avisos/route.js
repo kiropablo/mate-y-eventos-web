@@ -2,12 +2,15 @@ import { getEventosConEstado, formatRango, nombreConAnio } from "../../../lib/ag
 import { avisosPendientes, marcarAvisados } from "../../../lib/avisos";
 import { mandarCorreo } from "../../../lib/correo";
 import { SITE } from "../../../lib/site";
+import { tokenDeRefrescoValido } from "../../../lib/token-refresco";
 
 // Manda los avisos de fecha que quedaron pendientes.
 //
 // La llama la Action de la agenda una vez por día, con el mismo token que ya
-// usa para refrescar. Vive acá y no en el robot porque el envío de correo es
-// del sitio: RESEND_API_KEY está en Vercel, no en los secretos de GitHub.
+// usa para refrescar, en la cabecera x-token (en la dirección quedaría escrito
+// en los registros de Vercel; el detalle está en lib/token-refresco.js). Vive
+// acá y no en el robot porque el envío de correo es del sitio: RESEND_API_KEY
+// está en Vercel, no en los secretos de GitHub.
 //
 // No hace falta detectar "el día que se confirmó la fecha": alcanza con
 // preguntar, cada día, si algún evento que alguien está esperando ya tiene
@@ -16,9 +19,7 @@ import { SITE } from "../../../lib/site";
 export const dynamic = "force-dynamic";
 
 export async function GET(req) {
-  const token = new URL(req.url).searchParams.get("token");
-  const esperado = process.env.REVALIDATE_TOKEN;
-  if (!esperado || token !== esperado) {
+  if (!tokenDeRefrescoValido(req)) {
     return Response.json({ error: "Token inválido" }, { status: 401 });
   }
 

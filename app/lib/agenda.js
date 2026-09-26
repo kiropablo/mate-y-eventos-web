@@ -124,6 +124,8 @@ function mapear(record) {
     descCorta: (f["Descripción corta"] || "").trim(),
     descLarga: (f["Descripción larga"] || "").trim(),
     web: (f["Web oficial"] || "").trim(),
+    // La misma dirección, pero solo si de verdad se puede linkear. Ver urlHttp.
+    webUrl: urlHttp(f["Web oficial"]),
     contactos: lineas(f["Contactos"]),
     redes: lineas(f["Redes"]),
     edicionesAnteriores: lineas(f["Ediciones anteriores"]),
@@ -145,6 +147,39 @@ function mesValido(crudo) {
   const mes = Number(m[2]);
   if (mes < 1 || mes > 12) return null;
   return `${m[1]}-${String(mes).padStart(2, "0")}`;
+}
+
+// El campo "Web oficial" convertido en una dirección que se puede poner en un
+// href, o "" si no sirve para eso.
+//
+// El dato no es de confianza: lo carga el robot que scrapea webs ajenas y
+// también el formulario público de sugerencias, que lo escribe tal cual llega.
+// Y React NO bloquea un href que arranque con "javascript:": alcanzaba con que
+// eso quedara en el campo para que el botón "Sitio oficial" ejecutara código
+// ajeno en nuestro dominio, con la sesión de quien lo clickeara.
+//
+// Solo pasan http y https. Lo que no pasa devuelve "", y así el botón
+// directamente no se dibuja: un dominio sin "https://" adelante hoy armaba un
+// link relativo que caía en nuestro propio 404, y no ofrecer el link es mejor
+// que ofrecer uno que no lleva a ninguna parte.
+//
+// Va como campo aparte y NO reemplaza a `web` a propósito. `web` es el texto
+// tal como está guardado, y es lo que repasa el organizador, lo que edita el
+// panel y lo que viaja en el mail y en el .ics. Si un valor mal escrito
+// desapareciera de ahí, nadie podría verlo para corregirlo: sería la fuga
+// silenciosa de la regla 8, justo en el único lugar donde se arregla.
+function urlHttp(crudo) {
+  const t = String(crudo || "").trim();
+  if (!t) return "";
+  try {
+    const u = new URL(t);
+    // Se devuelve la forma normalizada del parser, no el texto crudo: es la
+    // única que ya no puede traer sorpresas de escritura.
+    return u.protocol === "http:" || u.protocol === "https:" ? u.href : "";
+  } catch {
+    // Sin protocolo ("feria.com.ar") o directamente basura: no es una URL.
+    return "";
+  }
 }
 
 // ¿Sigue vigente el destacado? Sin fecha, sí: es editorial y no vence.
