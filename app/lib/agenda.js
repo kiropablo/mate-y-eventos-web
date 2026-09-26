@@ -8,6 +8,8 @@
 // Si falta la clave o Airtable no responde, devuelve una lista vacía
 // y la página muestra su estado "muy pronto" sin romperse.
 
+import { urlHttp } from "./url-segura";
+
 const BASE_ID = process.env.AIRTABLE_AGENDA_BASE || "app6q7METE3ofZz1S";
 const TABLE_ID = process.env.AIRTABLE_AGENDA_TABLE || "tblaLHf2VSyyyeN2s";
 
@@ -168,19 +170,6 @@ function mesValido(crudo) {
 // panel y lo que viaja en el mail y en el .ics. Si un valor mal escrito
 // desapareciera de ahí, nadie podría verlo para corregirlo: sería la fuga
 // silenciosa de la regla 8, justo en el único lugar donde se arregla.
-function urlHttp(crudo) {
-  const t = String(crudo || "").trim();
-  if (!t) return "";
-  try {
-    const u = new URL(t);
-    // Se devuelve la forma normalizada del parser, no el texto crudo: es la
-    // única que ya no puede traer sorpresas de escritura.
-    return u.protocol === "http:" || u.protocol === "https:" ? u.href : "";
-  } catch {
-    // Sin protocolo ("feria.com.ar") o directamente basura: no es una URL.
-    return "";
-  }
-}
 
 // ¿Sigue vigente el destacado? Sin fecha, sí: es editorial y no vence.
 function vigenteDestacado(hasta) {

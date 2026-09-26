@@ -3,6 +3,7 @@
 // Nunca se publica nada sin aprobación manual.
 
 import { PAISES, TIPOS } from "../../../lib/ficha-editable";
+import { urlHttp, unaLinea } from "../../../lib/url-segura";
 
 const BASE = "app6q7METE3ofZz1S";
 const TABLA = "tblaLHf2VSyyyeN2s";
@@ -47,9 +48,9 @@ export async function POST(req) {
     return Response.json({ ok: true });
   }
 
-  const nombrePersona = limpiar(datos.nombrePersona, 120);
+  const nombrePersona = limpiarLinea(datos.nombrePersona, 120);
   const email = limpiar(datos.email, 160);
-  const nombreEvento = limpiar(datos.nombreEvento, 200);
+  const nombreEvento = limpiarLinea(datos.nombreEvento, 200);
 
   if (!nombrePersona || !nombreEvento || !/.+@.+\..+/.test(email)) {
     return Response.json({ error: "Faltan datos" }, { status: 400 });
@@ -89,13 +90,18 @@ export async function POST(req) {
   if (pais && PAISES.includes(pais)) fields["País"] = pais;
   // Provincia/Región queda como texto libre a propósito: en la base también lo
   // es, y en LATAM las divisiones no entran en una lista cerrada.
-  const provincia = limpiar(datos.provincia, 120);
+  const provincia = limpiarLinea(datos.provincia, 120);
   if (provincia) fields["Provincia/Región"] = provincia;
-  const ciudad = limpiar(datos.ciudad, 120);
+  const ciudad = limpiarLinea(datos.ciudad, 120);
   if (ciudad) fields["Ciudad"] = ciudad;
   const desc = limpiar(datos.descripcion, 2000);
   if (desc) fields["Descripción corta"] = desc;
-  const web = limpiar(datos.web, 500);
+  // La web se guarda SOLO si es una dirección de verdad.
+  //
+  // Lo que se dibuja ya está filtrado al leerlo, así que esto no tapa un XSS:
+  // tapa que entre basura a la base. Y lo que entra a la base lo ve el
+  // organizador en la ficha que le mandamos a revisar, y lo lee el robot.
+  const web = urlHttp(limpiar(datos.web, 500));
   if (web) fields["Web oficial"] = web;
   const contacto = limpiar(datos.contacto, 500);
   if (contacto) fields["Contactos"] = contacto;
@@ -123,6 +129,15 @@ export async function POST(req) {
 function limpiar(v, max) {
   if (typeof v !== "string") return "";
   return v.trim().slice(0, max);
+}
+
+// Los campos de UNA línea se limpian distinto: sin saltos ni caracteres de
+// control. El nombre del evento es el caso que importa, porque el robot de la
+// agenda pega los nombres de todos los registros —uno por renglón— adentro de
+// su prompt. Con el salto intacto, un nombre de dos renglones se le presenta
+// al modelo como dos cosas distintas, o como una instrucción nueva.
+function limpiarLinea(v, max) {
+  return unaLinea(v, max);
 }
 
 function esFecha(v) {

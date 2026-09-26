@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { urlHttp } from "./url-segura";
 
 // Lee las fichas de invitados desde content/invitados/{slug}.md
 //
@@ -78,6 +79,15 @@ function parsear(crudo, slug) {
         ? [datos.episodios]
         : [],
     web: datos.web || "",
+    // La misma dirección, pero solo si se puede linkear de verdad.
+    //
+    // Esta la escribe el PROPIO INVITADO en el formulario, y React 18 no
+    // bloquea un href que arranque con "javascript:". La validación del panel
+    // solo rechaza lo que parece un mail o un teléfono, así que por ahí pasa
+    // derecho. Mismo criterio que la agenda: `web` sigue siendo el texto tal
+    // cual —lo muestra el panel, que es donde se corrige— y `webUrl` es "el
+    // texto, si se puede poner en un href".
+    webUrl: urlHttp(datos.web),
     // Si tiene foto cargada. Es un campo de la cabecera y NO un fs.existsSync()
     // sobre public/: los archivos del repositorio no viajan solos a las
     // funciones del servidor —es la regla 7, la que dejó el sitemap sin

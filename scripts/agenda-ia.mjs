@@ -547,6 +547,34 @@ Devolvé JSON sin texto alrededor y sin backticks:
   }
 }
 
+// Los nombres que ya están en la base, listos para pegar en el prompt.
+//
+// NO se pegan crudos, y este es el porqué: entre esos nombres hay borradores
+// que creó CUALQUIERA desde el formulario público de sugerencias, sin cuenta y
+// sin que nadie los mire antes. Se pegan uno por renglón, así que un nombre que
+// conserve un salto de línea deja de ser un nombre y pasa a ser dos renglones
+// del prompt —y el segundo puede estar escrito para que el modelo lo lea como
+// una instrucción nuestra—.
+//
+// El formulario ya no deja pasar saltos desde el 25/9/2026, pero esto se filtra
+// igual acá: los nombres también los escribe el robot y se editan a mano en
+// Airtable, así que esta es la última puerta antes del prompt y tiene que
+// aguantar sola. Se limpia el renglón, se corta el largo y se marca cada uno
+// con un guion, para que el modelo vea una lista y no texto suelto.
+function listaParaPrompt(nombres) {
+  const limpios = nombres
+    .map((n) =>
+      String(n ?? "")
+        .replace(/[\u0000-\u001F\u007F\u2028\u2029]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 120)
+    )
+    .filter(Boolean)
+    .map((n) => `- ${n}`);
+  return limpios.join("\n") || "(la base está vacía)";
+}
+
 async function descubrirTema(tema, yaEstan, conocidos, conocidosSinAnio = new Set()) {
   const foco = `Enfocate en: ${tema}. Buscá lo que ocurra en los próximos 18 meses.`;
 
@@ -576,7 +604,7 @@ Tampoco entran, aunque parezcan del rubro:
 ${foco}
 
 YA ESTÁN EN LA BASE (no los repitas, ni con otro nombre):
-${yaEstan.join("\n") || "(la base está vacía)"}
+${listaParaPrompt(yaEstan)}
 
 PREFERIMOS POCOS Y ENTEROS
 No cargamos fichas a medias. Un evento solo entra si podés traer TODO esto:

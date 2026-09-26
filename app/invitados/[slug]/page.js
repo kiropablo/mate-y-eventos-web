@@ -108,8 +108,8 @@ export default async function FichaInvitado({ params }) {
         // Sus perfiles públicos. Es lo que hace que esta persona del schema y
         // una persona real del rubro sean la misma para una máquina, y no dos
         // coincidencias de nombre.
-        ...(i.redes.length || i.web
-          ? { sameAs: [...(i.web ? [i.web] : []), ...i.redes] }
+        ...(i.redes.length || i.webUrl
+          ? { sameAs: [...(i.webUrl ? [i.webUrl] : []), ...i.redes] }
           : {}),
         // En qué episodios habló. El vínculo va en los dos sentidos: el
         // episodio la declara como invitada y ella declara el episodio.
@@ -155,7 +155,7 @@ export default async function FichaInvitado({ params }) {
             </p>
           ) : null}
 
-          {i.web || i.redes.length ? (
+          {i.webUrl || i.redes.length ? (
             <div
               style={{
                 marginTop: "26px",
@@ -164,10 +164,14 @@ export default async function FichaInvitado({ params }) {
                 flexWrap: "wrap",
               }}
             >
-              {i.web ? (
+              {/* Solo si la dirección se puede linkear: la escribe el propio
+                  invitado, y un "javascript:" acá ejecuta código en nuestro
+                  dominio. Si no sirve, no se dibuja el botón en vez de dibujar
+                  un link roto. */}
+              {i.webUrl ? (
                 <a
                   className="btn btn--ghost"
-                  href={i.web}
+                  href={i.webUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
