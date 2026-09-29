@@ -229,7 +229,7 @@ Todo lo que se puede contar, se cuenta solo: lo escribe `scripts/contar-estado.m
 desde la Action **Estado**, todos los días a las 11 (después de toda la cadena de contenido). Lo de abajo no se toca a mano.
 
 <!-- CONTADO:INICIO -->
-Contado solo el 28/9/2026. No editar a mano: lo reescribe
+Contado solo el 29/9/2026. No editar a mano: lo reescribe
 `scripts/contar-estado.mjs` y se pierde.
 
 - **44 transcripciones**, 44 con subtítulos.
