@@ -9,7 +9,9 @@ eje: "Estrategia & Negocio"
 etiquetas: ["catering", "presupuestos", "costos de eventos", "congresos", "degustación"]
 lectura: 5
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-04"
 ---
 
 Dos empresas de catering cotizan el mismo evento. Misma cantidad de invitados, mismos bocados de recepción, el mismo plato principal en el papel. Una sale bastante más que la otra y el cliente saca la conclusión obvia: esa es la cara.
@@ -18,7 +20,7 @@ Casi nunca es eso. Son dos servicios distintos escritos con las mismas palabras,
 
 ## Lo que llena el bocado mueve el precio más que la cantidad de bocados
 
-Nico Conjián, de La Estaca, lo dice sin vueltas cuando le preguntan hacia dónde va la gastronomía de eventos: no quiere llenar al invitado con harina, quiere llenarlo con producto. Es una declaración de principios y también una descripción de costos, porque él mismo lo aclara en números: algo con harina es mucho más barato que algo sin harina, justamente porque llena más.
+Nico Ekmekdjian, de Catering La Estaca, lo dice sin vueltas cuando le preguntan hacia dónde va la gastronomía de eventos: no quiere llenar al invitado con harina, quiere llenarlo con producto. Es una declaración de principios y también una descripción de costos, porque él mismo lo aclara en números: algo con harina es mucho más barato que algo sin harina, justamente porque llena más.
 
 Un bocado con base de harina —la empanada, la bruschetta, la tostada— llena: esa es su función y su ventaja económica, porque con menos materia prima costosa se llega a la misma sensación de haber comido. Un bocado de producto no tiene ese recurso: la saciedad la da el producto, y eso se paga.
 
