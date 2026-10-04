@@ -9,7 +9,9 @@ eje: "Técnico & Producción"
 etiquetas: ["visita técnica", "relevamiento", "presupuestos", "locaciones", "montaje"]
 lectura: 6
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-04"
 ---
 
 Hay un pedido que llega todas las semanas y nadie sabe muy bien cómo contestarlo: "¿te das una vuelta por el salón así lo ves y me presupuestás?". El salón queda en Don Torcuato. O en Nordelta, que son dos horas de viaje. No hay propuesta aceptada, no hay seña, y del otro lado hay alguien convencido de que ese viaje es parte del servicio.
