@@ -1,6 +1,6 @@
 ---
-titulo: "Microinfluencer local o influencer famoso: el tamaño decide último"
-bajada: "Dos presupuestos sobre la mesa y plata para uno. La decisión no se resuelve comparando seguidores: se resuelve definiendo qué trabajo tiene que hacer esa persona."
+titulo: "Microinfluencer local o influencer famoso: inversiones con criterio"
+bajada: "Dos presupuestos sobre la mesa y plata para uno. La decisión no se resuelve comparando seguidores o alcance: se resuelve definiendo qué trabajo tiene que hacer esa persona en base a nuestros objetivos."
 metaDescripcion: "Microinfluencer local o influencer famoso para un evento: los criterios concretos para elegir y por qué la cantidad de seguidores se mira al final."
 episodio: "ie_dfPec9b4"
 episodioTitulo: "T02E04 | 200.000 seguidores... y nadie fue al evento"
@@ -9,7 +9,9 @@ eje: "Estrategia & Negocio"
 etiquetas: ["influencers", "microinfluencers", "convocatoria", "marketing de eventos", "público objetivo"]
 lectura: 5
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-04"
 ---
 
 Llega el momento de decidir y hay dos presupuestos sobre la mesa. Uno es de una cuenta local con una comunidad chica, que contesta rápido y cobra poco. El otro es de un nombre que todo el mundo reconoce, con un alcance que hace que la propuesta al cliente quede impecable. Y hay plata para uno.
