@@ -9,7 +9,9 @@ eje: "Técnico & Producción"
 etiquetas: ["formato de evento", "shows en vivo", "cóctel", "experiencia del público", "producción de eventos"]
 lectura: 6
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-12"
 ---
 
 La decisión se toma temprano y casi siempre sin el show sobre la mesa. Se elige cóctel de pie o cena sentada por presupuesto, por costumbre del cliente, por cuánta gente entra en el salón. Después, con el formato ya cerrado, se sale a contratar el número artístico.
