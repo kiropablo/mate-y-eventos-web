@@ -9,7 +9,9 @@ eje: "Estrategia & Negocio"
 etiquetas: ["staff de eventos", "equipo interno", "tercerizar", "producción de eventos", "presupuesto de eventos"]
 lectura: 6
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-12"
 ---
 
 En un evento corporativo anual, un ejecutivo hablaba en el podio con su propio asistente operándole la computadora. El primer año falló la computadora. El segundo año había una máquina de backup y falló igual. El tercer año falló el micrófono. Tres ediciones, tres fallas, siempre en el minuto de mayor exposición del año.
