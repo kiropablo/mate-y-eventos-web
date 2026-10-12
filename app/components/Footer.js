@@ -75,6 +75,8 @@ export default function Footer() {
               <Link href="/sponsors">Para marcas</Link>
               <Link href="/newsletter">Newsletter</Link>
               <Link href="/contacto">Contacto</Link>
+              <Link href="/privacidad">Privacidad</Link>
+              <Link href="/terminos">Términos</Link>
             </div>
           </div>
         </div>

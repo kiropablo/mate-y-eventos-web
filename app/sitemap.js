@@ -32,6 +32,8 @@ export default async function sitemap() {
     "/newsletter",
     "/prensa",
     "/contacto",
+    "/privacidad",
+    "/terminos",
   ];
   const base = routes.map((path) => ({
     url: `${SITE.url}${path}`,
