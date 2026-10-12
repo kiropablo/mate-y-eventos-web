@@ -28,6 +28,8 @@ const CSS = `
 .adm-campo textarea{min-height:120px}
 .adm-campo textarea.grande{min-height:460px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;line-height:1.75}
 .adm-ayuda{font-family:var(--font-ui);font-size:.76rem;color:rgba(245,245,245,.34);margin-top:6px;line-height:1.5}
+.adm-ayuda a{color:#5aa0ff;text-decoration:underline;text-underline-offset:3px}
+.adm-ayuda a:hover{color:#f5f5f5}
 .adm-acciones{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:22px}
 .adm-btn{border:none;border-radius:999px;padding:13px 26px;font-family:var(--font-ui);font-weight:700;font-size:.9rem;cursor:pointer}
 .adm-btn--pub{background:#ea478a;color:#fff}
@@ -2842,6 +2844,20 @@ export default function PanelAdmin({
                             </p>
                           </div>
                         ) : null}
+
+                        {/* Ver como queda antes de publicarla. Abre la ficha
+                            de verdad —el mismo componente que dibuja la pagina
+                            publica— en una pestana aparte, para no perder lo
+                            que haya escrito sin guardar en este formulario. */}
+                        <p className="adm-ayuda" style={{ marginBottom: "16px" }}>
+                          <a
+                            href={`/admin/vista/${i.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Ver cómo se vería publicada ↗
+                          </a>
+                        </p>
 
                         <FotoInvitado
                           id={i.id}
