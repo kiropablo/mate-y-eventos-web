@@ -9,7 +9,9 @@ eje: "Estrategia & Negocio"
 etiquetas: ["contratación de artistas", "comisiones", "intermediarios", "presupuesto", "negociación"]
 lectura: 6
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-12"
 ---
 
 Hay dos maneras de llegar a un artista para un evento: entrar por su canal —el artista, su manager, su oficina de ventas— o entrar por un tercero que lo ofrece. Las dos existen, las dos son legítimas y ninguna de las dos es gratis. La decisión no se toma mirando el número final del presupuesto, porque el número final es la consecuencia; se toma sabiendo qué parte del trabajo estás comprando en cada caso.
