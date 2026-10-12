@@ -65,6 +65,7 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
   - **`/agenda/radiografia`** y su `datos.csv` — los números propios de la base
 - `/imperdibles` y `/imperdibles/[mes]`
 - `/sobre` y `/sobre/[quien]` (Pablo y Alexis)
+- **`/invitados` y `/invitados/[slug]`** — una ficha por persona entrevistada, con `ProfilePage`. Más `/invitados/[slug]/confirmar` (el link firmado donde el invitado revisa su ficha) y `/invitados/formulario/[clave]` (el formulario privado, que reemplaza al de Airtable)
 - `/admin` — el panel: artículos, glosario, organizadores y los textos de los mails
 - `/admin/newsletter` — el borrador del newsletter de la semana, listo para copiar y pegar en beehiiv. Página aparte del panel a propósito
 - `/sponsors`, `/newsletter`, `/prensa`, `/contacto`
@@ -97,6 +98,32 @@ Las Actions tienen un **bucle de 3 reintentos con `git pull --rebase`** antes de
 3. Pablo da el OK desde el panel y **se enciende el sello Verificado**, con el mes.
 4. Se manda la **confirmación**: el sello, el código del badge para su web, cuándo sale la difusión, y recién ahí se pide algo —los otros eventos que organizan— y se ofrece cobertura y contactos. No se vende: al pie una línea aclara que el sello no se paga.
 5. Cuando se postea en redes, el botón **"Ya lo difundimos"** se lo avisa.
+
+### El circuito con los invitados
+
+Es lo más grande que se construyó en septiembre de 2026 y funciona en espejo con el de organizadores. **La mitad pública vive en el repo y la privada en Airtable**, a propósito: el repo es público y acá hay mail, teléfono y lo que la persona escribió antes de grabar.
+
+- **Lo público**: `content/invitados/{slug}.md`, que leen `app/lib/invitados.js` (el sitio) e `invitados-admin.js` (el panel). Nunca van mail ni teléfono, ni aunque se hayan dicho al aire: un invitado vino a una charla, no a que le publiquemos una ficha de contacto.
+- **Lo privado**: la base **`Invitados MyE`** (`appvziqRHGN0jtS19`), por `app/lib/invitados-airtable.js`. Contacto, las 10 respuestas del formulario y en qué punto está la validación.
+- **El vínculo entre las dos mitades es el campo `Ficha` de Airtable**, que guarda el slug del archivo. Si está vacío se cae al nombre, que es lo que pasa con los 16 registros del formulario viejo.
+
+Cómo va una ficha de punta a punta:
+
+1. La Action **Invitados** (`generar-invitados.mjs`) lee la transcripción y escribe la ficha como **borrador**. Un episodio puede dar **varios** invitados. Nunca publica.
+2. Pablo la revisa en `/admin` → **Invitados**, y la **une** con su registro de Airtable con un desplegable y un botón. Eso lo decide una persona y no el robot: decidir que dos nombres distintos son la misma persona es adivinar el nombre real de alguien.
+3. Se le manda el **pedido de revisión**: un mail con un link firmado donde corrige o confirma campo por campo.
+4. Pablo da el último vistazo y **publica**.
+
+**El formulario privado** (`/invitados/formulario/[clave]`) reemplaza al de Airtable: mismas 10 preguntas, más los datos de contacto y **la foto, que manda y autoriza el propio invitado**. Sin la fecha de esa autorización la foto no se muestra: es lo que distingue una foto autorizada de un archivo suelto.
+
+**Dónde se ve lo que llega.** En la solapa Invitados, arriba de todo, el bloque **«Contestaron el formulario · todavía sin ficha»**: el caso normal es que el formulario llegue ANTES de la entrevista y la ficha se arme después. Para los que ya tienen ficha, las respuestas van plegadas en su fila.
+
+**El enlazado de menciones** (`app/lib/menciones.js`): cuando un artículo nombra a un invitado con ficha **publicada**, el nombre se vuelve link adentro del párrafo y el schema lo declara en `mentions`. Dos reglas: **un nombre de una sola palabra nunca se enlaza** —"Michel" aparece 10 veces en los artículos y casi ninguna es el mentalista, que es la regla 12—, y los links se ponen **al dibujar la página**, no se escriben en el `.md`, para que una ficha despublicada no deje un link muerto.
+
+Tres cosas que se aprendieron haciéndolo:
+- **El campo `foto` de la cabecera NO es un `fs.existsSync()`** sobre `public/`: es la regla 7, los archivos del repo no viajan solos a las funciones del servidor y la comprobación fallaría en silencio.
+- **Las firmas de invitado usan su propio prefijo** (`invitado:`), separado del de la agenda: si no, un link de un evento serviría para abrir la ficha de una persona.
+- **Lo que escribe el invitado se sangra** antes de guardarlo, para que no pueda falsificar la marca `[fecha] Respuesta del invitado`. Es la regla 22.
 
 ### "Avisame cuando confirmen la fecha"
 
