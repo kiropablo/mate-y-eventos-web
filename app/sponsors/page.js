@@ -161,10 +161,26 @@ export default async function Sponsors() {
               querés esos números, o el detalle de una campaña puntual, pedilo
               y te lo pasamos.
             </p>
-            {/* Acá iba el botón al panel de métricas. Se saca mientras el
-                panel muestre todo en cero: mandar a un anunciante a un tablero
-                vacío es peor que no ofrecerlo. Para reponerlo, este bloque
-                vuelve tal cual con href={SITE.datosUrl}. */}
+            {/* El botón al panel de métricas. Estuvo sacado desde el primer
+                día con esta nota: "mientras el panel muestre todo en cero,
+                mandar a un anunciante a un tablero vacío es peor que no
+                ofrecerlo". Vuelve el 12/10/2026, cuando esa condición dejó de
+                cumplirse: el panel tiene histórico propio en Neon desde agosto
+                y los seis bloques traen datos.
+                
+                Es el mismo argumento que ya hace /agenda/destacado, y por eso
+                se dice igual: no es "mirá qué lindo el tablero", es que una
+                marca puede verificar sola en vez de creernos. Ahí está lo que
+                no se puede inventar, incluido lo que anda flojo. */}
+            <a
+              className="btn btn--ghost"
+              style={{ marginTop: "6px" }}
+              href={SITE.datosUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ver los números abiertos ↗
+            </a>
           </div>
         </div>
       </section>
