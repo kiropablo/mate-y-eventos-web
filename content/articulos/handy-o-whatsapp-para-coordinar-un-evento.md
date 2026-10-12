@@ -9,7 +9,9 @@ eje: "Técnico & Producción"
 etiquetas: ["comunicación operativa", "handy", "coordinación de eventos", "producción de eventos", "protocolo"]
 lectura: 6
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-12"
 ---
 
 La pregunta suele aparecer tarde. El equipo ya tiene los handies colgados, el grupo de chat viene largo y alguien está por apretar el PTT para contar algo que podía esperar dos horas. La decisión de por dónde se dice cada cosa casi nunca se toma en frío: se hereda del último evento y se resuelve por reflejo.
