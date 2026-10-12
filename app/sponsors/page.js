@@ -149,8 +149,14 @@ export default async function Sponsors() {
                 números no se muestran es prometer un alcance que no está
                 publicado. Instagram y TikTok existen, y sus números se pasan
                 si los piden; acá no están. */}
+            {/* Cada número dice de dónde sale, y no los tres juntos. Decía
+                "los tres son de YouTube" y el 12/10/2026 dejó de ser cierto: los
+                países pasaron a contarse sobre búsqueda y Spotify, porque los de
+                YouTube piden Analytics con OAuth y no los tenemos. Un número que
+                miente sobre su fuente es peor que un número viejo. */}
             <p>
-              Los tres números de arriba son de YouTube, medidos a la fecha del
+              Las vistas y el crecimiento son de YouTube; los países son donde
+              hay audiencia medida en búsqueda y en Spotify. Todos a la fecha del
               cartel. También publicamos en Instagram, TikTok y LinkedIn: si
               querés esos números, o el detalle de una campaña puntual, pedilo
               y te lo pasamos.
