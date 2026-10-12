@@ -1,12 +1,12 @@
 ---
-nombre: "Michel"
-rol: "Mentalista"
-bio: "Michel, mentalista, explicó en Mate y Eventos cómo captar y sostener la atención del público en un evento en vivo."
+nombre: "Miguel Ángel Clavello (Michel)"
+rol: "Mentalista e ilusionista, conocido como Michel"
+bio: "Miguel Ángel Clavello, Michel, mentalista, explicó en Mate y Eventos cómo captar y sostener la atención del público en un evento en vivo."
 episodios: ["dY0vy_KLcGA", "pURjtiT-wak"]
 episodioTitulo: "T02E26 | El arte de captar la atención | Michel, mentalista"
 web: ""
 redes: []
-fuente: "estamos con vos, Michel, uno de los ilusionistas más reconocidos en el mundo. Recorriste Europa, recorriste toda América."
+fuente: "El nombre real sale del formulario de invitados, donde figura como Miguel Angel Clavello y su cargo como «Michel Mentalista». Al aire solo se lo nombra Michel: «estamos con vos, Michel, uno de los ilusionistas más reconocidos en el mundo. Recorriste Europa, recorriste toda América."
 generado: "2026-09-17"
 publicado: false
 revisado: ""
