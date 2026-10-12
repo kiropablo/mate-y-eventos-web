@@ -1,5 +1,5 @@
-import { getArticulos } from "./articulos";
-import { EJES } from "./site";
+import { getArticulos } from "./articulos.js";
+import { EJES } from "./site.js";
 
 // Los cortes de artículos por eje editorial.
 //

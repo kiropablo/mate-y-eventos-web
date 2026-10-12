@@ -1,6 +1,6 @@
-import { formatRango, nombreConAnio } from "./agenda";
-import { DIAS_PARA_DIFUNDIR, llegamosADifundir, lunesDe, MAXIMO_SEMANA } from "./semana";
-import { SITE } from "./site";
+import { formatRango, nombreConAnio } from "./agenda.js";
+import { DIAS_PARA_DIFUNDIR, llegamosADifundir, lunesDe, MAXIMO_SEMANA } from "./semana.js";
+import { SITE } from "./site.js";
 import {
   esc,
   bloque,
@@ -11,8 +11,8 @@ import {
   firma,
   pagina,
   pieLegal,
-} from "./mail-base";
-import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes";
+} from "./mail-base.js";
+import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes.js";
 
 // El mail que le llega al organizador.
 //

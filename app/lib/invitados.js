@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { urlHttp } from "./url-segura";
+import { urlHttp } from "./url-segura.js";
 
 // Lee las fichas de invitados desde content/invitados/{slug}.md
 //
@@ -106,10 +106,21 @@ function parsear(crudo, slug) {
 }
 
 // Una ficha se puede publicar si la aprobaron, tiene nombre, tiene algo escrito
-// y tiene al menos un episodio. Sin episodio no hay nada que comprobar y la
-// página sería una biografía suelta de alguien, que no es lo que hacemos.
+// y hay POR DÓNDE COMPROBARLA: un episodio donde esa persona habló, o su web o
+// sus redes.
+//
+// Antes se exigía el episodio y nada más. La regla de fondo nunca fue "tiene
+// que haber episodio": era que lo que dice la página se pueda ir a verificar, y
+// el episodio es una forma de eso, no la única. Con esa versión no se podía
+// hacer la ficha de alguien que llenó el formulario y todavía no vino a grabar,
+// ni la de alguien del rubro que nunca va a venir, y las dos cosas hacen falta.
+//
+// Lo que NO se afloja: sigue sin poder publicarse una ficha de la que no se
+// pueda comprobar nada. Una biografía suelta de alguien, sin episodio ni un
+// perfil al que ir, no es algo que publiquemos.
 export function sePuedePublicar(i) {
-  return Boolean(i.publicado && i.nombre && i.cuerpo && i.episodios.length > 0);
+  const sePuedeIrAVer = i.episodios.length > 0 || Boolean(i.web) || i.redes.length > 0;
+  return Boolean(i.publicado && i.nombre && i.cuerpo && sePuedeIrAVer);
 }
 
 export function getInvitados({ incluirBorradores = false } = {}) {

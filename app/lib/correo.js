@@ -1,4 +1,4 @@
-import { SITE } from "./site";
+import { SITE } from "./site.js";
 
 // Mandar mails desde el sitio, vía Resend.
 //

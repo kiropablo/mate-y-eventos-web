@@ -8,7 +8,7 @@
 // pero Outlook es el más estricto: si una línea pasa los 75 caracteres
 // sin cortar, descarta el evento entero. Por eso todo pasa por plegar().
 
-import { SITE } from "./site";
+import { SITE } from "./site.js";
 
 const LARGO_MAXIMO = 75; // octetos, según el estándar.
 

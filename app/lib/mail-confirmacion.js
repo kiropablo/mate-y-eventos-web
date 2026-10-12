@@ -1,7 +1,7 @@
-import { nombreConAnio, formatRango, mesLargo } from "./agenda";
-import { llegamosADifundir } from "./semana";
-import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes";
-import { SITE } from "./site";
+import { nombreConAnio, formatRango, mesLargo } from "./agenda.js";
+import { llegamosADifundir } from "./semana.js";
+import { getMensaje, reemplazar, MARCAS_BASE } from "./mensajes.js";
+import { SITE } from "./site.js";
 import {
   esc,
   bloque,
@@ -12,7 +12,7 @@ import {
   firma,
   pagina,
   pieLegal,
-} from "./mail-base";
+} from "./mail-base.js";
 
 // El mail que sale cuando el sello ya quedó encendido.
 //

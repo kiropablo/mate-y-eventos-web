@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import { LINKS } from "./site";
+import { LINKS } from "./site.js";
 
 // Lee y parsea un feed Atom de YouTube (canal o playlist).
 async function fetchFeed(url) {

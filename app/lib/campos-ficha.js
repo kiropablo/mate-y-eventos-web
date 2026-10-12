@@ -1,4 +1,4 @@
-import { formatRango } from "./agenda";
+import { formatRango } from "./agenda.js";
 
 // Los datos de la ficha que el organizador repasa uno por uno.
 //

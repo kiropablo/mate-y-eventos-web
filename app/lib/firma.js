@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { SITE } from "./site";
+import { SITE } from "./site.js";
 
 // La firma del link de confirmación.
 //

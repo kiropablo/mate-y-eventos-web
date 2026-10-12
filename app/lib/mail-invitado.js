@@ -8,9 +8,9 @@ import {
   firma,
   pieLegal,
   pagina,
-} from "./mail-base";
-import { SITE } from "./site";
-import { valoresDe } from "./campos-invitado";
+} from "./mail-base.js";
+import { SITE } from "./site.js";
+import { valoresDe } from "./campos-invitado.js";
 
 // El mail que le pide a un invitado que revise su ficha antes de publicarla.
 //

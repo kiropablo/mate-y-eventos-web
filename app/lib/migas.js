@@ -1,4 +1,4 @@
-import { SITE } from "./site";
+import { SITE } from "./site.js";
 
 // El BreadcrumbList de una página de detalle.
 //

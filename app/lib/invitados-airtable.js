@@ -10,7 +10,7 @@
 // que es lo que pasa con los 16 registros que entraron por el formulario viejo
 // y nunca supieron de ninguna ficha.
 
-import { PREGUNTAS } from "./formulario-invitados";
+import { PREGUNTAS } from "./formulario-invitados.js";
 
 const BASE = "appvziqRHGN0jtS19";
 const TABLA = "tblHdZr5d8yWovqNk";

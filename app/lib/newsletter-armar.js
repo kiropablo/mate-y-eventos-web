@@ -1,4 +1,4 @@
-import { SITE } from "./site";
+import { SITE } from "./site.js";
 
 // Arma el borrador del newsletter en HTML y en texto pelado.
 //

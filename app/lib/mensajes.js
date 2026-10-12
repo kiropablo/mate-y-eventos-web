@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { SITE } from "./site";
+import { SITE } from "./site.js";
 
 // Los textos del mail de primer contacto, editables desde /admin.
 //

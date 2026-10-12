@@ -1,7 +1,7 @@
-import { getEventosConEstado, yaPaso, formatRango } from "./agenda";
-import { hayClave, firmar, linkDelEquipo } from "./firma";
-import { mismaSemana, llegamosADifundir, diasHasta } from "./semana";
-import { SITE } from "./site";
+import { getEventosConEstado, yaPaso, formatRango } from "./agenda.js";
+import { hayClave, firmar, linkDelEquipo } from "./firma.js";
+import { mismaSemana, llegamosADifundir, diasHasta } from "./semana.js";
+import { SITE } from "./site.js";
 
 // Lo que necesita el panel para el circuito con organizadores.
 //

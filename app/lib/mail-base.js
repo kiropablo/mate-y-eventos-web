@@ -1,4 +1,4 @@
-import { SITE } from "./site";
+import { SITE } from "./site.js";
 
 // El marco compartido de los mails que salen del panel.
 //

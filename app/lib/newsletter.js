@@ -1,9 +1,9 @@
-import { getArticulos } from "./articulos";
-import { getTerminos } from "./glosario";
-import { getEventosConEstado, yaPaso, formatRango, nombreConAnio } from "./agenda";
-import { terminosMencionados } from "./enlaces";
-import { getEpisodes } from "./youtube";
-import { SITE } from "./site";
+import { getArticulos } from "./articulos.js";
+import { getTerminos } from "./glosario.js";
+import { getEventosConEstado, yaPaso, formatRango, nombreConAnio } from "./agenda.js";
+import { terminosMencionados } from "./enlaces.js";
+import { getEpisodes } from "./youtube.js";
+import { SITE } from "./site.js";
 
 // El borrador del newsletter de la semana.
 //
@@ -266,4 +266,4 @@ export async function borradorNewsletter({ hoy = new Date() } = {}) {
 // Los armadores viven en newsletter-armar.js, que no lee nada del servidor y
 // por eso lo puede usar también la pantalla. Se re-exportan desde acá para
 // que quien ya importaba de este archivo no tenga que cambiar nada.
-export { borradorHTML, borradorTexto, BLOQUES, cuanto } from "./newsletter-armar";
+export { borradorHTML, borradorTexto, BLOQUES, cuanto } from "./newsletter-armar.js";

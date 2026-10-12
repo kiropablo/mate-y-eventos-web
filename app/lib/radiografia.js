@@ -1,4 +1,4 @@
-import { yaPaso, hoyISO, mesLargo } from "./agenda";
+import { yaPaso, hoyISO, mesLargo } from "./agenda.js";
 
 // Los números de la agenda, calculados sobre la propia base.
 //
