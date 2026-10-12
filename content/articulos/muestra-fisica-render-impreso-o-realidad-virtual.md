@@ -9,7 +9,9 @@ eje: "Estrategia & Negocio"
 etiquetas: ["presentación de proyectos", "render", "realidad virtual", "clientes", "diseño de eventos"]
 lectura: 6
 generado: "2026-09-25"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-12"
 ---
 
 Hay una decisión que se toma antes de entrar a la reunión y que casi nunca se discute: con qué se le muestra el diseño al cliente. Se resuelve por costumbre —la presentación de siempre, la herramienta que la agencia acaba de incorporar— y esa costumbre define si la idea se entiende o no en los pocos minutos que hay.
