@@ -8,7 +8,12 @@
 // Si falta la clave o Airtable no responde, devuelve una lista vacía
 // y la página muestra su estado "muy pronto" sin romperse.
 
-import { urlHttp } from "./url-segura";
+// El ".js" NO sobra. Next resuelve el import sin la extension cuando arma la
+// web, pero un script corriendo con Node pelado no: y a este archivo llegan
+// scripts/buscar-contactos.mjs, agenda-ia.mjs y contar-estado.mjs. Sin la
+// extension, esos mueren apenas arrancan con "Cannot find module", y el build
+// de la web sigue en verde sin enterarse (regla 9).
+import { urlHttp } from "./url-segura.js";
 
 const BASE_ID = process.env.AIRTABLE_AGENDA_BASE || "app6q7METE3ofZz1S";
 const TABLE_ID = process.env.AIRTABLE_AGENDA_TABLE || "tblaLHf2VSyyyeN2s";

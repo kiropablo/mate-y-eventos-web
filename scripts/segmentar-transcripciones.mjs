@@ -256,6 +256,19 @@ function leerFallidos() {
   }
 }
 
+// Los fallos que son de la casa y no del episodio: sin credito, limite de uso,
+// sobrecarga de la API o un error del servidor. Se reconocen por el texto porque
+// es lo unico que llega del otro lado.
+function esProblemaNuestro(motivo) {
+  const m = String(motivo || "").toLowerCase();
+  return (
+    m.includes("credit balance") ||
+    m.includes("rate_limit") ||
+    m.includes("overloaded") ||
+    /claude http (429|500|502|503|504|529)/.test(m)
+  );
+}
+
 function anotarFallo(fallidos, id, motivo) {
   const previo = fallidos[id] || { intentos: 0 };
   fallidos[id] = {
@@ -369,6 +382,24 @@ async function main() {
       visibles.forEach((t) => console.log(`      · ${t}`));
     } catch (e) {
       fallados++;
+
+      // Un problema NUESTRO no gasta los intentos del episodio.
+      //
+      // El 12/10/2026 se acabo el credito de la API y las tres corridas del dia
+      // quemaron los tres intentos de los dos episodios nuevos de una sentada.
+      // Quedaron en la lista de rendidos y el script los iba a saltear para
+      // siempre: cargar credito no alcanzaba, habia que editar el JSON a mano.
+      //
+      // El presupuesto de reintentos existe para dejar de gastar llamadas en un
+      // episodio que de verdad no se puede cortar. Quedarse sin credito, que la
+      // API este sobrecargada o que se caiga no dice NADA sobre el episodio, asi
+      // que se anota —para que quede en los registros— pero no se descuenta.
+      if (esProblemaNuestro(e.message)) {
+        console.log(`  · ${id} — ${e.message.slice(0, 90)}`);
+        console.log("    No cuenta como intento: el problema no es del episodio.");
+        continue;
+      }
+
       const intentos = (fallidos[id]?.intentos || 0) + 1;
       anotarFallo(fallidos, id, e.message);
       console.log(

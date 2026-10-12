@@ -1,12 +1,1 @@
-{
- "ASPafkX2WFk": {
-  "intentos": 3,
-  "ultimoIntento": "2026-10-12",
-  "motivo": "Claude HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_i"
- },
- "CgoHNL6G-PE": {
-  "intentos": 3,
-  "ultimoIntento": "2026-10-12",
-  "motivo": "Claude HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_i"
- }
-}
+{}
