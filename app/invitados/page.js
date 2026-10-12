@@ -3,7 +3,7 @@ import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { getInvitados } from "../lib/invitados";
 import { migas } from "../lib/migas";
-import { SITE } from "../lib/site";
+import { SITE, AUTORES } from "../lib/site";
 import { jsonLdSeguro } from "../lib/jsonld";
 
 // Quiénes pasaron por el podcast.
@@ -31,8 +31,38 @@ export const metadata = {
   },
 };
 
+// Los dos conductores entran a este listado, pero NO con una ficha propia.
+//
+// Pablo y Alexis ya son entidades del schema, declaradas una sola vez en
+// layout.js, con /sobre/{id} como su ProfilePage. Darles además una ficha de
+// invitado crearía un SEGUNDO Person con el mismo nombre: para Google y para
+// una IA serían dos personas distintas que casualmente se llaman igual, y la
+// autoridad se partiría en dos en vez de concentrarse. Es exactamente lo que
+// el grafo de entidades del layout existe para evitar.
+//
+// Así que aparecen con su tarjeta —que es lo que se quería— y el link lleva a
+// la página que ya tienen. Una persona, una página canónica.
+function losConductores() {
+  return AUTORES.map((a) => ({
+    slug: a.id,
+    href: `/sobre/${a.id}`,
+    nombre: a.nombre,
+    rol: a.jobTitle || a.cargo,
+    bio: a.bio,
+    foto: a.foto || `/${a.id.split("-")[0]}.jpg`,
+    episodios: [],
+    conduce: true,
+  }));
+}
+
 export default function Invitados() {
-  const lista = getInvitados();
+  const invitados = getInvitados().map((i) => ({
+    ...i,
+    href: `/invitados/${i.slug}`,
+    foto: i.foto ? `/invitados/${i.slug}.jpg` : "",
+  }));
+  // Los conductores primero: son los que sostienen todo lo demás.
+  const lista = [...losConductores(), ...invitados];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -53,7 +83,7 @@ export default function Invitados() {
                 itemListElement: lista.map((i, n) => ({
                   "@type": "ListItem",
                   position: n + 1,
-                  url: `${SITE.url}/invitados/${i.slug}`,
+                  url: `${SITE.url}${i.href}`,
                   name: i.nombre,
                 })),
               },
@@ -80,13 +110,18 @@ export default function Invitados() {
           <div className="eyebrow reveal">
             <span className="n">—</span> Invitados
           </div>
-          <h1>Quiénes pasaron por acá</h1>
+          <h1>Las voces de la industria</h1>
           <p className="lead reveal" style={{ transitionDelay: ".1s" }}>
-            {lista.length === 0
-              ? "Acá van a estar las personas que pasaron por el podcast, con el episodio donde hablaron."
-              : lista.length === 1
-                ? "Una persona de la industria que vino a contar cómo trabaja. Su ficha lleva al episodio donde habló."
-                : `${lista.length} personas de la industria que vinieron a contar cómo trabajan. Cada ficha lleva al episodio donde hablaron.`}
+              {/* El texto ya no puede decir "los que pasaron por el podcast":
+                  en esta lista están también los dos que lo conducen, y gente
+                  del rubro que todavía no vino a grabar. Decir "vinieron a
+                  contar cómo trabajan" de alguien que nunca vino sería falso,
+                  y es el tipo de frase que nadie vuelve a leer después. */}
+              {invitados.length === 0
+                ? "Las personas de la industria que sostienen este medio, y las que pasaron a contar cómo trabajan."
+                : `Los dos que conducen y ${invitados.length} ${
+                    invitados.length === 1 ? "persona" : "personas"
+                  } de la industria. Cada ficha lleva a lo que esa persona contó.`}
           </p>
         </div>
       </section>
@@ -101,7 +136,7 @@ export default function Invitados() {
             <div className="inv-grilla">
               {lista.map((i) => (
                 <Link
-                  href={`/invitados/${i.slug}`}
+                  href={i.href}
                   key={i.slug}
                   className="inv-tarjeta reveal"
                 >
@@ -109,7 +144,7 @@ export default function Invitados() {
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       className="inv-tarjeta__foto"
-                      src={`/invitados/${i.slug}.jpg`}
+                      src={i.foto}
                       alt=""
                       width={800}
                       height={1000}
@@ -120,9 +155,17 @@ export default function Invitados() {
                   {i.rol ? <span className="inv-tarjeta__rol">{i.rol}</span> : null}
                   {i.bio ? <p>{i.bio}</p> : null}
                   <span className="inv-tarjeta__eps">
-                    {i.episodios.length === 1
-                      ? "1 episodio"
-                      : `${i.episodios.length} episodios`}
+                    {/* Los conductores están en TODOS los episodios, así que
+                        contarlos no dice nada: dice que conducen. Y una ficha
+                        sin episodio —alguien del rubro que todavía no vino— no
+                        tiene que mentir diciendo «0 episodios». */}
+                    {i.conduce
+                      ? "Conduce el podcast"
+                      : i.episodios.length === 0
+                        ? "Todavía no pasó por el podcast"
+                        : i.episodios.length === 1
+                          ? "1 episodio"
+                          : `${i.episodios.length} episodios`}
                   </span>
                 </Link>
               ))}
