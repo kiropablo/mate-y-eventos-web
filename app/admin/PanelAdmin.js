@@ -269,6 +269,9 @@ export default function PanelAdmin({
   const [mailInv, setMailInv] = useState({});
   // Qué registro de Airtable eligió para unir a cada ficha todavía sin unir.
   const [unirCon, setUnirCon] = useState({});
+  // La ficha que se está creando a mano. Null = el formulario está cerrado.
+  const [fichaNueva, setFichaNueva] = useState(null);
+  const [creando, setCreando] = useState(false);
   const [uniendo, setUniendo] = useState("");
   const [msgGlo, setMsgGlo] = useState(null);
   const [abierto, setAbierto] = useState(null);
@@ -514,6 +517,57 @@ export default function PanelAdmin({
       setMsgGlo({ tipo: "mal", texto: e.message });
     } finally {
       setBorrandoGlo("");
+    }
+  }
+
+  // El mismo criterio que usa generar-invitados.mjs para armar el slug: si no
+  // fueran iguales, una ficha creada a mano y una generada podrían chocar.
+  function slugDe(texto) {
+    return String(texto || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60);
+  }
+
+  // Crear una ficha a mano, para alguien que no salió de ningún episodio.
+  //
+  // El slug se arma del nombre y NO se puede cambiar después: el nombre del
+  // archivo es la dirección de la página. Por eso se muestra antes de crear.
+  async function crearFicha() {
+    const nombre = String(fichaNueva?.nombre || "").trim();
+    const id = slugDe(nombre);
+    if (!nombre || !id) return;
+    if (invs.some((x) => x.id === id)) {
+      alert(`Ya existe una ficha en /invitados/${id}.`);
+      return;
+    }
+    setCreando(true);
+    try {
+      const res = await fetch("/api/admin/invitados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          nombre,
+          rol: String(fichaNueva.rol || "").trim(),
+          bio: "",
+          web: String(fichaNueva.web || "").trim(),
+          redes: [],
+          cuerpo: "",
+          publicado: false,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data?.error || "No se pudo crear.");
+      // Se recarga para que la ficha nueva aparezca con todo lo que el panel
+      // arma del lado del servidor (los candidatos de Airtable, los parecidos).
+      location.reload();
+    } catch (e) {
+      alert(e.message);
+      setCreando(false);
     }
   }
 
@@ -1380,6 +1434,97 @@ export default function PanelAdmin({
           Va ARRIBA de la lista de fichas a propósito: es gente que viene a
           grabar, y lo que escribió es justo lo que hay que leer antes. Hasta
           ahora esto no aparecía en ninguna pantalla. */}
+      {/* Crear una ficha a mano. Existe para dos casos que el robot no cubre:
+          alguien que llenó el formulario y todavía no vino a grabar, y alguien
+          del rubro que merece su página sin haber pasado por un episodio. */}
+      {seccion === "invitados" ? (
+        <div className="inv-unir" style={{ marginBottom: "22px" }}>
+          {fichaNueva ? (
+            <>
+              <span className="org-rotulo">Ficha nueva</span>
+              <div className="adm-campo">
+                <label>Nombre</label>
+                <input
+                  value={fichaNueva.nombre || ""}
+                  onChange={(e) =>
+                    setFichaNueva({ ...fichaNueva, nombre: e.target.value })
+                  }
+                  placeholder="Como se lo nombra"
+                />
+                <p className="adm-ayuda">
+                  {fichaNueva.nombre?.trim() ? (
+                    <>
+                      Su dirección va a ser{" "}
+                      <strong>/invitados/{slugDe(fichaNueva.nombre)}</strong>, y
+                      después no se puede cambiar sin romper el link.
+                    </>
+                  ) : (
+                    "De acá sale la dirección de la página, que después no se cambia."
+                  )}
+                </p>
+              </div>
+              <div className="adm-campo">
+                <label>A qué se dedica</label>
+                <input
+                  value={fichaNueva.rol || ""}
+                  onChange={(e) =>
+                    setFichaNueva({ ...fichaNueva, rol: e.target.value })
+                  }
+                  placeholder="En pocas palabras"
+                />
+              </div>
+              <div className="adm-campo">
+                <label>Web o perfil</label>
+                <input
+                  value={fichaNueva.web || ""}
+                  onChange={(e) =>
+                    setFichaNueva({ ...fichaNueva, web: e.target.value })
+                  }
+                  placeholder="https://"
+                />
+                <p className="adm-ayuda">
+                  Sin episodio, esto es lo único por donde se la puede
+                  comprobar: sin web ni redes, la ficha no se va a dejar
+                  publicar.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="adm-btn"
+                disabled={creando || !fichaNueva.nombre?.trim()}
+                onClick={crearFicha}
+              >
+                {creando ? "Creando…" : "Crear la ficha"}
+              </button>{" "}
+              <button
+                type="button"
+                className="adm-btn adm-btn--sec"
+                disabled={creando}
+                onClick={() => setFichaNueva(null)}
+              >
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="org-rotulo">¿Falta alguien?</span>
+              <p className="adm-ayuda" style={{ marginTop: 0 }}>
+                Las fichas las arma sola la Action a partir de los episodios.
+                Acá podés crear una a mano para alguien que todavía no vino a
+                grabar, o que no va a venir.
+              </p>
+              <button
+                type="button"
+                className="adm-btn adm-btn--sec"
+                onClick={() => setFichaNueva({ nombre: "", rol: "", web: "" })}
+              >
+                Crear una ficha a mano
+              </button>
+            </>
+          )}
+        </div>
+      ) : null}
+
       {seccion === "invitados" && sinFicha.length ? (
         <div className="inv-sinficha">
           <div className="inv-sinficha__top">

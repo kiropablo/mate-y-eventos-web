@@ -115,14 +115,24 @@ export async function POST(request) {
       headers: cabeceras(token),
       cache: "no-store",
     });
-    if (!actual.ok) {
+    // Un 404 aca NO es un error: es una ficha NUEVA. Es el camino para la
+    // persona que lleno el formulario y todavia no vino a grabar, y para
+    // cualquiera del rubro que merezca su pagina sin haber pasado por un
+    // episodio. Las demas respuestas si son un problema de verdad.
+    const esNueva = actual.status === 404;
+    if (!actual.ok && !esNueva) {
       return Response.json(
         { ok: false, error: explicar(actual.status, "la ficha") },
         { status: 502 }
       );
     }
-    const info = await actual.json();
-    const crudo = Buffer.from(info.content || "", "base64").toString("utf8");
+    const info = esNueva ? {} : await actual.json();
+    // Sin archivo previo, la cabecera se arma desde cero: episodios queda
+    // en [] y fuente en "", que es justo lo que corresponde a una ficha
+    // que no sale de ninguna transcripcion.
+    const crudo = esNueva
+      ? ""
+      : Buffer.from(info.content || "", "base64").toString("utf8");
 
     // Lo que el panel NO edita se copia tal cual del archivo. Reconstruir la
     // cabecera desde cero perdería los episodios —que los pone el generador— y
@@ -160,9 +170,13 @@ export async function POST(request) {
       method: "PUT",
       headers: cabeceras(token),
       body: JSON.stringify({
-        message: `${d.publicado ? "Publicar" : "Guardar"} la ficha de ${d.nombre}`,
+        message: `${
+          esNueva ? "Crear" : d.publicado ? "Publicar" : "Guardar"
+        } la ficha de ${d.nombre}`,
         content: Buffer.from(cabecera, "utf8").toString("base64"),
-        sha: info.sha,
+        // Sin sha cuando es nueva: el sha le dice a GitHub "pisá ESTA
+        // versión", y si no hay version anterior, rechaza el cambio.
+        ...(info.sha ? { sha: info.sha } : {}),
         branch: RAMA,
       }),
     });
