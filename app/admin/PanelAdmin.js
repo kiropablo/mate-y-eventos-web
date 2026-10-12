@@ -28,6 +28,8 @@ const CSS = `
 .adm-campo textarea{min-height:120px}
 .adm-campo textarea.grande{min-height:460px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;line-height:1.75}
 .adm-ayuda{font-family:var(--font-ui);font-size:.76rem;color:rgba(245,245,245,.34);margin-top:6px;line-height:1.5}
+.inv-acciones{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.inv-acciones__estado{font-family:var(--font-ui);font-size:.76rem;color:rgba(245,245,245,.4)}
 .adm-ayuda a{color:#5aa0ff;text-decoration:underline;text-underline-offset:3px}
 .adm-ayuda a:hover{color:#f5f5f5}
 .adm-acciones{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:22px}
@@ -2990,19 +2992,49 @@ export default function PanelAdmin({
                           </div>
                         ) : null}
 
-                        {/* Ver como queda antes de publicarla. Abre la ficha
-                            de verdad —el mismo componente que dibuja la pagina
-                            publica— en una pestana aparte, para no perder lo
-                            que haya escrito sin guardar en este formulario. */}
-                        <p className="adm-ayuda" style={{ marginBottom: "16px" }}>
+                        {/* Las tres cosas que se hacen seguido, juntas y
+                            arriba: ver cómo queda, publicarla y bajarla. Los
+                            mismos botones están al pie del formulario, pero
+                            abajo de diez campos largos: para publicar algo que
+                            ya revisaste no deberías tener que scrollear todo.
+                            La vista previa abre en otra pestaña a propósito,
+                            para no perder lo que esté escrito sin guardar. */}
+                        <div className="inv-acciones">
                           <a
+                            className="adm-btn adm-btn--sec"
                             href={`/admin/vista/${i.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            Ver cómo se vería publicada ↗
+                            Vista previa ↗
                           </a>
-                        </p>
+                          {i.publicado ? (
+                            <button
+                              type="button"
+                              className="adm-btn adm-btn--sec"
+                              disabled={guardandoInv}
+                              onClick={() => guardarInvitado(i, false)}
+                            >
+                              {guardandoInv ? "Guardando…" : "Despublicar"}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="adm-btn"
+                              disabled={guardandoInv || !i.listoParaPublicar}
+                              onClick={() => guardarInvitado(i, true)}
+                            >
+                              {guardandoInv ? "Guardando…" : "Publicar"}
+                            </button>
+                          )}
+                          <span className="inv-acciones__estado">
+                            {i.publicado
+                              ? "Está publicada"
+                              : i.listoParaPublicar
+                                ? "En borrador"
+                                : "En borrador · todavía no se puede publicar"}
+                          </span>
+                        </div>
 
                         <FotoInvitado
                           id={i.id}

@@ -1,5 +1,8 @@
 import fs from "fs";
 import path from "path";
+// La MISMA regla que usa el sitio para decidir si una ficha puede publicarse.
+// No se copia acá: dos copias de una regla terminan diciendo cosas distintas.
+import { sePuedePublicar } from "./invitados.js";
 
 // Lector de las fichas de invitados pensado solo para el panel interno.
 // A diferencia de lib/invitados.js, trae también los borradores y devuelve el
@@ -273,9 +276,20 @@ export function listarInvitadosParaPanel() {
         fuente: limpiar(datos.fuente || ""),
         generado: limpiar(datos.generado || ""),
         publicado: limpiar(datos.publicado || "") === "true",
-        // Sin episodio la ficha no sale publicada aunque esté marcada: sería la
-        // biografía suelta de alguien, sin nada que se pueda ir a escuchar.
-        listoParaPublicar: Boolean(nombre && episodios.length > 0),
+          // Si se puede publicar o no lo decide sePuedePublicar(), que es la MISMA
+          // funcion que usa el sitio. Antes el panel tenia su propia copia de la
+          // regla y el 12/10/2026 quedaron distintas: el sitio ya aceptaba una ficha
+          // sin episodio con web o redes, y el panel seguia diciendo que no se podia
+          // publicar. Dos copias de una regla siempre terminan asi.
+
+          listoParaPublicar: sePuedePublicar({
+            publicado: true,
+            nombre,
+            cuerpo: crudo.slice(m[0].length).trim(),
+            episodios,
+            web: limpiar(datos.web || ""),
+            redes: comoLista(datos.redes),
+          }),
         cuerpo: crudo.slice(m[0].length).trim(),
       });
     } catch {
