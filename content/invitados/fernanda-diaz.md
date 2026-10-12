@@ -2,7 +2,7 @@
 nombre: "Fernanda Díaz"
 rol: "Bailarina, escenógrafa y artista"
 bio: "Fernanda Díaz, artista y escenógrafa, habló sobre su proceso creativo en ambientación de eventos, el trabajo con clientes y equipos, y su búsqueda de autenticidad frente a las tendencias."
-episodios: ["DgibkxeZ3bA"]
+episodios: ["DgibkxeZ3bA", "CgoHNL6G-PE"]
 episodioTitulo: "T02E28 | El esqueleto de un evento: diseño, convicción y equipo | Fernanda Díaz, artista, diseñadora"
 web: ""
 redes: []
