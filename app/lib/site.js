@@ -232,10 +232,30 @@ export const EJES = [
 // El valor de abajo es el que la API devolvía el día que se congeló, no uno
 // viejo: congelar hacia atrás habría sido mostrar menos de lo que el canal
 // tiene. Para actualizarlos, se cambian acá y se cambia la fecha.
+// Los números que se PUBLICAN en la web (sponsors, home y la página del
+// Destacado). Siguen escribiéndose acá y no saliendo solos, pero desde el
+// 12/10/2026 los tres salen del panel —datos.mateyeventos.com/api/data, que es
+// nuestra propia base— en vez de copiarse de algún lado a ojo. Cuando haya que
+// refrescarlos, se miran ahí.
 export const STATS = {
-  vistasYouTube: 46287,
-  crecimientoMensual: 5,
-  paises: 17,
+  // youtube.actual.vistas del panel, que lo lee de la API de YouTube.
+  vistasYouTube: 63412,
+  // Cuánto crecieron las VISTAS en los últimos 30 días, calculado sobre la
+  // serie diaria del panel: 48.275 el 6/9 → 63.412 el 12/10. Está al lado del
+  // número de vistas, así que es de eso que habla.
+  //
+  // Decía 5 y el real es 31: seis veces más. Y esto se publica en la página de
+  // sponsors, o sea que el número viejo nos jugaba en contra justo donde se
+  // vende.
+  crecimientoMensual: 31,
+  // Países donde hay audiencia DE VERDAD, no donde nos vieron pasar: los 25
+  // que dieron clic en búsqueda (Search Console) más los 17 con oyentes en
+  // Spotify, sin repetir. Quedan afuera los que solo registran impresiones.
+  //
+  // Ojo: YouTube no entra en esta cuenta. Sus países necesitan YouTube
+  // Analytics, que pide OAuth y no alcanza con la clave que tenemos, así que
+  // el número es más bajo que la audiencia real, no más alto.
+  paises: 32,
   // Cuándo se actualizaron a mano. Es la fecha que se publica al pie.
-  actualizado: "2026-08-21",
+  actualizado: "2026-10-12",
 };
