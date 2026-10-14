@@ -9,8 +9,11 @@ eje: "Estrategia & Negocio"
 etiquetas: ["presupuesto", "diseño de eventos", "ambientación", "liderazgo", "inteligencia artificial"]
 lectura: 6
 generado: "2026-10-12"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-14"
 ---
+
 Hay una frase que circula en la industria como si fuera una queja resignada: nunca hay plata suficiente para la idea que se quiere hacer. Fernanda Díaz, diseñadora y artista especializada en ambientaciones, la confirma sin vueltas, pero le cambia el signo. No es un mito ni una anomalía del mercado: es la condición estructural bajo la que trabaja cualquier diseñador de eventos, y por eso mismo conviene dejar de vivirla como un obstáculo y empezar a tratarla como parte del método.
 
 ## La restricción de presupuesto no frena la idea, la obliga a encontrar su forma
