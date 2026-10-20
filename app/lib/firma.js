@@ -88,15 +88,6 @@ export function linkDeConfirmacion(slug) {
   return `${SITE.url}/agenda/${slug}/confirmar?f=${firmar(slug)}`;
 }
 
-// El formulario de invitados. Mismo mecanismo que el link del equipo: una
-// clave sola, derivada del secreto, que se comparte con quien tenga que
-// llenarlo. No es un link por persona a propósito: el formulario lo llena
-// alguien que todavía no está en ninguna base nuestra —por eso lo llena— así
-// que no hay a quién atarle una firma.
-//
-// Lo que esta clave protege NO es un dato sensible: es que la página no ande
-// suelta por internet ni la encuentre Google. La página además lleva noindex y
-// no está en el sitemap ni en el menú.
 // La firma de los links de invitados. Va en su propio espacio y NO reusa
 // firmar(), que firma "agenda:{slug}": si algún día un evento y un invitado
 // compartieran slug —y el robot arma los dos a partir de un nombre— la misma
@@ -126,30 +117,18 @@ export function firmaInvitadoValida(slug, firma) {
   }
 }
 
-export function claveFormulario() {
-  if (!hayClave()) {
-    throw new Error(
-      "Falta AGENDA_FIRMA_SECRET: no se puede armar el link del formulario."
-    );
-  }
-  return crypto
-    .createHmac("sha256", CLAVE)
-    .update("invitados:formulario")
-    .digest("hex")
-    .slice(0, 20);
-}
-
-export function claveFormularioValida(clave) {
-  if (!hayClave() || typeof clave !== "string") return false;
-  const esperada = claveFormulario();
-  if (clave.length !== esperada.length) return false;
-  try {
-    return crypto.timingSafeEqual(Buffer.from(clave), Buffer.from(esperada));
-  } catch {
-    return false;
-  }
-}
-
+// El formulario de invitados NO lleva clave, y por eso esto no firma nada.
+//
+// Tuvo una: /invitados/formulario/<clave>, derivada de este mismo secreto. Se
+// sacó porque no servía para lo que decía servir. El contador de visitas manda
+// la dirección completa de cada página al panel público, así que una dirección
+// con clave adentro termina publicada sola: se comprobó con la de /equipo, que
+// estaba a la vista en datos.mateyeventos.com/api/data.
+//
+// Queda acá, al lado de los links que SÍ se firman, para que se vea la
+// diferencia: los de confirmación llevan firma porque autorizan a editar un
+// registro que ya existe, y este no autoriza nada —abre un formulario vacío—.
+// Lo que lo cuida son las guardas de app/api/invitados/formulario/route.js.
 export function linkDelFormulario() {
-  return `${SITE.url}/invitados/formulario/${claveFormulario()}`;
+  return `${SITE.url}/formulario`;
 }

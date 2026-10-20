@@ -26,7 +26,25 @@ const nextConfig = {
   // contenido (el campo slugsAnteriores de cada artículo), así que se
   // mantienen solas: no hay una lista aparte que se pueda desactualizar.
   async redirects() {
-    return reglasDeRedireccion();
+    return [
+      ...reglasDeRedireccion(),
+      // El formulario de invitados se mudó de /invitados/formulario/<clave> a
+      // /formulario. Los links con clave ya salieron por WhatsApp y tienen que
+      // seguir entrando.
+      //
+      // Va acá y no en una página: así la dirección vieja no invoca ninguna
+      // función ni valida ningún secreto —el destino es público igual— y el día
+      // que se rote AGENDA_FIRMA_SECRET estos links siguen andando.
+      //
+      // 307 y no 308 a propósito: un permanente se le queda cacheado para
+      // siempre al navegador de quien lo abrió, y esta mudanza se tiene que
+      // poder revertir con un deploy.
+      {
+        source: "/invitados/formulario/:clave",
+        destination: "/formulario",
+        permanent: false,
+      },
+    ];
   },
   images: {
     // Logos de eventos servidos desde los adjuntos de Airtable.

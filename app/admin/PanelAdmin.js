@@ -1402,7 +1402,7 @@ export default function PanelAdmin({
       {/* El link del formulario que se le manda a un invitado antes de
           grabar. Va acá arriba y no adentro de una ficha porque se manda
           ANTES de que la ficha exista. */}
-      {seccion === "invitados" && linkFormulario ? (
+      {seccion === "invitados" ? (
         <div className="adm-exportar">
           <span>
             Formulario para mandarle a un invitado antes de la entrevista. Pide
@@ -1422,13 +1422,6 @@ export default function PanelAdmin({
           >
             Abrirlo
           </a>
-        </div>
-      ) : null}
-
-      {seccion === "invitados" && !linkFormulario ? (
-        <div className="adm-aviso">
-          Falta cargar AGENDA_FIRMA_SECRET en Vercel: sin esa clave no se puede
-          armar el link del formulario.
         </div>
       ) : null}
 

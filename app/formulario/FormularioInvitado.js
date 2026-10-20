@@ -3,10 +3,12 @@
 import { useState } from "react";
 
 // El formulario en sí. Es cliente porque tiene estado y manda el pedido; la
-// página que lo envuelve es de servidor y es la que valida la clave del link.
+// página que lo envuelve es de servidor y solo le pasa la lista de campos.
+//
+// No manda ninguna clave: la dirección es pública y quien valida y frena es la
+// ruta que recibe el POST. Está explicado en app/formulario/page.js.
 
 export default function FormularioInvitado({
-  clave,
   contacto,
   preguntas,
   foto: campoFoto,
@@ -22,6 +24,11 @@ export default function FormularioInvitado({
   const [foto, setFoto] = useState("");
   const [autorizada, setAutorizada] = useState(false);
   const [pesando, setPesando] = useState(false);
+
+  // El honeypot: un campo que no se ve y que una persona no puede llenar. Si
+  // llega con algo, lo llenó un robot. Va aparte de `valores` a propósito: eso
+  // es lo que se escribe en Airtable y esto no tiene que llegar nunca ahí.
+  const [trampa, setTrampa] = useState("");
 
   const poner = (id, v) => setValores((p) => ({ ...p, [id]: v }));
 
@@ -73,8 +80,8 @@ export default function FormularioInvitado({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clave,
           valores,
+          tel: trampa,
           // La foto solo viaja si además está autorizada. Sin la casilla no se
           // manda: es el permiso y no un detalle que se arregla después.
           foto: foto && autorizada ? foto : "",
@@ -109,6 +116,17 @@ export default function FormularioInvitado({
 
   return (
     <form onSubmit={enviar}>
+      {/* honeypot invisible. Reusa la clase del formulario de sugerir: es el
+          mismo truco y no hace falta un segundo estilo que diga lo mismo. */}
+      <input
+        className="sug-tel"
+        tabIndex={-1}
+        autoComplete="off"
+        value={trampa}
+        onChange={(e) => setTrampa(e.target.value)}
+        aria-hidden="true"
+      />
+
       <section className="sem-bloque">
         <h2 className="ag-mes">Tus datos</h2>
         {contacto.map((c) => (

@@ -9,6 +9,28 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+// Las direcciones que llevan una clave adentro se recortan ANTES de salir.
+//
+// POR QUÉ HACE FALTA. El panel es público a propósito —es el argumento de
+// venta del espacio destacado— y lo que se le manda queda publicado en su API:
+// /api/data lista las páginas más visitadas, con su dirección entera. Entonces
+// cualquier dirección con una clave en el camino se publica sola.
+//
+// No es hipotético: la clave de /equipo estuvo listada ahí, en el puesto 9, a
+// la vista de cualquiera que abriera el JSON. Abría la cola de difusión.
+//
+// El recorte es POR FORMA y no por una lista de rutas: cualquier tramo que sea
+// un hexadecimal de 16 caracteres o más es una de nuestras claves —así las
+// arma app/lib/firma.js, con LARGO = 16— y se reemplaza por [clave]. De esta
+// manera una ruta con clave que se agregue mañana ya sale recortada sin que
+// nadie se tenga que acordar de venir a tocar este archivo.
+//
+// Las firmas de los links de confirmación no pasan por acá: van en la query
+// (?f=...) y usePathname() no la incluye.
+function sinClaves(ruta) {
+  return String(ruta || "").replace(/\/[0-9a-f]{16,}(?=\/|$)/g, "/[clave]");
+}
+
 export default function Contador() {
   const ruta = usePathname();
 
@@ -18,7 +40,7 @@ export default function Contador() {
     try {
       const dato = {
         tipo: "visita",
-        ruta,
+        ruta: sinClaves(ruta),
         referrer: document.referrer || null,
         utm: new URLSearchParams(location.search).get("utm_source"),
       };

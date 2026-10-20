@@ -11,7 +11,7 @@ import {
   registroDeFicha,
   TABLA_URL,
 } from "../lib/invitados-airtable";
-import { hayClave, linkDelFormulario } from "../lib/firma";
+import { linkDelFormulario } from "../lib/firma";
 import { listarOrganizadoresParaPanel } from "../lib/organizadores-admin";
 import LoginAdmin from "./LoginAdmin";
 import PanelAdmin from "./PanelAdmin";
@@ -48,7 +48,10 @@ export default async function Admin() {
       // formulario y sale su episodio.
       sinFicha={respuestasSinFicha(fichas, registros, registroDeFicha)}
       tablaUrl={TABLA_URL}
-      linkFormulario={hayClave() ? linkDelFormulario() : ""}
+      // El link del formulario ya no depende de ningún secreto: es una
+      // dirección fija. Antes iba condicionado a que AGENDA_FIRMA_SECRET
+      // estuviera cargada, porque la clave salía de ahí.
+      linkFormulario={linkDelFormulario()}
       organizadores={organizadores}
     />
   );

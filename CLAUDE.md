@@ -65,7 +65,7 @@ Stack: **Next.js 14** (App Router), **CSS puro** en `app/globals.css` (SIN Tailw
   - **`/agenda/radiografia`** y su `datos.csv` — los números propios de la base
 - `/imperdibles` y `/imperdibles/[mes]`
 - `/sobre` y `/sobre/[quien]` (Pablo y Alexis)
-- **`/invitados` y `/invitados/[slug]`** — una ficha por persona entrevistada, con `ProfilePage`. Más `/invitados/[slug]/confirmar` (el link firmado donde el invitado revisa su ficha) y `/invitados/formulario/[clave]` (el formulario privado, que reemplaza al de Airtable)
+- **`/invitados` y `/invitados/[slug]`** — una ficha por persona entrevistada, con `ProfilePage`. Más `/invitados/[slug]/confirmar` (el link firmado donde el invitado revisa su ficha) y **`/formulario`** (el formulario que se le manda al invitado antes de grabar, que reemplaza al de Airtable)
 - `/admin` — el panel: artículos, glosario, organizadores y los textos de los mails
 - `/admin/newsletter` — el borrador del newsletter de la semana, listo para copiar y pegar en beehiiv. Página aparte del panel a propósito
 - `/sponsors`, `/newsletter`, `/prensa`, `/contacto`
@@ -114,7 +114,7 @@ Cómo va una ficha de punta a punta:
 3. Se le manda el **pedido de revisión**: un mail con un link firmado donde corrige o confirma campo por campo.
 4. Pablo da el último vistazo y **publica**.
 
-**El formulario privado** (`/invitados/formulario/[clave]`) reemplaza al de Airtable: mismas 10 preguntas, más los datos de contacto y **la foto, que manda y autoriza el propio invitado**. Sin la fecha de esa autorización la foto no se muestra: es lo que distingue una foto autorizada de un archivo suelto.
+**El formulario** (`/formulario`) reemplaza al de Airtable: mismas 10 preguntas, más los datos de contacto y **la foto, que manda y autoriza el propio invitado**. Sin la fecha de esa autorización la foto no se muestra: es lo que distingue una foto autorizada de un archivo suelto.
 
 **Dónde se ve lo que llega.** En la solapa Invitados, arriba de todo, el bloque **«Contestaron el formulario · todavía sin ficha»**: el caso normal es que el formulario llegue ANTES de la entrevista y la ficha se arme después. Para los que ya tienen ficha, las respuestas van plegadas en su fila.
 
@@ -242,13 +242,15 @@ Cosas sabidas y verificadas (no volver a investigar):
 
 20. **El repo es PÚBLICO, y sus registros de Actions también.** Un `console.log` con una dirección de correo la publica para cualquiera. Ya pasó: 112 mails de organizadores quedaron a la vista, más un archivo descargable con el informe entero. Los scripts ahora registran **el dominio, no la dirección**. Y en un repo público **no existe el artefacto privado**: si un dato no puede ser público, no se sube como artifact.
 
-21. **Un tope guardado en memoria no es un tope.** En Vercel cada instancia de la función tiene su propio `Map` y arranca vacía; el atacante que hace más pedidos hace nacer más instancias. Sirve como amortiguador contra el bot de una conexión, y nada más. Cuando el tope tiene que ser real, va contra Airtable o contra el firewall de Vercel. **Esto está escrito en cada lugar donde hay uno**: `sugerir`, `avisame`, `organizador`, `login`. No volver a "arreglarlo" subiendo el número.
+21. **Un tope guardado en memoria no es un tope.** En Vercel cada instancia de la función tiene su propio `Map` y arranca vacía; el atacante que hace más pedidos hace nacer más instancias. Sirve como amortiguador contra el bot de una conexión, y nada más. Cuando el tope tiene que ser real, va contra Airtable o contra el firewall de Vercel. **Esto está escrito en cada lugar donde hay uno**: `sugerir`, `avisame`, `organizador`, `login`, `subscribe` y el formulario de invitados. No volver a "arreglarlo" subiendo el número. En `/formulario` el tope real no está en el código: es una regla de rate limit del firewall de Vercel, que es lo único que frena **antes** de que la función arranque y por lo tanto lo único que también cuida las invocaciones y la cuota de Resend.
 
 22. **El contador y el dato del usuario no comparten cajón.** El tope de `/confirmar` se calculaba contando `[fecha]` dentro del mismo campo donde el organizador escribe texto libre: escribiendo fechas futuras ahí, el evento quedaba bloqueado años. Ahora la marca es `^[fecha] Respuesta del organizador`, que solo puede escribir el servidor porque `sangrar()` corre con espacios todo lo que manda el organizador.
 
 23. **`typecast: true` no valida: inventa.** Airtable no rechaza un valor que no está en el desplegable, lo **crea para siempre**. Borrar después el registro basura no saca la opción. Toda ruta que escriba un `singleSelect` valida antes contra la lista de `app/lib/ficha-editable.js`. Y esas listas tienen que coincidir **exactamente** con Airtable: faltaban Ecuador y Reino Unido, y desde que la lista también valida el formulario público, una opción que falta es un campo que se pierde en silencio.
 
 24. **Nadie de afuera decide a dónde mandamos un link firmado.** La ruta pública del organizador escribía el mail que le mandaban en el campo `Email del organizador`, que es de donde después sale la invitación con el link. Ese dato llega igual por la nota interna y por el correo al equipo; que se copie a mano después de mirarlo es exactamente el paso que hace que el sello valga algo.
+
+25. **Una clave en el camino de una dirección se publica sola.** El contador de visitas manda al panel la dirección **completa** de cada página, y el panel es público a propósito: su `/api/data` lista las más visitadas. Así la clave de `/equipo` terminó listada ahí, en el puesto 9, a la vista de cualquiera que abriera el JSON —y abría la cola de difusión—. Por eso `Contador.js` recorta cualquier tramo que sea un hexadecimal de 16 caracteres o más antes de mandarlo, **por forma y no por una lista de rutas**: la ruta con clave que se agregue mañana ya sale recortada. Y la conclusión de fondo: una dirección secreta no es una protección en este sitio, así que lo que cuida una ruta pública tiene que estar escrito en la ruta. Las firmas de los links de confirmación se salvaron de casualidad, porque van en la query (`?f=`) y `usePathname()` no la incluye.
 
 ---
 
