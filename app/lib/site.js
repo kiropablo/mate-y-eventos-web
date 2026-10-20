@@ -239,23 +239,36 @@ export const EJES = [
 // refrescarlos, se miran ahí.
 export const STATS = {
   // youtube.actual.vistas del panel, que lo lee de la API de YouTube.
-  vistasYouTube: 63412,
+  vistasYouTube: 65216,
   // Cuánto crecieron las VISTAS en los últimos 30 días, calculado sobre la
-  // serie diaria del panel: 48.275 el 6/9 → 63.412 el 12/10. Está al lado del
+  // serie diaria del panel: 56.927 el 14/9 → 65.216 el 20/10. Está al lado del
   // número de vistas, así que es de eso que habla.
   //
-  // Decía 5 y el real es 31: seis veces más. Y esto se publica en la página de
-  // sponsors, o sea que el número viejo nos jugaba en contra justo donde se
-  // vende.
-  crecimientoMensual: 31,
-  // Países donde hay audiencia DE VERDAD, no donde nos vieron pasar: los 25
-  // que dieron clic en búsqueda (Search Console) más los 17 con oyentes en
-  // Spotify, sin repetir. Quedan afuera los que solo registran impresiones.
+  // Este número BAJÓ: decía 31 y el real es 15. No es que el canal se haya
+  // frenado a la mitad, es que el 31 venía de un mes con un pico enorme (el
+  // 9/9 solo hizo 4.566 vistas, el mejor día de la historia del canal) y se
+  // publicaba como si fuera el ritmo normal. Un número inflado en la página
+  // donde se vende es el peor lugar para tener uno: el sponsor que lo
+  // verifica no vuelve. 15% mensual sostenido sigue siendo mucho —es más del
+  // doble del ritmo de Grupo eventoplus, que lleva 19 años de canal— y tiene
+  // la ventaja de que aguanta que lo miren.
+  crecimientoMensual: 15,
+  // Países donde hay audiencia DE VERDAD, no donde nos vieron pasar: los 26
+  // que dieron clic en búsqueda (Search Console) más los 11 con oyentes en la
+  // app de Spotify, sin repetir. Quedan afuera los que solo registran
+  // impresiones.
+  //
+  // Cambió el criterio, no sólo el número: antes se usaban los 17 países del
+  // export "todas las plataformas", que incluye Singapur, Bangladesh,
+  // Indonesia y Pakistán. Esos cuatro son 0% en el export de la app de
+  // Spotify, o sea que no son oyentes: son descargas del RSS hechas por
+  // agregadores o bots. Sumarlos daba 33 y no sobrevivía a una repregunta en
+  // una reunión de sponsors. Con oyentes de verdad son 29.
   //
   // Ojo: YouTube no entra en esta cuenta. Sus países necesitan YouTube
   // Analytics, que pide OAuth y no alcanza con la clave que tenemos, así que
   // el número es más bajo que la audiencia real, no más alto.
-  paises: 32,
+  paises: 29,
   // Cuándo se actualizaron a mano. Es la fecha que se publica al pie.
-  actualizado: "2026-10-12",
+  actualizado: "2026-10-20",
 };
