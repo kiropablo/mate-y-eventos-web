@@ -55,16 +55,25 @@ export function firmaValida(slug, firma) {
 //
 // Es una sola para todos y no vence: la idea es pegarla en el grupo una vez y
 // que el equipo la tenga. No abre el panel ni deja tocar nada, solo mostrar la
-// lista de lo que hay para publicar. Si alguna vez hay que cortarla, se cambia
-// AGENDA_FIRMA_SECRET en Vercel y el link viejo deja de servir —ojo que eso
-// también invalida los links de confirmación que estén dando vueltas.
+// lista de lo que hay para publicar.
+//
+// PARA CORTARLA se le suma uno al número de la frase de abajo, y nada más. Eso
+// renueva SOLO esta clave: los links de confirmación de organizadores e
+// invitados que estén dando vueltas siguen andando. NO hay que rotar
+// AGENDA_FIRMA_SECRET, que es el martillo grande y los invalida todos.
+//
+// Va en el 2 porque la 1 estuvo publicada. El contador de visitas mandaba la
+// dirección entera de cada página al panel, que es público, y esta clave
+// terminó listada en datos.mateyeventos.com/api/data entre las páginas más
+// vistas, abriendo esta cola a cualquiera que leyera ese JSON. Está contado en
+// la regla 25, y el Contador ya no manda direcciones con clave adentro.
 export function claveEquipo() {
   if (!hayClave()) {
     throw new Error("Falta AGENDA_FIRMA_SECRET: no se puede armar el link del equipo.");
   }
   return crypto
     .createHmac("sha256", CLAVE)
-    .update("equipo:difusion")
+    .update("equipo:difusion:2")
     .digest("hex")
     .slice(0, 20);
 }
