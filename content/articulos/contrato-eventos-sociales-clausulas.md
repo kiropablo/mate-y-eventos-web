@@ -9,8 +9,11 @@ eje: "Estrategia & Negocio"
 etiquetas: ["contratos", "wedding planner", "eventos sociales", "gestión de clientes", "límites profesionales"]
 lectura: 5
 generado: "2026-10-15"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-22"
 ---
+
 Un contrato de eventos sociales no se escribe en un escritorio pensando en escenarios hipotéticos. Se escribe, cláusula por cláusula, después de que algo salió mal. Eso es lo que plantea Mariana Philip, wedding y event planner con años de trayectoria, cuando cuenta que su contrato arrancó siendo una hoja y hoy tiene varias páginas: cada párrafo nuevo es la cicatriz de un conflicto que no se quiere repetir.
 
 Esa lógica —documentar a partir de la experiencia y no de la teoría— es el eje que más vale desarrollar, porque atraviesa toda la conversación con Pablo y Alexis y tiene aplicación directa para cualquiera que organice eventos sociales, corporativos o de cualquier escala.
