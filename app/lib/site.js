@@ -254,21 +254,28 @@ export const STATS = {
   // la ventaja de que aguanta que lo miren.
   crecimientoMensual: 15,
   // Países donde hay audiencia DE VERDAD, no donde nos vieron pasar: los 26
-  // que dieron clic en búsqueda (Search Console) más los 11 con oyentes en la
+  // que dieron clic en búsqueda (Search Console) más los 14 con oyentes en la
   // app de Spotify, sin repetir. Quedan afuera los que solo registran
   // impresiones.
   //
-  // Cambió el criterio, no sólo el número: antes se usaban los 17 países del
-  // export "todas las plataformas", que incluye Singapur, Bangladesh,
-  // Indonesia y Pakistán. Esos cuatro son 0% en el export de la app de
-  // Spotify, o sea que no son oyentes: son descargas del RSS hechas por
+  // El criterio se cambió el 20/10: antes se usaban los países del export
+  // "todas las plataformas", que incluye Singapur, Bangladesh, Vietnam,
+  // Libia, Bielorrusia y Azerbaiyán. Todos esos son 0% en el export de la app
+  // de Spotify, o sea que no son oyentes: son descargas del RSS hechas por
   // agregadores o bots. Sumarlos daba 33 y no sobrevivía a una repregunta en
-  // una reunión de sponsors. Con oyentes de verdad son 29.
+  // una reunión de sponsors.
+  //
+  // Recontado el 22/10 con el export nuevo de la app, que pasó de 11 países a
+  // 14. El total NO se movió: los tres que se sumaron —Panamá, Venezuela y
+  // Estados Unidos— ya estaban entre los que dan clic en búsqueda. Los únicos
+  // que aporta Spotify y no aporta Google siguen siendo Australia, Costa Rica
+  // y Puerto Rico. Que el número aguante un recuento con datos nuevos es la
+  // mejor señal de que está bien medido.
   //
   // Ojo: YouTube no entra en esta cuenta. Sus países necesitan YouTube
   // Analytics, que pide OAuth y no alcanza con la clave que tenemos, así que
   // el número es más bajo que la audiencia real, no más alto.
   paises: 29,
   // Cuándo se actualizaron a mano. Es la fecha que se publica al pie.
-  actualizado: "2026-10-20",
+  actualizado: "2026-10-22",
 };
