@@ -276,6 +276,12 @@ export const STATS = {
   // Analytics, que pide OAuth y no alcanza con la clave que tenemos, así que
   // el número es más bajo que la audiencia real, no más alto.
   paises: 29,
+  // De esos 29, en cuántos hay oyentes del podcast: los que lista el export de
+  // la app de Spotify (23/9 al 22/10). Los otros 15 llegan por búsqueda, leen
+  // la agenda y no escuchan — son audiencia igual, pero de otra cosa, y
+  // mezclarlos en un solo número hacía que el 29 tuviera que explicarse en voz
+  // alta en cada reunión. Publicados por separado, cada uno dice lo que es.
+  paisesConOyentes: 14,
   // Cuándo se actualizaron a mano. Es la fecha que se publica al pie.
   actualizado: "2026-10-22",
 };

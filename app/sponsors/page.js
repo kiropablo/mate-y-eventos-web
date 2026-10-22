@@ -134,7 +134,24 @@ export default async function Sponsors() {
                   {STATS.paises}
                 </span>
               </div>
-              <div className="l">Países en la audiencia</div>
+              <div className="l">Países nos leen o nos escuchan</div>
+              {/* El segundo número va acá abajo y no como cuarta tarjeta: .grid
+                  es de tres columnas y una cuarta dejaba un huérfano en la fila
+                  de abajo. Además la relación es de subconjunto —los 14 están
+                  dentro de los 29— y así se lee sola. */}
+              <div
+                style={{
+                  marginTop: "8px",
+                  fontSize: "0.82rem",
+                  color: "var(--mute)",
+                  lineHeight: 1.5,
+                }}
+              >
+                <b style={{ color: "var(--blanco)" }}>
+                  {STATS.paisesConOyentes}
+                </b>{" "}
+                con oyentes del podcast
+              </div>
               <div className="rule" />
             </div>
           </div>
