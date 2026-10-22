@@ -9,8 +9,11 @@ eje: "Estrategia & Negocio"
 etiquetas: ["diseño de experiencias", "ambientación", "escucha activa", "fidelización", "metodología"]
 lectura: 5
 generado: "2026-10-14"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-22"
 ---
+
 Hay una confusión instalada en la industria que Diego Bernardini, publicitario y estratega de experiencias, marca sin vueltas: evento y experiencia no son sinónimos. Se usan como si lo fueran, se venden como si lo fueran, pero son cosas distintas. Entender esa diferencia cambia por completo cómo se planifica, se presupuesta y se mide el éxito de lo que se organiza.
 
 ## Un evento puede salir perfecto y no ser una experiencia
