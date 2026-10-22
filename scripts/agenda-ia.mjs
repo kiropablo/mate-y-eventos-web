@@ -874,9 +874,32 @@ Devolvé JSON sin texto alrededor y sin backticks:
     console.log(`  ${f["Nombre"]}: próxima edición → ${d.fechaInicio}`);
   } else {
     // Sin anuncio: se limpian las fechas para que no siga figurando como pasado.
-    campos["Fecha inicio"] = null;
-    campos["Fecha fin"] = null;
-    campos["Estado de fechas"] = "Por anunciar";
+    //
+    // MENOS si el evento fue imperdible de algún mes. Ahí la fecha no es un
+    // dato viejo que estorba: es el dato que sostiene el archivo. "Los
+    // imperdibles de septiembre" se arma leyendo los eventos marcados con
+    // "2026-09", y si acá les vaciamos la fecha, esa edición queda sin
+    // fechas para siempre. Pasó: el 22/10/2026, cuatro de los cinco
+    // imperdibles de septiembre —Hotelga, Argentina Mining Norte, Expo
+    // Noivas y Premios Konex— figuraban sin fecha, y Search Console avisó
+    // porque el schema de Event salía incompleto. La causa no era el schema:
+    // era esta línea.
+    //
+    // Contradice en apariencia al comentario de lib/agenda.js que dice que
+    // un evento elegido en septiembre "se queda con 2026-09 para siempre":
+    // se quedaba con el mes, pero perdía la fecha.
+    //
+    // Conservarla es seguro: la web ya separa pasados de próximos con
+    // yaPaso(), así que el evento cae en "pasados" de /agenda y no aparece
+    // como vigente en ningún lado. Y "Estado de fechas" no se toca, porque
+    // esas fechas SÍ estuvieron confirmadas: lo que no está anunciado es la
+    // próxima edición, y eso lo dice el hallazgo de abajo.
+    const esImperdible = Boolean(String(f["Imperdible del mes"] || "").trim());
+    if (!esImperdible) {
+      campos["Fecha inicio"] = null;
+      campos["Fecha fin"] = null;
+      campos["Estado de fechas"] = "Por anunciar";
+    }
     // Dos casos distintos, y antes los dos decían lo mismo. Si el modelo avisa
     // que hay próxima edición pero la fecha no se puede usar —"2027-03" sin
     // día, o un mes de un solo dígito—, afirmar que "no anunciaron la próxima"
@@ -885,7 +908,10 @@ Devolvé JSON sin texto alrededor y sin backticks:
     const cabecera = anunciadaSinFecha
       ? `La edición ${rango} ya se hizo. Anunciaron la próxima pero sin una fecha que se pueda cargar: hay que ponerla a mano.`
       : `La edición ${rango} ya se hizo y todavía no anunciaron la próxima. Queda a la espera.`;
-    campos["Hallazgos IA"] = `[${hoy}] ${cabecera}${d.resumen ? `\n${sinCitas(d.resumen)}` : ""}${d.fuente ? `\nFuente: ${sinCitas(d.fuente)}` : ""}`;
+    const nota = esImperdible
+      ? " Las fechas se conservan porque este evento es imperdible de un mes: son las que sostienen esa edición del archivo."
+      : "";
+    campos["Hallazgos IA"] = `[${hoy}] ${cabecera}${nota}${d.resumen ? `\n${sinCitas(d.resumen)}` : ""}${d.fuente ? `\nFuente: ${sinCitas(d.fuente)}` : ""}`;
     console.log(
       `  ${f["Nombre"]}: ${anunciadaSinFecha ? "próxima anunciada sin fecha usable" : "edición pasada archivada, sin próxima fecha"}`
     );
