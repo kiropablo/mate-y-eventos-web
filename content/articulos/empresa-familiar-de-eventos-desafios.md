@@ -9,8 +9,11 @@ eje: "Humano"
 etiquetas: ["empresa familiar", "liderazgo", "equipos de trabajo", "gestión de personas", "ambientaciones"]
 lectura: 5
 generado: "2026-10-22"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-10-22"
 ---
+
 Hay un mito instalado en la industria de eventos: que trabajar con la familia es automáticamente más fácil porque "hay confianza". Sol Sáenz, de SB Ambientaciones, cuenta en el episodio algo distinto: la confianza existe, pero no reemplaza la estructura. Y ahí aparece el primer tema que vale la pena desarrollar, porque es el que más empresas familiares de eventos enfrentan tarde, cuando ya duele.
 
 ## El sueldo de un familiar no se decide por cariño, se decide por trabajo
