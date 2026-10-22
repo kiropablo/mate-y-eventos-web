@@ -57,27 +57,57 @@ export function schemaEdicion(edicion, { canonical }) {
         itemListElement: edicion.eventos.map((ev, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          item: {
-            "@type": "Event",
-            name: ev.nombre,
-            ...(ev.fechaInicio ? { startDate: ev.fechaInicio } : {}),
-            ...(ev.fechaFin ? { endDate: ev.fechaFin } : {}),
-            ...(ev.porQueImperdible || ev.descCorta
-              ? { description: ev.porQueImperdible || ev.descCorta }
-              : {}),
-            url: `${SITE.url}/agenda/${ev.slug}`,
-            ...(ev.ciudad || ev.pais
-              ? {
-                  location: {
-                    "@type": "Place",
-                    name: ev.venue || ev.ciudad || ev.pais,
-                    address: [ev.ciudad, ev.provincia, ev.pais]
-                      .filter(Boolean)
-                      .join(", "),
-                  },
-                }
-              : {}),
-          },
+          // Sin fecha de inicio NO es un Event.
+          //
+          // startDate es obligatorio para Google: un Event sin esa fecha no
+          // es un evento incompleto, es un dato inválido. Acá se emitía igual
+          // y el 20/10/2026 Search Console avisó por el campo endDate que
+          // falta; mirando la página, el problema era más grande: 4 de los 5
+          // Events de /imperdibles salían sin startDate.
+          //
+          // La selección del mes incluye a propósito eventos que todavía no
+          // anunciaron fecha, y eso está bien en la página: el lector los ve
+          // igual. Lo que no corresponde es afirmarle a Google que son
+          // eventos agendables. Van como Thing, que es lo que son hasta que
+          // haya fecha: algo que existe y tiene una ficha propia.
+          //
+          // Es el mismo criterio de agenda/[slug], que directamente no emite
+          // el Event cuando no sabe cuándo ni dónde.
+          item: ev.fechaInicio
+            ? {
+                "@type": "Event",
+                name: ev.nombre,
+                startDate: ev.fechaInicio,
+                // Un evento de un solo día igual tiene fecha de cierre: es la
+                // misma que la de inicio.
+                endDate: ev.fechaFin || ev.fechaInicio,
+                eventStatus: "https://schema.org/EventScheduled",
+                eventAttendanceMode:
+                  "https://schema.org/OfflineEventAttendanceMode",
+                ...(ev.porQueImperdible || ev.descCorta
+                  ? { description: ev.porQueImperdible || ev.descCorta }
+                  : {}),
+                url: `${SITE.url}/agenda/${ev.slug}`,
+                ...(ev.ciudad || ev.pais
+                  ? {
+                      location: {
+                        "@type": "Place",
+                        name: ev.venue || ev.ciudad || ev.pais,
+                        address: [ev.ciudad, ev.provincia, ev.pais]
+                          .filter(Boolean)
+                          .join(", "),
+                      },
+                    }
+                  : {}),
+              }
+            : {
+                "@type": "Thing",
+                name: ev.nombre,
+                ...(ev.porQueImperdible || ev.descCorta
+                  ? { description: ev.porQueImperdible || ev.descCorta }
+                  : {}),
+                url: `${SITE.url}/agenda/${ev.slug}`,
+              },
         })),
       },
       {

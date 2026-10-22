@@ -111,10 +111,19 @@ export default async function EstaSemana() {
             "@type": "Event",
             name: ev.nombre,
             startDate: ev.fechaInicio,
-            ...(ev.fechaFin ? { endDate: ev.fechaFin } : {}),
+            // Un evento de un solo día igual tiene fecha de cierre: es la
+            // misma que la de inicio. Es el campo que reclamó Search Console
+            // el 20/10/2026. Acá no se veía el problema —esta semana todos
+            // los eventos tenían fecha fin— pero el día que entre uno de un
+            // solo día, la lista vuelve a emitir un Event incompleto. La
+            // ficha de agenda/[slug] ya lo resolvía así: ahora las tres
+            // fuentes de Event dicen lo mismo.
+            endDate: ev.fechaFin || ev.fechaInicio,
             // Ver la nota en agenda/[slug]/page.js: "pospuesto" es una
             // afirmación falsa sobre un evento que solo tiene fecha tentativa.
             eventStatus: "https://schema.org/EventScheduled",
+            eventAttendanceMode:
+              "https://schema.org/OfflineEventAttendanceMode",
             url: `${SITE.url}/agenda/${ev.slug}`,
             ...(ev.ciudad || ev.pais
               ? {
