@@ -32,14 +32,36 @@ export default function SuscribirCalendario({ eventos, tipos: tiposDisponibles, 
   const seleccion = { tipos, paises, provincias };
   const cuantos = eventos.filter((e) => pasaFiltros(e, seleccion)).length;
 
+  // Un identificador al azar POR SUSCRIPCIÓN, generado en el navegador de
+  // quien se suscribe. No identifica a una persona: identifica a una
+  // suscripción, como el número de un abono. No sale de ningún dato del
+  // visitante y no se guarda nada del lado de él.
+  //
+  // Existe por dos razones concretas:
+  //
+  // 1. Sin esto no hay forma de contar suscripciones. El feed se cachea una
+  //    hora en el CDN, así que dos personas suscritas al mismo filtro
+  //    comparten una sola respuesta y la segunda nunca llega al servidor. Lo
+  //    único medible serían "consultas", que no es lo mismo que "cuánta gente
+  //    tiene esto en su calendario".
+  // 2. Permite saber cuáles siguen vivas: un calendario que dejó de consultar
+  //    hace un mes es alguien que se dio de baja.
+  //
+  // Se genera una vez por sesión del armador: si tocás otro filtro la URL
+  // cambia, pero el identificador queda, porque sigue siendo la misma persona
+  // armando la misma suscripción.
+  const [sid] = useState(
+    () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
+  );
+
   const ruta = useMemo(() => {
     const q = new URLSearchParams();
     tipos.forEach((t) => q.append("tipo", t));
     paises.forEach((p) => q.append("pais", p));
     provincias.forEach((p) => q.append("provincia", p));
-    const s = q.toString();
-    return `/api/agenda/ics${s ? `?${s}` : ""}`;
-  }, [tipos, paises, provincias]);
+    q.append("s", sid);
+    return `/api/agenda/ics?${q.toString()}`;
+  }, [tipos, paises, provincias, sid]);
 
   const urlHttps = `${SITE.url}${ruta}`;
   const urlWebcal = `webcal://${HOST}${ruta}`;
