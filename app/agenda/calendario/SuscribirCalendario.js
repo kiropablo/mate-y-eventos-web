@@ -50,16 +50,36 @@ export default function SuscribirCalendario({ eventos, tipos: tiposDisponibles, 
   // Se genera una vez por sesión del armador: si tocás otro filtro la URL
   // cambia, pero el identificador queda, porque sigue siendo la misma persona
   // armando la misma suscripción.
-  const [sid] = useState(
-    () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
-  );
+  // ARRANCA VACÍO Y SE LLENA AL MONTAR, y esto no es un detalle de estilo.
+  //
+  // Generarlo en el inicializador de useState parecía alcanzar y no alcanzaba:
+  // ese inicializador también corre en el servidor, y esta página se sirve
+  // desde una copia cacheada. El identificador quedaba escrito DENTRO del HTML
+  // y era el mismo para todos. Comprobado en producción el 23/10/2026: tres
+  // pedidos seguidos devolvieron s=2r6d3p2om7i9. El panel cuenta suscripciones
+  // por sid distinto, así que todas las personas que se suscribieran en una
+  // misma hora contaban como una sola. El número daba chico y creíble, que es
+  // la peor forma de estar mal.
+  //
+  // Arrancar vacío además evita que el primer dibujo del cliente difiera del
+  // del servidor: hasta que monta, el link es la suscripción sin identificar,
+  // que funciona igual, solo que no se cuenta.
+  const [sid, setSid] = useState("");
+
+  useEffect(() => {
+    // Sin prefijo, a propósito: los que salen de una ficha llevan "f-" y así
+    // un LIKE 'f-%' separa los dos orígenes sin tocar el panel.
+    setSid(Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4));
+  }, []);
 
   const ruta = useMemo(() => {
     const q = new URLSearchParams();
     tipos.forEach((t) => q.append("tipo", t));
     paises.forEach((p) => q.append("pais", p));
     provincias.forEach((p) => q.append("provincia", p));
-    q.append("s", sid);
+    // Mientras no montó todavía no hay identificador: se manda sin él antes
+    // que mandar uno vacío, que el panel guardaría como un sid más.
+    if (sid) q.append("s", sid);
     return `/api/agenda/ics?${q.toString()}`;
   }, [tipos, paises, provincias, sid]);
 
