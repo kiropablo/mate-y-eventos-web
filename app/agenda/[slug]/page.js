@@ -20,9 +20,15 @@ import { migas } from "../../lib/migas";
 import { todosLosCortes, textosDe } from "../cortes";
 import SoyOrganizador from "./SoyOrganizador";
 import AvisameDeLaFecha from "./AvisameDeLaFecha";
+import EnTuCalendario from "./EnTuCalendario";
 import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
+
+// Menos eventos que esto no justifican ofrecer una suscripción al calendario.
+// Es el mínimo más alto de cortes.js (el de las provincias), porque acá lo que
+// se promete no es una lista sino que la agenda llegue sola todas las semanas.
+const MINIMO_PARA_SUSCRIBIR = 6;
 
 export async function generateStaticParams() {
   const eventos = await getEventos();
@@ -117,10 +123,17 @@ export default async function Evento({ params }) {
   // a /agenda. O sea que las páginas pensadas para las búsquedas genéricas
   // ("congresos en Argentina") no recibían nada de las fichas, que son por
   // donde entra el 91% de las visitas de búsqueda.
-  const cortesDelEvento = todosLosCortes(await getEventos())
+  const eventos = await getEventos();
+  const cortesDelEvento = todosLosCortes(eventos)
     .filter((c) => c.eventos.some((e) => e.slug === ev.slug))
     .map((c) => ({ url: c.url, etiqueta: textosDe(c).etiqueta, tipo: c.tipo }));
   const corteDelTipo = cortesDelEvento.find((c) => c.tipo === "tipo");
+
+  // Cuántos eventos entregaría la suscripción al calendario: exactamente los
+  // que entran en el feed, o sea los que tienen fecha y todavía no pasaron.
+  // Sale de la lista que esta página YA leyó para los cortes, así que no hay
+  // una lectura más de Airtable.
+  const vigentes = eventos.filter((e) => e.fechaInicio && !yaPaso(e)).length;
 
   const lugar = [ev.venue, ev.ciudad, ev.provincia, ev.pais]
     .filter(Boolean)
@@ -489,6 +502,28 @@ export default async function Evento({ params }) {
               todavía. Ofrecerle avisarle es contestarle más tarde. */}
           {!ev.fechaInicio && !pasado && (
             <AvisameDeLaFecha slug={ev.slug} nombre={nombreConAnio(ev)} />
+          )}
+
+          {/* La suscripción al calendario, el mismo bloque en todas las
+              fichas: el calendario le sirve igual al público general y al
+              profesional, que son las dos audiencias que traen las fichas.
+
+              VA DESPUÉS DE "AVISAME CUANDO CONFIRMEN LA FECHA" a propósito. En
+              una ficha sin fecha anunciada ese renglón es la visita con la
+              intención más clara del sitio, y dos ofertas parecidas una arriba
+              de la otra se comen entre ellas: primero la promesa puntual
+              —"este evento, un correo"—, después la general. En las fichas con
+              fecha, que son la mayoría y las cinco que más tráfico traen,
+              Avisame no se dibuja y este bloque queda primero.
+
+              Y SOLO SI HAY AGENDA PARA PROMETER. Es el mismo criterio que los
+              mínimos de cortes.js: una landing con dos eventos es una página
+              flaca, y un calendario con dos eventos es una suscripción que no
+              cumple. Abajo de ese piso se llega, en la práctica, cuando la
+              lectura de Airtable vino corta; ahí es mejor no ofrecer nada que
+              ofrecer una agenda que no tenemos. */}
+          {vigentes >= MINIMO_PARA_SUSCRIBIR && (
+            <EnTuCalendario cuantos={vigentes} />
           )}
 
           {/* El pedido de verificación, al pie y solo si el sello todavía no
