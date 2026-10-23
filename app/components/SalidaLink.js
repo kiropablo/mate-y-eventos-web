@@ -10,9 +10,13 @@
 // Mide igual que el contador de visitas: sin cookies, sin identificadores,
 // sólo "alguien se fue a Spotify desde esta ruta". Por eso sigue sin hacer
 // falta banner de consentimiento.
+//
+// El armado del aviso NO vive acá: está en app/lib/medir-salida.js, compartido
+// con el reproductor del bloque del podcast. El motivo está escrito allá y es
+// el mismo de medir-calendario.js: del otro lado hay una lista cerrada y una
+// copia por componente se vuelve mentira en silencio.
 import { useCallback } from "react";
-
-const REGISTRADOR = "https://datos.mateyeventos.com/api/registrar";
+import { anotarSalida } from "../lib/medir-salida";
 
 export default function SalidaLink({
   destino,          // "spotify" · "apple" · "youtube" — la lista la valida el panel
@@ -21,31 +25,7 @@ export default function SalidaLink({
   style,
   children,
 }) {
-  const avisar = useCallback(() => {
-    // Sólo cuenta el sitio publicado: las pruebas locales no son salidas.
-    if (!/(^|\.)mateyeventos\.com$/.test(location.hostname)) return;
-    try {
-      navigator.sendBeacon(
-        REGISTRADOR,
-        new Blob(
-          [
-            JSON.stringify({
-              tipo: "salida",
-              destino,
-              ruta: location.pathname,
-              referrer: document.referrer || null,
-              // De qué short vino. El mismo utm_source que ya usa el contador,
-              // así la visita y la salida se cruzan por el mismo campo.
-              utm: new URLSearchParams(location.search).get("utm_source"),
-            }),
-          ],
-          { type: "text/plain" },
-        ),
-      );
-    } catch {
-      // Medir jamás rompe el link: si el beacon falla, el clic sigue igual.
-    }
-  }, [destino]);
+  const avisar = useCallback(() => anotarSalida(destino), [destino]);
 
   return (
     // sendBeacon está pensado justo para esto: sigue viajando aunque la página

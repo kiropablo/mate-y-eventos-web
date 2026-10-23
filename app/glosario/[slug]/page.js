@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import ArticuloCuerpo from "../../components/ArticuloCuerpo";
+import InvitacionAlPodcast from "../../components/InvitacionAlPodcast";
 import { getTermino, getTerminos } from "../../lib/glosario";
 import { getArticuloDeEpisodio, getArticulos } from "../../lib/articulos";
 import {
@@ -72,6 +73,12 @@ export default function Termino({ params }) {
   const usadaEn = articulosQueMencionan(t, getArticulos())
     .filter((a) => !articulo || a.id !== articulo.id)
     .slice(0, 4);
+
+  // La columna de la derecha ya no tiene el episodio adentro, así que puede
+  // quedar sin nada: un término sin artículo, sin menciones y sin relacionados
+  // dibujaba una caja vacía con borde. Mientras el episodio estaba ahí esto no
+  // podía pasar, y por eso la condición no existía.
+  const hayColumna = Boolean(articulo || usadaEn.length || relacionados.length);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -160,7 +167,10 @@ export default function Termino({ params }) {
 
       <section className="section-p" data-accent="blue">
         <div className="wrap">
-          <div className="ev-ficha">
+          {/* Sin columna derecha no hay dos columnas: .ev-ficha es una grilla
+              de 1,6fr + 1fr y con una sola hija el texto queda achicado contra
+              un hueco. */}
+          <div className={hayColumna ? "ev-ficha" : undefined}>
             <div className="ev-ficha__cuerpo reveal">
               {t.cuerpo ? (
                 <ArticuloCuerpo markdown={t.cuerpo} />
@@ -169,20 +179,18 @@ export default function Termino({ params }) {
               )}
             </div>
 
+            {hayColumna && (
             <aside className="ev-ficha__datos reveal">
-              <h3 className="ev-datos__titulo">Dónde lo hablamos</h3>
-              <p className="glo-episodio">
-                {t.episodioTitulo || "Episodio de Mate y Eventos"}
-                {t.minuto ? (
-                  <>
-                    <br />
-                    <span className="glo-minuto">Minuto {t.minuto}</span>
-                  </>
-                ) : null}
-              </p>
-              <Link className="btn" href={`/episodios/${t.episodio}`}>
-                Ver el episodio
-              </Link>
+              {/* ACÁ ESTABA "DÓNDE LO HABLAMOS": el título del episodio y un
+                  link suelto a /episodios/{id}, en la columna angosta, debajo
+                  de todo lo demás. Eso era toda la presencia del podcast en la
+                  página de un término —/glosario/timing creció 879% en un mes—
+                  y no embebía el video, no contaba de qué se habló ahí ni
+                  invitaba a nada. Se mudó al bloque InvitacionAlPodcast de
+                  abajo, que ocupa el ancho entero. No se deja también acá: dos
+                  invitaciones a lo mismo en la misma página se comen entre
+                  ellas, igual que pasaba con Avisame y el calendario en la
+                  ficha de un evento. */}
 
               {/* El artículo de ese mismo episodio. Los 59 términos publicados
                   tienen uno y hasta ahora no se linkeaban nunca: el glosario
@@ -233,7 +241,25 @@ export default function Termino({ params }) {
                 </>
               )}
             </aside>
+            )}
           </div>
+
+          {/* El episodio donde se habló de esta palabra, con el video y una
+              invitación de verdad.
+
+              ACÁ EL CASO ES FUERTE Y NO HAY QUE INFERIR NADA: la cabecera del
+              .md declara `episodio` y `episodioTitulo`, así que la relación
+              está en el dato. Y el público es el correcto: el que busca "qué
+              es el timing de un evento" es un profesional del rubro, o sea
+              exactamente el oyente del podcast. Es el lugar del sitio donde
+              una página de tráfico genérico puede convertir en audiencia. */}
+          <InvitacionAlPodcast
+            id={t.episodio}
+            titulo={t.episodioTitulo}
+            minuto={t.minuto}
+            encabezado="Esta definición salió de una charla"
+            invitacion={`${SITE.name} es un podcast semanal sobre la industria de eventos. “${t.termino}” no lo sacamos de un diccionario: se habló en este episodio, con gente que lo hace todos los días. Dale play acá mismo.`}
+          />
 
           <div style={{ marginTop: "40px" }}>
             <Link className="btn" href="/glosario">

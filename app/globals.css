@@ -4222,3 +4222,88 @@ footer.site {
   cursor: pointer;
 }
 .form-ayuda--ojo { color: #ffb35a !important; }
+
+/* ---------- EL BLOQUE DEL PODCAST (glosario, artículos y fichas) ----------
+   La invitación a escuchar el episodio, al pie de las tres plantillas por las
+   que entra el tráfico. Clases propias y no las del calendario (.sus-caja):
+   las dos cajas conviven en la misma ficha de evento y tienen que leerse como
+   dos ofertas distintas, no como una repetida.
+
+   El borde izquierdo magenta es el de .cf-ficha: dice "esto lo pone el sitio".
+   NO comparte nada con el sello Verificado de la cabecera, que es lo que firma
+   el organizador. */
+.pod {
+  margin-top: 46px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-left: 3px solid var(--magenta);
+  border-radius: 18px;
+  padding: clamp(24px, 3.4vw, 34px);
+}
+.pod__marca {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--magenta);
+}
+.pod__texto {
+  font-family: var(--font-body);
+  color: var(--mute);
+  font-size: 0.98rem;
+  line-height: 1.7;
+  max-width: 64ch;
+}
+.pod__grid {
+  display: grid;
+  /* El video un poco más ancho que el texto: es la miniatura la que invita.
+     minmax(0,…) en las dos columnas porque un título largo sin espacios
+     —los hay— estira la celda y desborda la caja. */
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 32px);
+  align-items: center;
+  margin-top: 26px;
+}
+.pod__meta {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.pod__tit {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.15rem, 1vw + 0.95rem, 1.5rem);
+  line-height: 1.15;
+  text-transform: none;
+  margin: 8px 0 14px;
+}
+.pod__minuto {
+  font-family: var(--font-body);
+  color: var(--celeste);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.pod__botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+/* Un poco más chicos que el CTA de una página: acá son dos y conviven con el
+   botón de play de la miniatura. */
+.pod__botones .btn {
+  padding: 14px 26px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 860px) {
+  .pod__grid {
+    grid-template-columns: 1fr;
+  }
+  .pod {
+    padding: 24px 20px 28px;
+  }
+}

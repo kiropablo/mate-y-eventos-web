@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import SiteNav from "../../components/SiteNav";
 import Footer from "../../components/Footer";
 import ArticuloCuerpo from "../../components/ArticuloCuerpo";
+import InvitacionAlPodcast from "../../components/InvitacionAlPodcast";
 import {
   getArticulo,
   getArticulos,
@@ -248,9 +249,16 @@ export default function Articulo({ params }) {
             ) : null}
 
             <div className="art-acciones">
-              <Link className="btn btn--ghost" href={`/episodios/${art.episodio}`}>
-                Escuchar el episodio
-              </Link>
+              {/* "Escuchar el episodio" sale de acá cuando abajo se dibuja el
+                  bloque del podcast con el video embebido: dos botones que
+                  prometen lo mismo, uno arriba del otro, se comen entre ellos.
+                  Queda para el caso raro del artículo sin `episodio` en la
+                  cabecera, donde el bloque no se dibuja. */}
+              {!art.episodio && (
+                <Link className="btn btn--ghost" href="/episodios">
+                  Escuchar los episodios
+                </Link>
+              )}
               <Link className="btn btn--ghost" href={`/articulos/${art.id}/imprimir`}>
                 Ver versión para PDF
               </Link>
@@ -263,6 +271,24 @@ export default function Articulo({ params }) {
             </div>
           </div>
         </div>
+
+        {/* El episodio que este artículo amplía, con el video.
+
+            Igual que en el glosario, la relación está DECLARADA en la cabecera
+            del .md (`episodio` y `episodioTitulo`): no se infiere nada. Y es
+            literalmente de dónde salió el texto —los artículos no son
+            resúmenes, amplían la charla—, así que ofrecerlo acá no es una
+            cuña: es la fuente. */}
+        {art.episodio && (
+        <div className="wrap">
+          <InvitacionAlPodcast
+            id={art.episodio}
+            titulo={art.episodioTitulo}
+            encabezado="De dónde salió este artículo"
+            invitacion={`Esto no es un resumen: amplía una charla de ${SITE.name}, el podcast semanal de la industria de eventos. El episodio completo es este y lo escuchás sin salir de la página.`}
+          />
+        </div>
+        )}
 
         {terminos.length > 0 && (
           <div className="wrap">
