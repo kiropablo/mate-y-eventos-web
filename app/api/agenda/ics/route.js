@@ -1,6 +1,7 @@
 import { getEventos, yaPaso, pasaFiltros } from "../../../lib/agenda";
 import { armarCalendario } from "../../../lib/ics";
 import { SITE } from "../../../lib/site";
+import { quienPide, anotar } from "../../../lib/medir-calendario";
 
 // Feed de calendario de toda la agenda, para suscribirse una vez y que los
 // eventos nuevos aparezcan solos. Distinto del .ics de un evento suelto:
@@ -12,45 +13,10 @@ import { SITE } from "../../../lib/site";
 
 export const revalidate = 3600;
 
-const REGISTRADOR = "https://datos.mateyeventos.com/api/registrar";
-
-// Quién está pidiendo el calendario. Lo que importa no es la marca sino la
-// diferencia entre "un calendario suscrito" y "un navegador mirando": lo
-// primero es alguien que va a recibir la agenda todas las semanas sin hacer
-// nada; lo segundo es una visita más.
-function quienPide(ua = "") {
-  const u = ua.toLowerCase();
-  if (!u) return "desconocido";
-  if (u.includes("google-calendar") || u.includes("googlecalendar") || u.includes("feedfetcher")) return "google";
-  if (u.includes("calendaragent") || u.includes("dataaccessd") || u.includes("ical") || u.includes("macoutlook")) return "apple";
-  if (u.includes("outlook") || u.includes("microsoft")) return "outlook";
-  if (u.includes("thunderbird") || u.includes("lightning")) return "thunderbird";
-  // Un navegador que abre la URL no es una suscripción: es alguien mirando.
-  if (u.includes("mozilla") || u.includes("chrome") || u.includes("safari")) return "navegador";
-  return "otro";
-}
-
-// Anota que alguien consultó el calendario. Nunca espera la respuesta y nunca
-// rompe el feed: si el panel está caído, la suscripción sigue funcionando
-// igual. Es la misma regla que el contador de visitas.
-function anotar({ cliente, filtros, sid, pais }) {
-  try {
-    fetch(REGISTRADOR, {
-      method: "POST",
-      headers: { "content-type": "text/plain" },
-      body: JSON.stringify({
-        tipo: "calendario",
-        ruta: "/api/agenda/ics",
-        cliente,
-        sid,
-        filtros,
-        pais,
-      }),
-    }).catch(() => {});
-  } catch {
-    // Medir jamás rompe el calendario de nadie.
-  }
-}
+// quienPide() y anotar() se mudaron a app/lib/medir-calendario.js el
+// 23/10/2026, cuando el .ics de un evento suelto —que no estaba medido— pasó a
+// usar los mismos. El porqué de compartirlas en vez de copiarlas está escrito
+// ahí: la lista de clientes es un contrato con una lista cerrada del panel.
 
 export async function GET(req) {
   const q = new URL(req.url).searchParams;
@@ -60,6 +26,7 @@ export async function GET(req) {
 
   const cliente = quienPide(req.headers.get("user-agent") || "");
   anotar({
+    ruta: "/api/agenda/ics",
     cliente,
     // Qué pidió: sirve para saber qué recorte le interesa a la gente. Va
     // ordenado para que dos suscripciones iguales con los filtros en otro
@@ -68,7 +35,6 @@ export async function GET(req) {
     // El identificador de la suscripción, si la URL lo trae. Las que se
     // armaron antes de que esto existiera no lo tienen y se cuentan aparte.
     sid: (q.get("s") || "").trim().slice(0, 32) || null,
-    pais: req.headers.get("x-vercel-ip-country") || null,
   });
 
   // Estricto a propósito. Si Airtable falla a mitad de la paginación y
