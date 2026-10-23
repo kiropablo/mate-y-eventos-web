@@ -21,6 +21,8 @@ import { todosLosCortes, textosDe } from "../cortes";
 import SoyOrganizador from "./SoyOrganizador";
 import AvisameDeLaFecha from "./AvisameDeLaFecha";
 import EnTuCalendario from "./EnTuCalendario";
+import InvitacionAlPodcast from "../../components/InvitacionAlPodcast";
+import { getEpisodes } from "../../lib/youtube";
 import { jsonLdSeguro } from "../../lib/jsonld";
 
 export const revalidate = 3600;
@@ -134,6 +136,23 @@ export default async function Evento({ params }) {
   // Sale de la lista que esta página YA leyó para los cortes, así que no hay
   // una lectura más de Airtable.
   const vigentes = eventos.filter((e) => e.fechaInicio && !yaPaso(e)).length;
+
+  // El último episodio del podcast, para el bloque del pie.
+  //
+  // EL ÚLTIMO Y NO "EL QUE HABLA DE ESTE EVENTO", QUE NO EXISTE. En la ficha
+  // no hay ningún campo que ate un evento a un episodio, y cruzar "tipo de
+  // evento → eje editorial" sería inventar la relación: es la misma regla que
+  // ya dice app/lib/enlaces.js y la razón por la que EnTuCalendario, en su
+  // momento, descartó sugerir un episodio. Mostrar el último no afirma nada
+  // falso, se mantiene fresco solo y le dice a quien cayó buscando una fecha
+  // ajena qué más hacemos.
+  //
+  // Si la lectura viene vacía —sin YOUTUBE_API_KEY el feed RSS puede no
+  // contestar desde un datacenter— el bloque no se dibuja y la ficha queda
+  // exactamente como estaba. Es lo mismo que hace el mínimo del calendario:
+  // antes que ofrecer algo que no tenemos, no ofrecer nada.
+  const episodios = await getEpisodes();
+  const ultimoEpisodio = episodios[0] || null;
 
   const lugar = [ev.venue, ev.ciudad, ev.provincia, ev.pais]
     .filter(Boolean)
@@ -524,6 +543,32 @@ export default async function Evento({ params }) {
               ofrecer una agenda que no tenemos. */}
           {vigentes >= MINIMO_PARA_SUSCRIBIR && (
             <EnTuCalendario cuantos={vigentes} />
+          )}
+
+          {/* El podcast, DEBAJO del calendario y no en su lugar.
+
+              El orden es el mismo criterio de siempre: primero lo que la
+              persona vino a buscar —la fecha, y que la agenda le llegue sola—,
+              después lo nuestro. Y queda arriba de "¿Organizás este evento?"
+              a propósito: ese renglón le habla al organizador, que es una de
+              cada cuatrocientas visitas y además lee la ficha entera porque
+              está revisando sus propios datos.
+
+              ESTO NO LO AVALA EL ORGANIZADOR. El sello "Datos verificados por
+              el organizador" de la cabecera certifica LOS DATOS DEL EVENTO;
+              esto es una oferta nuestra. Por eso va en su propia sección, con
+              el nombre del podcast arriba de todo, y por eso el texto dice con
+              todas las letras que el episodio no es sobre este evento. No se
+              suma nada al JSON-LD: el nodo Event y el WebPage con
+              lastReviewed/reviewedBy quedan como estaban, que es lo que
+              sostiene que el sello signifique algo. */}
+          {ultimoEpisodio && (
+            <InvitacionAlPodcast
+              id={ultimoEpisodio.id}
+              titulo={ultimoEpisodio.title}
+              encabezado="Esto también lo hacemos nosotros"
+              invitacion={`Además de la agenda, ${SITE.name} es un podcast semanal sobre la industria de eventos: cómo se produce, cuánto cuesta y quién lo hace. Este es el último episodio que publicamos. No es sobre ${ev.nombre} —no vamos a inventar una relación que no existe—: es lo que hacemos cuando no estamos armando la agenda.`}
+            />
           )}
 
           {/* El pedido de verificación, al pie y solo si el sello todavía no
