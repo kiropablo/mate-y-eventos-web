@@ -25,12 +25,47 @@ Disallow: /api/
 
 # Crawlers de IA (búsqueda y citación).
 # Mismas reglas que arriba: bienvenidos al contenido, afuera del panel.
-User-agent: GPTBot
-User-agent: ChatGPT-User
+#
+# Van todos en UN solo grupo, por lo que dice el comentario de arriba: cada
+# robot obedece un único bloque. Si a alguno se le hace un bloque propio con
+# solo "Allow: /", ese robot deja de respetar los Disallow de acá abajo.
+#
+# Qué hace cada uno, porque NO son equivalentes y es fácil mirar esta lista y
+# creer que estamos cubiertos cuando falta justo el que decide las citas:
+#
+#   Los que deciden si nos citan — son los que importan:
+#     OAI-SearchBot     índice de búsqueda de ChatGPT
+#     ChatGPT-User      trae la página cuando alguien pregunta algo
+#     Claude-SearchBot  índice de búsqueda de Claude. Anthropic dice que
+#                       bloquearlo "may reduce your site's visibility"
+#     Claude-User       trae la página cuando alguien le pregunta a Claude
+#     PerplexityBot     índice de Perplexity
+#     ShapBot           Parallel Web Systems, uno de los tres proveedores de
+#                       búsqueda que Anthropic declara como subprocesadores
+#
+#   Los que NO afectan que nos citen. Quedan por completitud, no como cobertura:
+#     GPTBot            entrenamiento de OpenAI
+#     ClaudeBot         entrenamiento de Anthropic. Las lecturas de este bot no
+#                       miden si Claude nos cita: miden exposición al corpus
+#     anthropic-ai      token viejo, ya no figura en la documentación de
+#                       Anthropic. No controla nada; se deja porque no molesta
+#     Google-Extended   no es un crawler. No hace pedidos HTTP y por lo tanto
+#                       nunca va a aparecer en los registros: buscarlo ahí es
+#                       buscar algo que no existe. Controla el grounding de la
+#                       app Gemini, así que bloquearlo no ayudaría y sí nos
+#                       sacaría de ahí sin dejar rastro. Queda permitido
+#
+# AI Overviews y AI Mode de Google no tienen crawler propio: salen del índice
+# de Googlebot, que ya está permitido en el bloque de arriba.
 User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: ShapBot
+User-agent: GPTBot
 User-agent: ClaudeBot
 User-agent: anthropic-ai
-User-agent: PerplexityBot
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin

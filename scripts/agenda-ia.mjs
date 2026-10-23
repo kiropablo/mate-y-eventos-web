@@ -40,6 +40,49 @@ const RUBROS_POR_DIA = Number(process.env.RUBROS_POR_DIA || 3);
 // arriba: antes compartían variable y bajar uno bajaba el otro sin querer.
 const MAX_VERIFICAR = Number(process.env.MAX_VERIFICAR || 10);
 
+// Las fichas que esta corrida tocó, para avisarle a IndexNow SOLO de esas.
+//
+// El robot cambia fechas todos los días y hasta ahora nadie se enteraba: el
+// paso "Refrescar la web" llamaba a /api/agenda/revalidar sin ?slugs=, así que
+// se avisaban únicamente los hubs (/agenda, /agenda/esta-semana y los dos
+// meses). Las fichas, que son justamente el dato que se vence, no entraban
+// nunca. Avisar importa porque IndexNow alimenta a Bing, y Bing alimenta a
+// ChatGPT y a Copilot.
+//
+// OJO: estas dos van acá arriba y no al lado de escribir() a propósito.
+// main() se llama más abajo en este mismo archivo y empieza a correr enseguida;
+// si el const viviera después de esa línea, traerTodos() lo encontraría en
+// temporal dead zone y el robot se caía antes de leer la base.
+const TOCADAS = new Set();
+
+// id → { slug, estado } de lo que hay en la base.
+//
+// Hace falta porque un PATCH manda solo los campos que cambian, y el Slug casi
+// nunca viaja ahí: sin este mapa no hay forma de saber qué dirección pública
+// corresponde al registro que se acaba de tocar.
+const FICHAS = new Map();
+
+// Cuántos slugs se pasan como máximo. El tope real está en lib/indexnow.js
+// (100 direcciones), y revalidar le suma los hubs: dejamos aire para esos.
+const MAX_SLUGS_AVISADOS = 90;
+
+function anotarTocadas(records) {
+  for (const r of records || []) {
+    const f = r.fields || {};
+    const previo = FICHAS.get(r.id) || {};
+    const slugDeFicha = f["Slug"] || previo.slug;
+    // El estado que vale es el que queda DESPUÉS de esta escritura: si la misma
+    // llamada archiva el registro, la ficha ya no se publica.
+    const estado = f["Estado"] || previo.estado;
+    // Solo las aprobadas tienen página: /agenda/[slug] hace notFound() con
+    // cualquier otro estado, y está comprobado en vivo que devuelve 404.
+    // Avisar de una dirección que da 404 es la forma más rápida de que
+    // IndexNow deje de tomarte en serio, así que las de "Borrador IA" y
+    // "Archivado" se quedan afuera.
+    if (slugDeFicha && estado === "Aprobado") TOCADAS.add(slugDeFicha);
+  }
+}
+
 // Los rubros que barre la búsqueda. Están acá adentro para que nadie
 // tenga que escribir nada: el botón dispara el barrido completo.
 const RUBROS = [
@@ -264,10 +307,29 @@ const hoy = new Date().toLocaleDateString("en-CA", {
   timeZone: "America/Argentina/Buenos_Aires",
 });
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    // La lista que agenda.yml le pasa a /api/agenda/revalidar?slugs=...
+    //
+    // Va acá y no al final de main() porque main() corta temprano en el modo
+    // "limpiar", y esa pasada también toca fichas publicadas.
+    if (TOCADAS.size === 0) return;
+    const todas = [...TOCADAS];
+    const lista = todas.slice(0, MAX_SLUGS_AVISADOS);
+    if (todas.length > lista.length) {
+      console.log(
+        `Tocadas ${todas.length} fichas; se avisan las primeras ${lista.length}. ` +
+          `El resto entra igual cuando el refresco horario las vuelva a servir.`
+      );
+    }
+    // El prefijo es para que la Action pueda sacar la línea del log sin
+    // confundirla con los mensajes de cada evento.
+    console.log(`::fichas-tocadas::${lista.join(",")}`);
+  })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 
 async function main() {
   const registros = await traerTodos();
@@ -1174,6 +1236,12 @@ async function traerTodos() {
     out.push(...data.records);
     offset = data.offset;
   } while (offset);
+  // Se rearma el mapa en cada lectura: en el modo diario la base se lee dos
+  // veces y la segunda tiene que ver los estados que dejó la primera.
+  FICHAS.clear();
+  for (const r of out) {
+    FICHAS.set(r.id, { slug: r.fields?.["Slug"], estado: r.fields?.["Estado"] });
+  }
   return out;
 }
 
@@ -1187,6 +1255,9 @@ async function escribir(metodo, records) {
     body: JSON.stringify({ records, typecast: true }),
   });
   if (!res.ok) throw new Error(`Airtable ${res.status}: ${await res.text()}`);
+  // Va después del chequeo: si la escritura falló, la ficha no cambió y no hay
+  // nada que avisar.
+  anotarTocadas(records);
   // Airtable acepta 5 escrituras por segundo: vamos tranquilos.
   await new Promise((r) => setTimeout(r, 300));
 }

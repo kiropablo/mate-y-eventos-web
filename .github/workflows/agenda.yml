@@ -56,7 +56,13 @@ jobs:
           MODO: ${{ inputs.modo || 'diario' }}
           TEMA: ${{ inputs.tema }}
           MAX_EVENTOS: ${{ inputs.cantidad || '4' }}
-        run: node scripts/agenda-ia.mjs
+        # Se guarda la salida porque el robot imprime al final la lista de
+        # fichas que tocó, y el paso siguiente la necesita. El pipefail está
+        # para que un error de node siga volteando el paso: sin él, el código
+        # de salida que cuenta sería el del tee.
+        run: |
+          set -o pipefail
+          node scripts/agenda-ia.mjs | tee /tmp/agenda.log
       # La clave va en la cabecera x-token, no en la dirección: Vercel guarda la
       # URL completa con su querystring en los registros de pedidos, así que un
       # ?token= deja la clave escrita ahí. En la cabecera no viaja a ningún log.
@@ -65,7 +71,22 @@ jobs:
           REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
         run: |
           if [ -n "$REVALIDATE_TOKEN" ]; then
-            curl -s -H "x-token: $REVALIDATE_TOKEN" "https://www.mateyeventos.com/api/agenda/revalidar" || true
+            # Las fichas que el robot tocó, para que IndexNow se entere de ellas
+            # y no solo de los hubs. Sin esto, el dato que se vence —la fecha de
+            # cada evento— nunca le llegaba a Bing, que es el que alimenta a
+            # ChatGPT y a Copilot.
+            #
+            # Los slugs no necesitan escaparse: la función slug() del robot deja
+            # solo minúsculas, números y guiones.
+            SLUGS=$(grep -o '::fichas-tocadas::.*' /tmp/agenda.log | tail -1 | sed 's/^::fichas-tocadas:://')
+            URL="https://www.mateyeventos.com/api/agenda/revalidar"
+            if [ -n "$SLUGS" ]; then
+              echo "Fichas tocadas que se avisan: $(echo "$SLUGS" | tr ',' '\n' | grep -c .)"
+              URL="$URL?slugs=$SLUGS"
+            else
+              echo "El robot no tocó ninguna ficha publicada: se avisan solo los hubs."
+            fi
+            curl -s -H "x-token: $REVALIDATE_TOKEN" "$URL" || true
           else
             echo "Sin REVALIDATE_TOKEN: la web se actualiza sola dentro de una hora."
           fi
