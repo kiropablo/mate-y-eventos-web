@@ -6,7 +6,7 @@ episodios: ["VTor4D_7i_o"]
 episodioTitulo: ""
 web: "https://www.hilton.com/en/hotels/buehihh-hilton-buenos-aires/"
 redes: ["https://www.instagram.com/soygonzalopereira/", "https://www.linkedin.com/in/gonzalopereira/"]
-foto: false
+foto: true
 fuente: "Esta ficha NO sale de una transcripción: la escribió él mismo en el formulario de invitados el 2/10/2026, y todo lo que dice son sus propias respuestas. Por eso no declara ningún episodio: todavía no vino a grabar."
 generado: "2026-10-12"
 publicado: false
