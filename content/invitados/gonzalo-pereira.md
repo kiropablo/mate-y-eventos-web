@@ -2,7 +2,7 @@
 nombre: "Gonzalo Pereira"
 rol: "Director de Ventas y Marketing del Hilton Buenos Aires"
 bio: "Gonzalo Pereira dirige ventas y marketing del Hilton Buenos Aires, un hotel que recibe más de 580 eventos por año, y acompaña a sus clientes a que el evento cumpla lo que se propuso."
-episodios: []
+episodios: ["VTor4D_7i_o"]
 episodioTitulo: ""
 web: "https://www.hilton.com/en/hotels/buehihh-hilton-buenos-aires/"
 redes: ["https://www.instagram.com/soygonzalopereira/", "https://www.linkedin.com/in/gonzalopereira/"]
