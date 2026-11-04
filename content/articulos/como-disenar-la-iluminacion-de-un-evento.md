@@ -9,8 +9,11 @@ eje: "Técnico & Producción"
 etiquetas: ["iluminación", "diseño de eventos", "producción técnica", "ambientación", "dj y sonido"]
 lectura: 6
 generado: "2026-10-30"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-11-04"
 ---
+
 Hay una frase que resume mejor que cualquier manual técnico lo que debería pasar con la luz en un evento: que no se le vean los hilos al títere. Si el invitado nota el truco, el truco falló. Esa idea, que puede sonar poética, tiene consecuencias muy concretas a la hora de presupuestar, diseñar y ejecutar la iluminación de cualquier evento, desde un casamiento hasta un lanzamiento corporativo.
 
 La iluminación suele quedar en el lugar de "lo que se ve pero no se piensa". Se contrata como un ítem más de la lista, se define por cantidad de equipos y se evalúa por la primera foto. Pero ahí se pierde la parte más importante del trabajo: la luz no decora, dirige. Define dónde mira el ojo, cuánto tiempo se queda la gente, qué recuerda y qué olvida.
