@@ -9,8 +9,11 @@ eje: "Estrategia & Negocio"
 etiquetas: ["hoteles", "gestión de eventos", "proveedores", "feedback", "seguridad"]
 lectura: 5
 generado: "2026-11-04"
-publicado: false
+publicado: true
+tituloSeo: ""
+revisado: "2026-11-04"
 ---
+
 Un hotel que corre varios eventos en simultáneo no evalúa a una productora por su portfolio. La evalúa por lo que hace en los primeros veinte minutos de la primera recorrida. Gonzalo Pereira, director de ventas y marketing de Hilton Buenos Aires, lo plantea sin vueltas en el episodio: hay productoras que llegan, toman medidas, traen a sus proveedores y generan confianza de entrada. Y hay otras que obligan al hotel a involucrarse mucho más de lo que debería.
 
 Esa distinción no es un detalle protocolar. Define cuánto trabajo extra va a poner el hotel, qué tan expuesto queda el cliente frente a un error evitable, y hasta qué tipo de negocio está dispuesto a aceptar la propiedad en el futuro. Vale la pena desarmar esa lectura, porque se aplica a cualquier locación, no solo a un hotel de 7.000 metros cuadrados de superficie para eventos.
