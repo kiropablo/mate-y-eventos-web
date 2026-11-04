@@ -8,8 +8,10 @@ minuto: ""
 eje: "Humano"
 relacionados: []
 generado: "2026-10-12"
-publicado: false
+publicado: true
+revisado: "2026-11-04"
 ---
+
 "Dar puerta" es el instante bisagra donde termina el montaje y el armado previo, y empieza el servicio real de cara al público. A partir de ahí, como se remarca en el episodio, no importa el cansancio acumulado ni los problemas que hubo antes: el equipo tiene que estar impecable, bañado, perfumado y con la energía puesta en la hospitalidad.
 
 Es una expresión que condensa una lógica muy propia del rubro: todo lo que pasó en las horas previas (los conflictos de BAC, los cambios de último momento) queda atrás en cuanto arranca el servicio frente al cliente y los invitados.
