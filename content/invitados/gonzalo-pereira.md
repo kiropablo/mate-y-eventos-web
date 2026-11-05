@@ -1,16 +1,16 @@
 ---
 nombre: "Gonzalo Pereira"
-rol: "Director de Ventas y Marketing del Hilton Buenos Aires"
+rol: "Director de Ventas y Marketing - Hilton Buenos Aires"
 bio: "Gonzalo Pereira dirige ventas y marketing del Hilton Buenos Aires, un hotel que recibe más de 580 eventos por año, y acompaña a sus clientes a que el evento cumpla lo que se propuso."
 episodios: ["VTor4D_7i_o"]
 episodioTitulo: ""
 web: "https://www.hilton.com/en/hotels/buehihh-hilton-buenos-aires/"
 redes: ["https://www.instagram.com/soygonzalopereira/", "https://www.linkedin.com/in/gonzalopereira/"]
-foto: true
 fuente: "Esta ficha NO sale de una transcripción: la escribió él mismo en el formulario de invitados el 2/10/2026, y todo lo que dice son sus propias respuestas. Por eso no declara ningún episodio: todavía no vino a grabar."
+foto: true
 generado: "2026-10-12"
-publicado: false
-revisado: ""
+publicado: true
+revisado: "2026-11-05"
 ---
 
 Gonzalo Pereira dirige ventas y marketing del Hilton Buenos Aires. Antes organizó eventos desde el lado del cliente, en FiberCorp: clínicas de tenis, degustaciones, cenas con partido de la Selección o Copa Davis, clínicas de manejo. Hoy, desde el hotel, la mayoría de las veces el evento es de otro y su equipo acompaña para que cumpla lo que se propuso; los que más lo entusiasman son los que arma el propio hotel para fidelizar clientes, como el Watch Party de los Martín Fierro.
