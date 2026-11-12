@@ -260,17 +260,17 @@ Todo lo que se puede contar, se cuenta solo: lo escribe `scripts/contar-estado.m
 desde la Action **Estado**, todos los días a las 11 (después de toda la cadena de contenido). Lo de abajo no se toca a mano.
 
 <!-- CONTADO:INICIO -->
-Contado solo el 11/11/2026. No editar a mano: lo reescribe
+Contado solo el 12/11/2026. No editar a mano: lo reescribe
 `scripts/contar-estado.mjs` y se pierde.
 
-- **51 transcripciones**, 51 con subtítulos.
-- **59 artículos**, todos publicados.
-- **67 términos de glosario publicados** de 97 generados: quedan 30 en borrador.
-- **450 eventos aprobados** en la agenda y 155 sin aprobar (borradores IA y archivados).
+- **52 transcripciones**, 52 con subtítulos.
+- **60 artículos**: 59 publicados y 1 en borrador.
+- **67 términos de glosario publicados** de 99 generados: quedan 32 en borrador.
+- **450 eventos aprobados** en la agenda y 159 sin aprobar (borradores IA y archivados).
 - **11 eventos verificados** por su organizador.
-- De los aprobados: 248 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
-- Search Console, semana del 3/11/2026 al 9/11/2026: **238 clics y 25.800 impresiones**. El grueso sigue entrando por fichas de agenda.
-- YouTube: **73.821 visitas** y 358 suscriptores. Ojo: `STATS.vistasYouTube` en `app/lib/site.js` es un número aparte, escrito a mano, y es el que se publica en la web.
+- De los aprobados: 249 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
+- Search Console, semana del 4/11/2026 al 10/11/2026: **215 clics y 24.195 impresiones**. El grueso sigue entrando por fichas de agenda.
+- YouTube: **73.979 visitas** y 358 suscriptores. Ojo: `STATS.vistasYouTube` en `app/lib/site.js` es un número aparte, escrito a mano, y es el que se publica en la web.
 <!-- CONTADO:FIN -->
 
 Los de Search Console y YouTube salen del **panel** (`datos.mateyeventos.com/api/data`,
