@@ -260,17 +260,17 @@ Todo lo que se puede contar, se cuenta solo: lo escribe `scripts/contar-estado.m
 desde la Action **Estado**, todos los días a las 11 (después de toda la cadena de contenido). Lo de abajo no se toca a mano.
 
 <!-- CONTADO:INICIO -->
-Contado solo el 15/11/2026. No editar a mano: lo reescribe
+Contado solo el 16/11/2026. No editar a mano: lo reescribe
 `scripts/contar-estado.mjs` y se pierde.
 
 - **52 transcripciones**, 52 con subtítulos.
 - **60 artículos**: 59 publicados y 1 en borrador.
 - **67 términos de glosario publicados** de 99 generados: quedan 32 en borrador.
-- **450 eventos aprobados** en la agenda y 170 sin aprobar (borradores IA y archivados).
+- **450 eventos aprobados** en la agenda y 174 sin aprobar (borradores IA y archivados).
 - **11 eventos verificados** por su organizador.
-- De los aprobados: 255 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
-- Search Console, semana del 7/11/2026 al 13/11/2026: **167 clics y 22.740 impresiones**. El grueso sigue entrando por fichas de agenda.
-- YouTube: **74.399 visitas** y 359 suscriptores. Ojo: `STATS.vistasYouTube` en `app/lib/site.js` es un número aparte, escrito a mano, y es el que se publica en la web.
+- De los aprobados: 258 sin fecha anunciada y 10 argentinos sin provincia. **No son datos que falten cargar**: son eventos cuya fecha o sede todavía no se anunció, y completarlos sería inventar.
+- Search Console, semana del 8/11/2026 al 14/11/2026: **155 clics y 22.695 impresiones**. El grueso sigue entrando por fichas de agenda.
+- YouTube: **74.467 visitas** y 360 suscriptores. Ojo: `STATS.vistasYouTube` en `app/lib/site.js` es un número aparte, escrito a mano, y es el que se publica en la web.
 <!-- CONTADO:FIN -->
 
 Los de Search Console y YouTube salen del **panel** (`datos.mateyeventos.com/api/data`,
