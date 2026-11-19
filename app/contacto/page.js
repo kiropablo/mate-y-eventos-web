@@ -1,6 +1,7 @@
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { SITE, LINKS } from "../lib/site";
+import FormContacto from "./FormContacto";
 
 export const metadata = {
   alternates: { canonical: "/contacto" },
@@ -30,43 +31,10 @@ export default function Contacto() {
 
       <section className="section-p" data-accent="blue">
         <div className="wrap">
-          <div className="grid grid--2">
-            <article className="card reveal">
-              <div className="eyebrow" style={{ marginBottom: "12px" }}>
-                Marcas
-              </div>
-              <h3>Quiero sponsorear</h3>
-              <p>
-                Si tu marca quiere llegar a la comunidad de eventos de LATAM,
-                escribinos y te pasamos las oportunidades disponibles.
-              </p>
-              <a
-                className="btn"
-                style={{ marginTop: "18px" }}
-                href={`mailto:${SITE.email}?subject=Sponsoreo%20-%20Mate%20y%20Eventos`}
-              >
-                Escribir sobre sponsoreo
-              </a>
-            </article>
-
-            <article className="card reveal" style={{ transitionDelay: ".1s" }}>
-              <div className="eyebrow" style={{ marginBottom: "12px" }}>
-                Comunidad
-              </div>
-              <h3>Invitados y colaboraciones</h3>
-              <p>
-                ¿Tenés una historia que aporte valor a la industria, o una idea
-                para colaborar? Nos encanta conocer gente del rubro.
-              </p>
-              <a
-                className="btn btn--azul"
-                style={{ marginTop: "18px" }}
-                href={`mailto:${SITE.email}?subject=Invitado%20/%20Colaboración%20-%20Mate%20y%20Eventos`}
-              >
-                Proponer una idea
-              </a>
-            </article>
-          </div>
+          {/* Las dos tarjetas y el formulario al que llevan. Eran dos links
+              `mailto:`, que no hacen nada si el navegador no tiene un programa
+              de correo asociado; está contado en FormContacto.js. */}
+          <FormContacto email={SITE.email} />
 
           <div style={{ marginTop: "48px" }}>
             <div className="eyebrow reveal">

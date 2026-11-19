@@ -4184,7 +4184,11 @@ footer.site {
 }
 .form-foto__lado { flex: 1 1 200px; }
 .form-foto__lado .form-ayuda { margin-top: 0; }
-.form-foto__sacar {
+/* Un botón con pinta de link, para una acción secundaria adentro de un
+   formulario: sacar la foto que se eligió, o cambiar de motivo en /contacto.
+   Las dos comparten la regla en vez de tener una copia cada una. */
+.form-foto__sacar,
+.form-cambiar {
   margin-top: 6px;
   padding: 0;
   background: none;
@@ -4195,7 +4199,11 @@ footer.site {
   font-size: 0.82rem;
   cursor: pointer;
 }
-.form-foto__sacar:hover { color: #f5f5f5; border-bottom-color: #f5f5f5; }
+.form-foto__sacar:hover,
+.form-cambiar:hover { color: #f5f5f5; border-bottom-color: #f5f5f5; }
+/* En /contacto va adentro de un párrafo, así que no lleva el margen de arriba
+   y hereda el tamaño del texto que la rodea. */
+.form-cambiar { margin-top: 0; font-size: inherit; }
 .form-autorizo {
   display: flex !important;
   gap: 10px;
