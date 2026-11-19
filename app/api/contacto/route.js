@@ -29,9 +29,16 @@ export const dynamic = "force-dynamic";
 // Es una lista cerrada y el asunto sale de ACÁ, nunca de lo que mandó el
 // visitante: si el asunto se armara con su texto, cualquiera escribe lo que
 // quiera en el renglón del mail que leemos todos los días.
+// Los cinco salen de un botón distinto del sitio, y la diferencia importa en
+// la bandeja de entrada: «Sponsor fundador» no es la misma conversación que
+// «Sponsoreo», y los `mailto:` viejos ya los separaban con asuntos distintos.
+// Mantenerlos separados es conservar lo que había, no agregar nada.
 const MOTIVOS = {
   sponsoreo: "Sponsoreo",
   idea: "Invitado / Colaboración",
+  fundador: "Sponsor fundador",
+  prensa: "Prensa",
+  destacado: "Destacado en Agenda",
 };
 
 const MAX_CORTO = 200;

@@ -82,13 +82,17 @@ export default async function Sponsors() {
             profesionales del rubro en Latinoamérica. Si tu marca vive de los
             eventos, están todos acá.
           </p>
-          <a
+          {/* Al formulario de /contacto, no a un `mailto:`: un `mailto:` no
+              hace nada si el navegador no tiene un programa de correo
+              asociado, y este es el botón con el que una marca convierte. El
+              hash deja el motivo ya elegido del otro lado. */}
+          <Link
             className="btn reveal"
             style={{ marginTop: "28px", transitionDelay: ".18s" }}
-            href={`mailto:${SITE.email}?subject=Quiero%20ser%20sponsor%20de%20Mate%20y%20Eventos`}
+            href="/contacto#sponsoreo"
           >
             Quiero ser sponsor
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -272,13 +276,16 @@ export default async function Sponsors() {
             Estamos abriendo un cupo de sponsors fundadores con condiciones
             preferenciales por acompañar el proyecto desde el comienzo.
           </p>
-          <a
+          {/* Motivo propio y no "sponsoreo" a secas: el asunto del mail que
+              llega distingue al fundador, igual que lo distinguía el `mailto:`
+              que había acá. */}
+          <Link
             className="btn reveal"
             style={{ transitionDelay: ".18s" }}
-            href={`mailto:${SITE.email}?subject=Sponsor%20fundador%20-%20Mate%20y%20Eventos`}
+            href="/contacto#fundador"
           >
             Hablemos
-          </a>
+          </Link>
         </div>
       </section>
 

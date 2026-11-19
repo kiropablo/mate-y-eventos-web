@@ -279,9 +279,13 @@ export default async function Destacado() {
           </section>
 
           <div style={{ marginTop: "40px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <a className="btn" href={`mailto:${SITE.email}?subject=${encodeURIComponent("Destacado en Agenda")}`}>
+            {/* Al formulario y no a un `mailto:`, que no hace nada si el
+                navegador no tiene un programa de correo asociado. La dirección
+                sigue arriba, en "Cómo se contrata", para quien prefiera
+                escribir desde su propio correo. */}
+            <Link className="btn" href="/contacto#destacado">
               Quiero un lugar
-            </a>
+            </Link>
             <Link className="btn" href="/agenda">
               ← Volver a la agenda
             </Link>

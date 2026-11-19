@@ -1,3 +1,4 @@
+import Link from "next/link";
 import SiteNav from "../components/SiteNav";
 import Footer from "../components/Footer";
 import { SITE, LINKS } from "../lib/site";
@@ -84,13 +85,21 @@ export default function Prensa() {
             Para entrevistas, notas o material adicional, escribinos y
             respondemos a la brevedad.
           </p>
-          <a
+          {/* Era un `mailto:` con la dirección de rótulo, y un `mailto:` no
+              hace nada si el navegador no tiene un programa de correo
+              asociado. Ahora el botón lleva al formulario y la dirección queda
+              abajo, a la vista y clickeable para quien prefiera su correo: era
+              lo único que el botón mostraba y no se puede perder. */}
+          <Link
             className="btn btn--azul"
             style={{ marginTop: "20px" }}
-            href={`mailto:${SITE.email}?subject=Prensa%20-%20Mate%20y%20Eventos`}
+            href="/contacto#prensa"
           >
-            {SITE.email}
-          </a>
+            Escribinos
+          </Link>
+          <p className="form-ayuda" style={{ marginTop: "14px" }}>
+            O directo a <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+          </p>
         </div>
       </section>
 

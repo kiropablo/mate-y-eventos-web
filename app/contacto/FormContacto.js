@@ -1,20 +1,75 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Las dos puertas de entrada de /contacto y el formulario al que llevan.
 //
 // Las tarjetas y el formulario viven en el MISMO componente a propósito: el
 // botón de cada tarjeta tiene que dejar elegido el motivo antes de bajar, y
-// partirlo en dos archivos obligaría a pasarse el dato por el hash de la URL
-// o por un contexto, que es mucha maquinaria para dos botones.
+// partirlo en dos archivos obligaría a pasarse el dato por un contexto, que es
+// mucha maquinaria para dos botones.
 //
 // Antes cada botón era un `mailto:`. No andaban: un `mailto:` no hace nada si
 // el navegador no tiene un programa de correo asociado, que es el caso de
 // cualquiera que use Gmail desde Chrome sin ponerlo de predeterminado. No da
 // error, no abre nada: parece que el sitio está roto. El `mailto:` sigue al
 // pie de la página, en la fila "Email", para el que prefiera su propio correo.
+//
+// DE DÓNDE SALE EL MOTIVO CUANDO SE LLEGA DE OTRA PÁGINA. Los botones de
+// /sponsors, /prensa y /agenda/destacado tenían el mismo problema y ahora
+// apuntan acá, cada uno con su motivo en el hash: /contacto#prensa.
+//
+// Va en el hash y no en la query (?motivo=prensa) por una razón concreta: leer
+// la query desde un componente cliente obliga a envolverlo en un <Suspense> y
+// saca a /contacto de las páginas estáticas. El hash ni siquiera viaja al
+// servidor, así que la página se sigue sirviendo armada desde el CDN.
 
+// Lo que cambia en el formulario según de dónde vino la persona. El asunto del
+// mail NO sale de acá: sale de la lista cerrada de app/api/contacto/route.js,
+// y los dos tienen que tener las mismas claves.
+const MOTIVOS = {
+  sponsoreo: {
+    titulo: "Contanos de tu marca",
+    empresa: "Tu marca o empresa",
+    ayuda: "Qué hace tu marca, a quién querés llegar y en qué estás pensando.",
+    pregunta: "¿Era por sponsoreo?",
+    otro: "idea",
+  },
+  idea: {
+    titulo: "Contanos tu idea",
+    empresa: "Empresa o proyecto",
+    ayuda: "De qué te gustaría hablar, o qué tenés en mente para colaborar.",
+    pregunta: "¿Era por una idea o colaboración?",
+    otro: "sponsoreo",
+  },
+  fundador: {
+    titulo: "Hablemos de ser sponsor fundador",
+    empresa: "Tu marca o empresa",
+    ayuda:
+      "Qué hace tu marca y qué te gustaría lograr acompañando el proyecto desde el comienzo.",
+    pregunta: "¿Era por el sponsoreo común?",
+    otro: "sponsoreo",
+  },
+  prensa: {
+    titulo: "Contanos qué necesitás",
+    empresa: "Medio o publicación",
+    ayuda:
+      "Si es una entrevista, una nota o material adicional, y para cuándo lo necesitás.",
+    pregunta: "¿Era por prensa?",
+    otro: "idea",
+  },
+  destacado: {
+    titulo: "Contanos de tu evento",
+    empresa: "Organizador o productora",
+    ayuda:
+      "El nombre del evento y el mes que querés. Si todavía no está en la agenda, cargalo primero desde /agenda/sugerir: es gratis y no hace falta contratar nada para estar.",
+    pregunta: "¿Era por sponsoreo?",
+    otro: "sponsoreo",
+  },
+};
+
+// Las dos tarjetas que se ven en la página. Los otros tres motivos no tienen
+// tarjeta: se llega a ellos desde el botón de su propia página.
 const PUERTAS = [
   {
     id: "sponsoreo",
@@ -56,17 +111,43 @@ export default function FormContacto({ email }) {
   const poner = (id) => (e) =>
     setValores((v) => ({ ...v, [id]: e.target.value }));
 
-  // Elegir una puerta deja el motivo puesto y baja hasta el formulario. El
-  // foco va al primer campo: si solo scrolleara, en un celular la persona
-  // igual tiene que buscar dónde tocar.
-  function abrir(id) {
+  // Elegir un motivo lo deja puesto y baja hasta el formulario. El foco va al
+  // primer campo: si solo scrolleara, en un celular la persona igual tiene que
+  // buscar dónde tocar.
+  //
+  // `suave` va en false cuando se llega con el hash ya puesto: al abrir la
+  // página el scroll suave pelea con la posición que el navegador restaura, y
+  // se ve un salto raro.
+  function abrir(id, suave = true) {
+    if (!MOTIVOS[id]) return;
     setMotivo(id);
     setError("");
     requestAnimationFrame(() => {
-      caja.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      caja.current?.scrollIntoView({
+        behavior: suave ? "smooth" : "auto",
+        block: "start",
+      });
       primerCampo.current?.focus({ preventScroll: true });
     });
   }
+
+  // El motivo que viene en la dirección, al entrar y si cambia después. Lo
+  // segundo pasa de verdad: desde /sponsors se llega con un Link de Next, que
+  // navega sin recargar, y si solo mirara al montar el formulario no se
+  // enteraría de nada.
+  useEffect(() => {
+    const mirar = (suave) => {
+      const id = window.location.hash.replace(/^#/, "");
+      if (MOTIVOS[id]) abrir(id, suave);
+    };
+    mirar(false);
+    const alCambiar = () => mirar(true);
+    window.addEventListener("hashchange", alCambiar);
+    return () => window.removeEventListener("hashchange", alCambiar);
+    // Solo al montar: adentro no se lee ningún estado, y volver a correrlo en
+    // cada tecleo reabriría el formulario sobre lo que la persona escribió.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function enviar(e) {
     e.preventDefault();
@@ -88,6 +169,8 @@ export default function FormContacto({ email }) {
       setEnviando(false);
     }
   }
+
+  const actual = MOTIVOS[motivo];
 
   return (
     <>
@@ -116,6 +199,15 @@ export default function FormContacto({ email }) {
         ))}
       </div>
 
+      {/* Sin JavaScript los botones de arriba no hacen nada, así que la
+          dirección tiene que quedar a mano igual. Antes eran links `mailto:`
+          y funcionaban sin JS; esto devuelve ese camino. */}
+      <noscript>
+        <p className="form-ayuda" style={{ marginTop: "18px" }}>
+          Escribinos a <a href={`mailto:${email}`}>{email}</a>.
+        </p>
+      </noscript>
+
       <div ref={caja} style={{ marginTop: "48px", scrollMarginTop: "90px" }}>
         {listo ? (
           <section className="sem-bloque">
@@ -126,7 +218,7 @@ export default function FormContacto({ email }) {
               dentro de las 48 horas.
             </p>
           </section>
-        ) : motivo ? (
+        ) : actual ? (
           <form onSubmit={enviar}>
             {/* honeypot invisible. Reusa la clase del formulario de sugerir:
                 es el mismo truco y no hace falta un estilo que repita lo
@@ -141,23 +233,15 @@ export default function FormContacto({ email }) {
             />
 
             <section className="sem-bloque">
-              <h2 className="ag-mes">
-                {motivo === "sponsoreo"
-                  ? "Contanos de tu marca"
-                  : "Contanos tu idea"}
-              </h2>
+              <h2 className="ag-mes">{actual.titulo}</h2>
               <p className="sem-nota" style={{ marginBottom: "22px" }}>
                 Lo leemos nosotros dos y te contestamos por mail.{" "}
                 <button
                   type="button"
                   className="form-cambiar"
-                  onClick={() =>
-                    abrir(motivo === "sponsoreo" ? "idea" : "sponsoreo")
-                  }
+                  onClick={() => abrir(actual.otro)}
                 >
-                  {motivo === "sponsoreo"
-                    ? "¿Era por una idea o colaboración?"
-                    : "¿Era por sponsoreo?"}
+                  {MOTIVOS[actual.otro].pregunta}
                 </button>
               </p>
 
@@ -186,9 +270,7 @@ export default function FormContacto({ email }) {
               </div>
 
               <div className="form-campo">
-                <label htmlFor="c-empresa">
-                  {motivo === "sponsoreo" ? "Tu marca o empresa" : "Empresa o proyecto"}
-                </label>
+                <label htmlFor="c-empresa">{actual.empresa}</label>
                 <input
                   id="c-empresa"
                   type="text"
@@ -206,11 +288,7 @@ export default function FormContacto({ email }) {
                   value={valores.mensaje}
                   onChange={poner("mensaje")}
                 />
-                <p className="form-ayuda">
-                  {motivo === "sponsoreo"
-                    ? "Qué hace tu marca, a quién querés llegar y en qué estás pensando."
-                    : "De qué te gustaría hablar, o qué tenés en mente para colaborar."}
-                </p>
+                <p className="form-ayuda">{actual.ayuda}</p>
               </div>
             </section>
 
